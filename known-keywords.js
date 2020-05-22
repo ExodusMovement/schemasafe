@@ -12,7 +12,6 @@ module.exports = [
   'allOf',
   'anyOf',
   'oneOf',
-  'name',
   'target',
   'maximum',
   'minimum',

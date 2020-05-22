@@ -57,7 +57,6 @@ exports.invalid = {
 }
 
 exports.schema = { // from cosmic thingy
-    name : "test",
     type : "object",
     additionalProperties : false,
     required : ["fullName", "age", "zip", "married", "dozen", "dozenOrBakersDozen", "favoriteEvenNumber", "topThreeFavoriteColors", "favoriteSingleDigitWholeNumbers", "favoriteFiveLetterWord", "emailAddresses"],
