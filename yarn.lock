@@ -172,10 +172,10 @@ is-symbol@^1.0.2:
   dependencies:
     has-symbols "^1.0.1"
 
-jaystring@^1.0.2:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/jaystring/-/jaystring-1.0.5.tgz#2d4e07ae935d6dbac9fcc279e622cc0716531176"
-  integrity sha512-XESwgvu7oqQHdRfkU/Ryjl8kKkMNrpgeS+Imx0K1CenZIw5JoS+wfXy3h1GA3LdCi2F6HTZWa5Qzn/oOG3eZ5g==
+jaystring@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/jaystring/-/jaystring-1.0.6.tgz#0481dda66ab99d6ba6d02a6909b83c0a4c4442f5"
+  integrity sha512-Jf/vf1llT5eBwT60UUQbo+JClLTXx20G6A9L9L+gpZQE6rBmDw5wBmhj2qBRsfNAIZ01euaBmyEXlWh/yqxHLg==
 
 jsonpointer@^4.0.0:
   version "4.0.1"

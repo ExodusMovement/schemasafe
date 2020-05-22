@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "generate-object-property": "^1.1.0",
-    "jaystring": "^1.0.2",
+    "jaystring": "^1.0.6",
     "jsonpointer": "^4.0.0"
   },
   "devDependencies": {
