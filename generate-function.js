@@ -1,26 +1,25 @@
-var util = require('util')
-var jaystring = require('jaystring')
+const util = require('util')
+const jaystring = require('jaystring')
 
-var INDENT_START = /[\{\[]/
-var INDENT_END = /[\}\]]/
+const INDENT_START = /[{[]/
+const INDENT_END = /[}\]]/
 
-var genfun = function() {
-  var lines = []
-  var indent = 0
-  var vars = {}
+const genfun = function() {
+  const lines = []
+  let indent = 0
 
-  var push = function(str) {
+  const push = function(str) {
     lines.push(' '.repeat(indent * 2) + str)
   }
 
-  var pushLine = function(line) {
-    if (INDENT_END.test(line.trim()[0]) && INDENT_START.test(line[line.length-1])) {
+  const pushLine = function(line) {
+    if (INDENT_END.test(line.trim()[0]) && INDENT_START.test(line[line.length - 1])) {
       indent--
       push(line)
       indent++
       return
     }
-    if (INDENT_START.test(line[line.length-1])) {
+    if (INDENT_START.test(line[line.length - 1])) {
       push(line)
       indent++
       return
@@ -34,12 +33,12 @@ var genfun = function() {
     push(line)
   }
 
-  var line = function(fmt) {
+  const line = function(fmt) {
     if (!fmt) return line
 
     if (arguments.length === 1 && fmt.indexOf('\n') > -1) {
-      var lines = fmt.trim().split('\n')
-      for (var i = 0; i < lines.length; i++) {
+      const lines = fmt.trim().split('\n')
+      for (let i = 0; i < lines.length; i++) {
         pushLine(lines[i].trim())
       }
     } else {
@@ -56,8 +55,8 @@ var genfun = function() {
   line.toModule = function(scope) {
     if (!scope) scope = {}
 
-    var scopeSource = Object.entries(scope)
-      .map(function ([key, value]) {
+    const scopeSource = Object.entries(scope)
+      .map(function([key, value]) {
         return `var ${key} = ${jaystring(value)};`
       })
       .join('\n')
@@ -68,13 +67,13 @@ var genfun = function() {
   line.toFunction = function(scope) {
     if (!scope) scope = {}
 
-    var src = 'return ('+line.toString()+')'
+    const src = 'return (' + line.toString() + ')'
 
-    var keys = Object.keys(scope).map(function(key) {
+    const keys = Object.keys(scope).map(function(key) {
       return key
     })
 
-    var vals = keys.map(function(key) {
+    const vals = keys.map(function(key) {
       return scope[key]
     })
 

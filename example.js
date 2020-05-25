@@ -1,6 +1,8 @@
-var validator = require('./')
+/* eslint-disable no-console */
 
-var validate = validator({
+const validator = require('./')
+
+const validate = validator({
   type: 'object',
   properties: {
     hello: {
