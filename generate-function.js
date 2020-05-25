@@ -1,4 +1,4 @@
-const util = require('util')
+const { format: utilFormat } = require('util')
 const jaystring = require('jaystring')
 
 const INDENT_START = /[{[]/
@@ -33,26 +33,27 @@ const genfun = function() {
     push(line)
   }
 
-  const line = function(fmt) {
-    if (!fmt) return line
+  const builder = {}
 
-    if (arguments.length === 1 && fmt.indexOf('\n') > -1) {
+  builder.write = function(fmt, ...args) {
+    if (typeof fmt !== 'string') throw new Error('Format must be a string!')
+    if (args.length === 1 && fmt.indexOf('\n') > -1) {
+      // multiple lines with no parameters, push them separately for correct indent
       const lines = fmt.trim().split('\n')
-      for (let i = 0; i < lines.length; i++) {
-        pushLine(lines[i].trim())
+      for (const line of lines) {
+        pushLine(line.trim())
       }
     } else {
-      pushLine(util.format.apply(util, arguments))
+      // format + parameters case
+      pushLine(utilFormat(fmt, ...args))
     }
-
-    return line
   }
 
-  line.toString = function() {
+  builder.toString = function() {
     return lines.join('\n')
   }
 
-  line.toModule = function(scope) {
+  builder.toModule = function(scope) {
     if (!scope) scope = {}
 
     const scopeSource = Object.entries(scope)
@@ -61,13 +62,13 @@ const genfun = function() {
       })
       .join('\n')
 
-    return `(function() {\n${scopeSource}\nreturn (${line})})();`
+    return `(function() {\n${scopeSource}\nreturn (${builder.toString()})})();`
   }
 
-  line.toFunction = function(scope) {
+  builder.toFunction = function(scope) {
     if (!scope) scope = {}
 
-    const src = 'return (' + line.toString() + ')'
+    const src = 'return (' + builder.toString() + ')'
 
     const keys = Object.keys(scope).map(function(key) {
       return key
@@ -80,9 +81,7 @@ const genfun = function() {
     return Function.apply(null, keys.concat(src)).apply(null, vals)
   }
 
-  if (arguments.length) line.apply(null, arguments)
-
-  return line
+  return builder
 }
 
 module.exports = genfun

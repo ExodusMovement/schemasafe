@@ -169,6 +169,13 @@ const compile = function(schema, cache, root, reporter, opts) {
     return v
   }
 
+  const fun = genfun()
+  fun.write('function validate(data) {')
+  // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
+  fun.write('if (data === undefined) data = null')
+  fun.write('validate.errors = null')
+  fun.write('var errors = 0')
+
   const visit = function(name, node, reporter, filter, schemaPath) {
     if (node.constructor.toString() === Object.toString()) {
       Object.keys(node).forEach(function checkKeywordSupported(keyword) {
@@ -194,11 +201,11 @@ const compile = function(schema, cache, root, reporter, opts) {
 
     let indent = 0
     const error = function(msg, prop, value) {
-      validate('errors++')
+      fun.write('errors++')
       if (reporter === true) {
-        validate('if (validate.errors === null) validate.errors = []')
+        fun.write('if (validate.errors === null) validate.errors = []')
         if (verbose) {
-          validate(
+          fun.write(
             'validate.errors.push({field:%s,message:%s,value:%s,type:%s,schemaPath:%s})',
             formatName(prop || name),
             JSON.stringify(msg),
@@ -207,7 +214,7 @@ const compile = function(schema, cache, root, reporter, opts) {
             JSON.stringify(schemaPath)
           )
         } else {
-          validate(
+          fun.write(
             'validate.errors.push({field:%s,message:%s})',
             formatName(prop || name),
             JSON.stringify(msg)
@@ -218,19 +225,19 @@ const compile = function(schema, cache, root, reporter, opts) {
 
     if (node.default !== undefined) {
       indent++
-      validate('if (%s === undefined) {', name)('%s = %s', name, jaystring(node.default))(
-        '} else {'
-      )
+      fun.write('if (%s === undefined) {', name)
+      fun.write('%s = %s', name, jaystring(node.default))
+      fun.write('} else {')
     }
 
     if (node.required === true) {
       indent++
-      validate('if (%s === undefined) {', name)
+      fun.write('if (%s === undefined) {', name)
       error('is required')
-      validate('} else {')
+      fun.write('} else {')
     } else {
       indent++
-      validate('if (%s !== undefined) {', name)
+      fun.write('if (%s !== undefined) {', name)
     }
 
     const valid =
@@ -247,19 +254,19 @@ const compile = function(schema, cache, root, reporter, opts) {
 
     if (valid !== 'true') {
       indent++
-      validate('if (!(%s)) {', valid)
+      fun.write('if (!(%s)) {', valid)
       error('is the wrong type')
-      validate('} else {')
+      fun.write('} else {')
     }
 
     if (tuple) {
       if (node.additionalItems === false) {
-        validate('if (%s.length > %d) {', name, node.items.length)
+        fun.write('if (%s.length > %d) {', name, node.items.length)
         error('has additional items')
-        validate('}')
+        fun.write('}')
       } else if (node.additionalItems) {
         const i = genloop()
-        validate('for (var %s = %d; %s < %s.length; %s++) {', i, node.items.length, i, name, i)
+        fun.write('for (var %s = %d; %s < %s.length; %s++) {', i, node.items.length, i, name, i)
         visit(
           name + '[' + i + ']',
           node.additionalItems,
@@ -267,25 +274,25 @@ const compile = function(schema, cache, root, reporter, opts) {
           filter,
           schemaPath.concat('additionalItems')
         )
-        validate('}')
+        fun.write('}')
       }
     }
 
     if (node.format && fmts.hasOwnProperty(node.format)) {
-      if (type !== 'string' && formats[node.format]) validate('if (%s) {', types.string(name))
+      if (type !== 'string' && formats[node.format]) fun.write('if (%s) {', types.string(name))
       const n = gensym('format')
       scope[n] = fmts[node.format]
 
       if (scope[n] instanceof RegExp || typeof scope[n] === 'function') {
         const condition = scope[n] instanceof RegExp ? '!%s.test(%s)' : '!%s(%s)'
-        validate('if (' + condition + ') {', n, name)
+        fun.write('if (' + condition + ') {', n, name)
         error('must be ' + node.format + ' format')
-        validate('}')
+        fun.write('}')
       } else if (typeof scope[n] === 'object') {
         visit(name, scope[n], reporter, filter, schemaPath.concat('format'))
       }
 
-      if (type !== 'string' && formats[node.format]) validate('}')
+      if (type !== 'string' && formats[node.format]) fun.write('}')
     } else if (node.format) {
       throw new Error('Unrecognized format used')
     }
@@ -293,27 +300,27 @@ const compile = function(schema, cache, root, reporter, opts) {
     if (Array.isArray(node.required)) {
       const checkRequired = function(req) {
         const prop = genobj(name, req)
-        validate('if (%s === undefined) {', prop)
+        fun.write('if (%s === undefined) {', prop)
         error('is required', prop)
-        validate('missing++')
-        validate('}')
+        fun.write('missing++')
+        fun.write('}')
       }
-      validate('if ((%s)) {', type !== 'object' ? types.object(name) : 'true')
-      validate('var missing = 0')
+      fun.write('if ((%s)) {', type !== 'object' ? types.object(name) : 'true')
+      fun.write('var missing = 0')
       node.required.map(checkRequired)
-      validate('}')
+      fun.write('}')
       if (!greedy) {
-        validate('if (missing === 0) {')
+        fun.write('if (missing === 0) {')
         indent++
       }
     }
 
     if (node.uniqueItems) {
-      if (type !== 'array') validate('if (%s) {', types.array(name))
-      validate('if (!(unique(%s))) {', name)
+      if (type !== 'array') fun.write('if (%s) {', types.array(name))
+      fun.write('if (!(unique(%s))) {', name)
       error('must be unique')
-      validate('}')
-      if (type !== 'array') validate('}')
+      fun.write('}')
+      if (type !== 'array') fun.write('}')
     }
 
     if (node.enum) {
@@ -329,13 +336,13 @@ const compile = function(schema, cache, root, reporter, opts) {
             return name + ' !== ' + JSON.stringify(e)
           }
 
-      validate('if (%s) {', node.enum.map(compare).join(' && ') || 'false')
+      fun.write('if (%s) {', node.enum.map(compare).join(' && ') || 'false')
       error('must be an enum value')
-      validate('}')
+      fun.write('}')
     }
 
     if (node.dependencies) {
-      if (type !== 'object') validate('if (%s) {', types.object(name))
+      if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
       Object.keys(node.dependencies).forEach(function(key) {
         let deps = node.dependencies[key]
@@ -346,26 +353,26 @@ const compile = function(schema, cache, root, reporter, opts) {
         }
 
         if (Array.isArray(deps)) {
-          validate(
+          fun.write(
             'if (%s !== undefined && !(%s)) {',
             genobj(name, key),
             deps.map(exists).join(' && ') || 'true'
           )
           error('dependencies not set')
-          validate('}')
+          fun.write('}')
         }
         if (typeof deps === 'object') {
-          validate('if (%s !== undefined) {', genobj(name, key))
+          fun.write('if (%s !== undefined) {', genobj(name, key))
           visit(name, deps, reporter, filter, schemaPath.concat(['dependencies', key]))
-          validate('}')
+          fun.write('}')
         }
       })
 
-      if (type !== 'object') validate('}')
+      if (type !== 'object') fun.write('}')
     }
 
     if (node.additionalProperties || node.additionalProperties === false) {
-      if (type !== 'object') validate('if (%s) {', types.object(name))
+      if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
       const i = genloop()
       const keys = gensym('keys')
@@ -384,16 +391,12 @@ const compile = function(schema, cache, root, reporter, opts) {
           .concat(Object.keys(node.patternProperties || {}).map(toTest))
           .join(' && ') || 'true'
 
-      validate('var %s = Object.keys(%s)', keys, name)(
-        'for (var %s = 0; %s < %s.length; %s++) {',
-        i,
-        i,
-        keys,
-        i
-      )('if (%s) {', additionalProp)
+      fun.write('var %s = Object.keys(%s)', keys, name)
+      fun.write('for (var %s = 0; %s < %s.length; %s++) {', i, i, keys, i)
+      fun.write('if (%s) {', additionalProp)
 
       if (node.additionalProperties === false) {
-        if (filter) validate('delete %s', name + '[' + keys + '[' + i + ']]')
+        if (filter) fun.write('delete %s', name + '[' + keys + '[' + i + ']]')
         error(
           'has additional properties',
           null,
@@ -409,9 +412,10 @@ const compile = function(schema, cache, root, reporter, opts) {
         )
       }
 
-      validate('}')('}')
+      fun.write('}')
+      fun.write('}')
 
-      if (type !== 'object') validate('}')
+      if (type !== 'object') fun.write('}')
     }
 
     if (node.$ref) {
@@ -426,47 +430,44 @@ const compile = function(schema, cache, root, reporter, opts) {
         }
         const n = gensym('ref')
         scope[n] = fn
-        validate('if (!(%s(%s))) {', n, name)
+        fun.write('if (!(%s(%s))) {', n, name)
         error('referenced schema does not match')
-        validate('}')
+        fun.write('}')
       }
     }
 
     if (node.not) {
       const prev = gensym('prev')
-      validate('var %s = errors', prev)
+      fun.write('var %s = errors', prev)
       visit(name, node.not, false, filter, schemaPath.concat('not'))
-      validate('if (%s === errors) {', prev)
+      fun.write('if (%s === errors) {', prev)
       error('negative schema matches')
-      validate('} else {')('errors = %s', prev)('}')
+      fun.write('} else {')
+      fun.write('errors = %s', prev)
+      fun.write('}')
     }
 
     if (node.items && !tuple) {
-      if (type !== 'array') validate('if (%s) {', types.array(name))
+      if (type !== 'array') fun.write('if (%s) {', types.array(name))
 
       const i = genloop()
-      validate('for (var %s = 0; %s < %s.length; %s++) {', i, i, name, i)
+      fun.write('for (var %s = 0; %s < %s.length; %s++) {', i, i, name, i)
       visit(name + '[' + i + ']', node.items, reporter, filter, schemaPath.concat('items'))
-      validate('}')
+      fun.write('}')
 
-      if (type !== 'array') validate('}')
+      if (type !== 'array') fun.write('}')
     }
 
     if (node.patternProperties) {
-      if (type !== 'object') validate('if (%s) {', types.object(name))
+      if (type !== 'object') fun.write('if (%s) {', types.object(name))
       const keys = gensym('keys')
       const i = genloop()
-      validate('var %s = Object.keys(%s)', keys, name)(
-        'for (var %s = 0; %s < %s.length; %s++) {',
-        i,
-        i,
-        keys,
-        i
-      )
+      fun.write('var %s = Object.keys(%s)', keys, name)
+      fun.write('for (var %s = 0; %s < %s.length; %s++) {', i, i, keys, i)
 
       Object.keys(node.patternProperties).forEach(function(key) {
         const p = patterns(key)
-        validate('if (%s.test(%s)) {', p, keys + '[' + i + ']')
+        fun.write('if (%s.test(%s)) {', p, keys + '[' + i + ']')
         visit(
           name + '[' + keys + '[' + i + ']]',
           node.patternProperties[key],
@@ -474,20 +475,20 @@ const compile = function(schema, cache, root, reporter, opts) {
           filter,
           schemaPath.concat(['patternProperties', key])
         )
-        validate('}')
+        fun.write('}')
       })
 
-      validate('}')
-      if (type !== 'object') validate('}')
+      fun.write('}')
+      if (type !== 'object') fun.write('}')
     }
 
     if (node.pattern) {
       const p = patterns(node.pattern)
-      if (type !== 'string') validate('if (%s) {', types.string(name))
-      validate('if (!(%s.test(%s))) {', p, name)
+      if (type !== 'string') fun.write('if (%s) {', types.string(name))
+      fun.write('if (!(%s.test(%s))) {', p, name)
       error('pattern mismatch')
-      validate('}')
-      if (type !== 'string') validate('}')
+      fun.write('}')
+      if (type !== 'string') fun.write('}')
     }
 
     if (node.allOf) {
@@ -501,130 +502,137 @@ const compile = function(schema, cache, root, reporter, opts) {
 
       node.anyOf.forEach(function(sch, i) {
         if (i === 0) {
-          validate('var %s = errors', prev)
+          fun.write('var %s = errors', prev)
         } else {
-          validate('if (errors !== %s) {', prev)('errors = %s', prev)
+          fun.write('if (errors !== %s) {', prev)
+          fun.write('errors = %s', prev)
         }
         visit(name, sch, false, false, schemaPath)
       })
       node.anyOf.forEach(function(sch, i) {
-        if (i) validate('}')
+        if (i) fun.write('}')
       })
-      validate('if (%s !== errors) {', prev)
+      fun.write('if (%s !== errors) {', prev)
       error('no schemas match')
-      validate('}')
+      fun.write('}')
     }
 
     if (node.oneOf && node.oneOf.length) {
       const prev = gensym('prev')
       const passes = gensym('passes')
 
-      validate('var %s = errors', prev)('var %s = 0', passes)
+      fun.write('var %s = errors', prev)
+      fun.write('var %s = 0', passes)
 
       node.oneOf.forEach(function(sch, i) {
         visit(name, sch, false, false, schemaPath)
-        validate('if (%s === errors) {', prev)('%s++', passes)('} else {')('errors = %s', prev)('}')
+        fun.write('if (%s === errors) {', prev)
+        fun.write('%s++', passes)
+        fun.write('} else {')
+        fun.write('errors = %s', prev)
+        fun.write('}')
       })
 
-      validate('if (%s !== 1) {', passes)
+      fun.write('if (%s !== 1) {', passes)
       error('no (or more than one) schemas match')
-      validate('}')
+      fun.write('}')
     }
 
     if (node.multipleOf !== undefined) {
-      if (type !== 'number' && type !== 'integer') validate('if (%s) {', types.number(name))
+      if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
-      validate('if (!isMultipleOf(%s, %d)) {', name, node.multipleOf)
+      fun.write('if (!isMultipleOf(%s, %d)) {', name, node.multipleOf)
 
       error('has a remainder')
-      validate('}')
+      fun.write('}')
 
-      if (type !== 'number' && type !== 'integer') validate('}')
+      if (type !== 'number' && type !== 'integer') fun.write('}')
     }
 
     if (node.maxProperties !== undefined) {
-      if (type !== 'object') validate('if (%s) {', types.object(name))
+      if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
-      validate('if (Object.keys(%s).length > %d) {', name, node.maxProperties)
+      fun.write('if (Object.keys(%s).length > %d) {', name, node.maxProperties)
       error('has more properties than allowed')
-      validate('}')
+      fun.write('}')
 
-      if (type !== 'object') validate('}')
+      if (type !== 'object') fun.write('}')
     }
 
     if (node.minProperties !== undefined) {
-      if (type !== 'object') validate('if (%s) {', types.object(name))
+      if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
-      validate('if (Object.keys(%s).length < %d) {', name, node.minProperties)
+      fun.write('if (Object.keys(%s).length < %d) {', name, node.minProperties)
       error('has less properties than allowed')
-      validate('}')
+      fun.write('}')
 
-      if (type !== 'object') validate('}')
+      if (type !== 'object') fun.write('}')
     }
 
     if (node.maxItems !== undefined) {
-      if (type !== 'array') validate('if (%s) {', types.array(name))
+      if (type !== 'array') fun.write('if (%s) {', types.array(name))
 
-      validate('if (%s.length > %d) {', name, node.maxItems)
+      fun.write('if (%s.length > %d) {', name, node.maxItems)
       error('has more items than allowed')
-      validate('}')
+      fun.write('}')
 
-      if (type !== 'array') validate('}')
+      if (type !== 'array') fun.write('}')
     }
 
     if (node.minItems !== undefined) {
-      if (type !== 'array') validate('if (%s) {', types.array(name))
+      if (type !== 'array') fun.write('if (%s) {', types.array(name))
 
-      validate('if (%s.length < %d) {', name, node.minItems)
+      fun.write('if (%s.length < %d) {', name, node.minItems)
       error('has less items than allowed')
-      validate('}')
+      fun.write('}')
 
-      if (type !== 'array') validate('}')
+      if (type !== 'array') fun.write('}')
     }
 
     if (node.maxLength !== undefined) {
-      if (type !== 'string') validate('if (%s) {', types.string(name))
+      if (type !== 'string') fun.write('if (%s) {', types.string(name))
 
-      validate('if (%s.length > %d) {', name, node.maxLength)
+      fun.write('if (%s.length > %d) {', name, node.maxLength)
       error('has longer length than allowed')
-      validate('}')
+      fun.write('}')
 
-      if (type !== 'string') validate('}')
+      if (type !== 'string') fun.write('}')
     }
 
     if (node.minLength !== undefined) {
-      if (type !== 'string') validate('if (%s) {', types.string(name))
+      if (type !== 'string') fun.write('if (%s) {', types.string(name))
 
-      validate('if (%s.length < %d) {', name, node.minLength)
+      fun.write('if (%s.length < %d) {', name, node.minLength)
       error('has less length than allowed')
-      validate('}')
+      fun.write('}')
 
-      if (type !== 'string') validate('}')
+      if (type !== 'string') fun.write('}')
     }
 
     if (node.minimum !== undefined) {
-      if (type !== 'number' && type !== 'integer') validate('if (%s) {', types.number(name))
+      if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
-      validate('if (%s %s %d) {', name, node.exclusiveMinimum ? '<=' : '<', node.minimum)
+      fun.write('if (%s %s %d) {', name, node.exclusiveMinimum ? '<=' : '<', node.minimum)
       error('is less than minimum')
-      validate('}')
+      fun.write('}')
 
-      if (type !== 'number' && type !== 'integer') validate('}')
+      if (type !== 'number' && type !== 'integer') fun.write('}')
     }
 
     if (node.maximum !== undefined) {
-      if (type !== 'number' && type !== 'integer') validate('if (%s) {', types.number(name))
+      if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
-      validate('if (%s %s %d) {', name, node.exclusiveMaximum ? '>=' : '>', node.maximum)
+      fun.write('if (%s %s %d) {', name, node.exclusiveMaximum ? '>=' : '>', node.maximum)
       error('is more than maximum')
-      validate('}')
+      fun.write('}')
 
-      if (type !== 'number' && type !== 'integer') validate('}')
+      if (type !== 'number' && type !== 'integer') fun.write('}')
     }
 
     if (properties) {
       Object.keys(properties).forEach(function(p) {
-        if (Array.isArray(type) && type.indexOf('null') !== -1) validate('if (%s !== null) {', name)
+        if (Array.isArray(type) && type.indexOf('null') !== -1)
+          fun.write('if (%s !== null) {', name)
 
         visit(
           genobj(name, p),
@@ -634,28 +642,23 @@ const compile = function(schema, cache, root, reporter, opts) {
           schemaPath.concat(tuple ? p : ['properties', p])
         )
 
-        if (Array.isArray(type) && type.indexOf('null') !== -1) validate('}')
+        if (Array.isArray(type) && type.indexOf('null') !== -1) fun.write('}')
       })
     }
 
-    while (indent--) validate('}')
+    while (indent--) fun.write('}')
   }
-
-  let validate = genfun('function validate(data) {')(
-    // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
-    'if (data === undefined) data = null'
-  )('validate.errors = null')('var errors = 0')
 
   visit('data', schema, reporter, opts && opts.filter, [])
 
-  validate('return errors === 0')('}')
+  fun.write('return errors === 0')
+  fun.write('}')
 
-  const generatedFunc = validate
-  const filteredScope = filterScope(generatedFunc.toString(), scope)
+  const filteredScope = filterScope(fun.toString(), scope)
 
-  validate = generatedFunc.toFunction(filteredScope)
+  const validate = fun.toFunction(filteredScope)
   validate.toModule = function() {
-    return generatedFunc.toModule(filteredScope)
+    return fun.toModule(filteredScope)
   }
   validate.errors = null
 
