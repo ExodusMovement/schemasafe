@@ -80,33 +80,22 @@ const unique = function(array) {
   return true
 }
 
-const isMultipleOf = function(name, multipleOf) {
-  let res
-  const factor =
-    (multipleOf | 0) !== multipleOf
-      ? Math.pow(
-          10,
-          multipleOf
-            .toString()
-            .split('.')
-            .pop().length
-        )
-      : 1
-  if (factor > 1) {
-    const factorName =
-      (name | 0) !== name
-        ? Math.pow(
-            10,
-            name
-              .toString()
-              .split('.')
-              .pop().length
-          )
-        : 1
-    if (factorName > factor) res = true
-    else res = Math.round(factor * name) % (factor * multipleOf)
-  } else res = name % multipleOf
-  return !res
+const isMultipleOf = function(value, multipleOf) {
+  if (typeof multipleOf !== 'number' || !Number.isFinite(value))
+    throw new Error('multipleOf is not a number')
+  if (typeof value !== 'number' || !Number.isFinite(value)) return false
+  if (value === 0) return true
+  if (multipleOf === 0) return false
+  const digitsAfterDot = (number) => {
+    if ((number | 0) === number) return 0
+    return String(number).split('.').pop().length
+  }
+  const digits = digitsAfterDot(multipleOf)
+  if (digits === 0) return value % multipleOf === 0
+  const valueDigits = digitsAfterDot(value)
+  if (valueDigits > digits) return false
+  const factor = Math.pow(10, digits)
+  return Math.round(factor * value) % Math.round(factor * multipleOf) === 0
 }
 
 const compile = function(schema, cache, root, reporter, opts) {
