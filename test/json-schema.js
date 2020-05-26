@@ -4,7 +4,8 @@ const path = require('path')
 const validator = require('../')
 
 const schemaDraftDir = path.join(__dirname, '/json-schema-draft4')
-const files = fs.readdirSync(schemaDraftDir)
+const files = fs
+  .readdirSync(schemaDraftDir)
   .map(function(file) {
     if (file === 'definitions.json') return null
     if (file === 'refRemote.json') return null

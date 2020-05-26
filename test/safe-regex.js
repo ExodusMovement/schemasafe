@@ -3,7 +3,7 @@ const safeRegex = require('safe-regex')
 
 const formats = require('../formats')
 
-tape('safe-regex', function (t) {
+tape('safe-regex', function(t) {
   let key
   for (key in formats) {
     if (formats[key] instanceof RegExp) {

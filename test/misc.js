@@ -7,20 +7,20 @@ tape('simple', function(t) {
     required: true,
     type: 'object',
     properties: {
-      hello: {type:'string', required:true}
-    }
+      hello: { type: 'string', required: true },
+    },
   }
 
   const validate = validator(schema)
 
-  t.ok(validate({hello: 'world'}), 'should be valid')
+  t.ok(validate({ hello: 'world' }), 'should be valid')
   t.notOk(validate(), 'should be invalid')
   t.notOk(validate({}), 'should be invalid')
   t.end()
 })
 
-tape('data is undefined', function (t) {
-  const validate = validator({type: 'string'})
+tape('data is undefined', function(t) {
+  const validate = validator({ type: 'string' })
 
   t.notOk(validate(null))
   t.notOk(validate(undefined))
@@ -40,71 +40,80 @@ tape('greedy/false', function(t) {
     type: 'object',
     properties: {
       x: {
-        type: 'number'
-      }
+        type: 'number',
+      },
     },
-    required: ['x', 'y']
-  });
+    required: ['x', 'y'],
+  })
   t.notOk(validate({}), 'should be invalid')
-  t.strictEqual(validate.errors.length, 2);
+  t.strictEqual(validate.errors.length, 2)
   t.strictEqual(validate.errors[0].field, 'data["x"]')
   t.strictEqual(validate.errors[0].message, 'is required')
   t.strictEqual(validate.errors[1].field, 'data["y"]')
   t.strictEqual(validate.errors[1].message, 'is required')
-  t.notOk(validate({x: 'string'}), 'should be invalid')
-  t.strictEqual(validate.errors.length, 1);
+  t.notOk(validate({ x: 'string' }), 'should be invalid')
+  t.strictEqual(validate.errors.length, 1)
   t.strictEqual(validate.errors[0].field, 'data["y"]')
   t.strictEqual(validate.errors[0].message, 'is required')
-  t.notOk(validate({x: 'string', y: 'value'}), 'should be invalid')
-  t.strictEqual(validate.errors.length, 1);
+  t.notOk(validate({ x: 'string', y: 'value' }), 'should be invalid')
+  t.strictEqual(validate.errors.length, 1)
   t.strictEqual(validate.errors[0].field, 'data["x"]')
   t.strictEqual(validate.errors[0].message, 'is the wrong type')
-  t.end();
-});
+  t.end()
+})
 
 tape('greedy/true', function(t) {
-  const validate = validator({
-    type: 'object',
-    properties: {
-      x: {
-        type: 'number'
-      }
+  const validate = validator(
+    {
+      type: 'object',
+      properties: {
+        x: {
+          type: 'number',
+        },
+      },
+      required: ['x', 'y'],
     },
-    required: ['x', 'y']
-  }, {
-    greedy: true
-  });
+    {
+      greedy: true,
+    }
+  )
   t.notOk(validate({}), 'should be invalid')
-  t.strictEqual(validate.errors.length, 2);
+  t.strictEqual(validate.errors.length, 2)
   t.strictEqual(validate.errors[0].field, 'data["x"]')
   t.strictEqual(validate.errors[0].message, 'is required')
   t.strictEqual(validate.errors[1].field, 'data["y"]')
   t.strictEqual(validate.errors[1].message, 'is required')
-  t.notOk(validate({x: 'string'}), 'should be invalid')
-  t.strictEqual(validate.errors.length, 2);
+  t.notOk(validate({ x: 'string' }), 'should be invalid')
+  t.strictEqual(validate.errors.length, 2)
   t.strictEqual(validate.errors[0].field, 'data["y"]')
   t.strictEqual(validate.errors[0].message, 'is required')
   t.strictEqual(validate.errors[1].field, 'data["x"]')
   t.strictEqual(validate.errors[1].message, 'is the wrong type')
-  t.notOk(validate({x: 'string', y: 'value'}), 'should be invalid')
-  t.strictEqual(validate.errors.length, 1);
+  t.notOk(validate({ x: 'string', y: 'value' }), 'should be invalid')
+  t.strictEqual(validate.errors.length, 1)
   t.strictEqual(validate.errors[0].field, 'data["x"]')
   t.strictEqual(validate.errors[0].message, 'is the wrong type')
-  t.ok(validate({x: 1, y: 'value'}), 'should be invalid')
-  t.end();
-});
+  t.ok(validate({ x: 1, y: 'value' }), 'should be invalid')
+  t.end()
+})
 
 tape('additional props', function(t) {
-  const validate = validator({
-    type: 'object',
-    additionalProperties: false
-  }, {
-    verbose: true
-  })
+  const validate = validator(
+    {
+      type: 'object',
+      additionalProperties: false,
+    },
+    {
+      verbose: true,
+    }
+  )
 
   t.ok(validate({}))
-  t.notOk(validate({foo:'bar'}))
-  t.ok(validate.errors[0].value === 'data.foo', 'should output the property not allowed in verbose mode')
+  t.notOk(validate({ foo: 'bar' }))
+  t.ok(
+    validate.errors[0].value === 'data.foo',
+    'should output the property not allowed in verbose mode'
+  )
   t.strictEqual(validate.errors[0].type, 'object', 'error object should contain the type')
   t.end()
 })
@@ -114,8 +123,8 @@ tape('array', function(t) {
     type: 'array',
     required: true,
     items: {
-      type: 'string'
-    }
+      type: 'string',
+    },
   })
 
   t.notOk(validate({}), 'wrong type')
@@ -132,15 +141,15 @@ tape('nested array', function(t) {
         type: 'array',
         required: true,
         items: {
-          type: 'string'
-        }
-      }
-    }
+          type: 'string',
+        },
+      },
+    },
   })
 
   t.notOk(validate({}), 'is required')
-  t.ok(validate({list:['test']}))
-  t.notOk(validate({list:[1]}))
+  t.ok(validate({ list: ['test'] }))
+  t.notOk(validate({ list: [1] }))
   t.end()
 })
 
@@ -151,14 +160,14 @@ tape('enum', function(t) {
       foo: {
         type: 'number',
         required: true,
-        enum: [42]
-      }
-    }
+        enum: [42],
+      },
+    },
   })
 
   t.notOk(validate({}), 'is required')
-  t.ok(validate({foo:42}))
-  t.notOk(validate({foo:43}))
+  t.ok(validate({ foo: 42 }))
+  t.notOk(validate({ foo: 43 }))
   t.end()
 })
 
@@ -169,14 +178,14 @@ tape('minimum/maximum', function(t) {
       foo: {
         type: 'number',
         minimum: 0,
-        maximum: 0
-      }
-    }
+        maximum: 0,
+      },
+    },
   })
 
-  t.notOk(validate({foo:-42}))
-  t.ok(validate({foo:0}))
-  t.notOk(validate({foo:42}))
+  t.notOk(validate({ foo: -42 }))
+  t.ok(validate({ foo: 0 }))
+  t.notOk(validate({ foo: 42 }))
   t.end()
 })
 
@@ -189,15 +198,15 @@ tape('exclusiveMinimum/exclusiveMaximum', function(t) {
         minimum: 10,
         maximum: 20,
         exclusiveMinimum: true,
-        exclusiveMaximum: true
-      }
-    }
+        exclusiveMaximum: true,
+      },
+    },
   })
 
-  t.notOk(validate({foo:10}))
-  t.ok(validate({foo:11}))
-  t.notOk(validate({foo:20}))
-  t.ok(validate({foo:19}))
+  t.notOk(validate({ foo: 10 }))
+  t.ok(validate({ foo: 11 }))
+  t.notOk(validate({ foo: 20 }))
+  t.ok(validate({ foo: 19 }))
   t.end()
 })
 
@@ -205,7 +214,7 @@ tape('minimum/maximum number type', function(t) {
   const validate = validator({
     type: ['integer', 'null'],
     minimum: 1,
-    maximum: 100
+    maximum: 100,
   })
 
   t.notOk(validate(-1))
@@ -218,40 +227,52 @@ tape('minimum/maximum number type', function(t) {
 })
 
 tape('custom format', function(t) {
-  const validate = validator({
-    type: 'object',
-    properties: {
-      foo: {
-        type: 'string',
-        format: 'as'
-      }
-    }
-  }, {formats: {as:/^a+$/}})
+  const validate = validator(
+    {
+      type: 'object',
+      properties: {
+        foo: {
+          type: 'string',
+          format: 'as',
+        },
+      },
+    },
+    { formats: { as: /^a+$/ } }
+  )
 
-  t.notOk(validate({foo:''}), 'not as')
-  t.notOk(validate({foo:'b'}), 'not as')
-  t.notOk(validate({foo:'aaab'}), 'not as')
-  t.ok(validate({foo:'a'}), 'as')
-  t.ok(validate({foo:'aaaaaa'}), 'as')
+  t.notOk(validate({ foo: '' }), 'not as')
+  t.notOk(validate({ foo: 'b' }), 'not as')
+  t.notOk(validate({ foo: 'aaab' }), 'not as')
+  t.ok(validate({ foo: 'a' }), 'as')
+  t.ok(validate({ foo: 'aaaaaa' }), 'as')
   t.end()
 })
 
 tape('custom format function', function(t) {
-  const validate = validator({
-    type: 'object',
-    properties: {
-      foo: {
-        type: 'string',
-        format: 'as'
-      }
+  const validate = validator(
+    {
+      type: 'object',
+      properties: {
+        foo: {
+          type: 'string',
+          format: 'as',
+        },
+      },
+    },
+    {
+      formats: {
+        as: function(s) {
+          return /^a+$/.test(s)
+        },
+      },
     }
-  }, {formats: {as:function(s) { return /^a+$/.test(s) } }})
+  )
 
-  t.notOk(validate({foo:''}), 'not as')
-  t.notOk(validate({foo:'b'}), 'not as')
-  t.notOk(validate({foo:'aaab'}), 'not as')
-  t.ok(validate({foo:'a'}), 'as')
-  t.ok(validate({foo:'aaaaaa'}), 'as')
+  t.notOk(validate({ foo: '' }), 'not as')
+  t.notOk(validate({ foo: 'b' }), 'not as')
+  t.notOk(validate({ foo: 'aaab' }), 'not as')
+  t.ok(validate({ foo: 'a' }), 'as')
+  t.ok(validate({ foo: 'aaaaaa' }), 'as')
   t.end()
 })
 
@@ -261,14 +282,14 @@ tape('custom format schema object', function(t) {
       schema: { format: 'vegetable' },
       description: 'an egglplant is a vegetable',
       data: { oblong: true, sweet: false },
-      valid: true
+      valid: true,
     },
     {
       schema: { format: 'vegetable' },
       description: 'a strawberry is not a vegetable',
       data: { oblong: false, sweet: true },
-      valid: false
-    }
+      valid: false,
+    },
   ]
 
   const formats = {
@@ -299,12 +320,10 @@ tape('unknown format throws errors', function(t) {
 
 tape('do not mutate schema', function(t) {
   const sch = {
-    items: [
-      {}
-    ],
+    items: [{}],
     additionalItems: {
-      type: 'integer'
-    }
+      type: 'integer',
+    },
   }
 
   const copy = JSON.parse(JSON.stringify(sch))
@@ -320,8 +339,8 @@ tape('#toJSON()', function(t) {
     required: true,
     type: 'object',
     properties: {
-      hello: {type:'string', required:true}
-    }
+      hello: { type: 'string', required: true },
+    },
   }
 
   const validate = validator(schema)
@@ -331,13 +350,13 @@ tape('#toJSON()', function(t) {
 })
 
 tape('external schemas', function(t) {
-  const ext = {type: 'string'}
+  const ext = { type: 'string' }
   const schema = {
     required: true,
-    $ref: '#ext'
+    $ref: '#ext',
   }
 
-  const validate = validator(schema, {schemas: {ext:ext}})
+  const validate = validator(schema, { schemas: { ext: ext } })
 
   t.ok(validate('hello string'), 'is a string')
   t.notOk(validate(42), 'not a string')
@@ -345,14 +364,14 @@ tape('external schemas', function(t) {
 })
 
 tape('external schema URIs', function(t) {
-  const ext = {type: 'string'}
+  const ext = { type: 'string' }
   const schema = {
     required: true,
-    $ref: 'http://example.com/schemas/schemaURIs'
+    $ref: 'http://example.com/schemas/schemaURIs',
   }
 
-  const opts = {schemas:{}};
-  opts.schemas['http://example.com/schemas/schemaURIs'] = ext;
+  const opts = { schemas: {} }
+  opts.schemas['http://example.com/schemas/schemaURIs'] = ext
   const validate = validator(schema, opts)
 
   t.ok(validate('hello string'), 'is a string')
@@ -362,31 +381,31 @@ tape('external schema URIs', function(t) {
 
 tape('top-level external schema', function(t) {
   const defs = {
-    "string": {
-      type: "string"
+    string: {
+      type: 'string',
     },
-    "sex": {
-      type: "string",
-      enum: ["male", "female", "other"]
-    }
+    sex: {
+      type: 'string',
+      enum: ['male', 'female', 'other'],
+    },
   }
   const schema = {
-    type: "object",
+    type: 'object',
     properties: {
-      "name": { $ref: "definitions.json#/string" },
-      "sex": { $ref: "definitions.json#/sex" }
+      name: { $ref: 'definitions.json#/string' },
+      sex: { $ref: 'definitions.json#/sex' },
     },
-    required: ["name", "sex"]
+    required: ['name', 'sex'],
   }
 
   const validate = validator(schema, {
     schemas: {
-      "definitions.json": defs
-    }
+      'definitions.json': defs,
+    },
   })
-  t.ok(validate({name:"alice", sex:"female"}), 'is an object')
-  t.notOk(validate({name:"alice", sex: "bob"}), 'recognizes external schema')
-  t.notOk(validate({name:2, sex: "female"}), 'recognizes external schema')
+  t.ok(validate({ name: 'alice', sex: 'female' }), 'is an object')
+  t.notOk(validate({ name: 'alice', sex: 'bob' }), 'recognizes external schema')
+  t.notOk(validate({ name: 2, sex: 'female' }), 'recognizes external schema')
   t.end()
 })
 
@@ -400,20 +419,20 @@ tape('nested required array decl', function(t) {
             type: 'object',
             properties: {
               z: {
-                type: 'string'
-              }
+                type: 'string',
+              },
             },
-            required: ['z']
-          }
-        }
-      }
+            required: ['z'],
+          },
+        },
+      },
     },
-    required: ['x']
+    required: ['x'],
   }
 
   const validate = validator(schema)
 
-  t.ok(validate({x: {}}), 'should be valid')
+  t.ok(validate({ x: {} }), 'should be valid')
   t.notOk(validate({}), 'should not be valid')
   t.strictEqual(validate.errors[0].field, 'data["x"]', 'should output the missing field')
   t.end()
@@ -426,15 +445,15 @@ tape('verbose mode', function(t) {
     properties: {
       hello: {
         required: true,
-        type: 'string'
-      }
-    }
-  };
+        type: 'string',
+      },
+    },
+  }
 
-  const validate = validator(schema, {verbose: true})
+  const validate = validator(schema, { verbose: true })
 
-  t.ok(validate({hello: 'string'}), 'should be valid')
-  t.notOk(validate({hello: 100}), 'should not be valid')
+  t.ok(validate({ hello: 'string' }), 'should be valid')
+  t.notOk(validate({ hello: 100 }), 'should not be valid')
   t.strictEqual(validate.errors[0].value, 100, 'error object should contain the invalid value')
   t.strictEqual(validate.errors[0].type, 'string', 'error object should contain the type')
   t.end()
@@ -447,7 +466,7 @@ tape('additional props in verbose mode', function(t) {
     additionalProperties: false,
     properties: {
       foo: {
-        type: 'string'
+        type: 'string',
       },
       'hello world': {
         type: 'object',
@@ -455,23 +474,27 @@ tape('additional props in verbose mode', function(t) {
         additionalProperties: false,
         properties: {
           foo: {
-            type: 'string'
-          }
-        }
-      }
-    }
-  };
+            type: 'string',
+          },
+        },
+      },
+    },
+  }
 
-  const validate = validator(schema, {verbose: true})
+  const validate = validator(schema, { verbose: true })
 
-  validate({'hello world': {bar: 'string'}});
+  validate({ 'hello world': { bar: 'string' } })
 
-  t.strictEqual(validate.errors[0].value, 'data["hello world"].bar', 'should output the path to the additional prop in the error')
+  t.strictEqual(
+    validate.errors[0].value,
+    'data["hello world"].bar',
+    'should output the path to the additional prop in the error'
+  )
   t.end()
 })
 
 tape('Date.now() is an integer', function(t) {
-  const schema = {type: 'integer'}
+  const schema = { type: 'integer' }
   const validate = validator(schema)
 
   t.ok(validate(Date.now()), 'is integer')
@@ -488,26 +511,21 @@ tape.skip('field shows item index in arrays', function(t) {
         properties: {
           foo: {
             type: 'string',
-            required: true
-          }
-        }
-      }
-    }
+            required: true,
+          },
+        },
+      },
+    },
   }
 
   const validate = validator(schema)
 
-  validate([
-    [
-      { foo: 'test' },
-      { foo: 'test' }
-    ],
-    [
-      { foo: 'test' },
-      { baz: 'test' }
-    ]
-  ])
+  validate([[{ foo: 'test' }, { foo: 'test' }], [{ foo: 'test' }, { baz: 'test' }]])
 
-  t.strictEqual(validate.errors[0].field, 'data.1.1.foo', 'should output the field with specific index of failing item in the error')
+  t.strictEqual(
+    validate.errors[0].field,
+    'data.1.1.foo',
+    'should output the field with specific index of failing item in the error'
+  )
   t.end()
 })
