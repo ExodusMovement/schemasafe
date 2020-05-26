@@ -63,43 +63,31 @@ types.any = function() {
 }
 
 types.null = function(name) {
-  return name + ' === null'
+  return `${name} === null`
 }
 
 types.boolean = function(name) {
-  return 'typeof ' + name + ' === "boolean"'
+  return `typeof ${name} === "boolean"`
 }
 
 types.array = function(name) {
-  return 'Array.isArray(' + name + ')'
+  return `Array.isArray(${name})`
 }
 
 types.object = function(name) {
-  return 'typeof ' + name + ' === "object" && ' + name + ' && !Array.isArray(' + name + ')'
+  return `typeof ${name} === "object" && ${name} && !Array.isArray(${name})`
 }
 
 types.number = function(name) {
-  return 'typeof ' + name + ' === "number" && isFinite(' + name + ')'
+  return `typeof ${name} === "number" && isFinite(${name})`
 }
 
 types.integer = function(name) {
-  return (
-    'typeof ' +
-    name +
-    ' === "number" && (Math.floor(' +
-    name +
-    ') === ' +
-    name +
-    ' || ' +
-    name +
-    ' > 9007199254740992 || ' +
-    name +
-    ' < -9007199254740992)'
-  )
+  return `typeof ${name} === "number" && (Math.floor(${name}) === ${name} || ${name} > 9007199254740992 || ${name} < -9007199254740992)`
 }
 
 types.string = function(name) {
-  return 'typeof ' + name + ' === "string"'
+  return `typeof ${name} === "string"`
 }
 
 const unique = function(array) {
@@ -180,7 +168,7 @@ const compile = function(schema, cache, root, reporter, opts) {
     if (node.constructor.toString() === Object.toString()) {
       Object.keys(node).forEach(function checkKeywordSupported(keyword) {
         if (!KNOWN_KEYWORDS.includes(keyword)) {
-          throw new Error('Keyword not supported: ' + keyword)
+          throw new Error(`Keyword not supported: ${keyword}`)
         }
       })
     }
@@ -245,7 +233,7 @@ const compile = function(schema, cache, root, reporter, opts) {
         .concat(type)
         .map(function(t) {
           if (t && !types.hasOwnProperty(t)) {
-            throw new Error('Unknown type: ' + t)
+            throw new Error(`Unknown type: ${t}`)
           }
 
           return types[t || 'any'](name)
@@ -268,7 +256,7 @@ const compile = function(schema, cache, root, reporter, opts) {
         const i = genloop()
         fun.write('for (var %s = %d; %s < %s.length; %s++) {', i, node.items.length, i, name, i)
         visit(
-          name + '[' + i + ']',
+          `${name}[${i}]`,
           node.additionalItems,
           reporter,
           filter,
@@ -285,8 +273,8 @@ const compile = function(schema, cache, root, reporter, opts) {
 
       if (scope[n] instanceof RegExp || typeof scope[n] === 'function') {
         const condition = scope[n] instanceof RegExp ? '!%s.test(%s)' : '!%s(%s)'
-        fun.write('if (' + condition + ') {', n, name)
-        error('must be ' + node.format + ' format')
+        fun.write(`if (${condition}) {`, n, name)
+        error(`must be ${node.format} format`)
         fun.write('}')
       } else if (typeof scope[n] === 'object') {
         visit(name, scope[n], reporter, filter, schemaPath.concat('format'))
@@ -330,10 +318,10 @@ const compile = function(schema, cache, root, reporter, opts) {
 
       const compare = complex
         ? function(e) {
-            return 'JSON.stringify(' + name + ')' + ' !== JSON.stringify(' + JSON.stringify(e) + ')'
+            return `JSON.stringify(${name})` + ` !== JSON.stringify(${JSON.stringify(e)})`
           }
         : function(e) {
-            return name + ' !== ' + JSON.stringify(e)
+            return `${name} !== ${JSON.stringify(e)}`
           }
 
       fun.write('if (%s) {', node.enum.map(compare).join(' && ') || 'false')
@@ -349,7 +337,7 @@ const compile = function(schema, cache, root, reporter, opts) {
         if (typeof deps === 'string') deps = [deps]
 
         const exists = function(k) {
-          return genobj(name, k) + ' !== undefined'
+          return `${genobj(name, k)} !== undefined`
         }
 
         if (Array.isArray(deps)) {
@@ -378,11 +366,11 @@ const compile = function(schema, cache, root, reporter, opts) {
       const keys = gensym('keys')
 
       const toCompare = function(p) {
-        return keys + '[' + i + '] !== ' + JSON.stringify(p)
+        return `${keys}[${i}] !== ${JSON.stringify(p)}`
       }
 
       const toTest = function(p) {
-        return '!' + patterns(p) + '.test(' + keys + '[' + i + '])'
+        return `!${patterns(p)}.test(${keys}[${i}])`
       }
 
       const additionalProp =
@@ -396,15 +384,11 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('if (%s) {', additionalProp)
 
       if (node.additionalProperties === false) {
-        if (filter) fun.write('delete %s', name + '[' + keys + '[' + i + ']]')
-        error(
-          'has additional properties',
-          null,
-          JSON.stringify(name + '.') + ' + ' + keys + '[' + i + ']'
-        )
+        if (filter) fun.write('delete %s', `${name}[${keys}[${i}]]`)
+        error('has additional properties', null, `${JSON.stringify(`${name}.`)} + ${keys}[${i}]`)
       } else {
         visit(
-          name + '[' + keys + '[' + i + ']]',
+          `${name}[${keys}[${i}]]`,
           node.additionalProperties,
           reporter,
           filter,
@@ -452,7 +436,7 @@ const compile = function(schema, cache, root, reporter, opts) {
 
       const i = genloop()
       fun.write('for (var %s = 0; %s < %s.length; %s++) {', i, i, name, i)
-      visit(name + '[' + i + ']', node.items, reporter, filter, schemaPath.concat('items'))
+      visit(`${name}[${i}]`, node.items, reporter, filter, schemaPath.concat('items'))
       fun.write('}')
 
       if (type !== 'array') fun.write('}')
@@ -467,9 +451,9 @@ const compile = function(schema, cache, root, reporter, opts) {
 
       Object.keys(node.patternProperties).forEach(function(key) {
         const p = patterns(key)
-        fun.write('if (%s.test(%s)) {', p, keys + '[' + i + ']')
+        fun.write('if (%s.test(%s)) {', p, `${keys}[${i}]`)
         visit(
-          name + '[' + keys + '[' + i + ']]',
+          `${name}[${keys}[${i}]]`,
           node.patternProperties[key],
           reporter,
           filter,
@@ -668,7 +652,7 @@ const compile = function(schema, cache, root, reporter, opts) {
         if (!validate.errors) return ''
         return validate.errors
           .map(function(err) {
-            return err.field + ' ' + err.message
+            return `${err.field} ${err.message}`
           })
           .join('\n')
       },

@@ -16,7 +16,7 @@ const files = fs.readdirSync(schemaDraftDir)
 
 files.forEach(function(file) {
   file.forEach(function(f) {
-    tape('json-schema-test-suite '+f.description, function(t) {
+    tape(`json-schema-test-suite ${f.description}`, function(t) {
       const validate = validator(f.schema)
       f.tests.forEach(function(test) {
         t.same(validate(test.data), test.valid, test.description)

@@ -11,6 +11,7 @@
   ],
   "rules": {
     "prefer-const": 2,
+    "prefer-template": 2,
     "no-var": 2
   }
 }

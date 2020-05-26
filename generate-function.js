@@ -68,7 +68,7 @@ const genfun = function() {
   builder.toFunction = function(scope) {
     if (!scope) scope = {}
 
-    const src = 'return (' + builder.toString() + ')'
+    const src = `return (${builder.toString()})`
 
     const keys = Object.keys(scope).map(function(key) {
       return key

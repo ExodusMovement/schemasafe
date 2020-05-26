@@ -6,7 +6,7 @@ function toPointer( path ) {
   if ( ! ( path && path.length && path.join ) ){
     return '';
   }
-  return '/' + path.join('/');
+  return `/${path.join('/')}`;
 }
 
 function lookup(schema, err){
@@ -98,14 +98,14 @@ tape('schemaPath', function(t) {
 
   function notOkAt(data, path, message) {
     if(validate(data)) {
-      return t.fail('should have failed: ' + message)
+      return t.fail(`should have failed: ${message}`)
     }
     t.deepEqual(validate.errors[0].schemaPath, path, message)
   }
 
   function notOkWithTarget(data, target, message) {
     if(validate(data)) {
-      return t.fail('should have failed: ' + message)
+      return t.fail(`should have failed: ${message}`)
     }
     t.deepEqual(lookup(schema, validate.errors[0]).target, target, message)
   }
