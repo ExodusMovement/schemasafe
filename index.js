@@ -1,9 +1,11 @@
-const genobj = require('generate-object-property')
 const jaystring = require('jaystring')
 const genfun = require('./generate-function')
 const jsonpointer = require('jsonpointer')
 const formats = require('./formats')
 const KNOWN_KEYWORDS = require('./known-keywords')
+
+// name is assumed to be already processed and can contain complex paths
+const genobj = (name, property) => `${name}[${JSON.stringify(property)}]`
 
 const get = function(obj, additionalSchemas, ptr) {
   const visit = function(sub) {

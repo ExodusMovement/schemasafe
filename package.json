@@ -14,7 +14,6 @@
     "test": "tape test/*.js"
   },
   "dependencies": {
-    "generate-object-property": "^1.1.0",
     "jaystring": "^1.0.6",
     "jsonpointer": "^4.0.0"
   },
