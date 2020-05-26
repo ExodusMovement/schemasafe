@@ -100,7 +100,7 @@ const isMultipleOf = function(value, multipleOf) {
 
 const compile = function(schema, cache, root, reporter, opts) {
   const fmts = opts ? Object.assign({}, formats, opts.formats) : formats
-  const scope = { unique: unique, formats: fmts, isMultipleOf: isMultipleOf }
+  const scope = Object.create(null)
   const verbose = opts ? !!opts.verbose : false
   const greedy = opts && opts.greedy !== undefined ? opts.greedy : false
 
@@ -236,16 +236,16 @@ const compile = function(schema, cache, root, reporter, opts) {
 
     if (node.format && fmts.hasOwnProperty(node.format)) {
       if (type !== 'string' && formats[node.format]) fun.write('if (%s) {', types.string(name))
-      const n = gensym('format')
-      scope[n] = fmts[node.format]
-
-      if (scope[n] instanceof RegExp || typeof scope[n] === 'function') {
-        const condition = scope[n] instanceof RegExp ? '!%s.test(%s)' : '!%s(%s)'
+      const format = fmts[node.format]
+      if (format instanceof RegExp || typeof format === 'function') {
+        const condition = format instanceof RegExp ? '!%s.test(%s)' : '!%s(%s)'
+        const n = gensym('format')
+        scope[n] = format
         fun.write(`if (${condition}) {`, n, name)
         error(`must be ${node.format} format`)
         fun.write('}')
-      } else if (typeof scope[n] === 'object') {
-        visit(name, scope[n], reporter, filter, schemaPath.concat('format'))
+      } else if (typeof format === 'object') {
+        visit(name, format, reporter, filter, schemaPath.concat('format'))
       }
 
       if (type !== 'string' && formats[node.format]) fun.write('}')
@@ -273,6 +273,7 @@ const compile = function(schema, cache, root, reporter, opts) {
 
     if (node.uniqueItems) {
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
+      scope.unique = unique
       fun.write('if (!(unique(%s))) {', name)
       error('must be unique')
       fun.write('}')
@@ -493,6 +494,7 @@ const compile = function(schema, cache, root, reporter, opts) {
     if (node.multipleOf !== undefined) {
       if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
+      scope.isMultipleOf = isMultipleOf
       fun.write('if (!isMultipleOf(%s, %d)) {', name, node.multipleOf)
 
       error('has a remainder')
@@ -606,11 +608,11 @@ const compile = function(schema, cache, root, reporter, opts) {
   fun.write('return errors === 0')
   fun.write('}')
 
-  const filteredScope = filterScope(fun.makeRawSource(), scope)
+  validateScope(fun.makeRawSource(), scope)
 
-  const validate = fun.makeFunction(filteredScope)
+  const validate = fun.makeFunction(scope)
   validate.toModule = function() {
-    return fun.makeModule(filteredScope)
+    return fun.makeModule(scope)
   }
   validate.errors = null
 
@@ -647,13 +649,8 @@ module.exports.filter = function(schema, opts) {
   }
 }
 
-// Improve performance of generated IIFE modules by filtering unneeded scope
-function filterScope(source, scope) {
-  const filtered = {}
-  for (const key of Object.keys(scope)) {
-    if (source.includes(key)) {
-      filtered[key] = scope[key]
-    }
-  }
-  return filtered
+function validateScope(source, scope) {
+  for (const key of Object.keys(scope))
+    if (!source.includes(key))
+      throw new Error('Unexpected unused scope variable!')
 }
