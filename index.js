@@ -153,6 +153,13 @@ const compile = function(schema, cache, root, reporter, opts) {
       }
     }
 
+    const unprocessed = new Set(Object.keys(node))
+    const consume = (property, required = true) => {
+      if (required && !unprocessed.has(property))
+        throw new Error(`Unexpected double consumption: ${property}`)
+      unprocessed.delete(property)
+    }
+
     let properties = node.properties
     let type = node.type
     let tuple = false
@@ -161,6 +168,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       // TODO: optionally enforce type being present?
       throw new Error('Unexpected type')
     }
+    if (type) consume('type') // checked below after overwrites
 
     const validateTypeApplicable = (...types) => {
       if (!type) return // no type enforced
@@ -179,6 +187,9 @@ const compile = function(schema, cache, root, reporter, opts) {
       type = 'array'
       tuple = true
       properties = { ...node.items }
+      consume('items')
+    } else if (properties) {
+      consume('properties')
     }
 
     let indent = 0
@@ -210,6 +221,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('if (%s === undefined) {', name)
       fun.write('%s = %s', name, jaystring(node.default))
       fun.write('} else {')
+      consume('default')
     }
 
     if (node.required === true) {
@@ -217,9 +229,11 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('if (%s === undefined) {', name)
       error('is required')
       fun.write('} else {')
+      consume('required')
     } else {
       indent++
       fun.write('if (%s !== undefined) {', name)
+      if (node.required === false) consume('required')
     }
 
     const valid =
@@ -246,6 +260,7 @@ const compile = function(schema, cache, root, reporter, opts) {
         fun.write('if (%s.length > %d) {', name, node.items.length)
         error('has additional items')
         fun.write('}')
+        consume('additionalItems')
       } else if (node.additionalItems) {
         const i = genloop()
         fun.write('for (var %s = %d; %s < %s.length; %s++) {', i, node.items.length, i, name, i)
@@ -257,7 +272,12 @@ const compile = function(schema, cache, root, reporter, opts) {
           schemaPath.concat('additionalItems')
         )
         fun.write('}')
+        consume('additionalItems')
       }
+    } else {
+      // WARNING, it's allowed, but ignored per spec tests in this case!
+      // TODO: do not allow in strong mode
+      consume('additionalItems', false)
     }
 
     if (node.format && fmts.hasOwnProperty(node.format)) {
@@ -276,6 +296,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       }
 
       if (type !== 'string' && formats[node.format]) fun.write('}')
+      consume('format')
     } else if (node.format) {
       throw new Error('Unrecognized format used')
     }
@@ -296,9 +317,10 @@ const compile = function(schema, cache, root, reporter, opts) {
         fun.write('if (missing === 0) {')
         indent++
       }
+      consume('required')
     }
 
-    if (node.uniqueItems) {
+    if (node.uniqueItems === true) {
       validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
       scope.unique = unique
@@ -306,6 +328,9 @@ const compile = function(schema, cache, root, reporter, opts) {
       error('must be unique')
       fun.write('}')
       if (type !== 'array') fun.write('}')
+      consume('uniqueItems')
+    } else if (node.uniqueItems === false) {
+      consume('uniqueItems')
     }
 
     if (node.enum) {
@@ -326,6 +351,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('if (%s) {', node.enum.map(compare).join(' && ') || 'false')
       error('must be an enum value')
       fun.write('}')
+      consume('enum')
     }
 
     if (node.dependencies) {
@@ -358,6 +384,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       }
 
       if (type !== 'object') fun.write('}')
+      consume('dependencies')
     }
 
     if (node.additionalProperties || node.additionalProperties === false) {
@@ -402,6 +429,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'object') fun.write('}')
+      consume('additionalProperties')
     }
 
     if (node.$ref) {
@@ -420,6 +448,7 @@ const compile = function(schema, cache, root, reporter, opts) {
         error('referenced schema does not match')
         fun.write('}')
       }
+      consume('$ref')
     }
 
     if (node.not) {
@@ -431,6 +460,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('} else {')
       fun.write('errors = %s', prev)
       fun.write('}')
+      consume('not')
     }
 
     if (node.items && !tuple) {
@@ -443,6 +473,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'array') fun.write('}')
+      consume('items')
     }
 
     if (node.patternProperties) {
@@ -468,6 +499,7 @@ const compile = function(schema, cache, root, reporter, opts) {
 
       fun.write('}')
       if (type !== 'object') fun.write('}')
+      consume('patternProperties')
     }
 
     if (node.pattern) {
@@ -478,6 +510,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       error('pattern mismatch')
       fun.write('}')
       if (type !== 'string') fun.write('}')
+      consume('pattern')
     }
 
     if (node.allOf) {
@@ -485,6 +518,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       node.allOf.forEach(function(sch, key) {
         visit(name, sch, reporter, filter, schemaPath.concat(['allOf', key]))
       })
+      consume('allOf')
     }
 
     if (node.anyOf && node.anyOf.length) {
@@ -506,6 +540,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('if (%s !== errors) {', prev)
       error('no schemas match')
       fun.write('}')
+      consume('anyOf')
     }
 
     if (node.oneOf && node.oneOf.length) {
@@ -528,6 +563,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('if (%s !== 1) {', passes)
       error('no (or more than one) schemas match')
       fun.write('}')
+      consume('oneOf')
     }
 
     if (node.multipleOf !== undefined) {
@@ -542,6 +578,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'number' && type !== 'integer') fun.write('}')
+      consume('multipleOf')
     }
 
     if (node.maxProperties !== undefined) {
@@ -554,6 +591,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'object') fun.write('}')
+      consume('maxProperties')
     }
 
     if (node.minProperties !== undefined) {
@@ -566,6 +604,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'object') fun.write('}')
+      consume('minProperties')
     }
 
     if (node.maxItems !== undefined) {
@@ -578,6 +617,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'array') fun.write('}')
+      consume('maxItems')
     }
 
     if (node.minItems !== undefined) {
@@ -590,6 +630,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'array') fun.write('}')
+      consume('minItems')
     }
 
     if (node.maxLength !== undefined) {
@@ -603,6 +644,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'string') fun.write('}')
+      consume('maxLength')
     }
 
     if (node.minLength !== undefined) {
@@ -616,6 +658,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'string') fun.write('}')
+      consume('minLength')
     }
 
     if (node.minimum !== undefined) {
@@ -628,6 +671,8 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'number' && type !== 'integer') fun.write('}')
+      consume('minimum')
+      consume('exclusiveMinimum', false)
     }
 
     if (node.maximum !== undefined) {
@@ -640,6 +685,8 @@ const compile = function(schema, cache, root, reporter, opts) {
       fun.write('}')
 
       if (type !== 'number' && type !== 'integer') fun.write('}')
+      consume('maximum')
+      consume('exclusiveMaximum', false)
     }
 
     if (properties) {
@@ -660,6 +707,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     while (indent--) fun.write('}')
+
+    if (unprocessed.size !== 0) throw new Error(`Unsupported keywords: ${[...unprocessed].join(', ')}`)
   }
 
   visit('data', schema, reporter, opts && opts.filter, [])
