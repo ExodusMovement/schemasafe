@@ -611,28 +611,8 @@ const compile = function(schema, cache, root, reporter, opts) {
   validateScope(fun.makeRawSource(), scope)
 
   const validate = fun.makeFunction(scope)
-  validate.toModule = function() {
-    return fun.makeModule(scope)
-  }
-  validate.errors = null
-
-  if (Object.defineProperty) {
-    Object.defineProperty(validate, 'error', {
-      get: function() {
-        if (!validate.errors) return ''
-        return validate.errors
-          .map(function(err) {
-            return `${err.field} ${err.message}`
-          })
-          .join('\n')
-      },
-    })
-  }
-
-  validate.toJSON = function() {
-    return schema
-  }
-
+  validate.toModule = () => fun.makeModule(scope)
+  validate.toJSON = () => schema
   return validate
 }
 
