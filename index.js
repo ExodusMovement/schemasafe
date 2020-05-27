@@ -145,6 +145,41 @@ const compile = function(schema, cache, root, reporter, opts) {
   fun.write('var errors = 0')
 
   const visit = function(name, node, reporter, filter, schemaPath) {
+    const error = function(msg, prop, value) {
+      fun.write('errors++')
+      if (reporter === true) {
+        fun.write('if (validate.errors === null) validate.errors = []')
+        if (verbose) {
+          fun.write(
+            'validate.errors.push({field:%s,message:%s,value:%s,type:%s,schemaPath:%s})',
+            formatName(prop || name),
+            JSON.stringify(msg),
+            value || name,
+            JSON.stringify(type),
+            JSON.stringify(schemaPath)
+          )
+        } else {
+          fun.write(
+            'validate.errors.push({field:%s,message:%s})',
+            formatName(prop || name),
+            JSON.stringify(msg)
+          )
+        }
+      }
+    }
+
+    if (typeof node === 'boolean') {
+      if (node === true) {
+        // any is valid
+        // TODO: don't allow in strong mode
+      } else { // node === false
+        fun.write('if (%s !== undefined) {', name)
+        error('is unexpected')
+        fun.write('}')
+      }
+      return
+    }
+
     if (node.constructor.toString() === Object.toString()) {
       for (const keyword of Object.keys(node)) {
         if (!KNOWN_KEYWORDS.includes(keyword)) {
@@ -193,28 +228,6 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     let indent = 0
-    const error = function(msg, prop, value) {
-      fun.write('errors++')
-      if (reporter === true) {
-        fun.write('if (validate.errors === null) validate.errors = []')
-        if (verbose) {
-          fun.write(
-            'validate.errors.push({field:%s,message:%s,value:%s,type:%s,schemaPath:%s})',
-            formatName(prop || name),
-            JSON.stringify(msg),
-            value || name,
-            JSON.stringify(type),
-            JSON.stringify(schemaPath)
-          )
-        } else {
-          fun.write(
-            'validate.errors.push({field:%s,message:%s})',
-            formatName(prop || name),
-            JSON.stringify(msg)
-          )
-        }
-      }
-    }
 
     if (node.default !== undefined) {
       indent++
