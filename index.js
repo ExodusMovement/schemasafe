@@ -172,7 +172,8 @@ const compile = function(schema, cache, root, reporter, opts) {
       if (node === true) {
         // any is valid
         // TODO: don't allow in strong mode
-      } else { // node === false
+      } else {
+        // node === false
         fun.write('if (%s !== undefined) {', name)
         error('is unexpected')
         fun.write('}')
@@ -208,10 +209,9 @@ const compile = function(schema, cache, root, reporter, opts) {
     const validateTypeApplicable = (...types) => {
       if (!type) return // no type enforced
       if (typeof type === 'string') {
-        if (!types.includes(type))
-          throw new Error(`Unexpected field in type=${type}`)
+        if (!types.includes(type)) throw new Error(`Unexpected field in type=${type}`)
       } else if (Array.isArray(type)) {
-        if (!type.some(x => types.includes(x)))
+        if (!type.some((x) => types.includes(x)))
           throw new Error(`Unexpected field in types: ${type.join(', ')}`)
       } else throw new Error('Unexpected type')
     }
@@ -721,7 +721,8 @@ const compile = function(schema, cache, root, reporter, opts) {
 
     while (indent--) fun.write('}')
 
-    if (unprocessed.size !== 0) throw new Error(`Unsupported keywords: ${[...unprocessed].join(', ')}`)
+    if (unprocessed.size !== 0)
+      throw new Error(`Unsupported keywords: ${[...unprocessed].join(', ')}`)
   }
 
   visit('data', schema, reporter, opts && opts.filter, [])

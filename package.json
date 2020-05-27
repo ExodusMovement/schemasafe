@@ -10,7 +10,8 @@
     "index.js"
   ],
   "scripts": {
-    "lint": "eslint .",
+    "lint": "prettier --list-different '**/*.js'&& eslint .",
+    "format": "prettier --write '**/*.js'",
     "test": "npm run test:normal && npm run test:module",
     "test:module": "tape -r ./test-module.js test/*.js",
     "test:normal": "tape test/*.js"
