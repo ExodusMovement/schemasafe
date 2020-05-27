@@ -319,11 +319,12 @@ const compile = function(schema, cache, root, reporter, opts) {
           )
           error('dependencies not set')
           fun.write('}')
-        }
-        if (typeof deps === 'object') {
+        } else if (typeof deps === 'object') {
           fun.write('if (%s !== undefined) {', genobj(name, key))
           visit(name, deps, reporter, filter, schemaPath.concat(['dependencies', key]))
           fun.write('}')
+        } else {
+          throw new Error('Unexpected dependencies entry')
         }
       }
 
