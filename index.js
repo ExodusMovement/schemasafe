@@ -5,7 +5,10 @@ const formats = require('./formats')
 const KNOWN_KEYWORDS = require('./known-keywords')
 
 // name is assumed to be already processed and can contain complex paths
-const genobj = (name, property) => `${name}[${JSON.stringify(property)}]`
+const genobj = (name, property) => {
+  if (!['string', 'number'].includes(typeof property)) throw new Error('Invalid property path')
+  return `${name}[${JSON.stringify(property)}]`
+}
 
 const get = function(obj, additionalSchemas, ptr) {
   const visit = function(sub) {
@@ -150,11 +153,28 @@ const compile = function(schema, cache, root, reporter, opts) {
     let type = node.type
     let tuple = false
 
+    if (type && typeof type !== 'string' && !Array.isArray(type)) {
+      // TODO: optionally enforce type being present?
+      throw new Error('Unexpected type')
+    }
+
+    const validateTypeApplicable = (...types) => {
+      if (!type) return // no type enforced
+      if (typeof type === 'string') {
+        if (!types.includes(type))
+          throw new Error(`Unexpected field in type=${type}`)
+      } else if (Array.isArray(type)) {
+        if (!type.some(x => types.includes(x)))
+          throw new Error(`Unexpected field in types: ${type.join(', ')}`)
+      } else throw new Error('Unexpected type')
+    }
+
     if (Array.isArray(node.items)) {
       // tuple type
-      properties = { ...node.items }
+      if (type && type !== 'array') throw new Error(`Unexpected type with items: ${type}`)
       type = 'array'
       tuple = true
+      properties = { ...node.items }
     }
 
     let indent = 0
@@ -237,6 +257,7 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.format && fmts.hasOwnProperty(node.format)) {
+      validateTypeApplicable('string')
       if (type !== 'string' && formats[node.format]) fun.write('if (%s) {', types.string(name))
       const format = fmts[node.format]
       if (format instanceof RegExp || typeof format === 'function') {
@@ -274,6 +295,7 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.uniqueItems) {
+      validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
       scope.unique = unique
       fun.write('if (!(unique(%s))) {', name)
@@ -283,6 +305,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.enum) {
+      if (!Array.isArray(node.enum)) throw new Error('Invalid enum')
+
       const complex = node.enum.some(function(e) {
         return typeof e === 'object'
       })
@@ -301,6 +325,7 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.dependencies) {
+      validateTypeApplicable('object')
       if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
       for (const key of Object.keys(node.dependencies)) {
@@ -332,6 +357,7 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.additionalProperties || node.additionalProperties === false) {
+      validateTypeApplicable('object')
       if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
       const i = genloop()
@@ -404,6 +430,7 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.items && !tuple) {
+      validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
 
       const i = genloop()
@@ -415,6 +442,7 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.patternProperties) {
+      validateTypeApplicable('object')
       if (type !== 'object') fun.write('if (%s) {', types.object(name))
       const keys = gensym('keys')
       const i = genloop()
@@ -440,6 +468,7 @@ const compile = function(schema, cache, root, reporter, opts) {
 
     if (node.pattern) {
       const p = patterns(node.pattern)
+      validateTypeApplicable('string')
       if (type !== 'string') fun.write('if (%s) {', types.string(name))
       fun.write('if (!(%s.test(%s))) {', p, name)
       error('pattern mismatch')
@@ -448,12 +477,14 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.allOf) {
+      if (!Array.isArray(node.allOf)) throw new Error('Invalid allOf')
       node.allOf.forEach(function(sch, key) {
         visit(name, sch, reporter, filter, schemaPath.concat(['allOf', key]))
       })
     }
 
     if (node.anyOf && node.anyOf.length) {
+      if (!Array.isArray(node.anyOf)) throw new Error('Invalid anyOf')
       const prev = gensym('prev')
 
       node.anyOf.forEach(function(sch, i) {
@@ -474,6 +505,7 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.oneOf && node.oneOf.length) {
+      if (!Array.isArray(node.oneOf)) throw new Error('Invalid oneOf')
       const prev = gensym('prev')
       const passes = gensym('passes')
 
@@ -495,6 +527,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.multipleOf !== undefined) {
+      if (!Number.isFinite(node.multipleOf)) throw new Error('Invalid multipleOf')
+      validateTypeApplicable('number', 'integer')
       if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
       scope.isMultipleOf = isMultipleOf
@@ -507,6 +541,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.maxProperties !== undefined) {
+      if (!Number.isFinite(node.maxProperties)) throw new Error('Invalid maxProperties')
+      validateTypeApplicable('object')
       if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
       fun.write('if (Object.keys(%s).length > %d) {', name, node.maxProperties)
@@ -517,6 +553,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.minProperties !== undefined) {
+      if (!Number.isFinite(node.minProperties)) throw new Error('Invalid minProperties')
+      validateTypeApplicable('object')
       if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
       fun.write('if (Object.keys(%s).length < %d) {', name, node.minProperties)
@@ -527,6 +565,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.maxItems !== undefined) {
+      if (!Number.isFinite(node.maxItems)) throw new Error('Invalid maxItems')
+      validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
 
       fun.write('if (%s.length > %d) {', name, node.maxItems)
@@ -537,6 +577,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.minItems !== undefined) {
+      if (!Number.isFinite(node.minItems)) throw new Error('Invalid maxItems')
+      validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
 
       fun.write('if (%s.length < %d) {', name, node.minItems)
@@ -547,6 +589,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.maxLength !== undefined) {
+      if (!Number.isFinite(node.maxLength)) throw new Error('Invalid maxItems')
+      validateTypeApplicable('string')
       if (type !== 'string') fun.write('if (%s) {', types.string(name))
 
       fun.write('if (%s.length > %d) {', name, node.maxLength)
@@ -557,6 +601,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.minLength !== undefined) {
+      if (!Number.isFinite(node.minLength)) throw new Error('Invalid maxItems')
+      validateTypeApplicable('string')
       if (type !== 'string') fun.write('if (%s) {', types.string(name))
 
       fun.write('if (%s.length < %d) {', name, node.minLength)
@@ -567,6 +613,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.minimum !== undefined) {
+      if (!Number.isFinite(node.minimum)) throw new Error('Invalid minimum')
+      validateTypeApplicable('number', 'integer')
       if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
       fun.write('if (%s %s %d) {', name, node.exclusiveMinimum ? '<=' : '<', node.minimum)
@@ -577,6 +625,8 @@ const compile = function(schema, cache, root, reporter, opts) {
     }
 
     if (node.maximum !== undefined) {
+      if (!Number.isFinite(node.maximum)) throw new Error('Invalid maximum')
+      validateTypeApplicable('number', 'integer')
       if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
       fun.write('if (%s %s %d) {', name, node.exclusiveMaximum ? '>=' : '>', node.maximum)
