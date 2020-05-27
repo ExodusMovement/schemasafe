@@ -13,7 +13,7 @@ function lookup(schema, err) {
   return get(schema, toPointer(err.schemaPath))
 }
 
-tape('function: schemaPath', function(t) {
+tape('schemaPath', function(t) {
   const schema = {
     type: 'object',
     target: 'top level',
@@ -206,7 +206,7 @@ tape('function: schemaPath', function(t) {
   t.end()
 })
 
-tape('function: schemaPath - nested selectors', function(t) {
+tape('schemaPath - nested selectors', function(t) {
   const schema = {
     anyOf: [
       {

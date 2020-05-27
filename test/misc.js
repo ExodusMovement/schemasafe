@@ -2,7 +2,7 @@ const tape = require('tape')
 const cosmic = require('./fixtures/cosmic')
 const validator = require('../')
 
-tape('function: simple', function(t) {
+tape('simple', function(t) {
   const schema = {
     required: true,
     type: 'object',
@@ -19,7 +19,7 @@ tape('function: simple', function(t) {
   t.end()
 })
 
-tape('function: data is undefined', function(t) {
+tape('data is undefined', function(t) {
   const validate = validator({ type: 'string' })
 
   t.notOk(validate(null))
@@ -27,7 +27,7 @@ tape('function: data is undefined', function(t) {
   t.end()
 })
 
-tape('function: advanced', function(t) {
+tape('advanced', function(t) {
   const validate = validator(cosmic.schema)
 
   t.ok(validate(cosmic.valid), 'should be valid')
@@ -35,7 +35,7 @@ tape('function: advanced', function(t) {
   t.end()
 })
 
-tape('function: greedy/false', function(t) {
+tape('greedy/false', function(t) {
   const validate = validator({
     type: 'object',
     properties: {
@@ -62,7 +62,7 @@ tape('function: greedy/false', function(t) {
   t.end()
 })
 
-tape('function: greedy/true', function(t) {
+tape('greedy/true', function(t) {
   const validate = validator(
     {
       type: 'object',
@@ -97,7 +97,7 @@ tape('function: greedy/true', function(t) {
   t.end()
 })
 
-tape('function: additional props', function(t) {
+tape('additional props', function(t) {
   const validate = validator(
     {
       type: 'object',
@@ -118,7 +118,7 @@ tape('function: additional props', function(t) {
   t.end()
 })
 
-tape('function: array', function(t) {
+tape('array', function(t) {
   const validate = validator({
     type: 'array',
     required: true,
@@ -133,7 +133,7 @@ tape('function: array', function(t) {
   t.end()
 })
 
-tape('function: nested array', function(t) {
+tape('nested array', function(t) {
   const validate = validator({
     type: 'object',
     properties: {
@@ -153,7 +153,7 @@ tape('function: nested array', function(t) {
   t.end()
 })
 
-tape('function: enum', function(t) {
+tape('enum', function(t) {
   const validate = validator({
     type: 'object',
     properties: {
@@ -171,7 +171,7 @@ tape('function: enum', function(t) {
   t.end()
 })
 
-tape('function: minimum/maximum', function(t) {
+tape('minimum/maximum', function(t) {
   const validate = validator({
     type: 'object',
     properties: {
@@ -189,7 +189,7 @@ tape('function: minimum/maximum', function(t) {
   t.end()
 })
 
-tape('function: exclusiveMinimum/exclusiveMaximum', function(t) {
+tape('exclusiveMinimum/exclusiveMaximum', function(t) {
   const validate = validator({
     type: 'object',
     properties: {
@@ -210,7 +210,7 @@ tape('function: exclusiveMinimum/exclusiveMaximum', function(t) {
   t.end()
 })
 
-tape('function: minimum/maximum number type', function(t) {
+tape('minimum/maximum number type', function(t) {
   const validate = validator({
     type: ['integer', 'null'],
     minimum: 1,
@@ -226,7 +226,7 @@ tape('function: minimum/maximum number type', function(t) {
   t.end()
 })
 
-tape('function: custom format', function(t) {
+tape('custom format', function(t) {
   const validate = validator(
     {
       type: 'object',
@@ -248,7 +248,7 @@ tape('function: custom format', function(t) {
   t.end()
 })
 
-tape('function: custom format function', function(t) {
+tape('custom format function', function(t) {
   const validate = validator(
     {
       type: 'object',
@@ -276,7 +276,7 @@ tape('function: custom format function', function(t) {
   t.end()
 })
 
-tape('function: custom format schema object', function(t) {
+tape('custom format schema object', function(t) {
   const tests = [
     {
       schema: { format: 'vegetable' },
@@ -310,7 +310,7 @@ tape('function: custom format schema object', function(t) {
   t.end()
 })
 
-tape('function: unknown format throws errors', function(t) {
+tape('unknown format throws errors', function(t) {
   t.throws(function() {
     validator({ type: 'string', format: 'foobar' })
   }, /Unrecognized format used/)
@@ -318,7 +318,7 @@ tape('function: unknown format throws errors', function(t) {
   t.end()
 })
 
-tape('function: do not mutate schema', function(t) {
+tape('do not mutate schema', function(t) {
   const sch = {
     items: [{}],
     additionalItems: {
@@ -334,7 +334,7 @@ tape('function: do not mutate schema', function(t) {
   t.end()
 })
 
-tape('function: #toJSON()', function(t) {
+tape('#toJSON()', function(t) {
   const schema = {
     required: true,
     type: 'object',
@@ -349,7 +349,7 @@ tape('function: #toJSON()', function(t) {
   t.end()
 })
 
-tape('function: external schemas', function(t) {
+tape('external schemas', function(t) {
   const ext = { type: 'string' }
   const schema = {
     required: true,
@@ -363,7 +363,7 @@ tape('function: external schemas', function(t) {
   t.end()
 })
 
-tape('function: external schema URIs', function(t) {
+tape('external schema URIs', function(t) {
   const ext = { type: 'string' }
   const schema = {
     required: true,
@@ -379,7 +379,7 @@ tape('function: external schema URIs', function(t) {
   t.end()
 })
 
-tape('function: top-level external schema', function(t) {
+tape('top-level external schema', function(t) {
   const defs = {
     string: {
       type: 'string',
@@ -409,7 +409,7 @@ tape('function: top-level external schema', function(t) {
   t.end()
 })
 
-tape('function: nested required array decl', function(t) {
+tape('nested required array decl', function(t) {
   const schema = {
     properties: {
       x: {
@@ -438,7 +438,7 @@ tape('function: nested required array decl', function(t) {
   t.end()
 })
 
-tape('function: verbose mode', function(t) {
+tape('verbose mode', function(t) {
   const schema = {
     required: true,
     type: 'object',
@@ -459,7 +459,7 @@ tape('function: verbose mode', function(t) {
   t.end()
 })
 
-tape('function: additional props in verbose mode', function(t) {
+tape('additional props in verbose mode', function(t) {
   const schema = {
     type: 'object',
     required: true,
@@ -493,7 +493,7 @@ tape('function: additional props in verbose mode', function(t) {
   t.end()
 })
 
-tape('function: Date.now() is an integer', function(t) {
+tape('Date.now() is an integer', function(t) {
   const schema = { type: 'integer' }
   const validate = validator(schema)
 

@@ -20,7 +20,7 @@ files.forEach(function(file) {
     tape(`json-schema-test-suite ${f.description}`, function(t) {
       const validate = validator(f.schema)
       f.tests.forEach(function(test) {
-        t.same(validate(test.data), test.valid, `function: ${test.description}`)
+        t.same(validate(test.data), test.valid, test.description)
       })
       t.end()
     })
