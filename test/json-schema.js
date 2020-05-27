@@ -3,26 +3,55 @@ const fs = require('fs')
 const path = require('path')
 const validator = require('../')
 
-const schemaDraftDir = path.join(__dirname, '/json-schema-draft4')
-const files = fs
-  .readdirSync(schemaDraftDir)
-  .map(function(file) {
-    if (file === 'definitions.json') return null
-    if (file === 'refRemote.json') return null
-    if (file === 'ref.json') return null
-    const content = fs.readFileSync(path.join(schemaDraftDir, file))
-    return JSON.parse(content)
-  })
-  .filter(Boolean)
+const unsupported = new Set([
+  // Directories
+  'optional',
+  // Files
+  'definitions.json',
+  'refRemote.json',
+  'ref.json',
+  // Blocks
+  'format.json/validation of IP addresses',
+  'format.json/validation of IPv6 addresses',
+  'items.json/items and subitems',
+  // Specific tests
+  'items.json/an array of schemas for items/JavaScript pseudo-array is valid',
+])
 
-files.forEach(function(file) {
-  file.forEach(function(f) {
-    tape(`json-schema-test-suite ${f.description}`, function(t) {
-      const validate = validator(f.schema)
-      f.tests.forEach(function(test) {
-        t.same(validate(test.data), test.valid, test.description)
-      })
-      t.end()
+const schemaDir = path.join(__dirname, '/json-schema/draft4')
+
+function processTestDir(subdir = '') {
+  const dir = path.join(schemaDir, subdir)
+  for (const file of fs.readdirSync(dir)) {
+    const sub = path.join(subdir, file) // relative to schemaDir
+    if (unsupported.has(sub)) continue
+    if (file.endsWith('.json')) {
+      const content = fs.readFileSync(path.join(schemaDir, sub))
+      processTest(sub, JSON.parse(content))
+    } else {
+      // assume it's a dir and let it fail otherwise
+      processTestDir(sub)
+    }
+  }
+}
+
+function processTest(id, file) {
+  for (const block of file) {
+    if (unsupported.has(`${id}/${block.description}`)) continue
+    tape(`json-schema-test-suite ${id}/${block.description}`, (t) => {
+      try {
+        const validate = validator(block.schema)
+        for (const test of block.tests) {
+          if (unsupported.has(`${id}/${block.description}/${test.description}`)) continue
+          t.same(validate(test.data), test.valid, test.description)
+        }
+      } catch (e) {
+        t.fail(e)
+      } finally {
+        t.end()
+      }
     })
-  })
-})
+  }
+}
+
+processTestDir()

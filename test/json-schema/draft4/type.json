@@ -19,6 +19,11 @@
                 "valid": false
             },
             {
+                "description": "a string is still not an integer, even if it looks like one",
+                "data": "1",
+                "valid": false
+            },
+            {
                 "description": "an object is not an integer",
                 "data": {},
                 "valid": false
@@ -50,6 +55,11 @@
                 "valid": true
             },
             {
+                "description": "a float with zero fractional part is a number",
+                "data": 1.0,
+                "valid": true
+            },
+            {
                 "description": "a float is a number",
                 "data": 1.1,
                 "valid": true
@@ -57,6 +67,11 @@
             {
                 "description": "a string is not a number",
                 "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "a string is still not a number, even if it looks like one",
+                "data": "1",
                 "valid": false
             },
             {
@@ -98,6 +113,16 @@
             {
                 "description": "a string is a string",
                 "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "a string is still a string, even if it looks like a number",
+                "data": "1",
+                "valid": true
+            },
+            {
+                "description": "an empty string is still a string",
+                "data": "",
                 "valid": true
             },
             {
@@ -188,7 +213,7 @@
                 "valid": false
             },
             {
-                "description": "an array is not an array",
+                "description": "an array is an array",
                 "data": [],
                 "valid": true
             },
@@ -214,6 +239,11 @@
                 "valid": false
             },
             {
+                "description": "zero is not a boolean",
+                "data": 0,
+                "valid": false
+            },
+            {
                 "description": "a float is not a boolean",
                 "data": 1.1,
                 "valid": false
@@ -221,6 +251,11 @@
             {
                 "description": "a string is not a boolean",
                 "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "an empty string is not a boolean",
+                "data": "",
                 "valid": false
             },
             {
@@ -234,8 +269,13 @@
                 "valid": false
             },
             {
-                "description": "a boolean is not a boolean",
+                "description": "true is a boolean",
                 "data": true,
+                "valid": true
+            },
+            {
+                "description": "false is a boolean",
+                "data": false,
                 "valid": true
             },
             {
@@ -260,8 +300,18 @@
                 "valid": false
             },
             {
+                "description": "zero is not null",
+                "data": 0,
+                "valid": false
+            },
+            {
                 "description": "a string is not null",
                 "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "an empty string is not null",
+                "data": "",
                 "valid": false
             },
             {
@@ -275,8 +325,13 @@
                 "valid": false
             },
             {
-                "description": "a boolean is not null",
+                "description": "true is not null",
                 "data": true,
+                "valid": false
+            },
+            {
+                "description": "false is not null",
+                "data": false,
                 "valid": false
             },
             {
@@ -323,6 +378,90 @@
             {
                 "description": "null is invalid",
                 "data": null,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "type as array with one item",
+        "schema": {
+            "type": ["string"]
+        },
+        "tests": [
+            {
+                "description": "string is valid",
+                "data": "foo",
+                "valid": true
+            },
+            {
+                "description": "number is invalid",
+                "data": 123,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "type: array or object",
+        "schema": {
+            "type": ["array", "object"]
+        },
+        "tests": [
+            {
+                "description": "array is valid",
+                "data": [1,2,3],
+                "valid": true
+            },
+            {
+                "description": "object is valid",
+                "data": {"foo": 123},
+                "valid": true
+            },
+            {
+                "description": "number is invalid",
+                "data": 123,
+                "valid": false
+            },
+            {
+                "description": "string is invalid",
+                "data": "foo",
+                "valid": false
+            },
+            {
+                "description": "null is invalid",
+                "data": null,
+                "valid": false
+            }
+        ]
+    },
+    {
+        "description": "type: array, object or null",
+        "schema": {
+            "type": ["array", "object", "null"]
+        },
+        "tests": [
+            {
+                "description": "array is valid",
+                "data": [1,2,3],
+                "valid": true
+            },
+            {
+                "description": "object is valid",
+                "data": {"foo": 123},
+                "valid": true
+            },
+            {
+                "description": "null is valid",
+                "data": null,
+                "valid": true
+            },
+            {
+                "description": "number is invalid",
+                "data": 123,
+                "valid": false
+            },
+            {
+                "description": "string is invalid",
+                "data": "foo",
                 "valid": false
             }
         ]
