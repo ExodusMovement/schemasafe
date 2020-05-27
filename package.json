@@ -11,7 +11,9 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "test": "tape test/*.js"
+    "test": "npm run test:normal && npm run test:module",
+    "test:module": "tape -r ./test-module.js test/*.js",
+    "test:normal": "tape test/*.js"
   },
   "dependencies": {
     "jaystring": "^1.0.6",
