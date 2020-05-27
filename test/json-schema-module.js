@@ -1,7 +1,10 @@
 const tape = require('tape')
 const fs = require('fs')
 const path = require('path')
-const validator = require('../')
+const createValidator = require('../')
+
+// eslint-disable-next-line no-new-func
+const validator = (...args) => new Function(`return ${createValidator(...args).toModule()}`)()
 
 const schemaDraftDir = path.join(__dirname, '/json-schema-draft4')
 const files = fs
@@ -20,7 +23,7 @@ files.forEach(function(file) {
     tape(`json-schema-test-suite ${f.description}`, function(t) {
       const validate = validator(f.schema)
       f.tests.forEach(function(test) {
-        t.same(validate(test.data), test.valid, `function: ${test.description}`)
+        t.same(validate(test.data), test.valid, `module: ${test.description}`)
       })
       t.end()
     })

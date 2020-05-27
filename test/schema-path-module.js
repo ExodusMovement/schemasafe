@@ -1,6 +1,9 @@
 const tape = require('tape')
-const validator = require('../')
 const get = require('jsonpointer').get
+const createValidator = require('../')
+
+// eslint-disable-next-line no-new-func
+const validator = (...args) => new Function(`return ${createValidator(...args).toModule()}`)()
 
 function toPointer(path) {
   if (!(path && path.length && path.join)) {
@@ -13,7 +16,7 @@ function lookup(schema, err) {
   return get(schema, toPointer(err.schemaPath))
 }
 
-tape('function: schemaPath', function(t) {
+tape('module: schemaPath', function(t) {
   const schema = {
     type: 'object',
     target: 'top level',
@@ -206,7 +209,7 @@ tape('function: schemaPath', function(t) {
   t.end()
 })
 
-tape('function: schemaPath - nested selectors', function(t) {
+tape('module: schemaPath - nested selectors', function(t) {
   const schema = {
     anyOf: [
       {
