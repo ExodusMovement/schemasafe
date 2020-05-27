@@ -13,18 +13,20 @@ function lookup(schema, err) {
   return get(schema, toPointer(err.schemaPath))
 }
 
+const target = Symbol('target')
+
 tape('schemaPath', function(t) {
   const schema = {
     type: 'object',
-    target: 'top level',
+    [target]: 'top level',
     properties: {
-      target: 'inside properties',
+      [target]: 'inside properties',
       hello: {
-        target: 'inside hello',
+        [target]: 'inside hello',
         type: 'string',
       },
       someItems: {
-        target: 'in someItems',
+        [target]: 'in someItems',
         type: 'array',
         items: [
           {
@@ -35,20 +37,20 @@ tape('schemaPath', function(t) {
           },
         ],
         additionalItems: {
-          target: 'inside additionalItems',
+          [target]: 'inside additionalItems',
           type: 'boolean',
         },
       },
       nestedOuter: {
         type: 'object',
-        target: 'in nestedOuter',
+        [target]: 'in nestedOuter',
         properties: {
           nestedInner: {
             type: 'object',
-            target: 'in nestedInner',
+            [target]: 'in nestedInner',
             properties: {
               deeplyNestedProperty: {
-                target: 'in deeplyNestedProperty',
+                [target]: 'in deeplyNestedProperty',
                 type: 'boolean',
               },
             },
@@ -60,17 +62,17 @@ tape('schemaPath', function(t) {
         allOf: [{ pattern: 'z$' }, { pattern: '^a' }, { pattern: '-' }, { pattern: '^...$' }],
       },
       negate: {
-        target: 'in negate',
+        [target]: 'in negate',
         not: {
           type: 'boolean',
         },
       },
       selection: {
-        target: 'in selection',
+        [target]: 'in selection',
         anyOf: [{ pattern: '^[a-z]{3}$' }, { pattern: '^[0-9]$' }],
       },
       exclusiveSelection: {
-        target: 'There can be only one',
+        [target]: 'There can be only one',
         oneOf: [
           { pattern: 'a' },
           { pattern: 'e' },
@@ -95,11 +97,11 @@ tape('schemaPath', function(t) {
     t.deepEqual(validate.errors[0].schemaPath, path, message)
   }
 
-  function notOkWithTarget(data, target, message) {
+  function notOkWithTarget(data, targetValue, message) {
     if (validate(data)) {
       return t.fail(`should have failed: ${message}`)
     }
-    t.deepEqual(lookup(schema, validate.errors[0]).target, target, message)
+    t.deepEqual(lookup(schema, validate.errors[0])[target], targetValue, message)
   }
 
   // Top level errors
