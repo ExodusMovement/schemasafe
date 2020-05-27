@@ -464,7 +464,7 @@ const compile = function(schema, cache, root, reporter, opts) {
       consume('$ref')
     }
 
-    if (node.not) {
+    if (node.not || node.not === false) {
       const prev = gensym('prev')
       fun.write('var %s = errors', prev)
       visit(name, node.not, false, filter, schemaPath.concat('not'))
