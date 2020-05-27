@@ -7,9 +7,9 @@ const validate = validator({
   properties: {
     hello: {
       required: true,
-      type: 'string'
-    }
-  }
+      type: 'string',
+    },
+  },
 })
 
 console.log('should be valid', validate({ hello: 'world' }))

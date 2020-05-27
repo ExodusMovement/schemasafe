@@ -88,7 +88,9 @@ const isMultipleOf = function(value, multipleOf) {
   if (multipleOf === 0) return false
   const digitsAfterDot = (number) => {
     if ((number | 0) === number) return 0
-    return String(number).split('.').pop().length
+    return String(number)
+      .split('.')
+      .pop().length
   }
   const digits = digitsAfterDot(multipleOf)
   if (digits === 0) return value % multipleOf === 0
@@ -150,7 +152,7 @@ const compile = function(schema, cache, root, reporter, opts) {
 
     if (Array.isArray(node.items)) {
       // tuple type
-      properties = {...node.items}
+      properties = { ...node.items }
       type = 'array'
       tuple = true
     }
@@ -631,6 +633,5 @@ module.exports.filter = function(schema, opts) {
 
 function validateScope(source, scope) {
   for (const key of Object.keys(scope))
-    if (!source.includes(key))
-      throw new Error('Unexpected unused scope variable!')
+    if (!source.includes(key)) throw new Error('Unexpected unused scope variable!')
 }

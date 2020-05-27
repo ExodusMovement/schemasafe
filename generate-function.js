@@ -49,6 +49,6 @@ module.exports = function() {
       const keys = Object.keys(scope)
       const vals = keys.map((key) => scope[key])
       return Function.apply(null, keys.concat(src)).apply(null, vals)
-    }
+    },
   }
 }
