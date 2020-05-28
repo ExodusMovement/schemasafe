@@ -362,15 +362,15 @@ const compile = function(schema, root, reporter, opts, scope) {
     const makeCompare = (name, complex) => {
       if (complex) {
         scope.deepEqual = deepEqual
-        return (e) => `!deepEqual(${name}, ${JSON.stringify(e)})`
+        return (e) => `deepEqual(${name}, ${JSON.stringify(e)})`
       }
-      return (e) => `${name} !== ${JSON.stringify(e)}`
+      return (e) => `(${name} === ${JSON.stringify(e)})`
     }
 
     if (node.const !== undefined) {
       const complex = typeof node.const === 'object'
       const compare = makeCompare(name, complex)
-      fun.write('if (%s) {', compare(node.const))
+      fun.write('if (!%s) {', compare(node.const))
       error('must be const value')
       fun.write('}')
       consume('const')
@@ -378,7 +378,7 @@ const compile = function(schema, root, reporter, opts, scope) {
       if (!Array.isArray(node.enum)) throw new Error('Invalid enum')
       const complex = node.enum.some((e) => typeof e === 'object')
       const compare = makeCompare(name, complex)
-      fun.write('if (%s) {', node.enum.map(compare).join(' && '))
+      fun.write('if (!(%s)) {', node.enum.map(compare).join(' || '))
       error('must be an enum value')
       fun.write('}')
       consume('enum')
