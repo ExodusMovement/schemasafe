@@ -30,4 +30,6 @@ module.exports = [
   'uniqueItems',
   '$ref',
   'default',
+  'definitions', // up to draft7
+  '$defs', // since draft2019-09
 ]

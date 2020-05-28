@@ -212,6 +212,13 @@ const compile = function(schema, root, reporter, opts, scope) {
     }
     if (type) consume('type') // checked below after overwrites
 
+    // defining defs are allowed, those are validated on usage
+    if (typeof node.$defs === 'object') {
+      consume('$defs')
+    } else if (typeof node.definitions === 'object') {
+      consume('definitions')
+    }
+
     const validateTypeApplicable = (...types) => {
       if (!type) return // no type enforced
       if (typeof type === 'string') {
