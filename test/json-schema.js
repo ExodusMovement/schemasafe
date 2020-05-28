@@ -13,8 +13,6 @@ const unsupported = new Set([
   // Blocks
   'format.json/validation of IP addresses',
   'format.json/validation of IPv6 addresses',
-  // Specific tests
-  'items.json/an array of schemas for items/JavaScript pseudo-array is valid',
 ])
 
 const schemaDir = path.join(__dirname, '/json-schema/draft4')
