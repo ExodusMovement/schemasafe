@@ -23,6 +23,7 @@ module.exports = [
   'maxProperties',
   'minProperties',
   'multipleOf',
+  'divisibleBy',
   'pattern',
   'patternProperties',
   'dependencies',

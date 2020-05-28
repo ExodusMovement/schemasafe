@@ -19,6 +19,7 @@ exports['hostname'] = function(input) {
 
   return true
 }
+exports['host-name'] = exports['hostname'] // draft3 backwards compat
 exports['alpha'] = /^[a-zA-Z]+$/
 exports['alphanumeric'] = /^[a-zA-Z0-9]+$/
 exports['style'] = /\s*(.+?):\s*([^;]+);?/g
