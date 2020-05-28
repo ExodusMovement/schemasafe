@@ -107,13 +107,19 @@ const isMultipleOf = function(value, multipleOf) {
 // https://mathiasbynens.be/notes/javascript-unicode#accounting-for-astral-symbols
 const stringLength = (string) => [...string].length
 
-const compile = function(schema, cache, root, reporter, opts) {
+const scopeSyms = Symbol('syms')
+const scopeRefCache = Symbol('refcache')
+
+const compile = function(schema, root, reporter, opts, scope) {
   const fmts = opts ? Object.assign({}, formats, opts.formats) : formats
-  const scope = Object.create(null)
   const verbose = opts ? !!opts.verbose : false
   const greedy = opts && opts.greedy !== undefined ? opts.greedy : false
 
-  const syms = new Map()
+  if (!scope) scope = Object.create(null)
+  if (!scope[scopeRefCache]) scope[scopeRefCache] = new Map()
+  const refCache = scope[scopeRefCache]
+  if (!scope[scopeSyms]) scope[scopeSyms] = new Map()
+  const syms = scope[scopeSyms]
   const gensym = (name) => {
     if (!syms.get(name)) syms.set(name, 0)
     const index = syms.get(name)
@@ -141,7 +147,7 @@ const compile = function(schema, cache, root, reporter, opts) {
   fun.write('function validate(data) {')
   // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
   fun.write('if (data === undefined) data = null')
-  fun.write('validate.errors = null')
+  if (reporter === true) fun.write('validate.errors = null')
   fun.write('var errors = 0')
 
   const visit = function(name, node, reporter, filter, schemaPath) {
@@ -448,15 +454,12 @@ const compile = function(schema, cache, root, reporter, opts) {
     if (node.$ref) {
       const sub = get(root, (opts && opts.schemas) || {}, node.$ref)
       if (sub) {
-        let fn = cache[node.$ref]
-        if (!fn) {
-          cache[node.$ref] = function proxy(data) {
-            return fn(data)
-          }
-          fn = compile(sub, cache, root, false, opts)
+        let n = refCache.get(node.$ref)
+        if (!n) {
+          n = gensym('ref')
+          refCache.set(node.$ref, n)
+          scope[n] = compile(sub, root, false, opts, scope)
         }
-        const n = gensym('ref')
-        scope[n] = fn
         fun.write('if (!(%s(%s))) {', n, name)
         error('referenced schema does not match')
         fun.write('}')
@@ -730,8 +733,6 @@ const compile = function(schema, cache, root, reporter, opts) {
   fun.write('return errors === 0')
   fun.write('}')
 
-  validateScope(fun.makeRawSource(), scope)
-
   const validate = fun.makeFunction(scope)
   validate.toModule = () => fun.makeModule(scope)
   validate.toJSON = () => schema
@@ -740,7 +741,7 @@ const compile = function(schema, cache, root, reporter, opts) {
 
 module.exports = function(schema, opts) {
   if (typeof schema === 'string') schema = JSON.parse(schema)
-  return compile(schema, {}, schema, true, opts)
+  return compile(schema, schema, true, opts)
 }
 
 module.exports.filter = function(schema, opts) {
@@ -749,9 +750,4 @@ module.exports.filter = function(schema, opts) {
     validate(sch)
     return sch
   }
-}
-
-function validateScope(source, scope) {
-  for (const key of Object.keys(scope))
-    if (!source.includes(key)) throw new Error('Unexpected unused scope variable!')
 }
