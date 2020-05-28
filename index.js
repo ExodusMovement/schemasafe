@@ -114,6 +114,7 @@ const compile = function(schema, root, reporter, opts, scope) {
   const fmts = opts ? Object.assign({}, formats, opts.formats) : formats
   const verbose = opts ? !!opts.verbose : false
   const greedy = opts && opts.greedy !== undefined ? opts.greedy : false
+  if (opts && opts.filter) throw new Error('Filtering is not supported')
 
   if (!scope) scope = Object.create(null)
   if (!scope[scopeRefCache]) scope[scopeRefCache] = new Map()
@@ -150,7 +151,7 @@ const compile = function(schema, root, reporter, opts, scope) {
   if (reporter === true) fun.write('validate.errors = null')
   fun.write('var errors = 0')
 
-  const visit = function(name, node, reporter, filter, schemaPath) {
+  const visit = function(name, node, reporter, schemaPath) {
     const error = function(msg, prop, value) {
       fun.write('errors++')
       if (reporter === true) {
@@ -290,13 +291,7 @@ const compile = function(schema, root, reporter, opts, scope) {
       } else if (node.additionalItems) {
         const i = genloop()
         fun.write('for (var %s = %d; %s < %s.length; %s++) {', i, node.items.length, i, name, i)
-        visit(
-          `${name}[${i}]`,
-          node.additionalItems,
-          reporter,
-          filter,
-          schemaPath.concat('additionalItems')
-        )
+        visit(`${name}[${i}]`, node.additionalItems, reporter, schemaPath.concat('additionalItems'))
         fun.write('}')
         consume('additionalItems')
       }
@@ -318,7 +313,7 @@ const compile = function(schema, root, reporter, opts, scope) {
         error(`must be ${node.format} format`)
         fun.write('}')
       } else if (typeof format === 'object') {
-        visit(name, format, reporter, filter, schemaPath.concat('format'))
+        visit(name, format, reporter, schemaPath.concat('format'))
       }
 
       if (type !== 'string' && formats[node.format]) fun.write('}')
@@ -402,7 +397,7 @@ const compile = function(schema, root, reporter, opts, scope) {
           fun.write('}')
         } else if (typeof deps === 'object') {
           fun.write('if (%s !== undefined) {', genobj(name, key))
-          visit(name, deps, reporter, filter, schemaPath.concat(['dependencies', key]))
+          visit(name, deps, reporter, schemaPath.concat(['dependencies', key]))
           fun.write('}')
         } else {
           throw new Error('Unexpected dependencies entry')
@@ -439,14 +434,12 @@ const compile = function(schema, root, reporter, opts, scope) {
       fun.write('if (%s) {', additionalProp)
 
       if (node.additionalProperties === false) {
-        if (filter) fun.write('delete %s', `${name}[${keys}[${i}]]`)
         error('has additional properties', null, `${JSON.stringify(`${name}.`)} + ${keys}[${i}]`)
       } else {
         visit(
           `${name}[${keys}[${i}]]`,
           node.additionalProperties,
           reporter,
-          filter,
           schemaPath.concat(['additionalProperties'])
         )
       }
@@ -477,7 +470,7 @@ const compile = function(schema, root, reporter, opts, scope) {
     if (node.not || node.not === false) {
       const prev = gensym('prev')
       fun.write('var %s = errors', prev)
-      visit(name, node.not, false, filter, schemaPath.concat('not'))
+      visit(name, node.not, false, schemaPath.concat('not'))
       fun.write('if (%s === errors) {', prev)
       error('negative schema matches')
       fun.write('} else {')
@@ -492,7 +485,7 @@ const compile = function(schema, root, reporter, opts, scope) {
 
       const i = genloop()
       fun.write('for (var %s = 0; %s < %s.length; %s++) {', i, i, name, i)
-      visit(`${name}[${i}]`, node.items, reporter, filter, schemaPath.concat('items'))
+      visit(`${name}[${i}]`, node.items, reporter, schemaPath.concat('items'))
       fun.write('}')
 
       if (type !== 'array') fun.write('}')
@@ -514,7 +507,6 @@ const compile = function(schema, root, reporter, opts, scope) {
           `${name}[${keys}[${i}]]`,
           node.patternProperties[key],
           reporter,
-          filter,
           schemaPath.concat(['patternProperties', key])
         )
         fun.write('}')
@@ -539,7 +531,7 @@ const compile = function(schema, root, reporter, opts, scope) {
     if (node.allOf) {
       if (!Array.isArray(node.allOf)) throw new Error('Invalid allOf')
       node.allOf.forEach(function(sch, key) {
-        visit(name, sch, reporter, filter, schemaPath.concat(['allOf', key]))
+        visit(name, sch, reporter, schemaPath.concat(['allOf', key]))
       })
       consume('allOf')
     }
@@ -555,7 +547,7 @@ const compile = function(schema, root, reporter, opts, scope) {
           fun.write('if (errors !== %s) {', prev)
           fun.write('errors = %s', prev)
         }
-        visit(name, sch, false, false, schemaPath)
+        visit(name, sch, false, schemaPath)
       })
       node.anyOf.forEach(function(sch, i) {
         if (i) fun.write('}')
@@ -575,7 +567,7 @@ const compile = function(schema, root, reporter, opts, scope) {
       fun.write('var %s = 0', passes)
 
       node.oneOf.forEach(function(sch, i) {
-        visit(name, sch, false, false, schemaPath)
+        visit(name, sch, false, schemaPath)
         fun.write('if (%s === errors) {', prev)
         fun.write('%s++', passes)
         fun.write('} else {')
@@ -724,7 +716,6 @@ const compile = function(schema, root, reporter, opts, scope) {
           genobj(name, p),
           properties[p],
           reporter,
-          filter,
           schemaPath.concat(tuple ? p : ['properties', p])
         )
 
@@ -738,7 +729,7 @@ const compile = function(schema, root, reporter, opts, scope) {
       throw new Error(`Unsupported keywords: ${[...unprocessed].join(', ')}`)
   }
 
-  visit('data', schema, reporter, opts && opts.filter, [])
+  visit('data', schema, reporter, [])
 
   fun.write('return errors === 0')
   fun.write('}')
@@ -752,12 +743,4 @@ const compile = function(schema, root, reporter, opts, scope) {
 module.exports = function(schema, opts) {
   if (typeof schema === 'string') schema = JSON.parse(schema)
   return compile(schema, schema, true, opts)
-}
-
-module.exports.filter = function(schema, opts) {
-  const validate = module.exports(schema, Object.assign({}, opts, { filter: true }))
-  return function(sch) {
-    validate(sch)
-    return sch
-  }
 }

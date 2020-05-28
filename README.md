@@ -85,24 +85,6 @@ validate('hello') // returns true
 validate(42) // return false
 ```
 
-## Filtering away additional properties
-
-is-my-json-valid supports filtering away properties not in the schema
-
-```js
-var filter = validator.filter({
-  required: true,
-  type: 'object',
-  properties: {
-    hello: {type: 'string', required: true}
-  },
-  additionalProperties: false
-})
-
-var doc = {hello: 'world', notInSchema: true}
-console.log(filter(doc)) // {hello: 'world'}
-```
-
 ## Verbose mode shows more information about the source of the error
 
 When the `verbose` options is set to `true`, `is-my-json-valid` also outputs:
