@@ -677,32 +677,34 @@ const compile = function(schema, root, reporter, opts, scope) {
       consume('minLength')
     }
 
-    if (node.minimum !== undefined) {
-      if (!Number.isFinite(node.minimum)) throw new Error('Invalid minimum')
+    const applyMinMax = (value, operator, message) => {
+      if (!Number.isFinite(value)) throw new Error('Invalid minimum or maximum')
       validateTypeApplicable('number', 'integer')
       if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
-      fun.write('if (%s %s %d) {', name, node.exclusiveMinimum ? '<=' : '<', node.minimum)
-      error('is less than minimum')
+      fun.write('if (%s %s %d) {', name, operator, value)
+      error(message)
       fun.write('}')
 
       if (type !== 'number' && type !== 'integer') fun.write('}')
-      consume('minimum')
-      consume('exclusiveMinimum', false)
     }
 
-    if (node.maximum !== undefined) {
-      if (!Number.isFinite(node.maximum)) throw new Error('Invalid maximum')
-      validateTypeApplicable('number', 'integer')
-      if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
+    if (Number.isFinite(node.exclusiveMinimum)) {
+      applyMinMax(node.exclusiveMinimum, '<=', 'is less than exclusiveMinimum')
+      consume('exclusiveMinimum')
+    } else if (node.minimum !== undefined) {
+      applyMinMax(node.minimum, node.exclusiveMinimum ? '<=' : '<', 'is less than minimum')
+      consume('minimum')
+      if (typeof node.exclusiveMinimum === 'boolean') consume('exclusiveMinimum')
+    }
 
-      fun.write('if (%s %s %d) {', name, node.exclusiveMaximum ? '>=' : '>', node.maximum)
-      error('is more than maximum')
-      fun.write('}')
-
-      if (type !== 'number' && type !== 'integer') fun.write('}')
+    if (Number.isFinite(node.exclusiveMaximum)) {
+      applyMinMax(node.exclusiveMaximum, '>=', 'is more than exclusiveMaximum')
+      consume('exclusiveMaximum')
+    } else if (node.maximum !== undefined) {
+      applyMinMax(node.maximum, node.exclusiveMaximum ? '>=' : '>', 'is more than maximum')
       consume('maximum')
-      consume('exclusiveMaximum', false)
+      if (typeof node.exclusiveMaximum === 'boolean') consume('exclusiveMaximum')
     }
 
     if (properties) {
