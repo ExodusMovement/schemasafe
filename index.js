@@ -103,6 +103,29 @@ const isMultipleOf = function(value, multipleOf) {
   return Math.round(factor * value) % Math.round(factor * multipleOf) === 0
 }
 
+// supports only JSON-stringifyable objects, defaults to false for unsupported
+// also uses ===, not Object.is, i.e. 0 === -0, NaN !== NaN
+// symbols and non-enumerable properties are ignored!
+const deepEqual = (obj, obj2) => {
+  if (obj === obj2) return true
+  if (!obj || !obj2 || typeof obj !== typeof obj2) return false
+
+  const proto = Object.getPrototypeOf(obj)
+  if (proto !== Object.getPrototypeOf(obj2)) return false
+
+  if (proto === Array.prototype) {
+    if (!Array.isArray(obj) || !Array.isArray(obj2)) return false
+    if (obj.length !== obj2.length) return false
+    return obj.every((x, i) => deepEqual(x, obj2[i]))
+  } else if (proto === Object.prototype) {
+    const [keys, keys2] = [Object.keys(obj), Object.keys(obj2)]
+    if (keys.length !== keys2.length) return false
+    const keyset2 = new Set(keys2)
+    return keys.every((key) => keyset2.has(key) && deepEqual(obj[key], obj2[key]))
+  }
+  return false
+}
+
 // for correct Unicode code points processing
 // https://mathiasbynens.be/notes/javascript-unicode#accounting-for-astral-symbols
 const stringLength = (string) => [...string].length
@@ -336,22 +359,26 @@ const compile = function(schema, root, reporter, opts, scope) {
       consume('uniqueItems')
     }
 
-    if (node.enum) {
+    const makeCompare = (name, complex) => {
+      if (complex) {
+        scope.deepEqual = deepEqual
+        return (e) => `!deepEqual(${name}, ${JSON.stringify(e)})`
+      }
+      return (e) => `${name} !== ${JSON.stringify(e)}`
+    }
+
+    if (node.const !== undefined) {
+      const complex = typeof node.const === 'object'
+      const compare = makeCompare(name, complex)
+      fun.write('if (%s) {', compare(node.const))
+      error('must be const value')
+      fun.write('}')
+      consume('const')
+    } else if (node.enum) {
       if (!Array.isArray(node.enum)) throw new Error('Invalid enum')
-
-      const complex = node.enum.some(function(e) {
-        return typeof e === 'object'
-      })
-
-      const compare = complex
-        ? function(e) {
-            return `JSON.stringify(${name})` + ` !== JSON.stringify(${JSON.stringify(e)})`
-          }
-        : function(e) {
-            return `${name} !== ${JSON.stringify(e)}`
-          }
-
-      fun.write('if (%s) {', node.enum.map(compare).join(' && ') || 'false')
+      const complex = node.enum.some((e) => typeof e === 'object')
+      const compare = makeCompare(name, complex)
+      fun.write('if (%s) {', node.enum.map(compare).join(' && '))
       error('must be an enum value')
       fun.write('}')
       consume('enum')
