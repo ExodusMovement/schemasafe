@@ -181,16 +181,6 @@ console.log(validate.toModule())
 
 `@exodus/schemasafe` uses code generation to turn your JSON schema into basic javascript code that is easily optimizeable by v8.
 
-At the time of writing, schemasafe is the **fastest validator** when running
-
-- [json-schema-benchmark](https://github.com/Muscula/json-schema-benchmark)
-- [cosmicreals.com benchmark](http://cosmicrealms.com/blog/2014/08/29/benchmark-of-node-dot-js-json-validation-modules-part-3/)
-- [jsck benchmark](https://github.com/pandastrike/jsck/issues/72#issuecomment-70992684)
-- [themis benchmark](https://cdn.rawgit.com/playlyfe/themis/master/benchmark/results.html)
-- [z-schema benchmark](https://rawgit.com/zaggino/z-schema/master/benchmark/results.html)
-
-If you know any other relevant benchmarks open a PR and I'll add them.
-
 ## License
 
 MIT
