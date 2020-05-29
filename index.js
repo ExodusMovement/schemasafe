@@ -10,23 +10,23 @@ const genobj = (name, property) => {
   return `${name}[${JSON.stringify(property)}]`
 }
 
-const get = function(obj, additionalSchemas, ptr) {
+const resolveReference = (root, additionalSchemas, ptr) => {
   const visit = function(sub) {
-    if (sub && sub.id === ptr) return sub
+    if (sub && (sub.id || sub.$id) === ptr) return sub
     if (typeof sub !== 'object' || !sub) return null
     return Object.keys(sub).reduce(function(res, k) {
       return res || visit(sub[k])
     }, null)
   }
 
-  const res = visit(obj)
+  const res = visit(root)
   if (res) return res
 
   ptr = ptr.replace(/^#/, '')
   ptr = ptr.replace(/\/$/, '')
 
   try {
-    return jsonpointer.get(obj, decodeURI(ptr))
+    return jsonpointer.get(root, decodeURI(ptr))
   } catch (err) {
     const end = ptr.indexOf('#')
     let other
@@ -226,11 +226,18 @@ const compile = function(schema, root, reporter, opts, scope) {
       unprocessed.delete(property)
     }
 
+    if (typeof node.description === 'string') consume('description') // unused, meta-only
     // defining defs are allowed, those are validated on usage
     if (typeof node.$defs === 'object') {
       consume('$defs')
     } else if (typeof node.definitions === 'object') {
       consume('definitions')
+    }
+    // same for id
+    if (typeof node.$id === 'string') {
+      consume('$id')
+    } else if (typeof node.id === 'string') {
+      consume('id')
     }
 
     let indent = 0
@@ -461,7 +468,7 @@ const compile = function(schema, root, reporter, opts, scope) {
     }
 
     if (node.$ref) {
-      const sub = get(root, (opts && opts.schemas) || {}, node.$ref)
+      const sub = resolveReference(root, (opts && opts.schemas) || {}, node.$ref)
       if (sub) {
         let n = refCache.get(node.$ref)
         if (!n) {
@@ -472,6 +479,8 @@ const compile = function(schema, root, reporter, opts, scope) {
         fun.write('if (!(%s(%s))) {', n, name)
         error('referenced schema does not match')
         fun.write('}')
+      } else {
+        throw new Error(`ref not found: ${node.$ref}`)
       }
       consume('$ref')
     }

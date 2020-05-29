@@ -1,6 +1,7 @@
 module.exports = [
   'items',
-  'id',
+  'id', // up to draft4
+  '$id', // since draft6
   'type',
   'not',
   'properties',
