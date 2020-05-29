@@ -6,40 +6,84 @@ const validator = require('../')
 const unsupported = new Set([
   // Directories
   'optional',
-  // Files
-  'definitions.json',
+
+  // Whole files, meaning unsupported keywords / features
+  //  draft4
+  'definitions.json', // FIXME: fails open!
   'refRemote.json',
-  'ref.json',
-  // Blocks
+  'ref.json', // FIXME: fails open!
+  //  draft6
+  'contains.json',
+  'propertyNames.json',
+  //  draft 7
+  'if-then-else.json',
+  //  draft2019-09
+  'minContains.json',
+  'maxContains.json',
+  'anchor.json',
+  'dependentSchemas.json',
+  'dependentRequired.json',
+  'unevaluatedProperties.json',
+  'unevaluatedItems.json',
+  'defs.json', // FIXME: fails open!
+  //  draft3 only
+  'draft3/extends.json',
+  'draft3/disallow.json',
+
+  // Unsupported formats
+  //  draft4
   'format.json/validation of IP addresses',
   'format.json/validation of IPv6 addresses',
+  //  draft6 and later
+  'format.json/validation of JSON pointers',
+  'format.json/validation of relative JSON pointers',
+  'format.json/validation of URI references',
+  'format.json/validation of URI templates',
+  'format.json/validation of IRIs',
+  'format.json/validation of IRI references',
+  'format.json/validation of IDN hostnames',
+  'format.json/validation of IDN e-mail addresses',
+  'format.json/validation of regexes',
+  //  draft3 only
+  'draft3/format.json/validation of regular expressions',
+
+  // Blocks and individual tests
+  //  draft6 and later
+  'items.json/items with boolean schema (false)',
+  'dependencies.json/dependencies with boolean subschemas',
+  //  draft3 only
+  'draft3/additionalProperties.json/additionalProperties should not look in applicators',
+  'draft3/type.json/types can include schemas',
+  'draft3/type.json/when types includes a schema it should fully validate the schema',
+  'draft3/type.json/types from separate schemas are merged',
 ])
 
-const schemaDir = path.join(__dirname, '/json-schema/draft4')
+const schemaDir = path.join(__dirname, 'json-schema')
 
-function processTestDir(subdir = '') {
-  const dir = path.join(schemaDir, subdir)
+function processTestDir(main, subdir = '') {
+  const dir = path.join(schemaDir, main, subdir)
+  const shouldIngore = (id) => unsupported.has(id) || unsupported.has(`${main}/${id}`)
   for (const file of fs.readdirSync(dir)) {
     const sub = path.join(subdir, file) // relative to schemaDir
-    if (unsupported.has(sub)) continue
+    if (shouldIngore(sub)) continue
     if (file.endsWith('.json')) {
-      const content = fs.readFileSync(path.join(schemaDir, sub))
-      processTest(sub, JSON.parse(content))
+      const content = fs.readFileSync(path.join(schemaDir, main, sub))
+      processTest(main, sub, JSON.parse(content), shouldIngore)
     } else {
       // assume it's a dir and let it fail otherwise
-      processTestDir(sub)
+      processTestDir(main, sub)
     }
   }
 }
 
-function processTest(id, file) {
+function processTest(main, id, file, shouldIngore) {
   for (const block of file) {
-    if (unsupported.has(`${id}/${block.description}`)) continue
-    tape(`json-schema-test-suite ${id}/${block.description}`, (t) => {
+    if (shouldIngore(`${id}/${block.description}`)) continue
+    tape(`json-schema-test-suite ${main}/${id}/${block.description}`, (t) => {
       try {
         const validate = validator(block.schema)
         for (const test of block.tests) {
-          if (unsupported.has(`${id}/${block.description}/${test.description}`)) continue
+          if (shouldIngore(`${id}/${block.description}/${test.description}`)) continue
           t.same(validate(test.data), test.valid, test.description)
         }
       } catch (e) {
@@ -51,4 +95,8 @@ function processTest(id, file) {
   }
 }
 
-processTestDir()
+processTestDir('draft4')
+processTestDir('draft6')
+processTestDir('draft7')
+processTestDir('draft3')
+processTestDir('draft2019-09')
