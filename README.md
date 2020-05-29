@@ -1,4 +1,4 @@
-# is-my-json-valid
+# `@exodus/schemasafe`
 
 A [JSONSchema](https://json-schema.org/) validator that uses code generation to be extremely fast.
 
@@ -9,7 +9,7 @@ It passes the entire JSONSchema v4 test suite except for `remoteRefs` and `maxLe
 ## Installation
 
 ```sh
-npm install --save is-my-json-valid
+npm install --save @exodus/schemasafe
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ npm install --save is-my-json-valid
 Simply pass a schema to compile it
 
 ```js
-var validator = require('is-my-json-valid')
+var validator = require('@exodus/schemasafe')
 
 var validate = validator({
   required: true,
@@ -46,7 +46,7 @@ var validate = validator('{"type": ... }')
 
 ## Custom formats
 
-is-my-json-valid supports the formats specified in JSON schema v4 (such as date-time).
+`@exodus/schemasafe` supports the formats specified in JSON schema v4 (such as date-time).
 If you want to add your own custom formats pass them as the formats options to the validator
 
 ```js
@@ -87,7 +87,7 @@ validate(42) // return false
 
 ## Verbose mode shows more information about the source of the error
 
-When the `verbose` options is set to `true`, `is-my-json-valid` also outputs:
+When the `verbose` options is set to `true`, `@exodus/schemasafe` also outputs:
 
 - `value`: The data value that caused the error
 - `schemaPath`: an array of keys indicating which sub-schema failed
@@ -142,7 +142,7 @@ const schema = {
   format: 'hex'
 }
 
-const validator = require('../is-my-json-valid')
+const validator = require('@exodus/schemasafe')
 
 // This works with custom formats as well.
 const formats = {
@@ -206,9 +206,9 @@ Here is a list of possible `message` values for errors:
 
 ## Performance
 
-is-my-json-valid uses code generation to turn your JSON schema into basic javascript code that is easily optimizeable by v8.
+`@exodus/schemasafe` uses code generation to turn your JSON schema into basic javascript code that is easily optimizeable by v8.
 
-At the time of writing, is-my-json-valid is the **fastest validator** when running
+At the time of writing, schemasafe is the **fastest validator** when running
 
 - [json-schema-benchmark](https://github.com/Muscula/json-schema-benchmark)
 - [cosmicreals.com benchmark](http://cosmicrealms.com/blog/2014/08/29/benchmark-of-node-dot-js-json-validation-modules-part-3/)
