@@ -12,7 +12,8 @@
   "scripts": {
     "lint": "prettier --list-different '**/*.js'&& eslint .",
     "format": "prettier --write '**/*.js'",
-    "test": "npm run test:normal && npm run test:module",
+    "test": "npm run test:raw | tap-spec",
+    "test:raw": "npm run test:normal && npm run test:module",
     "test:module": "tape -r ./test-module.js test/*.js",
     "test:normal": "tape test/*.js"
   },
@@ -30,6 +31,7 @@
     "eslint-plugin-standard": "^4.0.0",
     "prettier": "~1.14.3",
     "safe-regex": "^1.1.0",
+    "tap-spec": "^5.0.0",
     "tape": "^4.7.0"
   },
   "keywords": [
