@@ -77,4 +77,21 @@ const extra = {
     /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input),
 }
 
-module.exports = { core, optional, extra }
+// HACK potentially unsafe formats from AJV
+const weak = {
+  'uri-reference': (input) => input.length < 2100 &&
+    /^(?:(?:[a-z][a-z0-9+-.]*:)?\/?\/)?(?:[^\\\s#][^\s#]*)?(?:#[^\\\s]*)?$/i.test(input),
+  regex: (str) => {
+    const Z_ANCHOR = /[^\\]\\Z/;
+    if (Z_ANCHOR.test(str)) return false;
+    try {
+      new RegExp(str);
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+}
+
+
+module.exports = { core, weak, optional, extra }

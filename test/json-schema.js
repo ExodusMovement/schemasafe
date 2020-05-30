@@ -24,14 +24,12 @@ const unsafe = new Set([
 
 const unsupported = new Set([
   // Whole files, meaning unsupported keywords / features
-  //  draft4
-  'definitions.json',
   //  draft2019-09
-  'anchor.json',
-  'dependentSchemas.json',
-  'unevaluatedProperties.json',
-  'unevaluatedItems.json',
-  'defs.json',
+  'draft2019-09/anchor.json',
+  'draft2019-09/dependentSchemas.json',
+  'draft2019-09/unevaluatedProperties.json',
+  'draft2019-09/unevaluatedItems.json',
+  'draft2019-09/defs.json',
   'draft2019-09/refRemote.json', // earlier versions are fine
   'draft2019-09/id.json', // earlier versions are fine
   //  draft3 only
@@ -42,35 +40,27 @@ const unsupported = new Set([
   //  draft6 and later
   'format.json/validation of JSON pointers',
   'format.json/validation of relative JSON pointers',
-  'format.json/validation of URI references',
   'format.json/validation of URI templates',
   'format.json/validation of IRIs',
   'format.json/validation of IRI references',
   'format.json/validation of IDN hostnames',
   'format.json/validation of IDN e-mail addresses',
-  'format.json/validation of regexes', // deliberately unsupported
-  //  draft3 only
-  'draft3/format.json/validation of regular expressions', // deliberately unsupported
 
   // Blocks and individual tests
-  //  draft4
-  'ref.json/remote ref, containing refs itself',
   //  draft2019-09
-  'ref.json/ref creates new scope when adjacent to keywords',
+  'draft2019-09/ref.json/ref creates new scope when adjacent to keywords',
+  'draft2019-09/ref.json/remote ref, containing refs itself',
   //  draft3 only
+  'draft3/ref.json/remote ref, containing refs itself',
   'draft3/type.json/types can include schemas',
   'draft3/type.json/when types includes a schema it should fully validate the schema',
   'draft3/type.json/types from separate schemas are merged',
+  'draft3/format.json/validation of regular expressions', // broken assumption in test
 
   // Optional
   'optional/zeroTerminatedFloats.json',
-  'optional/format/regex.json', // deliberately unsupported
-  'optional/ecmascript-regex.json', // deliberately unsupported
-  'optional/format.json/validation of regular expressions', // deliberately unsupported
   'optional/format.json/validation of JSON-pointers (JSON String Representation)',
-  'optional/format.json/validation of URI References',
   'optional/format.json/format: uri-template',
-  'optional/format/uri-reference.json',
   'optional/format/uri-template.json',
   'optional/format/iri-reference.json',
   'optional/format/iri.json',
@@ -81,10 +71,12 @@ const unsupported = new Set([
   //  draft7
   'optional/content.json',
   //  draft2019-09
-  'optional/refOfUnknownKeyword.json',
-  'optional/format/duration.json',
+  'draft2019-09/optional/refOfUnknownKeyword.json',
+  'draft2019-09/optional/format/duration.json',
   //  draft3 only
   'draft3/optional/format/color.json',
+  'draft3/optional/ecmascript-regex.json',
+  'draft3/optional/format.json/validation of CSS colors',
 ])
 
 const schemaDir = path.join(__dirname, 'JSON-Schema-Test-Suite/tests')

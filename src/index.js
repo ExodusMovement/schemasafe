@@ -60,6 +60,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     requireValidation = opts.mode === 'strong',
     $schemaDefault = null,
     formats: optFormats = {},
+    weakFormats = opts.mode !== 'strong',
     optionalFormats = true,
     extraFormats = false,
     schemas = {},
@@ -69,6 +70,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     {},
     formats.core,
     optionalFormats ? formats.optional : {},
+    weakFormats ? formats.weak : {},
     extraFormats ? formats.extra : {},
     optFormats
   )
@@ -78,6 +80,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (!['strong', 'lax', 'default'].includes(mode)) throw new Error(`Invalid mode: ${mode}`)
   if (mode === 'strong' && (!requireValidation || allowUnusedKeywords))
     throw new Error('Strong mode demands requireValidation and no allowUnusedKeywords')
+  if (mode === 'strong' && weakFormats) throw new Error('Strong mode forbids weakFormats')
 
   if (!scope) scope = Object.create(null)
   if (!scope[scopeRefCache]) scope[scopeRefCache] = new Map()
