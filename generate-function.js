@@ -48,7 +48,8 @@ module.exports = function() {
       const src = `return (${this.makeRawSource()})`
       const keys = Object.keys(scope)
       const vals = keys.map((key) => scope[key])
-      return Function.apply(null, keys.concat(src)).apply(null, vals)
+      // eslint-disable-next-line no-new-func
+      return Function(...keys, src)(...vals)
     },
   }
 }
