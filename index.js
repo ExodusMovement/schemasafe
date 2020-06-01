@@ -1,6 +1,6 @@
 const jaystring = require('jaystring')
 const genfun = require('./generate-function')
-const jsonpointer = require('jsonpointer')
+const { resolveReference } = require('./pointer')
 const formats = require('./formats')
 const KNOWN_KEYWORDS = require('./known-keywords')
 
@@ -8,48 +8,6 @@ const KNOWN_KEYWORDS = require('./known-keywords')
 const genobj = (name, property) => {
   if (!['string', 'number'].includes(typeof property)) throw new Error('Invalid property path')
   return `${name}[${JSON.stringify(property)}]`
-}
-
-const resolveReference = (root, additionalSchemas, ptr) => {
-  const visit = function(sub) {
-    if (sub && (sub.id || sub.$id) === ptr) return sub
-    if (typeof sub !== 'object' || !sub) return null
-    return Object.keys(sub).reduce(function(res, k) {
-      return res || visit(sub[k])
-    }, null)
-  }
-
-  const res = visit(root)
-  if (res) return res
-
-  ptr = ptr.replace(/^#/, '')
-  ptr = ptr.replace(/\/$/, '')
-
-  try {
-    return jsonpointer.get(root, decodeURI(ptr))
-  } catch (err) {
-    const end = ptr.indexOf('#')
-    let other
-    // external reference
-    if (end !== 0) {
-      // fragment doesn't exist.
-      if (end === -1) {
-        other = additionalSchemas[ptr]
-      } else {
-        const ext = ptr.slice(0, end)
-        other = additionalSchemas[ext]
-        const fragment = ptr.slice(end).replace(/^#/, '')
-        try {
-          return jsonpointer.get(other, fragment)
-        } catch (err) {
-          // do nothing
-        }
-      }
-    } else {
-      other = additionalSchemas[ptr]
-    }
-    return other || null
-  }
 }
 
 const formatName = function(field) {
@@ -469,7 +427,7 @@ const compile = function(schema, root, reporter, opts, scope) {
 
     if (node.$ref) {
       const sub = resolveReference(root, (opts && opts.schemas) || {}, node.$ref)
-      if (sub) {
+      if (sub || sub === false) {
         let n = refCache.get(node.$ref)
         if (!n) {
           n = gensym('ref')

@@ -9,9 +9,9 @@ const unsupported = new Set([
 
   // Whole files, meaning unsupported keywords / features
   //  draft4
-  'definitions.json', // FIXME: fails open!
+  'definitions.json',
   'refRemote.json',
-  'ref.json', // FIXME: fails open!
+  'ref.json',
   //  draft6
   'contains.json',
   'propertyNames.json',
@@ -25,7 +25,7 @@ const unsupported = new Set([
   'dependentRequired.json',
   'unevaluatedProperties.json',
   'unevaluatedItems.json',
-  'defs.json', // FIXME: fails open!
+  'defs.json',
   //  draft3 only
   'draft3/extends.json',
   'draft3/disallow.json',
