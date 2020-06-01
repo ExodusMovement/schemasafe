@@ -432,7 +432,10 @@ const compile = function(schema, root, reporter, opts, scope) {
         if (!n) {
           n = gensym('ref')
           refCache.set(node.$ref, n)
-          scope[n] = compile(sub, root, false, opts, scope)
+          let fn = null // resolve cyclic dependencies
+          scope[n] = (...args) => fn(...args)
+          fn = compile(sub, root, false, opts, scope)
+          scope[n] = fn
         }
         fun.write('if (!(%s(%s))) {', n, name)
         error('referenced schema does not match')
