@@ -74,7 +74,22 @@ const unsupported = new Set([
   'draft3/optional/format.json/validation of CSS colors',
 ])
 
-const schemaDir = path.join(__dirname, 'json-schema')
+const schemaDir = path.join(__dirname, 'JSON-Schema-Test-Suite/tests')
+
+const schemas = {
+  // standard
+  'https://json-schema.org/draft/2019-09/schema': require('./schemas/json-schema-draft-2019-09.json'),
+  'http://json-schema.org/draft-07/schema': require('./schemas/json-schema-draft-07.json'),
+  'http://json-schema.org/draft-06/schema': require('./schemas/json-schema-draft-06.json'),
+  'http://json-schema.org/draft-04/schema': require('./schemas/json-schema-draft-04.json'),
+  'http://json-schema.org/draft-03/schema': require('./schemas/json-schema-draft-03.json'),
+  // remote
+  'http://localhost:1234/integer.json': require('./JSON-Schema-Test-Suite/remotes/integer.json'),
+  'http://localhost:1234/subSchemas.json': require('./JSON-Schema-Test-Suite/remotes/subSchemas.json'),
+  'http://localhost:1234/folder/folderInteger.json': require('./JSON-Schema-Test-Suite/remotes/folder/folderInteger.json'),
+  'http://localhost:1234/name.json': require('./JSON-Schema-Test-Suite/remotes/name.json'),
+  'http://localhost:1234/name-defs.json': require('./JSON-Schema-Test-Suite/remotes/name-defs.json'),
+}
 
 function processTestDir(main, subdir = '') {
   const dir = path.join(schemaDir, main, subdir)
@@ -97,7 +112,7 @@ function processTest(main, id, file, shouldIngore) {
     if (shouldIngore(`${id}/${block.description}`)) continue
     tape(`json-schema-test-suite ${main}/${id}/${block.description}`, (t) => {
       try {
-        const validate = validator(block.schema)
+        const validate = validator(block.schema, { schemas })
         for (const test of block.tests) {
           if (shouldIngore(`${id}/${block.description}/${test.description}`)) continue
           t.same(validate(test.data), test.valid, test.description)
