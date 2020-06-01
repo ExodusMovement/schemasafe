@@ -124,7 +124,7 @@ const compile = function(schema, root, reporter, opts, scope) {
   const patterns = function(p) {
     if (reversePatterns[p]) return reversePatterns[p]
     const n = gensym('pattern')
-    scope[n] = new RegExp(p)
+    scope[n] = new RegExp(p, 'u')
     reversePatterns[p] = n
     return n
   }

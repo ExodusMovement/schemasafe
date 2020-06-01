@@ -49,7 +49,6 @@ const unsupported = new Set([
 
   // Optional
   'optional/zeroTerminatedFloats.json',
-  'optional/non-bmp-regex.json',
   'optional/format/regex.json', // deliberately unsupported
   'optional/ecmascript-regex.json', // deliberately unsupported
   'optional/format.json/validation of regular expressions', // deliberately unsupported
