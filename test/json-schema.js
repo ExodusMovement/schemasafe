@@ -4,9 +4,6 @@ const path = require('path')
 const validator = require('../')
 
 const unsupported = new Set([
-  // Directories
-  'optional',
-
   // Whole files, meaning unsupported keywords / features
   //  draft4
   'definitions.json',
@@ -15,7 +12,7 @@ const unsupported = new Set([
   //  draft6
   'contains.json',
   'propertyNames.json',
-  //  draft 7
+  //  draft7
   'if-then-else.json',
   //  draft2019-09
   'minContains.json',
@@ -31,9 +28,6 @@ const unsupported = new Set([
   'draft3/disallow.json',
 
   // Unsupported formats
-  //  draft4
-  'format.json/validation of IP addresses',
-  'format.json/validation of IPv6 addresses',
   //  draft6 and later
   'format.json/validation of JSON pointers',
   'format.json/validation of relative JSON pointers',
@@ -43,9 +37,9 @@ const unsupported = new Set([
   'format.json/validation of IRI references',
   'format.json/validation of IDN hostnames',
   'format.json/validation of IDN e-mail addresses',
-  'format.json/validation of regexes',
+  'format.json/validation of regexes', // deliberately unsupported
   //  draft3 only
-  'draft3/format.json/validation of regular expressions',
+  'draft3/format.json/validation of regular expressions', // deliberately unsupported
 
   // Blocks and individual tests
   //  draft6 and later
@@ -56,6 +50,32 @@ const unsupported = new Set([
   'draft3/type.json/types can include schemas',
   'draft3/type.json/when types includes a schema it should fully validate the schema',
   'draft3/type.json/types from separate schemas are merged',
+
+  // Optional
+  'optional/zeroTerminatedFloats.json',
+  'optional/non-bmp-regex.json',
+  'optional/format/regex.json', // deliberately unsupported
+  'optional/ecmascript-regex.json', // deliberately unsupported
+  'optional/format.json/validation of regular expressions', // deliberately unsupported
+  'optional/format/ecmascript-regex.json', // deliberately unsupported
+  'optional/format.json/validation of JSON-pointers (JSON String Representation)',
+  'optional/format.json/validation of URI References',
+  'optional/format.json/format: uri-template',
+  'optional/format/uri-reference.json',
+  'optional/format/uri-template.json',
+  'optional/format/iri-reference.json',
+  'optional/format/iri.json',
+  'optional/format/idn-email.json',
+  'optional/format/idn-hostname.json',
+  'optional/format/json-pointer.json',
+  'optional/format/relative-json-pointer.json',
+  //  draft7
+  'optional/content.json',
+  //  draft2019-09
+  'optional/refOfUnknownKeyword.json',
+  'optional/format/duration.json',
+  //  draft3 only
+  'draft3/optional/format.json/validation of CSS colors',
 ])
 
 const schemaDir = path.join(__dirname, 'json-schema')
