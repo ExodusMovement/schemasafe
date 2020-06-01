@@ -90,6 +90,7 @@ const stringLength = (string) => [...string].length
 
 const scopeSyms = Symbol('syms')
 const scopeRefCache = Symbol('refcache')
+const scopeFormatCache = Symbol('formatcache')
 
 const compile = function(schema, root, reporter, opts, scope) {
   const fmts = opts ? Object.assign({}, formats, opts.formats) : formats
@@ -100,6 +101,8 @@ const compile = function(schema, root, reporter, opts, scope) {
   if (!scope) scope = Object.create(null)
   if (!scope[scopeRefCache]) scope[scopeRefCache] = new Map()
   const refCache = scope[scopeRefCache]
+  if (!scope[scopeFormatCache]) scope[scopeFormatCache] = new Map()
+  const formatCache = scope[scopeFormatCache]
   if (!scope[scopeSyms]) scope[scopeSyms] = new Map()
   const syms = scope[scopeSyms]
   const gensym = (name) => {
@@ -276,9 +279,13 @@ const compile = function(schema, root, reporter, opts, scope) {
       if (type !== 'string' && formats[node.format]) fun.write('if (%s) {', types.string(name))
       const format = fmts[node.format]
       if (format instanceof RegExp || typeof format === 'function') {
+        let n = formatCache.get(format)
+        if (!n) {
+          n = gensym('format')
+          scope[n] = format
+          formatCache.set(format, n)
+        }
         const condition = format instanceof RegExp ? '!%s.test(%s)' : '!%s(%s)'
-        const n = gensym('format')
-        scope[n] = format
         fun.write(`if (${condition}) {`, n, name)
         error(`must be ${node.format} format`)
         fun.write('}')
