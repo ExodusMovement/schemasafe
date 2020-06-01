@@ -245,7 +245,7 @@ const compile = function(schema, root, reporter, opts, scope) {
     const validateTypeApplicable = (...types) => {
       if (!type || typeArray.includes('any')) return // no type enforced
       if (!typeArray.some((x) => types.includes(x)))
-        throw new Error(`Unexpected field in types: ${type.join(', ')}`)
+        throw new Error(`Unexpected field in types: ${typeArray.join(', ')}`)
     }
 
     if (!Array.isArray(node.items)) {
