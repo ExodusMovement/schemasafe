@@ -11,7 +11,6 @@ const unsupported = new Set([
   'ref.json',
   //  draft6
   'contains.json',
-  'propertyNames.json',
   //  draft7
   'if-then-else.json',
   //  draft2019-09

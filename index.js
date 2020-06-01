@@ -427,6 +427,21 @@ const compile = function(schema, root, reporter, opts, scope) {
       consume('additionalProperties')
     }
 
+    if (typeof node.propertyNames === 'object' || typeof node.propertyNames === 'boolean') {
+      validateTypeApplicable('object')
+      if (type !== 'object') fun.write('if (%s) {', types.object(name))
+      const key = gensym('key')
+      fun.write('for (const %s of Object.keys(%s)) {', key, name)
+      const nameSchema =
+        typeof node.propertyNames === 'object'
+          ? { type: 'string', ...node.propertyNames }
+          : node.propertyNames
+      visit(key, nameSchema, reporter, schemaPath.concat(['propertyNames']))
+      fun.write('}')
+      if (type !== 'object') fun.write('}')
+      consume('propertyNames')
+    }
+
     if (node.$ref) {
       const sub = resolveReference(root, (opts && opts.schemas) || {}, node.$ref)
       if (sub || sub === false) {

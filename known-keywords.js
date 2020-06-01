@@ -27,6 +27,7 @@ module.exports = [
   'divisibleBy',
   'pattern',
   'patternProperties',
+  'propertyNames',
   'dependencies',
   'enum',
   'const',
