@@ -7,6 +7,8 @@ const validator = require('../')
 const unsafe = new Set([
   'additionalItems.json/items is schema, no additionalItems',
   'additionalItems.json/additionalItems as false without items',
+  'maxContains.json/maxContains without contains is ignored',
+  'minContains.json/minContains without contains is ignored',
   'ref.json/escaped pointer ref',
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
 ])
@@ -16,13 +18,9 @@ const unsupported = new Set([
   //  draft4
   'definitions.json',
   'refRemote.json',
-  //  draft6
-  'contains.json',
   //  draft7
   'if-then-else.json',
   //  draft2019-09
-  'minContains.json',
-  'maxContains.json',
   'anchor.json',
   'dependentSchemas.json',
   'dependentRequired.json',

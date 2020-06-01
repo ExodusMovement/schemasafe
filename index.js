@@ -613,14 +613,14 @@ const compile = function(schema, root, reporter, opts, scope) {
       fun.write('var %s = errors', prev)
       fun.write('var %s = 0', passes)
 
-      node.oneOf.forEach(function(sch, i) {
+      for (const sch of node.oneOf) {
         visit(name, sch, false, schemaPath)
         fun.write('if (%s === errors) {', prev)
         fun.write('%s++', passes)
         fun.write('} else {')
         fun.write('errors = %s', prev)
         fun.write('}')
-      })
+      }
 
       fun.write('if (%s !== 1) {', passes)
       error('no (or more than one) schemas match')
@@ -779,6 +779,47 @@ const compile = function(schema, root, reporter, opts, scope) {
       consume('items')
     } else if (typeApplicable('array')) {
       if (strong) throw new Error('[strong mode] items rule must be specified')
+    }
+
+    if (node.contains || node.contains === false) {
+      validateTypeApplicable('array')
+      if (type !== 'array') fun.write('if (%s) {', types.array(name))
+
+      const prev = gensym('prev')
+      const passes = gensym('passes')
+      fun.write('let %s = 0', passes)
+
+      const i = genloop()
+      fun.write('for (let %s = 0; %s < %s.length; %s++) {', i, i, name, i)
+      fun.write('const %s = errors', prev)
+      visit(`${name}[${i}]`, node.contains, reporter, schemaPath.concat('contains'))
+      fun.write('if (%s === errors) {', prev)
+      fun.write('%s++', passes)
+      fun.write('} else {')
+      fun.write('errors = %s', prev)
+      fun.write('}')
+      fun.write('}')
+
+      if (Number.isFinite(node.minContains)) {
+        fun.write('if (%s < %d) {', passes, node.minContains)
+        error('array contains too few matching items')
+        fun.write('}')
+        consume('minContains')
+      } else {
+        fun.write('if (%s < 1) {', passes)
+        error('array does not contain a match')
+        fun.write('}')
+      }
+
+      if (Number.isFinite(node.maxContains)) {
+        fun.write('if (%s > %d) {', passes, node.maxContains)
+        error('array contains too many matching items')
+        fun.write('}')
+        consume('maxContains')
+      }
+
+      if (type !== 'array') fun.write('}')
+      consume('contains')
     }
 
     if (typeof node.properties === 'object') {
