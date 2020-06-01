@@ -204,10 +204,12 @@ const compile = function(schema, root, reporter, opts, scope) {
     let indent = 0
 
     if (node.default !== undefined) {
-      indent++
-      fun.write('if (%s === undefined) {', name)
-      fun.write('%s = %s', name, jaystring(node.default))
-      fun.write('} else {')
+      if (opts.applyDefault) {
+        indent++
+        fun.write('if (%s === undefined) {', name)
+        fun.write('%s = %s', name, jaystring(node.default))
+        fun.write('} else {')
+      }
       consume('default')
     }
 
@@ -745,7 +747,7 @@ const compile = function(schema, root, reporter, opts, scope) {
   return validate
 }
 
-module.exports = function(schema, opts) {
+module.exports = function(schema, opts = {}) {
   if (typeof schema === 'string') schema = JSON.parse(schema)
   return compile(schema, schema, true, opts)
 }
