@@ -92,6 +92,14 @@ const scopeSyms = Symbol('syms')
 const scopeRefCache = Symbol('refcache')
 const scopeFormatCache = Symbol('formatcache')
 
+const schemaVersions = [
+  'http://json-schema.org/draft/2019-09/schema#',
+  'http://json-schema.org/draft-07/schema#',
+  'http://json-schema.org/draft-06/schema#',
+  'http://json-schema.org/draft-04/schema#',
+  'http://json-schema.org/draft-03/schema#',
+]
+
 const compile = function(schema, root, reporter, opts, scope) {
   const fmts = opts ? Object.assign({}, formats, opts.formats) : formats
   const verbose = opts ? !!opts.verbose : false
@@ -172,12 +180,9 @@ const compile = function(schema, root, reporter, opts, scope) {
       return
     }
 
-    if (node.constructor.toString() === Object.toString()) {
-      for (const keyword of Object.keys(node)) {
-        if (!KNOWN_KEYWORDS.includes(keyword)) {
-          throw new Error(`Keyword not supported: ${keyword}`)
-        }
-      }
+    if (Object.getPrototypeOf(node) !== Object.prototype) throw new Error('Schema is not an object')
+    for (const keyword of Object.keys(node)) {
+      if (!KNOWN_KEYWORDS.includes(keyword)) throw new Error(`Keyword not supported: ${keyword}`)
     }
 
     const unprocessed = new Set(Object.keys(node))
@@ -187,7 +192,16 @@ const compile = function(schema, root, reporter, opts, scope) {
       unprocessed.delete(property)
     }
 
+    if (node === root && typeof node.$schema === 'string') {
+      if (!schemaVersions.includes(node.$schema)) throw new Error('Unexpected schema version')
+      consume('$schema') // meta-only
+    }
+
     if (typeof node.description === 'string') consume('description') // unused, meta-only
+    if (typeof node.title === 'string') consume('title') // unused, meta-only
+    if (typeof node.$comment === 'string') consume('$comment') // unused, meta-only
+    if (Array.isArray(node.examples)) consume('examples') // unused, meta-only
+
     // defining defs are allowed, those are validated on usage
     if (typeof node.$defs === 'object') {
       consume('$defs')

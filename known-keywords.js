@@ -1,4 +1,5 @@
 module.exports = [
+  '$schema',
   'items',
   'id', // up to draft4
   '$id', // since draft6
@@ -7,7 +8,6 @@ module.exports = [
   'properties',
   'additionalItems',
   'additionalProperties',
-  'description',
   'format',
   'required',
   'allOf',
@@ -36,4 +36,11 @@ module.exports = [
   'default',
   'definitions', // up to draft7
   '$defs', // since draft2019-09
+
+  // Unused meta keywords not affecting validation (annotations and comments)
+  // https://json-schema.org/understanding-json-schema/reference/generic.html
+  'description',
+  'title',
+  'examples',
+  '$comment',
 ]
