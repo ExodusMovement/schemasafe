@@ -101,10 +101,15 @@ const schemaVersions = [
 ]
 
 const compile = function(schema, root, reporter, opts, scope) {
-  const fmts = opts ? Object.assign({}, formats, opts.formats) : formats
-  const verbose = opts ? !!opts.verbose : false
-  const greedy = opts && opts.greedy !== undefined ? opts.greedy : false
-  if (opts && opts.filter) throw new Error('Filtering is not supported')
+  const fmts = Object.assign({}, formats, opts.formats)
+  const verbose = !!opts.verbose
+  const greedy = !!opts.greedy
+  if (opts.filter) throw new Error('Filtering is not supported')
+
+  if (opts.mode && !['strong', 'lax', 'default'].includes(opts.mode))
+    throw new Error(`Invalid mode: ${opts.mode}`)
+  const strong = opts.mode === 'strong'
+  const lax = opts.mode === 'lax'
 
   if (!scope) scope = Object.create(null)
   if (!scope[scopeRefCache]) scope[scopeRefCache] = new Map()
@@ -170,7 +175,7 @@ const compile = function(schema, root, reporter, opts, scope) {
     if (typeof node === 'boolean') {
       if (node === true) {
         // any is valid
-        // TODO: don't allow in strong mode
+        if (strong) throw new Error('[strong mode] schema = true is not allowed')
       } else {
         // node === false
         fun.write('if (%s !== undefined) {', name)
@@ -181,9 +186,9 @@ const compile = function(schema, root, reporter, opts, scope) {
     }
 
     if (Object.getPrototypeOf(node) !== Object.prototype) throw new Error('Schema is not an object')
-    for (const keyword of Object.keys(node)) {
-      if (!KNOWN_KEYWORDS.includes(keyword)) throw new Error(`Keyword not supported: ${keyword}`)
-    }
+    for (const keyword of Object.keys(node))
+      if (!KNOWN_KEYWORDS.includes(keyword) && !lax)
+        throw new Error(`Keyword not supported: ${keyword}`)
 
     const unprocessed = new Set(Object.keys(node))
     const consume = (property, required = true) => {
@@ -240,16 +245,16 @@ const compile = function(schema, root, reporter, opts, scope) {
     }
 
     const { type } = node
-    if (type !== undefined && typeof type !== 'string' && !Array.isArray(type)) {
-      // TODO: optionally enforce type being present?
+    if (strong && !type) throw new Error('[strong mode] type is required')
+    if (type !== undefined && typeof type !== 'string' && !Array.isArray(type))
       throw new Error('Unexpected type')
-    }
 
     const typeArray = type ? (Array.isArray(type) ? type : [type]) : []
     for (const t of typeArray) {
       if (typeof t !== 'string' || !types.hasOwnProperty(t)) {
         throw new Error(`Unknown type: ${t}`)
       }
+      if (strong && t === 'any') throw new Error('[strong mode] type = any is not allowed')
     }
 
     const typeValidate = typeArray.map((t) => types[t](name)).join(' || ') || 'true'
@@ -261,16 +266,17 @@ const compile = function(schema, root, reporter, opts, scope) {
     }
     if (type) consume('type')
 
+    const typeApplicable = (...types) =>
+      !type || typeArray.includes('any') || typeArray.some((x) => types.includes(x))
     const validateTypeApplicable = (...types) => {
-      if (!type || typeArray.includes('any')) return // no type enforced
-      if (!typeArray.some((x) => types.includes(x)))
+      if (!typeApplicable(...types))
         throw new Error(`Unexpected field in types: ${typeArray.join(', ')}`)
     }
 
     if (!Array.isArray(node.items)) {
-      // WARNING, it's allowed, but ignored per spec tests in this case!
-      // TODO: do not allow in strong mode
-      consume('additionalItems', false)
+      // additionalItems is allowed, but ignored per some spec tests in this case!
+      // We do nothing and let it throw except for in lax mode
+      // As a result, this is not allowed by default, only in lax mode
     } else if (node.additionalItems === false) {
       validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
@@ -288,6 +294,10 @@ const compile = function(schema, root, reporter, opts, scope) {
       fun.write('}')
       if (type !== 'array') fun.write('}')
       consume('additionalItems')
+    } else if (node.items.length === node.maxItems) {
+      // No additional items are possible
+    } else if (strong) {
+      throw new Error('[strong mode] additionalItems rule must be specified for fixed arrays')
     }
 
     if (node.format && fmts.hasOwnProperty(node.format)) {
@@ -444,6 +454,8 @@ const compile = function(schema, root, reporter, opts, scope) {
 
       if (type !== 'object') fun.write('}')
       consume('additionalProperties')
+    } else if (typeApplicable('object')) {
+      if (strong) throw new Error('[strong mode] additionalProperties rule must be specified')
     }
 
     if (typeof node.propertyNames === 'object' || typeof node.propertyNames === 'boolean') {
@@ -459,6 +471,10 @@ const compile = function(schema, root, reporter, opts, scope) {
       fun.write('}')
       if (type !== 'object') fun.write('}')
       consume('propertyNames')
+    }
+    if (strong) {
+      if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object')
+        throw new Error('[strong mode] wild-card additionalProperties requires propertyNames')
     }
 
     if (node.$ref) {
@@ -627,6 +643,8 @@ const compile = function(schema, root, reporter, opts, scope) {
 
     if (node.maxItems !== undefined) {
       if (!Number.isFinite(node.maxItems)) throw new Error('Invalid maxItems')
+      if (Array.isArray(node.items) && node.items.length > node.maxItems)
+        throw new Error('Invalid maxItems: mismatch with items array length')
       validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
 
@@ -640,6 +658,7 @@ const compile = function(schema, root, reporter, opts, scope) {
 
     if (node.minItems !== undefined) {
       if (!Number.isFinite(node.minItems)) throw new Error('Invalid maxItems')
+      // can be higher that .items length with additionalItems
       validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
 
@@ -729,6 +748,8 @@ const compile = function(schema, root, reporter, opts, scope) {
 
       if (type !== 'array') fun.write('}')
       consume('items')
+    } else if (typeApplicable('array')) {
+      if (strong) throw new Error('[strong mode] items rule must be specified')
     }
 
     if (typeof node.properties === 'object') {
@@ -746,8 +767,8 @@ const compile = function(schema, root, reporter, opts, scope) {
 
     while (indent--) fun.write('}')
 
-    if (unprocessed.size !== 0)
-      throw new Error(`Unsupported keywords: ${[...unprocessed].join(', ')}`)
+    if (!lax && unprocessed.size !== 0)
+      throw new Error(`Unprocessed keywords: ${[...unprocessed].join(', ')}`)
   }
 
   visit('data', schema, reporter, [])

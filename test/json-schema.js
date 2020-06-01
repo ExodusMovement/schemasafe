@@ -3,6 +3,13 @@ const fs = require('fs')
 const path = require('path')
 const validator = require('../')
 
+// these tests require lax mode
+const unsafe = new Set([
+  'additionalItems.json/items is schema, no additionalItems',
+  'additionalItems.json/additionalItems as false without items',
+  'ref.json/escaped pointer ref',
+])
+
 const unsupported = new Set([
   // Whole files, meaning unsupported keywords / features
   //  draft4
@@ -100,12 +107,13 @@ const schemas = {
 function processTestDir(main, subdir = '') {
   const dir = path.join(schemaDir, main, subdir)
   const shouldIngore = (id) => unsupported.has(id) || unsupported.has(`${main}/${id}`)
+  const requiresLax = (id) => unsafe.has(id) || unsafe.has(`${main}/${id}`)
   for (const file of fs.readdirSync(dir)) {
     const sub = path.join(subdir, file) // relative to schemaDir
     if (shouldIngore(sub)) continue
     if (file.endsWith('.json')) {
       const content = fs.readFileSync(path.join(schemaDir, main, sub))
-      processTest(main, sub, JSON.parse(content), shouldIngore)
+      processTest(main, sub, JSON.parse(content), shouldIngore, requiresLax)
     } else {
       // assume it's a dir and let it fail otherwise
       processTestDir(main, sub)
@@ -113,12 +121,13 @@ function processTestDir(main, subdir = '') {
   }
 }
 
-function processTest(main, id, file, shouldIngore) {
+function processTest(main, id, file, shouldIngore, requiresLax) {
   for (const block of file) {
     if (shouldIngore(`${id}/${block.description}`)) continue
     tape(`json-schema-test-suite ${main}/${id}/${block.description}`, (t) => {
       try {
-        const validate = validator(block.schema, { schemas })
+        const mode = requiresLax(`${id}/${block.description}`) ? 'lax' : 'default'
+        const validate = validator(block.schema, { schemas, mode })
         for (const test of block.tests) {
           if (shouldIngore(`${id}/${block.description}/${test.description}`)) continue
           t.same(validate(test.data), test.valid, test.description)
