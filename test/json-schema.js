@@ -8,7 +8,6 @@ const unsupported = new Set([
   //  draft4
   'definitions.json',
   'refRemote.json',
-  'ref.json',
   //  draft6
   'contains.json',
   //  draft7
@@ -41,6 +40,14 @@ const unsupported = new Set([
   'draft3/format.json/validation of regular expressions', // deliberately unsupported
 
   // Blocks and individual tests
+  //  draft4
+  'ref.json/escaped pointer ref',
+  'ref.json/remote ref, containing refs itself',
+  'ref.json/ref overrides any sibling keywords',
+  'ref.json/Recursive references between schemas',
+  'ref.json/Location-independent identifier with base URI change in subschema',
+  //  draft2019-09
+  'ref.json/ref creates new scope when adjacent to keywords',
   //  draft3 only
   'draft3/additionalProperties.json/additionalProperties should not look in applicators',
   'draft3/type.json/types can include schemas',

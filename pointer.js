@@ -40,35 +40,35 @@ function resolveReference(root, additionalSchemas, ptr) {
   }
 
   const res = visit(root)
-  if (res) return res
+  if (res) return [res, root]
 
   ptr = ptr.replace(/^#/, '')
   ptr = ptr.replace(/\/$/, '')
 
   try {
-    return get(root, decodeURI(ptr))
+    return [get(root, decodeURI(ptr)), root]
   } catch (err) {
     // do nothing
   }
 
   const end = ptr.indexOf('#')
   // external reference
-  if (end === 0) {
-    return additionalSchemas[ptr]
-  } else if (end === -1) {
-    return additionalSchemas[ptr]
+  if (end === 0 || end === -1) {
+    const additional = additionalSchemas[ptr]
+    return [additional, additional]
   } else {
     const ext = ptr.slice(0, end)
     const fragment = ptr.slice(end).replace(/^#/, '')
     try {
-      return get(additionalSchemas[ext], fragment)
+      const additional = additionalSchemas[ext]
+      return [get(additional, fragment), additional]
     } catch (err) {
       // do nothing
     }
   }
 
   // null or undefined values will throw an error on usage
-  return null
+  return [null, null]
 }
 
 module.exports = { get, resolveReference }
