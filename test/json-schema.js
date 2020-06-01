@@ -8,6 +8,7 @@ const unsafe = new Set([
   'additionalItems.json/items is schema, no additionalItems',
   'additionalItems.json/additionalItems as false without items',
   'ref.json/escaped pointer ref',
+  'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
 ])
 
 const unsupported = new Set([
@@ -50,7 +51,6 @@ const unsupported = new Set([
   //  draft4
   'ref.json/escaped pointer ref',
   'ref.json/remote ref, containing refs itself',
-  'ref.json/ref overrides any sibling keywords',
   'ref.json/Recursive references between schemas',
   'ref.json/Location-independent identifier with base URI change in subschema',
   //  draft2019-09
@@ -121,13 +121,24 @@ function processTestDir(main, subdir = '') {
   }
 }
 
+const schemaVersions = new Map(
+  Object.entries({
+    'draft2019-09': 'http://json-schema.org/draft/2019-09/schema#',
+    draft7: 'http://json-schema.org/draft-07/schema#',
+    draft6: 'http://json-schema.org/draft-06/schema#',
+    draft4: 'http://json-schema.org/draft-04/schema#',
+    draft3: 'http://json-schema.org/draft-03/schema#',
+  })
+)
+
 function processTest(main, id, file, shouldIngore, requiresLax) {
   for (const block of file) {
     if (shouldIngore(`${id}/${block.description}`)) continue
     tape(`json-schema-test-suite ${main}/${id}/${block.description}`, (t) => {
       try {
         const mode = requiresLax(`${id}/${block.description}`) ? 'lax' : 'default'
-        const validate = validator(block.schema, { schemas, mode })
+        const $schemaDefault = schemaVersions.get(main)
+        const validate = validator(block.schema, { schemas, mode, $schemaDefault })
         for (const test of block.tests) {
           if (shouldIngore(`${id}/${block.description}/${test.description}`)) continue
           t.same(validate(test.data), test.valid, test.description)

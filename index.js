@@ -92,6 +92,7 @@ const scopeSyms = Symbol('syms')
 const scopeRefCache = Symbol('refcache')
 const scopeFormatCache = Symbol('formatcache')
 
+// Order is important, newer at the top!
 const schemaVersions = [
   'http://json-schema.org/draft/2019-09/schema#',
   'http://json-schema.org/draft-07/schema#',
@@ -100,6 +101,7 @@ const schemaVersions = [
   'http://json-schema.org/draft-03/schema#',
 ]
 
+const rootMeta = new WeakMap()
 const compile = function(schema, root, reporter, opts, scope) {
   const fmts = Object.assign({}, formats, opts.formats)
   const verbose = !!opts.verbose
@@ -197,9 +199,30 @@ const compile = function(schema, root, reporter, opts, scope) {
       unprocessed.delete(property)
     }
 
-    if (node === root && typeof node.$schema === 'string') {
-      if (!schemaVersions.includes(node.$schema)) throw new Error('Unexpected schema version')
-      consume('$schema') // meta-only
+    const finish = () => {
+      while (indent--) fun.write('}')
+
+      if (!lax && unprocessed.size !== 0)
+        throw new Error(`Unprocessed keywords: ${[...unprocessed].join(', ')}`)
+    }
+
+    if (node === root) {
+      let version
+      if (typeof node.$schema === 'string') {
+        consume('$schema')
+        version = node.$schema
+      } else if (opts.$schemaDefault) {
+        version = opts.$schemaDefault
+      }
+      if (version) {
+        if (!schemaVersions.includes(version)) throw new Error('Unexpected schema version')
+        rootMeta.set(root, {
+          exclusiveRefs:
+            // older than draft/2019-09
+            schemaVersions.indexOf(version) >
+            schemaVersions.indexOf('http://json-schema.org/draft/2019-09/schema#'),
+        })
+      }
     }
 
     if (typeof node.description === 'string') consume('description') // unused, meta-only
@@ -242,6 +265,33 @@ const compile = function(schema, root, reporter, opts, scope) {
       indent++
       fun.write('if (%s !== undefined) {', name)
       if (node.required === false) consume('required')
+    }
+
+    if (node.$ref) {
+      const [sub, subRoot] = resolveReference(root, (opts && opts.schemas) || {}, node.$ref)
+      if (sub || sub === false) {
+        let n = refCache.get(sub)
+        if (!n) {
+          n = gensym('ref')
+          refCache.set(sub, n)
+          let fn = null // resolve cyclic dependencies
+          scope[n] = (...args) => fn(...args)
+          fn = compile(sub, subRoot, false, opts, scope)
+          scope[n] = fn
+        }
+        fun.write('if (!(%s(%s))) {', n, name)
+        error('referenced schema does not match')
+        fun.write('}')
+      } else {
+        throw new Error(`ref not found: ${node.$ref}`)
+      }
+      consume('$ref')
+
+      if (rootMeta.has(root) && rootMeta.get(root).exclusiveRefs) {
+        // ref overrides any sibling keywords for older schemas
+        finish()
+        return
+      }
     }
 
     const { type } = node
@@ -475,27 +525,6 @@ const compile = function(schema, root, reporter, opts, scope) {
     if (strong) {
       if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object')
         throw new Error('[strong mode] wild-card additionalProperties requires propertyNames')
-    }
-
-    if (node.$ref) {
-      const [sub, subRoot] = resolveReference(root, (opts && opts.schemas) || {}, node.$ref)
-      if (sub || sub === false) {
-        let n = refCache.get(sub)
-        if (!n) {
-          n = gensym('ref')
-          refCache.set(sub, n)
-          let fn = null // resolve cyclic dependencies
-          scope[n] = (...args) => fn(...args)
-          fn = compile(sub, subRoot, false, opts, scope)
-          scope[n] = fn
-        }
-        fun.write('if (!(%s(%s))) {', n, name)
-        error('referenced schema does not match')
-        fun.write('}')
-      } else {
-        throw new Error(`ref not found: ${node.$ref}`)
-      }
-      consume('$ref')
     }
 
     if (node.not || node.not === false) {
@@ -765,10 +794,7 @@ const compile = function(schema, root, reporter, opts, scope) {
       consume('properties')
     }
 
-    while (indent--) fun.write('}')
-
-    if (!lax && unprocessed.size !== 0)
-      throw new Error(`Unprocessed keywords: ${[...unprocessed].join(', ')}`)
+    finish()
   }
 
   visit('data', schema, reporter, [])
