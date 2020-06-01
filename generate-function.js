@@ -1,5 +1,5 @@
 const { format: utilFormat } = require('util')
-const jaystring = require('jaystring')
+const jaystring = require('./jaystring')
 
 const INDENT_START = /[{[]/
 const INDENT_END = /[}\]]/

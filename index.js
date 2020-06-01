@@ -1,4 +1,4 @@
-const jaystring = require('jaystring')
+const jaystring = require('./jaystring')
 const genfun = require('./generate-function')
 const { resolveReference } = require('./pointer')
 const formats = require('./formats')

@@ -757,11 +757,6 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=
 
-jaystring@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/jaystring/-/jaystring-1.0.6.tgz#0481dda66ab99d6ba6d02a6909b83c0a4c4442f5"
-  integrity sha512-Jf/vf1llT5eBwT60UUQbo+JClLTXx20G6A9L9L+gpZQE6rBmDw5wBmhj2qBRsfNAIZ01euaBmyEXlWh/yqxHLg==
-
 js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
