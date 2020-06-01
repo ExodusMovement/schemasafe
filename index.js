@@ -312,7 +312,7 @@ const compile = function(schema, root, reporter, opts, scope) {
       if (type !== 'string' && formats[node.format]) fun.write('}')
       consume('format')
     } else if (node.format) {
-      throw new Error('Unrecognized format used')
+      throw new Error(`Unrecognized format used: ${JSON.stringify(node.format)}`)
     }
 
     if (Array.isArray(node.required)) {
