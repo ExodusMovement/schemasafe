@@ -898,7 +898,33 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
   return validate
 }
 
-module.exports = function(schema, opts = {}) {
+const validator = function(schema, opts = {}) {
   if (typeof schema === 'string') schema = JSON.parse(schema)
   return compile(schema, schema, true, opts)
 }
+
+const parser = function(schema, opts = {}) {
+  // strong mode is default in parser
+  const validate = validator(schema, { mode: 'strong', ...opts })
+  const parse = (src) => {
+    if (typeof src !== 'string') throw new Error('Invalid type!')
+    const data = JSON.parse(src)
+    if (validate(data)) return data
+    const message = validate.errors
+      ? validate.errors.map((err) => `${err.field} ${err.message}`).join('\n')
+      : ''
+    throw new Error(`JSON validation error${message ? `: ${message}` : ''}`)
+  }
+  parse.toModule = () =>
+    [
+      '(function(src) {',
+      `const validate = ${validate.toModule()}`,
+      `const parse = ${parse}\n`,
+      'return parse(src)',
+      '});',
+    ].join('\n')
+  return parse
+}
+
+module.exports = validator
+Object.assign(module.exports, { validator, parser })
