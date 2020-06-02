@@ -11,6 +11,10 @@ const unsafe = new Set([
   'minContains.json/minContains without contains is ignored',
   'ref.json/escaped pointer ref',
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
+  'if-then-else.json/ignore if without then or else',
+  'if-then-else.json/ignore then without if',
+  'if-then-else.json/ignore else without if',
+  'if-then-else.json/non-interference across combined schemas',
 ])
 
 const unsupported = new Set([
@@ -18,8 +22,6 @@ const unsupported = new Set([
   //  draft4
   'definitions.json',
   'refRemote.json',
-  //  draft7
-  'if-then-else.json',
   //  draft2019-09
   'anchor.json',
   'dependentSchemas.json',

@@ -539,6 +539,26 @@ const compile = function(schema, root, reporter, opts, scope) {
       consume('not')
     }
 
+    const thenOrElse = node.then || node.then === false || node.else || node.else === false
+    if ((node.if || node.if === false) && thenOrElse) {
+      const prev = gensym('prev')
+      fun.write('const %s = errors', prev)
+      visit(name, node.if, false, schemaPath.concat('if'))
+      fun.write('if (%s !== errors) {', prev)
+      fun.write('errors = %s', prev)
+      if (node.else || node.else === false) {
+        visit(name, node.else, reporter, schemaPath.concat('else'))
+        consume('else')
+      }
+      if (node.then || node.then === false) {
+        fun.write('} else {')
+        visit(name, node.then, reporter, schemaPath.concat('then'))
+        consume('then')
+      }
+      fun.write('}')
+      consume('if')
+    }
+
     if (node.patternProperties) {
       validateTypeApplicable('object')
       if (type !== 'object') fun.write('if (%s) {', types.object(name))
