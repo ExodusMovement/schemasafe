@@ -4,7 +4,7 @@ const jaystring = require('./jaystring')
 const INDENT_START = /[{[]/
 const INDENT_END = /[}\]]/
 
-module.exports = function() {
+module.exports = () => {
   const lines = []
   let indent = 0
 
