@@ -1,6 +1,6 @@
 const jaystring = require('./jaystring')
 const genfun = require('./generate-function')
-const { resolveReference, joinPath } = require('./pointer')
+const { toPointer, resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
 const KNOWN_KEYWORDS = require('./known-keywords')
 
@@ -8,15 +8,6 @@ const KNOWN_KEYWORDS = require('./known-keywords')
 const genobj = (name, property) => {
   if (!['string', 'number'].includes(typeof property)) throw new Error('Invalid property path')
   return `${name}[${JSON.stringify(property)}]`
-}
-
-const formatName = function(field) {
-  field = JSON.stringify(field)
-  // Commented out code from original vanilla version because it allows a code execution
-  // exploit from a maliciously crafted schema.
-  // var pattern = /\[([^\[\]"]+)\]/
-  // while (pattern.test(field)) field = field.replace(pattern, '."+$1+"')
-  return field
 }
 
 const types = {}
@@ -167,30 +158,33 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
       fun.write('errors++')
       if (reporter === true) {
         fun.write('if (validate.errors === null) validate.errors = []')
+        const errorObject = { field: prop || name, message: msg }
         if (verbose) {
+          const type = node.type || 'any'
+          Object.assign(errorObject, { type, schemaPath: toPointer(schemaPath) })
           fun.write(
-            'validate.errors.push({field:%s,message:%s,value:%s,type:%s,schemaPath:%s})',
-            formatName(prop || name),
-            JSON.stringify(msg),
-            value || name,
-            JSON.stringify(node.type || 'any'),
-            JSON.stringify(schemaPath)
+            'validate.errors.push({ ...%s, value: %s })',
+            JSON.stringify(errorObject),
+            value || name
           )
         } else {
-          fun.write(
-            'validate.errors.push({field:%s,message:%s})',
-            formatName(prop || name),
-            JSON.stringify(msg)
-          )
+          fun.write('validate.errors.push(%s)', JSON.stringify(errorObject))
         }
       }
       if (!allErrors) fun.write('return false')
     }
 
+    const fail = (msg, value) => {
+      const comment = value !== undefined ? ` ${JSON.stringify(value)}` : ''
+      throw new Error(`${msg}${comment} at #${toPointer(schemaPath)}`)
+    }
+    const enforce = (ok, ...args) => ok || fail(...args)
+    const enforceValidation = (msg) => enforce(!requireValidation, `[requireValidation] ${msg}`)
+
     if (typeof node === 'boolean') {
       if (node === true) {
         // any is valid
-        if (requireValidation) throw new Error('[requireValidation] schema = true is not allowed')
+        enforceValidation('schema = true is not allowed')
       } else {
         // node === false
         fun.write('if (%s !== undefined) {', name)
@@ -200,23 +194,19 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
       return
     }
 
-    if (Object.getPrototypeOf(node) !== Object.prototype) throw new Error('Schema is not an object')
-    for (const keyword of Object.keys(node))
-      if (!KNOWN_KEYWORDS.includes(keyword) && !allowUnusedKeywords)
-        throw new Error(`Keyword not supported: ${keyword}`)
+    enforce(Object.getPrototypeOf(node) === Object.prototype, 'Schema is not an object')
+    for (const key of Object.keys(node))
+      enforce(KNOWN_KEYWORDS.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
-    const unprocessed = new Set(Object.keys(node))
-    const consume = (property, required = true) => {
-      if (required && !unprocessed.has(property))
-        throw new Error(`Unexpected double consumption: ${property}`)
-      unprocessed.delete(property)
+    const unused = new Set(Object.keys(node))
+    const consume = (property) => {
+      enforce(unused.has(property), 'Unexpected double consumption:', property)
+      unused.delete(property)
     }
 
     const finish = () => {
       while (indent--) fun.write('}')
-
-      if (!allowUnusedKeywords && unprocessed.size !== 0)
-        throw new Error(`Unprocessed keywords: ${[...unprocessed].join(', ')}`)
+      enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
     }
 
     if (node === root) {
@@ -227,7 +217,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
       }
       if ($schema) {
         const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
-        if (!schemaVersions.includes(version)) throw new Error('Unexpected schema version')
+        enforce(schemaVersions.includes(version), 'Unexpected schema version:', version)
         rootMeta.set(root, {
           exclusiveRefs:
             // older than draft/2019-09
@@ -299,7 +289,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
         error('referenced schema does not match')
         fun.write('}')
       } else {
-        throw new Error(`failed to resolve $ref: ${node.$ref}`)
+        fail('failed to resolve $ref:', node.$ref)
       }
       consume('$ref')
 
@@ -311,17 +301,14 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     const { type } = node
-    if (requireValidation && !type) throw new Error('[requireValidation] type is required')
+    if (!type) enforceValidation('type is required')
     if (type !== undefined && typeof type !== 'string' && !Array.isArray(type))
-      throw new Error('Unexpected type')
+      fail('Unexpected type')
 
     const typeArray = type ? (Array.isArray(type) ? type : [type]) : []
     for (const t of typeArray) {
-      if (typeof t !== 'string' || !types.hasOwnProperty(t)) {
-        throw new Error(`Unknown type: ${t}`)
-      }
-      if (requireValidation && t === 'any')
-        throw new Error('[requireValidation] type = any is not allowed')
+      enforce(typeof t === 'string' && types.hasOwnProperty(t), 'Unknown type:', t)
+      if (t === 'any') enforceValidation('type = any is not allowed')
     }
 
     const typeValidate = typeArray.map((t) => types[t](name)).join(' || ') || 'true'
@@ -335,10 +322,8 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
 
     const typeApplicable = (...types) =>
       !type || typeArray.includes('any') || typeArray.some((x) => types.includes(x))
-    const validateTypeApplicable = (...types) => {
-      if (!typeApplicable(...types))
-        throw new Error(`Unexpected field in types: ${typeArray.join(', ')}`)
-    }
+    const validateTypeApplicable = (...types) =>
+      enforce(typeApplicable(...types), 'Unexpected field in type', type)
 
     if (!Array.isArray(node.items)) {
       // additionalItems is allowed, but ignored per some spec tests in this case!
@@ -369,8 +354,8 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
       consume('additionalItems')
     } else if (node.items.length === node.maxItems) {
       // No additional items are possible
-    } else if (requireValidation) {
-      throw new Error('[requireValidation] additionalItems rule must be specified for fixed arrays')
+    } else {
+      enforceValidation('additionalItems rule must be specified for fixed arrays')
     }
 
     if (node.format && fmts.hasOwnProperty(node.format)) {
@@ -394,8 +379,8 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
 
       if (type !== 'string' && formats[node.format]) fun.write('}')
       consume('format')
-    } else if (node.format) {
-      throw new Error(`Unrecognized format used: ${JSON.stringify(node.format)}`)
+    } else {
+      enforce(!node.format, 'Unrecognized format used:', node.format)
     }
 
     if (Array.isArray(node.required)) {
@@ -444,7 +429,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
       fun.write('}')
       consume('const')
     } else if (node.enum) {
-      if (!Array.isArray(node.enum)) throw new Error('Invalid enum')
+      enforce(Array.isArray(node.enum), 'Invalid enum')
       const complex = node.enum.some((e) => typeof e === 'object')
       const compare = makeCompare(name, complex)
       fun.write('if (!(%s)) {', node.enum.map(compare).join(' || '))
@@ -474,7 +459,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
           visit(allErrors, name, deps, reporter, schemaPath.concat(['dependencies', key]))
           fun.write('}')
         } else {
-          throw new Error('Unexpected dependencies entry')
+          fail('Unexpected dependencies entry')
         }
       }
 
@@ -525,8 +510,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
       if (type !== 'object') fun.write('}')
       consume('additionalProperties')
     } else if (typeApplicable('object')) {
-      if (requireValidation)
-        throw new Error('[requireValidation] additionalProperties rule must be specified')
+      enforceValidation('additionalProperties rule must be specified')
     }
 
     if (typeof node.propertyNames === 'object' || typeof node.propertyNames === 'boolean') {
@@ -543,9 +527,8 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
       if (type !== 'object') fun.write('}')
       consume('propertyNames')
     }
-    if (requireValidation) {
-      if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object')
-        throw new Error('[requireValidation] wild-card additionalProperties requires propertyNames')
+    if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object') {
+      enforceValidation('wild-card additionalProperties requires propertyNames')
     }
 
     if (node.not || node.not === false) {
@@ -618,7 +601,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     if (node.allOf) {
-      if (!Array.isArray(node.allOf)) throw new Error('Invalid allOf')
+      enforce(Array.isArray(node.allOf), 'Invalid allOf')
       node.allOf.forEach(function(sch, key) {
         visit(allErrors, name, sch, reporter, schemaPath.concat(['allOf', key]))
       })
@@ -626,7 +609,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     if (node.anyOf && node.anyOf.length) {
-      if (!Array.isArray(node.anyOf)) throw new Error('Invalid anyOf')
+      enforce(Array.isArray(node.anyOf), 'Invalid anyOf')
       const prev = gensym('prev')
 
       node.anyOf.forEach(function(sch, i) {
@@ -648,7 +631,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     if (node.oneOf && node.oneOf.length) {
-      if (!Array.isArray(node.oneOf)) throw new Error('Invalid oneOf')
+      enforce(Array.isArray(node.oneOf), 'Invalid oneOf')
       const prev = gensym('prev')
       const passes = gensym('passes')
 
@@ -672,7 +655,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
 
     const multipleOf = node.multipleOf === undefined ? 'divisibleBy' : 'multipleOf' // draft3 support
     if (node[multipleOf] !== undefined) {
-      if (!Number.isFinite(node[multipleOf])) throw new Error(`Invalid ${multipleOf}`)
+      enforce(Number.isFinite(node[multipleOf]), `Invalid ${multipleOf}:`, node[multipleOf])
       validateTypeApplicable('number', 'integer')
       if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
@@ -687,7 +670,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     if (node.maxProperties !== undefined) {
-      if (!Number.isFinite(node.maxProperties)) throw new Error('Invalid maxProperties')
+      enforce(Number.isFinite(node.maxProperties), 'Invalid maxProperties:', node.maxProperties)
       validateTypeApplicable('object')
       if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
@@ -700,7 +683,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     if (node.minProperties !== undefined) {
-      if (!Number.isFinite(node.minProperties)) throw new Error('Invalid minProperties')
+      enforce(Number.isFinite(node.minProperties), 'Invalid minProperties:', node.minProperties)
       validateTypeApplicable('object')
       if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
@@ -713,9 +696,9 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     if (node.maxItems !== undefined) {
-      if (!Number.isFinite(node.maxItems)) throw new Error('Invalid maxItems')
+      enforce(Number.isFinite(node.maxItems), 'Invalid maxItems:', node.maxItems)
       if (Array.isArray(node.items) && node.items.length > node.maxItems)
-        throw new Error('Invalid maxItems: mismatch with items array length')
+        fail(`Invalid maxItems: ${node.maxItems} is less than items array length`)
       validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
 
@@ -728,7 +711,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     if (node.minItems !== undefined) {
-      if (!Number.isFinite(node.minItems)) throw new Error('Invalid maxItems')
+      enforce(Number.isFinite(node.minItems), 'Invalid minItems:', node.minItems)
       // can be higher that .items length with additionalItems
       validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
@@ -742,7 +725,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     if (node.maxLength !== undefined) {
-      if (!Number.isFinite(node.maxLength)) throw new Error('Invalid maxItems')
+      enforce(Number.isFinite(node.maxLength), 'Invalid maxLength:', node.maxLength)
       validateTypeApplicable('string')
       if (type !== 'string') fun.write('if (%s) {', types.string(name))
 
@@ -756,7 +739,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     if (node.minLength !== undefined) {
-      if (!Number.isFinite(node.minLength)) throw new Error('Invalid maxItems')
+      enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
       validateTypeApplicable('string')
       if (type !== 'string') fun.write('if (%s) {', types.string(name))
 
@@ -770,7 +753,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     const applyMinMax = (value, operator, message) => {
-      if (!Number.isFinite(value)) throw new Error('Invalid minimum or maximum')
+      enforce(Number.isFinite(value), 'Invalid minimum or maximum:', value)
       validateTypeApplicable('number', 'integer')
       if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
@@ -820,7 +803,7 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
       if (type !== 'array') fun.write('}')
       consume('items')
     } else if (typeApplicable('array')) {
-      if (requireValidation) throw new Error('[requireValidation] items rule must be specified')
+      enforceValidation('items rule must be specified')
     }
 
     if (node.contains || node.contains === false) {
