@@ -88,7 +88,7 @@ tape('schemaPath', function(t) {
     },
     additionalProperties: false,
   }
-  const validate = validator(schema, { verbose: true, greedy: true })
+  const validate = validator(schema, { verbose: true })
 
   function notOkAt(data, path, message) {
     if (validate(data)) {
@@ -226,7 +226,7 @@ tape('schemaPath - nested selectors', function(t) {
       },
     ],
   }
-  const validate = validator(schema, { verbose: true, greedy: true })
+  const validate = validator(schema, { verbose: true })
   t.notOk(validate({ nestedSelectors: 'nope' }), 'should not crash on visit inside *Of')
 
   t.end()

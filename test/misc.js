@@ -35,7 +35,7 @@ tape('advanced', function(t) {
   t.end()
 })
 
-tape('greedy/false', function(t) {
+tape('allErrors/false', function(t) {
   const validate = validator(
     {
       type: 'object',
@@ -46,14 +46,12 @@ tape('greedy/false', function(t) {
       },
       required: ['x', 'y'],
     },
-    { allErrors: true }
+    { allErrors: false }
   )
   t.notOk(validate({}), 'should be invalid')
-  t.strictEqual(validate.errors.length, 2)
+  t.strictEqual(validate.errors.length, 1)
   t.strictEqual(validate.errors[0].field, 'data["x"]')
   t.strictEqual(validate.errors[0].message, 'is required')
-  t.strictEqual(validate.errors[1].field, 'data["y"]')
-  t.strictEqual(validate.errors[1].message, 'is required')
   t.notOk(validate({ x: 'string' }), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
   t.strictEqual(validate.errors[0].field, 'data["y"]')
@@ -65,7 +63,7 @@ tape('greedy/false', function(t) {
   t.end()
 })
 
-tape('greedy/true', function(t) {
+tape('allErrors/true', function(t) {
   const validate = validator(
     {
       type: 'object',
@@ -76,10 +74,7 @@ tape('greedy/true', function(t) {
       },
       required: ['x', 'y'],
     },
-    {
-      greedy: true,
-      allErrors: true,
-    }
+    { allErrors: true }
   )
   t.notOk(validate({}), 'should be invalid')
   t.strictEqual(validate.errors.length, 2)

@@ -132,29 +132,6 @@ console.log( 'All evaluate to the same thing: ', R.equals(
 // All evaluate to the same thing: true
 ```
 
-## Greedy mode tries to validate as much as possible
-
-By default is-my-json-valid bails on first validation error but when greedy is
-set to true it tries to validate as much as possible:
-
-```js
-var validate = validator({
-  type: 'object',
-  properties: {
-    x: {
-      type: 'number'
-    }
-  },
-  required: ['x', 'y']
-}, {
-  greedy: true
-});
-
-validate({x: 'string'});
-console.log(validate.errors) // [{field: 'data.y', message: 'is required'},
-                             //  {field: 'data.x', message: 'is the wrong type'}]
-```
-
 ## Generate Modules
 
 To compile a validator function to an IIFE, call `validate.toModule()`:

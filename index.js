@@ -106,7 +106,6 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
   const {
     mode = 'default',
     verbose = false,
-    greedy = false,
     applyDefault = false,
     allErrors: optAllErrors = false,
     dryRun = false,
@@ -413,10 +412,6 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
       fun.write('var %s = 0', missing)
       node.required.map(checkRequired)
       if (type !== 'object') fun.write('}')
-      if (!greedy) {
-        fun.write('if (%s === 0) {', missing)
-        indent++
-      }
       consume('required')
     }
 
