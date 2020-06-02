@@ -14,7 +14,7 @@
   "scripts": {
     "lint": "prettier --list-different '**/*.js'&& eslint .",
     "format": "prettier --write '**/*.js'",
-    "test": "npm run test:raw | tap-spec",
+    "test": "npm run test:normal | tap-spec && npm run test:module | tap-spec",
     "test:raw": "npm run test:normal && npm run test:module",
     "test:module": "tape -r ./test-module.js test/*.js",
     "test:normal": "tape test/*.js"
