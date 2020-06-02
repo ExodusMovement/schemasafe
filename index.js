@@ -94,11 +94,11 @@ const scopeFormatCache = Symbol('formatcache')
 
 // Order is important, newer at the top!
 const schemaVersions = [
-  'http://json-schema.org/draft/2019-09/schema#',
-  'http://json-schema.org/draft-07/schema#',
-  'http://json-schema.org/draft-06/schema#',
-  'http://json-schema.org/draft-04/schema#',
-  'http://json-schema.org/draft-03/schema#',
+  'https://json-schema.org/draft/2019-09/schema',
+  'https://json-schema.org/draft-07/schema',
+  'https://json-schema.org/draft-06/schema',
+  'https://json-schema.org/draft-04/schema',
+  'https://json-schema.org/draft-03/schema',
 ]
 
 const rootMeta = new WeakMap()
@@ -219,20 +219,19 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     }
 
     if (node === root) {
-      let version
-      if (typeof node.$schema === 'string') {
+      const $schema = node.$schema || $schemaDefault
+      if (node.$schema) {
+        if (typeof node.$schema !== 'string') throw new Error('Unexpected $schema')
         consume('$schema')
-        version = node.$schema
-      } else if ($schemaDefault) {
-        version = $schemaDefault
       }
-      if (version) {
+      if ($schema) {
+        const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
         if (!schemaVersions.includes(version)) throw new Error('Unexpected schema version')
         rootMeta.set(root, {
           exclusiveRefs:
             // older than draft/2019-09
             schemaVersions.indexOf(version) >
-            schemaVersions.indexOf('http://json-schema.org/draft/2019-09/schema#'),
+            schemaVersions.indexOf('https://json-schema.org/draft/2019-09/schema'),
         })
       }
     }
