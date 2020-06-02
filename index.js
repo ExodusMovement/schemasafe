@@ -117,7 +117,8 @@ const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
     ...unknown
   } = opts
   const fmts = Object.assign({}, formats, optFormats)
-  if (unknown.length > 0) throw new Error(`Unknown options: ${Object.keys(unknown).join(', ')}`)
+  if (Object.keys(unknown).length !== 0)
+    throw new Error(`Unknown options: ${Object.keys(unknown).join(', ')}`)
 
   if (!['strong', 'lax', 'default'].includes(mode)) throw new Error(`Invalid mode: ${mode}`)
   if (mode === 'strong' && (!requireValidation || allowUnusedKeywords))
