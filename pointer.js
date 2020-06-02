@@ -13,7 +13,7 @@ function untilde(string) {
   })
 }
 
-function get(obj, pointer) {
+function get(obj, pointer, objpath) {
   if (typeof obj !== 'object') throw new Error('Invalid input object')
   if (typeof pointer !== 'string') throw new Error('Invalid JSON pointer')
   const parts = pointer.split('/')
@@ -26,49 +26,70 @@ function get(obj, pointer) {
     if (typeof obj !== 'object') return undefined
     if (!obj.hasOwnProperty(prop)) return undefined
     obj = obj[prop]
+    if (objpath) objpath.push(obj)
   }
+  if (objpath) objpath.pop() // does not include head or result
   return obj
 }
 
-function resolveReference(root, additionalSchemas, ptr) {
-  const visit = function(sub) {
-    if (sub && (sub.id || sub.$id) === ptr) return sub
-    if (typeof sub !== 'object' || !sub) return null
-    return Object.keys(sub).reduce(function(res, k) {
-      return res || visit(sub[k])
-    }, null)
-  }
-
-  const res = visit(root)
-  if (res) return [res, root]
-
-  ptr = ptr.replace(/^#/, '')
-  ptr = ptr.replace(/\/$/, '')
-
-  try {
-    return [get(root, decodeURI(ptr)), root]
-  } catch (err) {
-    // do nothing
-  }
-
-  const end = ptr.indexOf('#')
-  // external reference
-  if (end === 0 || end === -1) {
-    const additional = additionalSchemas[ptr]
-    return [additional, additional]
-  } else {
-    const ext = ptr.slice(0, end)
-    const fragment = ptr.slice(end).replace(/^#/, '')
-    try {
-      const additional = additionalSchemas[ext]
-      return [get(additional, fragment), additional]
-    } catch (err) {
-      // do nothing
-    }
-  }
-
-  // null or undefined values will throw an error on usage
-  return [null, null]
+function joinPath(base, sub) {
+  if (typeof base !== 'string' || typeof sub !== 'string') throw new Error('Unexpected path!')
+  if (sub.length === 0) return base
+  base = base.replace(/#.*/, '')
+  if (sub.startsWith('#')) return `${base}${sub}`
+  if (!base.includes('/') || sub.replace(/#.*/, '').includes('://')) return sub
+  if (sub.startsWith('/')) throw new Error('Unsupported yet')
+  return `${base.replace(/\/?[^/]*$/, '')}/${sub}`
 }
 
-module.exports = { get, resolveReference }
+function objpath2path(objpath) {
+  const ids = objpath.map((obj) => (obj && (obj.$id || obj.id)) || '')
+  return ids.filter((id) => id).reduce(joinPath, '')
+}
+
+function resolveReference(root, additionalSchemas, ptr) {
+  const results = []
+
+  const [main, hash = ''] = ptr.split('#')
+  const local = decodeURI(hash).replace(/\/$/, '')
+
+  // Find in self by id path
+  const visit = (sub, path) => {
+    if (!sub || typeof sub !== 'object') return
+    const id = sub.$id || sub.id
+    if (id && typeof id === 'string') {
+      path = joinPath(path, id)
+      if (path === ptr || (path === main && local === '')) {
+        results.push([sub, root, ptr])
+      } else if (path === main && local[0] === '/') {
+        const objpath = []
+        const res = get(sub, local, objpath)
+        if (res !== undefined) results.push([res, root, joinPath(path, objpath2path(objpath))])
+      }
+    }
+    for (const k of Object.keys(sub)) visit(sub[k], path)
+  }
+  visit(root, '')
+
+  // Find in self by pointer
+  if (main === '' && (local[0] === '/' || local === '')) {
+    const objpath = []
+    const res = get(root, local, objpath)
+    if (res !== undefined) results.push([res, root, objpath2path(objpath)])
+  }
+
+  // Find in additional schemas
+  if (additionalSchemas.hasOwnProperty(main))
+    results.push(...resolveReference(additionalSchemas[main], additionalSchemas, `#${hash}`))
+
+  // Full refs to additional schemas
+  if (additionalSchemas.hasOwnProperty(ptr))
+    results.push([additionalSchemas[ptr], additionalSchemas, ptr])
+  const altname = ptr.replace(/^#/, '').replace(/\/$/, '') // is-my-json-valid test
+  if (altname !== ptr && additionalSchemas.hasOwnProperty(altname))
+    results.push([additionalSchemas[altname], additionalSchemas, ptr])
+
+  return results
+}
+
+module.exports = { get, joinPath, resolveReference }

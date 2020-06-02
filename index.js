@@ -1,6 +1,6 @@
 const jaystring = require('./jaystring')
 const genfun = require('./generate-function')
-const { resolveReference } = require('./pointer')
+const { resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
 const KNOWN_KEYWORDS = require('./known-keywords')
 
@@ -102,7 +102,7 @@ const schemaVersions = [
 ]
 
 const rootMeta = new WeakMap()
-const compile = function(schema, root, reporter, opts, scope) {
+const compile = function(schema, root, reporter, opts, scope, basePathRoot) {
   const fmts = Object.assign({}, formats, opts.formats)
   const verbose = !!opts.verbose
   const greedy = !!opts.greedy
@@ -150,6 +150,7 @@ const compile = function(schema, root, reporter, opts, scope) {
   if (reporter === true) fun.write('validate.errors = null')
   fun.write('var errors = 0')
 
+  const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = function(name, node, reporter, schemaPath) {
     const error = function(msg, prop, value) {
       fun.write('errors++')
@@ -236,10 +237,13 @@ const compile = function(schema, root, reporter, opts, scope) {
     } else if (typeof node.definitions === 'object') {
       consume('definitions')
     }
-    // same for id
+
+    const basePath = () => (basePathStack.length > 0 ? basePathStack[basePathStack.length - 1] : '')
     if (typeof node.$id === 'string') {
+      basePathStack.push(joinPath(basePath(), node.$id))
       consume('$id')
     } else if (typeof node.id === 'string') {
+      basePathStack.push(joinPath(basePath(), node.id))
       consume('id')
     }
 
@@ -268,7 +272,8 @@ const compile = function(schema, root, reporter, opts, scope) {
     }
 
     if (node.$ref) {
-      const [sub, subRoot] = resolveReference(root, (opts && opts.schemas) || {}, node.$ref)
+      const resolved = resolveReference(root, opts.schemas || {}, joinPath(basePath(), node.$ref))
+      const [sub, subRoot, path] = resolved[0] || []
       if (sub || sub === false) {
         let n = refCache.get(sub)
         if (!n) {
@@ -276,14 +281,14 @@ const compile = function(schema, root, reporter, opts, scope) {
           refCache.set(sub, n)
           let fn = null // resolve cyclic dependencies
           scope[n] = (...args) => fn(...args)
-          fn = compile(sub, subRoot, false, opts, scope)
+          fn = compile(sub, subRoot, false, opts, scope, path)
           scope[n] = fn
         }
         fun.write('if (!(%s(%s))) {', n, name)
         error('referenced schema does not match')
         fun.write('}')
       } else {
-        throw new Error(`ref not found: ${node.$ref}`)
+        throw new Error(`failed to resolve $ref: ${node.$ref}`)
       }
       consume('$ref')
 

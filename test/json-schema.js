@@ -21,7 +21,6 @@ const unsupported = new Set([
   // Whole files, meaning unsupported keywords / features
   //  draft4
   'definitions.json',
-  'refRemote.json',
   //  draft2019-09
   'anchor.json',
   'dependentSchemas.json',
@@ -29,6 +28,7 @@ const unsupported = new Set([
   'unevaluatedProperties.json',
   'unevaluatedItems.json',
   'defs.json',
+  'draft2019-09/refRemote.json', // earlier versions are fine
   //  draft3 only
   'draft3/extends.json',
   'draft3/disallow.json',
@@ -49,10 +49,7 @@ const unsupported = new Set([
 
   // Blocks and individual tests
   //  draft4
-  'ref.json/escaped pointer ref',
   'ref.json/remote ref, containing refs itself',
-  'ref.json/Recursive references between schemas',
-  'ref.json/Location-independent identifier with base URI change in subschema',
   //  draft2019-09
   'ref.json/ref creates new scope when adjacent to keywords',
   //  draft3 only
