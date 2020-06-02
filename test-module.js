@@ -12,6 +12,7 @@ if (validator !== indexModule.exports) throw new Error('Unexpected!')
 
 indexModule.exports = function(...args) {
   const validate = validator(...args)
+  if (!validate) return validate
   // eslint-disable-next-line no-new-func
   const wrapped = new Function(`return ${validate.toModule()}`)()
   wrapped.toModule = (...args) => validate.toModule(...args)
