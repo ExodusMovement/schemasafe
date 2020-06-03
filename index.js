@@ -208,7 +208,6 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
     }
 
     const finish = () => {
-      while (indent--) fun.write('}')
       enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
     }
 
@@ -251,29 +250,23 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
       consume('id')
     }
 
-    let indent = 0
-
+    fun.write('if (%s === undefined) {', name)
+    let defaultApplied = false
     if (node.default !== undefined) {
       if (applyDefault) {
-        indent++
-        fun.write('if (%s === undefined) {', name)
+        if (node === root || name === 'data') fail('Can not apply default value at root')
         fun.write('%s = %s', name, jaystring(node.default))
-        fun.write('} else {')
+        defaultApplied = true
       }
       consume('default')
     }
-
     if (node.required === true) {
-      indent++
-      fun.write('if (%s === undefined) {', name)
-      error('is required')
-      fun.write('} else {')
+      if (!defaultApplied) error('is required')
       consume('required')
-    } else {
-      indent++
-      fun.write('if (%s !== undefined) {', name)
-      if (node.required === false) consume('required')
+    } else if (node.required === false) {
+      consume('required')
     }
+    fun.write('} else {')
 
     if (node.$ref) {
       const resolved = resolveReference(root, schemas || {}, joinPath(basePath(), node.$ref))
@@ -298,6 +291,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
 
       if (rootMeta.has(root) && rootMeta.get(root).exclusiveRefs) {
         // ref overrides any sibling keywords for older schemas
+        fun.write('}') // undefined check
         finish()
         return
       }
@@ -315,13 +309,16 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
     }
 
     const typeValidate = typeArray.map((t) => types[t](name)).join(' || ') || 'true'
-    if (typeValidate !== 'true') {
-      indent++
+    if (typeValidate === 'true') {
+      fun.write('/* any type */ {') // make missing type check visible in source code
+    } else {
       fun.write('if (!(%s)) {', typeValidate)
       error('is the wrong type')
       fun.write('} else {')
     }
     if (type) consume('type')
+
+    /* All checks below are expected to be independent, they are happening on the same code depth */
 
     const typeApplicable = (...types) =>
       !type || typeArray.includes('any') || typeArray.some((x) => types.includes(x))
@@ -844,6 +841,8 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
       consume('properties')
     }
 
+    fun.write('}') // type check
+    fun.write('}') // undefined check
     finish()
   }
 
