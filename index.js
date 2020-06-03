@@ -22,13 +22,19 @@ types.integer = (name) =>
 types.string = (name) => `typeof ${name} === "string"`
 
 const unique = (array) => {
-  const list = []
-  for (let i = 0; i < array.length; i++) {
-    list.push(typeof array[i] === 'object' ? JSON.stringify(array[i]) : array[i])
+  const objects = []
+  const primitives = new Set()
+  let primitivesCount = 0
+  for (const item of array) {
+    if (typeof item === 'object') {
+      objects.push(item)
+    } else {
+      primitives.add(item)
+      if (primitives.size !== ++primitivesCount) return false
+    }
   }
-  for (let i = 1; i < list.length; i++) {
-    if (list.indexOf(list[i]) !== i) return false
-  }
+  for (let i = 1; i < objects.length; i++)
+    for (let j = 0; j < i; j++) if (deepEqual(objects[i], objects[j])) return false
   return true
 }
 
@@ -398,6 +404,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
       validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
       scope.unique = unique
+      scope.deepEqual = deepEqual
       fun.write('if (!(unique(%s))) {', name)
       error('must be unique')
       fun.write('}')
