@@ -419,7 +419,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
 
     if (node.format && fmts.hasOwnProperty(node.format)) {
       validateTypeApplicable('string')
-      if (type !== 'string' && formats[node.format]) fun.write('if (%s) {', types.string(name))
+      if (type !== 'string') fun.write('if (%s) {', types.string(name))
       const format = fmts[node.format]
       if (format instanceof RegExp || typeof format === 'function') {
         let n = formatCache.get(format)
@@ -432,11 +432,10 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
         fun.write(`if (${condition}) {`, n, name)
         error(`must be ${node.format} format`)
         fun.write('}')
-      } else if (typeof format === 'object') {
-        rule(name, format, subPath('format'))
+      } else {
+        fail('Unrecognized format used:', node.format)
       }
-
-      if (type !== 'string' && formats[node.format]) fun.write('}')
+      if (type !== 'string') fun.write('}')
       consume('format')
     } else {
       enforce(!node.format, 'Unrecognized format used:', node.format)
