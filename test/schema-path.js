@@ -115,12 +115,12 @@ tape('schemaPath', function(t) {
     'should target specific someItems rule(1)'
   )
   notOkAt(
-    { someItems: ['astring', 42, 'not a boolean'] },
+    { someItems: ['astring', [], 'not a boolean'] },
     '/properties/someItems/additionalItems',
     'should target additionalItems'
   )
   notOkWithTarget(
-    { someItems: ['astring', 42, true, false, 42] },
+    { someItems: ['astring', [], true, false, 42] },
     'inside additionalItems',
     'should sitll target additionalProperties after valid additional items'
   )
