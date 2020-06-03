@@ -156,7 +156,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
   // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
   fun.write('if (data === undefined) data = null')
   if (reporter === true) fun.write('validate.errors = null')
-  fun.write('var errors = 0')
+  fun.write('let errors = 0')
 
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (allErrors, reporter, name, node, schemaPath) => {
@@ -497,7 +497,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
         }
       } else {
         const i = genloop()
-        fun.write('for (var %s = 0; %s < %s.length; %s++) {', i, i, name, i)
+        fun.write('for (let %s = 0; %s < %s.length; %s++) {', i, i, name, i)
         rule(`${name}[${i}]`, node.items, subPath('items'))
         fun.write('}')
       }
@@ -524,7 +524,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
       validateTypeApplicable('array')
       if (type !== 'array') fun.write('if (%s) {', types.array(name))
       const i = genloop()
-      fun.write('for (var %s = %d; %s < %s.length; %s++) {', i, node.items.length, i, name, i)
+      fun.write('for (let %s = %d; %s < %s.length; %s++) {', i, node.items.length, i, name, i)
       rule(`${name}[${i}]`, node.additionalItems, subPath('additionalItems'))
       fun.write('}')
       if (type !== 'array') fun.write('}')
@@ -694,19 +694,12 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
     if (node.patternProperties) {
       validateTypeApplicable('object')
       if (type !== 'object') fun.write('if (%s) {', types.object(name))
-      const keys = gensym('keys')
-      const i = genloop()
-      fun.write('var %s = Object.keys(%s)', keys, name)
-      fun.write('for (var %s = 0; %s < %s.length; %s++) {', i, i, keys, i)
+      const key = gensym('key')
+      fun.write('for (const %s of Object.keys(%s)) {', key, name)
 
-      for (const key of Object.keys(node.patternProperties)) {
-        const p = patterns(key)
-        fun.write('if (%s.test(%s)) {', p, `${keys}[${i}]`)
-        rule(
-          `${name}[${keys}[${i}]]`,
-          node.patternProperties[key],
-          subPath('patternProperties', key)
-        )
+      for (const p of Object.keys(node.patternProperties)) {
+        fun.write('if (%s.test(%s)) {', patterns(p), key)
+        rule(`${name}[${key}]`, node.patternProperties[p], subPath('patternProperties', p))
         fun.write('}')
       }
 
@@ -719,11 +712,10 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
       validateTypeApplicable('object')
       if (type !== 'object') fun.write('if (%s) {', types.object(name))
 
-      const i = genloop()
-      const keys = gensym('keys')
+      const key = gensym('key')
 
-      const toCompare = (p) => `${keys}[${i}] !== ${JSON.stringify(p)}`
-      const toTest = (p) => `!${patterns(p)}.test(${keys}[${i}])`
+      const toCompare = (p) => `${key} !== ${JSON.stringify(p)}`
+      const toTest = (p) => `!${patterns(p)}.test(${key})`
 
       const additionalProp =
         Object.keys(node.properties || {})
@@ -731,14 +723,13 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
           .concat(Object.keys(node.patternProperties || {}).map(toTest))
           .join(' && ') || 'true'
 
-      fun.write('var %s = Object.keys(%s)', keys, name)
-      fun.write('for (var %s = 0; %s < %s.length; %s++) {', i, i, keys, i)
+      fun.write('for (const %s of Object.keys(%s)) {', key, name)
       fun.write('if (%s) {', additionalProp)
 
       if (node.additionalProperties === false) {
-        error('has additional properties', null, `${JSON.stringify(`${name}.`)} + ${keys}[${i}]`)
+        error('has additional properties', null, `${JSON.stringify(`${name}.`)} + ${key}`)
       } else {
-        rule(`${name}[${keys}[${i}]]`, node.additionalProperties, subPath('additionalProperties'))
+        rule(`${name}[${key}]`, node.additionalProperties, subPath('additionalProperties'))
       }
 
       fun.write('}')
@@ -771,7 +762,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
 
     if (node.not || node.not === false) {
       const prev = gensym('prev')
-      fun.write('var %s = errors', prev)
+      fun.write('const %s = errors', prev)
       subrule(name, node.not, subPath('not'))
       fun.write('if (%s === errors) {', prev)
       error('negative schema matches')
@@ -815,7 +806,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
 
       node.anyOf.forEach((sch, i) => {
         if (i === 0) {
-          fun.write('var %s = errors', prev)
+          fun.write('const %s = errors', prev)
         } else {
           fun.write('if (errors !== %s) {', prev)
           fun.write('errors = %s', prev)
@@ -836,8 +827,8 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
       const prev = gensym('prev')
       const passes = gensym('passes')
 
-      fun.write('var %s = errors', prev)
-      fun.write('var %s = 0', passes)
+      fun.write('const %s = errors', prev)
+      fun.write('let %s = 0', passes)
 
       for (const sch of node.oneOf) {
         subrule(name, sch, schemaPath)
