@@ -1,7 +1,7 @@
 const tape = require('tape')
 const safeRegex = require('safe-regex')
 
-const formats = require('../formats')
+const formats = require('../src/formats')
 
 tape('safe-regex', function(t) {
   let key

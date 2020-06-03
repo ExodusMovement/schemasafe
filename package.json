@@ -3,13 +3,14 @@
   "version": "2.20.0-exodus4",
   "license": "MIT",
   "repository": "github.com/ExodusMovement/is-my-json-valid",
+  "main": "src/index.js",
   "files": [
-    "generate-function.js",
-    "jaystring.js",
-    "formats.js",
-    "known-keywords.js",
-    "pointer.js",
-    "index.js"
+    "src/generate-function.js",
+    "src/jaystring.js",
+    "src/formats.js",
+    "src/known-keywords.js",
+    "src/pointer.js",
+    "src/index.js"
   ],
   "scripts": {
     "lint": "prettier --list-different '**/*.js'&& eslint .",
