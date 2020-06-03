@@ -638,17 +638,13 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
 
     if (Array.isArray(node.required)) {
       validateTypeApplicable('object')
-      const missing = gensym('missing')
-      const checkRequired = (req) => {
+      if (type !== 'object') fun.write('if (%s) {', types.object(name))
+      for (const req of node.required) {
         const prop = genobj(name, req)
         fun.write('if (%s === undefined) {', prop)
         error('is required', prop)
-        fun.write('%s++', missing)
         fun.write('}')
       }
-      if (type !== 'object') fun.write('if (%s) {', types.object(name))
-      fun.write('var %s = 0', missing)
-      node.required.map(checkRequired)
       if (type !== 'object') fun.write('}')
       consume('required')
     }
