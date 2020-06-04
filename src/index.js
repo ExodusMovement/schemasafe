@@ -220,6 +220,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const finish = () => {
+      fun.write('}') // undefined check
       enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
     }
 
@@ -303,7 +304,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (rootMeta.has(root) && rootMeta.get(root).exclusiveRefs) {
         // ref overrides any sibling keywords for older schemas
-        fun.write('}') // undefined check
         finish()
         return
       }
@@ -321,9 +321,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const typeValidate = typeArray.map((t) => types[t](name)).join(' || ') || 'true'
-    if (typeValidate === 'true') {
-      fun.write('/* any type */ {') // make missing type check visible in source code
-    } else {
+    if (typeValidate !== 'true') {
       fun.write('if (!(%s)) {', typeValidate)
       error('is the wrong type')
       fun.write('} else {')
@@ -850,8 +848,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       consume('oneOf')
     }
 
-    fun.write('}') // type check
-    fun.write('}') // undefined check
+    if (typeValidate !== 'true') fun.write('}') // type check
     finish()
   }
 
