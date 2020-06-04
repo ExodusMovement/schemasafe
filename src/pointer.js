@@ -1,5 +1,7 @@
 'use strict'
 
+const { URL } = require('url')
+
 function toPointer(path) {
   if (path.length === 0) return ''
   return `#/${path.map((part) => `${part}`.replace(/~/g, '~0').replace(/\//g, '~1')).join('/')}`
@@ -37,13 +39,16 @@ function get(obj, pointer, objpath) {
   return obj
 }
 
+const protocolRegex = /^https?:\/\//
+
 function joinPath(base, sub) {
   if (typeof base !== 'string' || typeof sub !== 'string') throw new Error('Unexpected path!')
   if (sub.length === 0) return base
   base = base.replace(/#.*/, '')
   if (sub.startsWith('#')) return `${base}${sub}`
-  if (!base.includes('/') || sub.replace(/#.*/, '').includes('://')) return sub
-  if (sub.startsWith('/')) throw new Error('Unsupported yet')
+  if (!base.includes('/') || protocolRegex.test(sub)) return sub
+  if (protocolRegex.test(base)) return new URL(sub, base).toString()
+  if (sub.startsWith('/')) return sub
   return `${base.replace(/\/?[^/]*$/, '')}/${sub}`
 }
 
