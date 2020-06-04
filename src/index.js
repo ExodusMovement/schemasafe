@@ -99,12 +99,13 @@ const schemaVersions = [
 ]
 
 const rootMeta = new WeakMap()
-const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
+const compile = (schema, root, opts, scope, basePathRoot) => {
   const {
     mode = 'default',
-    verbose = false,
     applyDefault = false,
+    includeErrors: optIncludeErrors = false,
     allErrors: optAllErrors = false,
+    verboseErrors = false,
     dryRun = false,
     allowUnusedKeywords = opts.mode === 'lax',
     requireValidation = opts.mode === 'strong',
@@ -155,28 +156,33 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
   fun.write('function validate(data) {')
   // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
   fun.write('if (data === undefined) data = null')
-  if (reporter === true) fun.write('validate.errors = null')
+  if (optIncludeErrors) fun.write('validate.errors = null')
   fun.write('let errors = 0')
 
   const basePathStack = basePathRoot ? [basePathRoot] : []
-  const visit = (allErrors, reporter, name, node, schemaPath) => {
-    const rule = (...args) => visit(allErrors, reporter, ...args)
+  const visit = (allErrors, includeErrors, name, node, schemaPath) => {
+    const rule = (...args) => visit(allErrors, includeErrors, ...args)
     const subrule = (...args) => visit(true, false, ...args)
+    const writeErrorObject = (format, ...params) => {
+      if (allErrors) {
+        fun.write('if (validate.errors === null) validate.errors = []')
+        fun.write(`validate.errors.push(${format})`, ...params)
+      } else {
+        // Array assignment is significantly faster, do not refactor the two branches
+        fun.write(`validate.errors = [${format}]`, ...params)
+        fun.write('return false')
+      }
+    }
     const error = (msg, prop, value) => {
       fun.write('errors++')
-      if (reporter === true) {
-        fun.write('if (validate.errors === null) validate.errors = []')
+      if (includeErrors === true) {
         const errorObject = { field: prop || name, message: msg }
-        if (verbose) {
+        if (verboseErrors) {
           const type = node.type || 'any'
           Object.assign(errorObject, { type, schemaPath: toPointer(schemaPath) })
-          fun.write(
-            'validate.errors.push({ ...%s, value: %s })',
-            JSON.stringify(errorObject),
-            value || name
-          )
+          writeErrorObject('{ ...%s, value: %s }', JSON.stringify(errorObject), value || name)
         } else {
-          fun.write('validate.errors.push(%s)', JSON.stringify(errorObject))
+          writeErrorObject('%s', JSON.stringify(errorObject))
         }
       }
       if (!allErrors) fun.write('return false')
@@ -284,7 +290,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
           refCache.set(sub, n)
           let fn = null // resolve cyclic dependencies
           scope[n] = (...args) => fn(...args)
-          fn = compile(sub, subRoot, false, opts, scope, path)
+          fn = compile(sub, subRoot, { ...opts, includeErrors: false }, scope, path)
           scope[n] = fn
         }
         fun.write('if (!(%s(%s))) {', n, name)
@@ -849,7 +855,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
     finish()
   }
 
-  visit(optAllErrors, reporter, 'data', schema, [])
+  visit(optAllErrors, optIncludeErrors, 'data', schema, [])
 
   fun.write('return errors === 0')
   fun.write('}')
@@ -864,7 +870,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
 
 const validator = function(schema, opts = {}) {
   if (typeof schema === 'string') schema = JSON.parse(schema)
-  return compile(schema, schema, true, opts)
+  return compile(schema, schema, opts)
 }
 
 const parser = function(schema, opts = {}) {

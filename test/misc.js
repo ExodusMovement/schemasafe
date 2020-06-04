@@ -46,7 +46,7 @@ tape('allErrors/false', function(t) {
       },
       required: ['x', 'y'],
     },
-    { allErrors: false }
+    { includeErrors: true, allErrors: false }
   )
   t.notOk(validate({}), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
@@ -74,7 +74,7 @@ tape('allErrors/true', function(t) {
       },
       required: ['x', 'y'],
     },
-    { allErrors: true }
+    { includeErrors: true, allErrors: true }
   )
   t.notOk(validate({}), 'should be invalid')
   t.strictEqual(validate.errors.length, 2)
@@ -103,7 +103,8 @@ tape('additional props', function(t) {
       additionalProperties: false,
     },
     {
-      verbose: true,
+      includeErrors: true,
+      verboseErrors: true,
     }
   )
 
@@ -395,7 +396,7 @@ tape('nested required array decl', function(t) {
     required: ['x'],
   }
 
-  const validate = validator(schema)
+  const validate = validator(schema, { includeErrors: true })
 
   t.ok(validate({ x: {} }), 'should be valid')
   t.notOk(validate({}), 'should not be valid')
@@ -415,7 +416,7 @@ tape('verbose mode', function(t) {
     },
   }
 
-  const validate = validator(schema, { verbose: true })
+  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
 
   t.ok(validate({ hello: 'string' }), 'should be valid')
   t.notOk(validate({ hello: 100 }), 'should not be valid')
@@ -446,7 +447,7 @@ tape('additional props in verbose mode', function(t) {
     },
   }
 
-  const validate = validator(schema, { verbose: true })
+  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
 
   validate({ 'hello world': { bar: 'string' } })
 
