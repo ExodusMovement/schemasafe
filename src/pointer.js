@@ -2,7 +2,7 @@
 
 function toPointer(path) {
   if (path.length === 0) return ''
-  return `/${path.map((part) => `${part}`.replace(/~/g, '~0').replace(/\//g, '~1')).join('/')}`
+  return `#/${path.map((part) => `${part}`.replace(/~/g, '~0').replace(/\//g, '~1')).join('/')}`
 }
 
 function untilde(string) {
@@ -22,7 +22,7 @@ function get(obj, pointer, objpath) {
   if (typeof obj !== 'object') throw new Error('Invalid input object')
   if (typeof pointer !== 'string') throw new Error('Invalid JSON pointer')
   const parts = pointer.split('/')
-  if (parts.shift() !== '') throw new Error('Invalid JSON pointer')
+  if (!['', '#'].includes(parts.shift())) throw new Error('Invalid JSON pointer')
   if (parts.length === 0) return obj
 
   for (const part of parts) {

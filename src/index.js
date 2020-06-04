@@ -184,7 +184,7 @@ const compile = (schema, root, reporter, opts, scope, basePathRoot) => {
 
     const fail = (msg, value) => {
       const comment = value !== undefined ? ` ${JSON.stringify(value)}` : ''
-      throw new Error(`${msg}${comment} at #${toPointer(schemaPath)}`)
+      throw new Error(`${msg}${comment} at ${toPointer(schemaPath)}`)
     }
     const enforce = (ok, ...args) => ok || fail(...args)
     const enforceValidation = (msg) => enforce(!requireValidation, `[requireValidation] ${msg}`)

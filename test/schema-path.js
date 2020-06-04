@@ -103,20 +103,20 @@ tape('schemaPath', function(t) {
   )
 
   // Errors in properties
-  notOkAt({ hello: 42 }, '/properties/hello', 'should target property with type error')
+  notOkAt({ hello: 42 }, '#/properties/hello', 'should target property with type error')
   notOkAt(
     { someItems: [42] },
-    '/properties/someItems/0',
+    '#/properties/someItems/0',
     'should target specific someItems rule(0)'
   )
   notOkAt(
     { someItems: ['astring', 42] },
-    '/properties/someItems/1',
+    '#/properties/someItems/1',
     'should target specific someItems rule(1)'
   )
   notOkAt(
     { someItems: ['astring', [], 'not a boolean'] },
-    '/properties/someItems/additionalItems',
+    '#/properties/someItems/additionalItems',
     'should target additionalItems'
   )
   notOkWithTarget(
@@ -143,28 +143,28 @@ tape('schemaPath', function(t) {
 
   notOkAt(
     { aggregate: 'a-a' },
-    '/properties/aggregate/allOf/0',
+    '#/properties/aggregate/allOf/0',
     'should target specific rule in allOf (0)'
   )
   notOkAt(
     { aggregate: 'z-z' },
-    '/properties/aggregate/allOf/1',
+    '#/properties/aggregate/allOf/1',
     'should target specific rule in allOf (1)'
   )
   notOkAt(
     { aggregate: 'a:z' },
-    '/properties/aggregate/allOf/2',
+    '#/properties/aggregate/allOf/2',
     'should target specific rule in allOf (2)'
   )
   notOkAt(
     { aggregate: 'a--z' },
-    '/properties/aggregate/allOf/3',
+    '#/properties/aggregate/allOf/3',
     'should target specific rule in allOf (3)'
   )
 
   notOkAt(
     { notAString: 42 },
-    '/patternProperties/.*String',
+    '#/patternProperties/.*String',
     'should target the specific pattern in patternProperties (wildcards)'
   )
   notOkAt(
@@ -172,7 +172,7 @@ tape('schemaPath', function(t) {
       'I am a String': 'I really am',
       '001100111011000111100': "Don't stand around jabbering when you're in mortal danger",
     },
-    '/patternProperties/^[01]+$',
+    '#/patternProperties/^[01]+$',
     'should target the specific pattern in patternProperties ("binary" keys)'
   )
 
