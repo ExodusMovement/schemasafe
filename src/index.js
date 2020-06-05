@@ -158,6 +158,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (optIncludeErrors) fun.write('validate.errors = null')
   fun.write('let errors = 0')
 
+  const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (allErrors, includeErrors, name, node, schemaPath) => {
     const rule = (...args) => visit(allErrors, includeErrors, ...args)
@@ -218,8 +219,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       unused.delete(property)
     }
 
+    const isTopLevel = name === 'data'
     const finish = () => {
-      fun.write('}') // undefined check
+      if (!isTopLevel) fun.write('}') // undefined check
       enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
     }
 
@@ -232,11 +234,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if ($schema) {
         const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
         enforce(schemaVersions.includes(version), 'Unexpected schema version:', version)
+        const schemaIsOlderThan = (ver) =>
+          schemaVersions.indexOf(version) >
+          schemaVersions.indexOf(`https://json-schema.org/${ver}/schema`)
         rootMeta.set(root, {
-          exclusiveRefs:
-            // older than draft/2019-09
-            schemaVersions.indexOf(version) >
-            schemaVersions.indexOf('https://json-schema.org/draft/2019-09/schema'),
+          exclusiveRefs: schemaIsOlderThan('draft/2019-09'),
+          booleanRequired: schemaIsOlderThan('draft-04'),
         })
       }
     }
@@ -262,23 +265,37 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       consume('id')
     }
 
-    fun.write('if (%s === undefined) {', name)
-    let defaultApplied = false
-    if (node.default !== undefined) {
-      if (applyDefault) {
-        if (node === root || name === 'data') fail('Can not apply default value at root')
-        fun.write('%s = %s', name, jaystring(node.default))
-        defaultApplied = true
+    const booleanRequired = getMeta().booleanRequired && typeof node.required === 'boolean'
+    if (isTopLevel) {
+      // top-level data is coerced to null above, it can't be undefined
+      if (node.default !== undefined) {
+        enforce(!applyDefault, 'Can not apply default value at root')
+        consume('default')
       }
-      consume('default')
+      if (node.required === true || node.required === false)
+        fail('Can not apply boolean required at root')
+    } else if (node.default !== undefined || booleanRequired) {
+      fun.write('if (%s === undefined) {', name)
+      let defaultApplied = false
+      if (node.default !== undefined) {
+        if (applyDefault) {
+          fun.write('%s = %s', name, jaystring(node.default))
+          defaultApplied = true
+        }
+        consume('default')
+      }
+      if (booleanRequired) {
+        if (node.required === true) {
+          if (!defaultApplied) error('is required')
+          consume('required')
+        } else if (node.required === false) {
+          consume('required')
+        }
+      }
+      fun.write('} else {')
+    } else {
+      fun.write('if (%s !== undefined) {', name)
     }
-    if (node.required === true) {
-      if (!defaultApplied) error('is required')
-      consume('required')
-    } else if (node.required === false) {
-      consume('required')
-    }
-    fun.write('} else {')
 
     if (node.$ref) {
       const resolved = resolveReference(root, schemas || {}, joinPath(basePath(), node.$ref))
@@ -301,7 +318,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
       consume('$ref')
 
-      if (rootMeta.has(root) && rootMeta.get(root).exclusiveRefs) {
+      if (getMeta().exclusiveRefs) {
         // ref overrides any sibling keywords for older schemas
         finish()
         return

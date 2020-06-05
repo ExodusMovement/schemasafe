@@ -4,10 +4,10 @@ const validator = require('../')
 
 tape('simple', function(t) {
   const schema = {
-    required: true,
     type: 'object',
+    required: ['hello'],
     properties: {
-      hello: { type: 'string', required: true },
+      hello: { type: 'string' },
     },
   }
 
@@ -121,14 +121,12 @@ tape('additional props', function(t) {
 tape('array', function(t) {
   const validate = validator({
     type: 'array',
-    required: true,
     items: {
       type: 'string',
     },
   })
 
   t.notOk(validate({}), 'wrong type')
-  t.notOk(validate(), 'is required')
   t.ok(validate(['test']))
   t.end()
 })
@@ -136,10 +134,10 @@ tape('array', function(t) {
 tape('nested array', function(t) {
   const validate = validator({
     type: 'object',
+    required: ['list'],
     properties: {
       list: {
         type: 'array',
-        required: true,
         items: {
           type: 'string',
         },
@@ -156,10 +154,10 @@ tape('nested array', function(t) {
 tape('enum', function(t) {
   const validate = validator({
     type: 'object',
+    required: ['foo'],
     properties: {
       foo: {
         type: 'number',
-        required: true,
         enum: [42],
       },
     },
@@ -302,10 +300,10 @@ tape('do not mutate schema', function(t) {
 
 tape('#toJSON()', function(t) {
   const schema = {
-    required: true,
     type: 'object',
+    required: ['hello'],
     properties: {
-      hello: { type: 'string', required: true },
+      hello: { type: 'string' },
     },
   }
 
@@ -318,7 +316,6 @@ tape('#toJSON()', function(t) {
 tape('external schemas', function(t) {
   const ext = { type: 'string' }
   const schema = {
-    required: true,
     $ref: '#ext',
   }
 
@@ -332,7 +329,6 @@ tape('external schemas', function(t) {
 tape('external schema URIs', function(t) {
   const ext = { type: 'string' }
   const schema = {
-    required: true,
     $ref: 'http://example.com/schemas/schemaURIs',
   }
 
@@ -406,11 +402,10 @@ tape('nested required array decl', function(t) {
 
 tape('verbose mode', function(t) {
   const schema = {
-    required: true,
     type: 'object',
+    required: ['hello'],
     properties: {
       hello: {
-        required: true,
         type: 'string',
       },
     },
@@ -428,15 +423,14 @@ tape('verbose mode', function(t) {
 tape('additional props in verbose mode', function(t) {
   const schema = {
     type: 'object',
-    required: true,
     additionalProperties: false,
+    required: ['hello world'],
     properties: {
       foo: {
         type: 'string',
       },
       'hello world': {
         type: 'object',
-        required: true,
         additionalProperties: false,
         properties: {
           foo: {
@@ -474,10 +468,10 @@ tape.skip('field shows item index in arrays', function(t) {
     items: {
       type: 'array',
       items: {
+        required: ['foo'],
         properties: {
           foo: {
             type: 'string',
-            required: true,
           },
         },
       },
