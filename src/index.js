@@ -174,7 +174,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
     }
     const error = (msg, prop, value) => {
-      fun.write('errors++')
       if (includeErrors === true) {
         const errorObject = { field: prop || name, message: msg }
         if (verboseErrors) {
@@ -185,7 +184,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           writeErrorObject('%s', JSON.stringify(errorObject))
         }
       }
-      if (!allErrors) fun.write('return false')
+      if (allErrors) {
+        fun.write('errors++')
+      } else {
+        fun.write('return false')
+      }
     }
 
     const fail = (msg, value) => {
