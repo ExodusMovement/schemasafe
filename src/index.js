@@ -299,505 +299,511 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       return (e) => `(${name} === ${JSON.stringify(e)})`
     }
 
-    // Numbers
+    const checkNumbers = () => {
+      const applyMinMax = (value, operator, message) => {
+        enforce(Number.isFinite(value), 'Invalid minimum or maximum:', value)
+        validateTypeApplicable('number', 'integer')
+        if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
 
-    const applyMinMax = (value, operator, message) => {
-      enforce(Number.isFinite(value), 'Invalid minimum or maximum:', value)
-      validateTypeApplicable('number', 'integer')
-      if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
-
-      fun.write('if (!(%d %s %s)) {', value, operator, name)
-      error(message)
-      fun.write('}')
-
-      if (type !== 'number' && type !== 'integer') fun.write('}')
-    }
-
-    if (Number.isFinite(node.exclusiveMinimum)) {
-      applyMinMax(node.exclusiveMinimum, '<', 'is less than exclusiveMinimum')
-      consume('exclusiveMinimum')
-    } else if (node.minimum !== undefined) {
-      applyMinMax(node.minimum, node.exclusiveMinimum ? '<' : '<=', 'is less than minimum')
-      consume('minimum')
-      if (typeof node.exclusiveMinimum === 'boolean') consume('exclusiveMinimum')
-    }
-
-    if (Number.isFinite(node.exclusiveMaximum)) {
-      applyMinMax(node.exclusiveMaximum, '>', 'is more than exclusiveMaximum')
-      consume('exclusiveMaximum')
-    } else if (node.maximum !== undefined) {
-      applyMinMax(node.maximum, node.exclusiveMaximum ? '>' : '>=', 'is more than maximum')
-      consume('maximum')
-      if (typeof node.exclusiveMaximum === 'boolean') consume('exclusiveMaximum')
-    }
-
-    const multipleOf = node.multipleOf === undefined ? 'divisibleBy' : 'multipleOf' // draft3 support
-    if (node[multipleOf] !== undefined) {
-      enforce(Number.isFinite(node[multipleOf]), `Invalid ${multipleOf}:`, node[multipleOf])
-      validateTypeApplicable('number', 'integer')
-      if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
-
-      scope.isMultipleOf = functions.isMultipleOf
-      fun.write('if (!isMultipleOf(%s, %d)) {', name, node[multipleOf])
-
-      error('has a remainder')
-      fun.write('}')
-
-      if (type !== 'number' && type !== 'integer') fun.write('}')
-      consume(multipleOf)
-    }
-
-    // Strings
-
-    if (node.maxLength !== undefined) {
-      enforce(Number.isFinite(node.maxLength), 'Invalid maxLength:', node.maxLength)
-      validateTypeApplicable('string')
-      if (type !== 'string') fun.write('if (%s) {', types.string(name))
-
-      scope.stringLength = functions.stringLength
-      fun.write('if (stringLength(%s) > %d) {', name, node.maxLength)
-      error('has longer length than allowed')
-      fun.write('}')
-
-      if (type !== 'string') fun.write('}')
-      consume('maxLength')
-    }
-
-    if (node.minLength !== undefined) {
-      enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
-      validateTypeApplicable('string')
-      if (type !== 'string') fun.write('if (%s) {', types.string(name))
-
-      scope.stringLength = functions.stringLength
-      fun.write('if (stringLength(%s) < %d) {', name, node.minLength)
-      error('has less length than allowed')
-      fun.write('}')
-
-      if (type !== 'string') fun.write('}')
-      consume('minLength')
-    }
-
-    if (node.format && fmts.hasOwnProperty(node.format)) {
-      validateTypeApplicable('string')
-      if (type !== 'string') fun.write('if (%s) {', types.string(name))
-      const format = fmts[node.format]
-      if (format instanceof RegExp || typeof format === 'function') {
-        let n = formatCache.get(format)
-        if (!n) {
-          n = gensym('format')
-          scope[n] = format
-          formatCache.set(format, n)
-        }
-        const condition = format instanceof RegExp ? '!%s.test(%s)' : '!%s(%s)'
-        fun.write(`if (${condition}) {`, n, name)
-        error(`must be ${node.format} format`)
+        fun.write('if (!(%d %s %s)) {', value, operator, name)
+        error(message)
         fun.write('}')
-      } else {
-        fail('Unrecognized format used:', node.format)
+
+        if (type !== 'number' && type !== 'integer') fun.write('}')
       }
-      if (type !== 'string') fun.write('}')
-      consume('format')
-    } else {
-      enforce(!node.format, 'Unrecognized format used:', node.format)
+
+      if (Number.isFinite(node.exclusiveMinimum)) {
+        applyMinMax(node.exclusiveMinimum, '<', 'is less than exclusiveMinimum')
+        consume('exclusiveMinimum')
+      } else if (node.minimum !== undefined) {
+        applyMinMax(node.minimum, node.exclusiveMinimum ? '<' : '<=', 'is less than minimum')
+        consume('minimum')
+        if (typeof node.exclusiveMinimum === 'boolean') consume('exclusiveMinimum')
+      }
+
+      if (Number.isFinite(node.exclusiveMaximum)) {
+        applyMinMax(node.exclusiveMaximum, '>', 'is more than exclusiveMaximum')
+        consume('exclusiveMaximum')
+      } else if (node.maximum !== undefined) {
+        applyMinMax(node.maximum, node.exclusiveMaximum ? '>' : '>=', 'is more than maximum')
+        consume('maximum')
+        if (typeof node.exclusiveMaximum === 'boolean') consume('exclusiveMaximum')
+      }
+
+      const multipleOf = node.multipleOf === undefined ? 'divisibleBy' : 'multipleOf' // draft3 support
+      if (node[multipleOf] !== undefined) {
+        enforce(Number.isFinite(node[multipleOf]), `Invalid ${multipleOf}:`, node[multipleOf])
+        validateTypeApplicable('number', 'integer')
+        if (type !== 'number' && type !== 'integer') fun.write('if (%s) {', types.number(name))
+
+        scope.isMultipleOf = functions.isMultipleOf
+        fun.write('if (!isMultipleOf(%s, %d)) {', name, node[multipleOf])
+
+        error('has a remainder')
+        fun.write('}')
+
+        if (type !== 'number' && type !== 'integer') fun.write('}')
+        consume(multipleOf)
+      }
     }
 
-    if (node.pattern) {
-      const p = patterns(node.pattern)
-      validateTypeApplicable('string')
-      if (type !== 'string') fun.write('if (%s) {', types.string(name))
-      fun.write('if (!(%s.test(%s))) {', p, name)
-      error('pattern mismatch')
-      fun.write('}')
-      if (type !== 'string') fun.write('}')
-      consume('pattern')
-    }
+    const checkStrings = () => {
+      if (node.maxLength !== undefined) {
+        enforce(Number.isFinite(node.maxLength), 'Invalid maxLength:', node.maxLength)
+        validateTypeApplicable('string')
+        if (type !== 'string') fun.write('if (%s) {', types.string(name))
 
-    // Arrays
+        scope.stringLength = functions.stringLength
+        fun.write('if (stringLength(%s) > %d) {', name, node.maxLength)
+        error('has longer length than allowed')
+        fun.write('}')
 
-    if (node.maxItems !== undefined) {
-      enforce(Number.isFinite(node.maxItems), 'Invalid maxItems:', node.maxItems)
-      if (Array.isArray(node.items) && node.items.length > node.maxItems)
-        fail(`Invalid maxItems: ${node.maxItems} is less than items array length`)
-      validateTypeApplicable('array')
-      if (type !== 'array') fun.write('if (%s) {', types.array(name))
+        if (type !== 'string') fun.write('}')
+        consume('maxLength')
+      }
 
-      fun.write('if (%s.length > %d) {', name, node.maxItems)
-      error('has more items than allowed')
-      fun.write('}')
+      if (node.minLength !== undefined) {
+        enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
+        validateTypeApplicable('string')
+        if (type !== 'string') fun.write('if (%s) {', types.string(name))
 
-      if (type !== 'array') fun.write('}')
-      consume('maxItems')
-    }
+        scope.stringLength = functions.stringLength
+        fun.write('if (stringLength(%s) < %d) {', name, node.minLength)
+        error('has less length than allowed')
+        fun.write('}')
 
-    if (node.minItems !== undefined) {
-      enforce(Number.isFinite(node.minItems), 'Invalid minItems:', node.minItems)
-      // can be higher that .items length with additionalItems
-      validateTypeApplicable('array')
-      if (type !== 'array') fun.write('if (%s) {', types.array(name))
+        if (type !== 'string') fun.write('}')
+        consume('minLength')
+      }
 
-      fun.write('if (%s.length < %d) {', name, node.minItems)
-      error('has less items than allowed')
-      fun.write('}')
-
-      if (type !== 'array') fun.write('}')
-      consume('minItems')
-    }
-
-    if (node.items || node.items === false) {
-      validateTypeApplicable('array')
-      if (type !== 'array') fun.write('if (%s) {', types.array(name))
-
-      if (Array.isArray(node.items)) {
-        for (let p = 0; p < node.items.length; p++) {
-          if (Array.isArray(type) && type.indexOf('null') !== -1)
-            fun.write('if (%s !== null) {', name)
-          rule(genobj(name, p), node.items[p], subPath(`${p}`))
-          if (Array.isArray(type) && type.indexOf('null') !== -1) fun.write('}')
+      if (node.format && fmts.hasOwnProperty(node.format)) {
+        validateTypeApplicable('string')
+        if (type !== 'string') fun.write('if (%s) {', types.string(name))
+        const format = fmts[node.format]
+        if (format instanceof RegExp || typeof format === 'function') {
+          let n = formatCache.get(format)
+          if (!n) {
+            n = gensym('format')
+            scope[n] = format
+            formatCache.set(format, n)
+          }
+          const condition = format instanceof RegExp ? '!%s.test(%s)' : '!%s(%s)'
+          fun.write(`if (${condition}) {`, n, name)
+          error(`must be ${node.format} format`)
+          fun.write('}')
+        } else {
+          fail('Unrecognized format used:', node.format)
         }
+        if (type !== 'string') fun.write('}')
+        consume('format')
       } else {
+        enforce(!node.format, 'Unrecognized format used:', node.format)
+      }
+
+      if (node.pattern) {
+        const p = patterns(node.pattern)
+        validateTypeApplicable('string')
+        if (type !== 'string') fun.write('if (%s) {', types.string(name))
+        fun.write('if (!(%s.test(%s))) {', p, name)
+        error('pattern mismatch')
+        fun.write('}')
+        if (type !== 'string') fun.write('}')
+        consume('pattern')
+      }
+    }
+
+    const checkArrays = () => {
+      if (node.maxItems !== undefined) {
+        enforce(Number.isFinite(node.maxItems), 'Invalid maxItems:', node.maxItems)
+        if (Array.isArray(node.items) && node.items.length > node.maxItems)
+          fail(`Invalid maxItems: ${node.maxItems} is less than items array length`)
+        validateTypeApplicable('array')
+        if (type !== 'array') fun.write('if (%s) {', types.array(name))
+
+        fun.write('if (%s.length > %d) {', name, node.maxItems)
+        error('has more items than allowed')
+        fun.write('}')
+
+        if (type !== 'array') fun.write('}')
+        consume('maxItems')
+      }
+
+      if (node.minItems !== undefined) {
+        enforce(Number.isFinite(node.minItems), 'Invalid minItems:', node.minItems)
+        // can be higher that .items length with additionalItems
+        validateTypeApplicable('array')
+        if (type !== 'array') fun.write('if (%s) {', types.array(name))
+
+        fun.write('if (%s.length < %d) {', name, node.minItems)
+        error('has less items than allowed')
+        fun.write('}')
+
+        if (type !== 'array') fun.write('}')
+        consume('minItems')
+      }
+
+      if (node.items || node.items === false) {
+        validateTypeApplicable('array')
+        if (type !== 'array') fun.write('if (%s) {', types.array(name))
+
+        if (Array.isArray(node.items)) {
+          for (let p = 0; p < node.items.length; p++) {
+            if (Array.isArray(type) && type.indexOf('null') !== -1)
+              fun.write('if (%s !== null) {', name)
+            rule(genobj(name, p), node.items[p], subPath(`${p}`))
+            if (Array.isArray(type) && type.indexOf('null') !== -1) fun.write('}')
+          }
+        } else {
+          const i = genloop()
+          fun.write('for (let %s = 0; %s < %s.length; %s++) {', i, i, name, i)
+          rule(`${name}[${i}]`, node.items, subPath('items'))
+          fun.write('}')
+        }
+
+        if (type !== 'array') fun.write('}')
+        consume('items')
+      } else if (typeApplicable('array')) {
+        enforceValidation('items rule must be specified')
+      }
+
+      if (!Array.isArray(node.items)) {
+        // additionalItems is allowed, but ignored per some spec tests in this case!
+        // We do nothing and let it throw except for in allowUnusedKeywords mode
+        // As a result, this is not allowed by default, only in allowUnusedKeywords mode
+      } else if (node.additionalItems === false) {
+        validateTypeApplicable('array')
+        if (type !== 'array') fun.write('if (%s) {', types.array(name))
+        fun.write('if (%s.length > %d) {', name, node.items.length)
+        error('has additional items')
+        fun.write('}')
+        if (type !== 'array') fun.write('}')
+        consume('additionalItems')
+      } else if (node.additionalItems) {
+        validateTypeApplicable('array')
+        if (type !== 'array') fun.write('if (%s) {', types.array(name))
+        const i = genloop()
+        fun.write('for (let %s = %d; %s < %s.length; %s++) {', i, node.items.length, i, name, i)
+        rule(`${name}[${i}]`, node.additionalItems, subPath('additionalItems'))
+        fun.write('}')
+        if (type !== 'array') fun.write('}')
+        consume('additionalItems')
+      } else if (node.items.length === node.maxItems) {
+        // No additional items are possible
+      } else {
+        enforceValidation('additionalItems rule must be specified for fixed arrays')
+      }
+
+      if (node.contains || node.contains === false) {
+        validateTypeApplicable('array')
+        if (type !== 'array') fun.write('if (%s) {', types.array(name))
+
+        const prev = gensym('prev')
+        const passes = gensym('passes')
+        fun.write('let %s = 0', passes)
+
         const i = genloop()
         fun.write('for (let %s = 0; %s < %s.length; %s++) {', i, i, name, i)
-        rule(`${name}[${i}]`, node.items, subPath('items'))
-        fun.write('}')
-      }
-
-      if (type !== 'array') fun.write('}')
-      consume('items')
-    } else if (typeApplicable('array')) {
-      enforceValidation('items rule must be specified')
-    }
-
-    if (!Array.isArray(node.items)) {
-      // additionalItems is allowed, but ignored per some spec tests in this case!
-      // We do nothing and let it throw except for in allowUnusedKeywords mode
-      // As a result, this is not allowed by default, only in allowUnusedKeywords mode
-    } else if (node.additionalItems === false) {
-      validateTypeApplicable('array')
-      if (type !== 'array') fun.write('if (%s) {', types.array(name))
-      fun.write('if (%s.length > %d) {', name, node.items.length)
-      error('has additional items')
-      fun.write('}')
-      if (type !== 'array') fun.write('}')
-      consume('additionalItems')
-    } else if (node.additionalItems) {
-      validateTypeApplicable('array')
-      if (type !== 'array') fun.write('if (%s) {', types.array(name))
-      const i = genloop()
-      fun.write('for (let %s = %d; %s < %s.length; %s++) {', i, node.items.length, i, name, i)
-      rule(`${name}[${i}]`, node.additionalItems, subPath('additionalItems'))
-      fun.write('}')
-      if (type !== 'array') fun.write('}')
-      consume('additionalItems')
-    } else if (node.items.length === node.maxItems) {
-      // No additional items are possible
-    } else {
-      enforceValidation('additionalItems rule must be specified for fixed arrays')
-    }
-
-    if (node.contains || node.contains === false) {
-      validateTypeApplicable('array')
-      if (type !== 'array') fun.write('if (%s) {', types.array(name))
-
-      const prev = gensym('prev')
-      const passes = gensym('passes')
-      fun.write('let %s = 0', passes)
-
-      const i = genloop()
-      fun.write('for (let %s = 0; %s < %s.length; %s++) {', i, i, name, i)
-      fun.write('const %s = errors', prev)
-      subrule(`${name}[${i}]`, node.contains, subPath('contains'))
-      fun.write('if (%s === errors) {', prev)
-      fun.write('%s++', passes)
-      fun.write('} else {')
-      fun.write('errors = %s', prev)
-      fun.write('}')
-      fun.write('}')
-
-      if (Number.isFinite(node.minContains)) {
-        fun.write('if (%s < %d) {', passes, node.minContains)
-        error('array contains too few matching items')
-        fun.write('}')
-        consume('minContains')
-      } else {
-        fun.write('if (%s < 1) {', passes)
-        error('array does not contain a match')
-        fun.write('}')
-      }
-
-      if (Number.isFinite(node.maxContains)) {
-        fun.write('if (%s > %d) {', passes, node.maxContains)
-        error('array contains too many matching items')
-        fun.write('}')
-        consume('maxContains')
-      }
-
-      if (type !== 'array') fun.write('}')
-      consume('contains')
-    }
-
-    if (node.uniqueItems === true) {
-      validateTypeApplicable('array')
-      if (type !== 'array') fun.write('if (%s) {', types.array(name))
-      scope.unique = functions.unique
-      scope.deepEqual = functions.deepEqual
-      fun.write('if (!(unique(%s))) {', name)
-      error('must be unique')
-      fun.write('}')
-      if (type !== 'array') fun.write('}')
-      consume('uniqueItems')
-    } else if (node.uniqueItems === false) {
-      consume('uniqueItems')
-    }
-
-    // Objects
-
-    if (node.maxProperties !== undefined) {
-      enforce(Number.isFinite(node.maxProperties), 'Invalid maxProperties:', node.maxProperties)
-      validateTypeApplicable('object')
-      if (type !== 'object') fun.write('if (%s) {', types.object(name))
-
-      fun.write('if (Object.keys(%s).length > %d) {', name, node.maxProperties)
-      error('has more properties than allowed')
-      fun.write('}')
-
-      if (type !== 'object') fun.write('}')
-      consume('maxProperties')
-    }
-
-    if (node.minProperties !== undefined) {
-      enforce(Number.isFinite(node.minProperties), 'Invalid minProperties:', node.minProperties)
-      validateTypeApplicable('object')
-      if (type !== 'object') fun.write('if (%s) {', types.object(name))
-
-      fun.write('if (Object.keys(%s).length < %d) {', name, node.minProperties)
-      error('has less properties than allowed')
-      fun.write('}')
-
-      if (type !== 'object') fun.write('}')
-      consume('minProperties')
-    }
-
-    if (typeof node.propertyNames === 'object' || typeof node.propertyNames === 'boolean') {
-      validateTypeApplicable('object')
-      if (type !== 'object') fun.write('if (%s) {', types.object(name))
-      const key = gensym('key')
-      fun.write('for (const %s of Object.keys(%s)) {', key, name)
-      const nameSchema =
-        typeof node.propertyNames === 'object'
-          ? { type: 'string', ...node.propertyNames }
-          : node.propertyNames
-      rule(key, nameSchema, subPath('propertyNames'))
-      fun.write('}')
-      if (type !== 'object') fun.write('}')
-      consume('propertyNames')
-    }
-    if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object') {
-      enforceValidation('wild-card additionalProperties requires propertyNames')
-    }
-
-    if (Array.isArray(node.required)) {
-      validateTypeApplicable('object')
-      if (type !== 'object') fun.write('if (%s) {', types.object(name))
-      for (const req of node.required) {
-        const prop = genobj(name, req)
-        fun.write('if (%s === undefined) {', prop)
-        error('is required', prop)
-        fun.write('}')
-      }
-      if (type !== 'object') fun.write('}')
-      consume('required')
-    }
-
-    if (node.dependencies) {
-      validateTypeApplicable('object')
-      if (type !== 'object') fun.write('if (%s) {', types.object(name))
-
-      for (const key of Object.keys(node.dependencies)) {
-        let deps = node.dependencies[key]
-        if (typeof deps === 'string') deps = [deps]
-
-        const exists = (k) => `${genobj(name, k)} !== undefined`
-        const item = genobj(name, key)
-
-        if (Array.isArray(deps)) {
-          const condition = deps.map(exists).join(' && ') || 'true'
-          fun.write('if (%s !== undefined && !(%s)) {', item, condition)
-          error('dependencies not set')
-          fun.write('}')
-        } else if (typeof deps === 'object' || typeof deps === 'boolean') {
-          fun.write('if (%s !== undefined) {', item)
-          rule(name, deps, subPath('dependencies', key))
-          fun.write('}')
-        } else {
-          fail('Unexpected dependencies entry')
-        }
-      }
-
-      if (type !== 'object') fun.write('}')
-      consume('dependencies')
-    }
-
-    if (typeof node.properties === 'object') {
-      validateTypeApplicable('object')
-      for (const p of Object.keys(node.properties)) {
-        rule(genobj(name, p), node.properties[p], subPath('properties', p))
-      }
-      consume('properties')
-    }
-
-    if (node.patternProperties) {
-      validateTypeApplicable('object')
-      if (type !== 'object') fun.write('if (%s) {', types.object(name))
-      const key = gensym('key')
-      fun.write('for (const %s of Object.keys(%s)) {', key, name)
-
-      for (const p of Object.keys(node.patternProperties)) {
-        fun.write('if (%s.test(%s)) {', patterns(p), key)
-        rule(`${name}[${key}]`, node.patternProperties[p], subPath('patternProperties', p))
-        fun.write('}')
-      }
-
-      fun.write('}')
-      if (type !== 'object') fun.write('}')
-      consume('patternProperties')
-    }
-
-    if (node.additionalProperties || node.additionalProperties === false) {
-      validateTypeApplicable('object')
-      if (type !== 'object') fun.write('if (%s) {', types.object(name))
-
-      const key = gensym('key')
-
-      const toCompare = (p) => `${key} !== ${JSON.stringify(p)}`
-      const toTest = (p) => `!${patterns(p)}.test(${key})`
-
-      const additionalProp =
-        Object.keys(node.properties || {})
-          .map(toCompare)
-          .concat(Object.keys(node.patternProperties || {}).map(toTest))
-          .join(' && ') || 'true'
-
-      fun.write('for (const %s of Object.keys(%s)) {', key, name)
-      fun.write('if (%s) {', additionalProp)
-
-      if (node.additionalProperties === false) {
-        error('has additional properties', null, `${JSON.stringify(`${name}.`)} + ${key}`)
-      } else {
-        rule(`${name}[${key}]`, node.additionalProperties, subPath('additionalProperties'))
-      }
-
-      fun.write('}')
-      fun.write('}')
-
-      if (type !== 'object') fun.write('}')
-      consume('additionalProperties')
-    } else if (typeApplicable('object')) {
-      enforceValidation('additionalProperties rule must be specified')
-    }
-
-    // Generic
-
-    if (node.const !== undefined) {
-      const complex = typeof node.const === 'object'
-      const compare = makeCompare(name, complex)
-      fun.write('if (!%s) {', compare(node.const))
-      error('must be const value')
-      fun.write('}')
-      consume('const')
-    } else if (node.enum) {
-      enforce(Array.isArray(node.enum), 'Invalid enum')
-      const complex = node.enum.some((e) => typeof e === 'object')
-      const compare = makeCompare(name, complex)
-      fun.write('if (!(%s)) {', node.enum.map(compare).join(' || '))
-      error('must be an enum value')
-      fun.write('}')
-      consume('enum')
-    }
-
-    if (node.not || node.not === false) {
-      const prev = gensym('prev')
-      fun.write('const %s = errors', prev)
-      subrule(name, node.not, subPath('not'))
-      fun.write('if (%s === errors) {', prev)
-      error('negative schema matches')
-      fun.write('} else {')
-      fun.write('errors = %s', prev)
-      fun.write('}')
-      consume('not')
-    }
-
-    const thenOrElse = node.then || node.then === false || node.else || node.else === false
-    if ((node.if || node.if === false) && thenOrElse) {
-      const prev = gensym('prev')
-      fun.write('const %s = errors', prev)
-      subrule(name, node.if, subPath('if'))
-      fun.write('if (%s !== errors) {', prev)
-      fun.write('errors = %s', prev)
-      if (node.else || node.else === false) {
-        rule(name, node.else, subPath('else'))
-        consume('else')
-      }
-      if (node.then || node.then === false) {
-        fun.write('} else {')
-        rule(name, node.then, subPath('then'))
-        consume('then')
-      }
-      fun.write('}')
-      consume('if')
-    }
-
-    if (node.allOf) {
-      enforce(Array.isArray(node.allOf), 'Invalid allOf')
-      node.allOf.forEach((sch, key) => {
-        rule(name, sch, subPath('allOf', key))
-      })
-      consume('allOf')
-    }
-
-    if (node.anyOf && node.anyOf.length) {
-      enforce(Array.isArray(node.anyOf), 'Invalid anyOf')
-      const prev = gensym('prev')
-
-      node.anyOf.forEach((sch, i) => {
-        if (i === 0) {
-          fun.write('const %s = errors', prev)
-        } else {
-          fun.write('if (errors !== %s) {', prev)
-          fun.write('errors = %s', prev)
-        }
-        subrule(name, sch, schemaPath)
-      })
-      node.anyOf.forEach((sch, i) => {
-        if (i) fun.write('}')
-      })
-      fun.write('if (%s !== errors) {', prev)
-      error('no schemas match')
-      fun.write('}')
-      consume('anyOf')
-    }
-
-    if (node.oneOf && node.oneOf.length) {
-      enforce(Array.isArray(node.oneOf), 'Invalid oneOf')
-      const prev = gensym('prev')
-      const passes = gensym('passes')
-
-      fun.write('const %s = errors', prev)
-      fun.write('let %s = 0', passes)
-
-      for (const sch of node.oneOf) {
-        subrule(name, sch, schemaPath)
+        fun.write('const %s = errors', prev)
+        subrule(`${name}[${i}]`, node.contains, subPath('contains'))
         fun.write('if (%s === errors) {', prev)
         fun.write('%s++', passes)
         fun.write('} else {')
         fun.write('errors = %s', prev)
         fun.write('}')
+        fun.write('}')
+
+        if (Number.isFinite(node.minContains)) {
+          fun.write('if (%s < %d) {', passes, node.minContains)
+          error('array contains too few matching items')
+          fun.write('}')
+          consume('minContains')
+        } else {
+          fun.write('if (%s < 1) {', passes)
+          error('array does not contain a match')
+          fun.write('}')
+        }
+
+        if (Number.isFinite(node.maxContains)) {
+          fun.write('if (%s > %d) {', passes, node.maxContains)
+          error('array contains too many matching items')
+          fun.write('}')
+          consume('maxContains')
+        }
+
+        if (type !== 'array') fun.write('}')
+        consume('contains')
       }
 
-      fun.write('if (%s !== 1) {', passes)
-      error('no (or more than one) schemas match')
-      fun.write('}')
-      consume('oneOf')
+      if (node.uniqueItems === true) {
+        validateTypeApplicable('array')
+        if (type !== 'array') fun.write('if (%s) {', types.array(name))
+        scope.unique = functions.unique
+        scope.deepEqual = functions.deepEqual
+        fun.write('if (!(unique(%s))) {', name)
+        error('must be unique')
+        fun.write('}')
+        if (type !== 'array') fun.write('}')
+        consume('uniqueItems')
+      } else if (node.uniqueItems === false) {
+        consume('uniqueItems')
+      }
     }
+
+    const checkObjects = () => {
+      if (node.maxProperties !== undefined) {
+        enforce(Number.isFinite(node.maxProperties), 'Invalid maxProperties:', node.maxProperties)
+        validateTypeApplicable('object')
+        if (type !== 'object') fun.write('if (%s) {', types.object(name))
+
+        fun.write('if (Object.keys(%s).length > %d) {', name, node.maxProperties)
+        error('has more properties than allowed')
+        fun.write('}')
+
+        if (type !== 'object') fun.write('}')
+        consume('maxProperties')
+      }
+
+      if (node.minProperties !== undefined) {
+        enforce(Number.isFinite(node.minProperties), 'Invalid minProperties:', node.minProperties)
+        validateTypeApplicable('object')
+        if (type !== 'object') fun.write('if (%s) {', types.object(name))
+
+        fun.write('if (Object.keys(%s).length < %d) {', name, node.minProperties)
+        error('has less properties than allowed')
+        fun.write('}')
+
+        if (type !== 'object') fun.write('}')
+        consume('minProperties')
+      }
+
+      if (typeof node.propertyNames === 'object' || typeof node.propertyNames === 'boolean') {
+        validateTypeApplicable('object')
+        if (type !== 'object') fun.write('if (%s) {', types.object(name))
+        const key = gensym('key')
+        fun.write('for (const %s of Object.keys(%s)) {', key, name)
+        const nameSchema =
+          typeof node.propertyNames === 'object'
+            ? { type: 'string', ...node.propertyNames }
+            : node.propertyNames
+        rule(key, nameSchema, subPath('propertyNames'))
+        fun.write('}')
+        if (type !== 'object') fun.write('}')
+        consume('propertyNames')
+      }
+      if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object') {
+        enforceValidation('wild-card additionalProperties requires propertyNames')
+      }
+
+      if (Array.isArray(node.required)) {
+        validateTypeApplicable('object')
+        if (type !== 'object') fun.write('if (%s) {', types.object(name))
+        for (const req of node.required) {
+          const prop = genobj(name, req)
+          fun.write('if (%s === undefined) {', prop)
+          error('is required', prop)
+          fun.write('}')
+        }
+        if (type !== 'object') fun.write('}')
+        consume('required')
+      }
+
+      if (node.dependencies) {
+        validateTypeApplicable('object')
+        if (type !== 'object') fun.write('if (%s) {', types.object(name))
+
+        for (const key of Object.keys(node.dependencies)) {
+          let deps = node.dependencies[key]
+          if (typeof deps === 'string') deps = [deps]
+
+          const exists = (k) => `${genobj(name, k)} !== undefined`
+          const item = genobj(name, key)
+
+          if (Array.isArray(deps)) {
+            const condition = deps.map(exists).join(' && ') || 'true'
+            fun.write('if (%s !== undefined && !(%s)) {', item, condition)
+            error('dependencies not set')
+            fun.write('}')
+          } else if (typeof deps === 'object' || typeof deps === 'boolean') {
+            fun.write('if (%s !== undefined) {', item)
+            rule(name, deps, subPath('dependencies', key))
+            fun.write('}')
+          } else {
+            fail('Unexpected dependencies entry')
+          }
+        }
+
+        if (type !== 'object') fun.write('}')
+        consume('dependencies')
+      }
+
+      if (typeof node.properties === 'object') {
+        validateTypeApplicable('object')
+        for (const p of Object.keys(node.properties)) {
+          rule(genobj(name, p), node.properties[p], subPath('properties', p))
+        }
+        consume('properties')
+      }
+
+      if (node.patternProperties) {
+        validateTypeApplicable('object')
+        if (type !== 'object') fun.write('if (%s) {', types.object(name))
+        const key = gensym('key')
+        fun.write('for (const %s of Object.keys(%s)) {', key, name)
+
+        for (const p of Object.keys(node.patternProperties)) {
+          fun.write('if (%s.test(%s)) {', patterns(p), key)
+          rule(`${name}[${key}]`, node.patternProperties[p], subPath('patternProperties', p))
+          fun.write('}')
+        }
+
+        fun.write('}')
+        if (type !== 'object') fun.write('}')
+        consume('patternProperties')
+      }
+
+      if (node.additionalProperties || node.additionalProperties === false) {
+        validateTypeApplicable('object')
+        if (type !== 'object') fun.write('if (%s) {', types.object(name))
+
+        const key = gensym('key')
+
+        const toCompare = (p) => `${key} !== ${JSON.stringify(p)}`
+        const toTest = (p) => `!${patterns(p)}.test(${key})`
+
+        const additionalProp =
+          Object.keys(node.properties || {})
+            .map(toCompare)
+            .concat(Object.keys(node.patternProperties || {}).map(toTest))
+            .join(' && ') || 'true'
+
+        fun.write('for (const %s of Object.keys(%s)) {', key, name)
+        fun.write('if (%s) {', additionalProp)
+
+        if (node.additionalProperties === false) {
+          error('has additional properties', null, `${JSON.stringify(`${name}.`)} + ${key}`)
+        } else {
+          rule(`${name}[${key}]`, node.additionalProperties, subPath('additionalProperties'))
+        }
+
+        fun.write('}')
+        fun.write('}')
+
+        if (type !== 'object') fun.write('}')
+        consume('additionalProperties')
+      } else if (typeApplicable('object')) {
+        enforceValidation('additionalProperties rule must be specified')
+      }
+    }
+
+    const checkGeneric = () => {
+      if (node.const !== undefined) {
+        const complex = typeof node.const === 'object'
+        const compare = makeCompare(name, complex)
+        fun.write('if (!%s) {', compare(node.const))
+        error('must be const value')
+        fun.write('}')
+        consume('const')
+      } else if (node.enum) {
+        enforce(Array.isArray(node.enum), 'Invalid enum')
+        const complex = node.enum.some((e) => typeof e === 'object')
+        const compare = makeCompare(name, complex)
+        fun.write('if (!(%s)) {', node.enum.map(compare).join(' || '))
+        error('must be an enum value')
+        fun.write('}')
+        consume('enum')
+      }
+
+      if (node.not || node.not === false) {
+        const prev = gensym('prev')
+        fun.write('const %s = errors', prev)
+        subrule(name, node.not, subPath('not'))
+        fun.write('if (%s === errors) {', prev)
+        error('negative schema matches')
+        fun.write('} else {')
+        fun.write('errors = %s', prev)
+        fun.write('}')
+        consume('not')
+      }
+
+      const thenOrElse = node.then || node.then === false || node.else || node.else === false
+      if ((node.if || node.if === false) && thenOrElse) {
+        const prev = gensym('prev')
+        fun.write('const %s = errors', prev)
+        subrule(name, node.if, subPath('if'))
+        fun.write('if (%s !== errors) {', prev)
+        fun.write('errors = %s', prev)
+        if (node.else || node.else === false) {
+          rule(name, node.else, subPath('else'))
+          consume('else')
+        }
+        if (node.then || node.then === false) {
+          fun.write('} else {')
+          rule(name, node.then, subPath('then'))
+          consume('then')
+        }
+        fun.write('}')
+        consume('if')
+      }
+
+      if (node.allOf) {
+        enforce(Array.isArray(node.allOf), 'Invalid allOf')
+        node.allOf.forEach((sch, key) => {
+          rule(name, sch, subPath('allOf', key))
+        })
+        consume('allOf')
+      }
+
+      if (node.anyOf && node.anyOf.length) {
+        enforce(Array.isArray(node.anyOf), 'Invalid anyOf')
+        const prev = gensym('prev')
+
+        node.anyOf.forEach((sch, i) => {
+          if (i === 0) {
+            fun.write('const %s = errors', prev)
+          } else {
+            fun.write('if (errors !== %s) {', prev)
+            fun.write('errors = %s', prev)
+          }
+          subrule(name, sch, schemaPath)
+        })
+        node.anyOf.forEach((sch, i) => {
+          if (i) fun.write('}')
+        })
+        fun.write('if (%s !== errors) {', prev)
+        error('no schemas match')
+        fun.write('}')
+        consume('anyOf')
+      }
+
+      if (node.oneOf && node.oneOf.length) {
+        enforce(Array.isArray(node.oneOf), 'Invalid oneOf')
+        const prev = gensym('prev')
+        const passes = gensym('passes')
+
+        fun.write('const %s = errors', prev)
+        fun.write('let %s = 0', passes)
+
+        for (const sch of node.oneOf) {
+          subrule(name, sch, schemaPath)
+          fun.write('if (%s === errors) {', prev)
+          fun.write('%s++', passes)
+          fun.write('} else {')
+          fun.write('errors = %s', prev)
+          fun.write('}')
+        }
+
+        fun.write('if (%s !== 1) {', passes)
+        error('no (or more than one) schemas match')
+        fun.write('}')
+        consume('oneOf')
+      }
+    }
+
+    checkNumbers()
+    checkStrings()
+    checkArrays()
+    checkObjects()
+    checkGeneric()
 
     if (typeValidate !== 'true') fun.write('}') // type check
     finish()
