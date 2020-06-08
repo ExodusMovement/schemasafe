@@ -8,6 +8,7 @@
     "src/generate-function.js",
     "src/jaystring.js",
     "src/formats.js",
+    "src/scope-functions.js",
     "src/known-keywords.js",
     "src/pointer.js",
     "src/index.js"
