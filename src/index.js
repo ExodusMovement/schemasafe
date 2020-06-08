@@ -703,12 +703,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (typeof node.properties === 'object') {
       validateTypeApplicable('object')
       for (const p of Object.keys(node.properties)) {
-        if (Array.isArray(type) && type.indexOf('null') !== -1)
-          fun.write('if (%s !== null) {', name)
-
         rule(genobj(name, p), node.properties[p], subPath('properties', p))
-
-        if (Array.isArray(type) && type.indexOf('null') !== -1) fun.write('}')
       }
       consume('properties')
     }
