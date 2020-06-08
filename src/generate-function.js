@@ -21,16 +21,8 @@ module.exports = () => {
   return {
     write(fmt, ...args) {
       if (typeof fmt !== 'string') throw new Error('Format must be a string!')
-      if (args.length === 1 && fmt.indexOf('\n') > -1) {
-        // multiple lines with no parameters, push them separately for correct indent
-        const lines = fmt.trim().split('\n')
-        for (const line of lines) {
-          pushLine(line.trim())
-        }
-      } else {
-        // format + parameters case
-        pushLine(utilFormat(fmt, ...args))
-      }
+      if (fmt.includes('\n')) throw new Error('Only single lines are supported')
+      pushLine(args.length > 0 ? utilFormat(fmt, ...args) : fmt)
     },
 
     makeRawSource() {
