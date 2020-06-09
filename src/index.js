@@ -266,6 +266,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
     }
 
+    /* Preparation and methods, post-$ref validation will begin at the end of the function */
+
     const { type } = node
     if (!type) enforceValidation('type is required')
     if (type !== undefined && typeof type !== 'string' && !Array.isArray(type))
@@ -277,16 +279,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (t === 'any') enforceValidation('type = any is not allowed')
     }
 
-    const typeValidate = typeArray.map((t) => types[t](name)).join(' || ') || 'true'
-    if (typeValidate !== 'true') {
-      fun.write('if (!(%s)) {', typeValidate)
-      error('is the wrong type')
-      fun.write('} else {')
-    }
-    if (type) consume('type')
-
-    /* All checks below are expected to be independent, they are happening on the same code depth */
-
     const typeApplicable = (...types) =>
       !type || typeArray.includes('any') || typeArray.some((x) => types.includes(x))
 
@@ -297,6 +289,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
       return (e) => `(${name} === ${JSON.stringify(e)})`
     }
+
+    /* Checks inside blocks are independent, they are happening on the same code depth */
 
     const checkNumbers = () => {
       const applyMinMax = (value, operator, message) => {
@@ -659,25 +653,40 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
     }
 
+    const maybeWrap = (shouldWrap, fmt, args, close, writeBody) => {
+      if (!shouldWrap) return writeBody()
+      fun.block(fmt, args, close, writeBody)
+    }
+
     const typeWrap = (checkBlock, validTypes, queryType) => {
       const [funSize, unusedSize] = [fun.size(), unused.size]
-      if (validTypes.includes(type)) {
-        checkBlock()
-      } else {
-        fun.block('if (%s) {', [queryType], '}', checkBlock)
-      }
+      maybeWrap(!validTypes.includes(type), 'if (%s) {', [queryType], '}', checkBlock)
       // enforce check that non-applicable blocks are empty and no rules were applied
       if (funSize !== fun.size() || unusedSize !== unused.size)
         enforce(typeApplicable(...validTypes), `Unexpected rules in type`, type)
     }
 
-    typeWrap(checkNumbers, ['number', 'integer'], types.number(name))
-    typeWrap(checkStrings, ['string'], types.string(name))
-    typeWrap(checkArrays, ['array'], types.array(name))
-    typeWrap(checkObjects, ['object'], types.object(name))
-    checkGeneric()
+    /* Actual post-$ref validation happens here */
+
+    const typeValidate = typeArray.map((t) => types[t](name)).join(' || ') || 'true'
+    if (typeValidate !== 'true') {
+      fun.write('if (!(%s)) {', typeValidate)
+      error('is the wrong type')
+    }
+    if (type) consume('type')
+
+    // If type validation was needed, we should wrap this inside an else clause.
+    // No need to close, type validation would always close at the end if it's used.
+    maybeWrap(typeValidate !== 'true', '} else {', [], '', () => {
+      typeWrap(checkNumbers, ['number', 'integer'], types.number(name))
+      typeWrap(checkStrings, ['string'], types.string(name))
+      typeWrap(checkArrays, ['array'], types.array(name))
+      typeWrap(checkObjects, ['object'], types.object(name))
+      checkGeneric()
+    })
 
     if (typeValidate !== 'true') fun.write('}') // type check
+
     finish()
   }
 
