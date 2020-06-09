@@ -25,6 +25,24 @@ module.exports = () => {
       pushLine(args.length > 0 ? utilFormat(fmt, ...args) : fmt)
     },
 
+    size() {
+      return lines.length
+    },
+
+    block(fmt, args, close, writeBody) {
+      const oldIndent = indent
+      this.write(fmt, ...args)
+      const length = lines.length
+      writeBody()
+      if (length === lines.length) {
+        // no lines inside block, unwind the block
+        lines.pop()
+        indent = oldIndent
+        return
+      }
+      this.write(close)
+    },
+
     makeRawSource() {
       return lines.join('\n')
     },
