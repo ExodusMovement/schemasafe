@@ -127,6 +127,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('return false')
       }
     }
+    const errorIf = (fmt, args, ...errorArgs) => {
+      fun.write(`if (${fmt}) {`, ...args)
+      error(...errorArgs)
+      fun.write('}')
+    }
 
     const fail = (msg, value) => {
       const comment = value !== undefined ? ` ${JSON.stringify(value)}` : ''
@@ -142,9 +147,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforceValidation('schema = true is not allowed')
       } else {
         // node === false
-        fun.write('if (%s !== undefined) {', name)
-        error('is unexpected')
-        fun.write('}')
+        errorIf('%s !== undefined', [name], 'is unexpected')
       }
       return
     }
@@ -250,9 +253,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           fn = compile(sub, subRoot, { ...opts, includeErrors: false }, scope, path)
           scope[n] = fn
         }
-        fun.write('if (!(%s(%s))) {', n, name)
-        error('referenced schema does not match')
-        fun.write('}')
+        errorIf('!%s(%s)', [n, name], 'referenced schema does not match')
       } else {
         fail('failed to resolve $ref:', node.$ref)
       }
@@ -300,9 +301,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const checkNumbers = () => {
       const applyMinMax = (value, operator, message) => {
         enforce(Number.isFinite(value), 'Invalid minimum or maximum:', value)
-        fun.write('if (!(%d %s %s)) {', value, operator, name)
-        error(message)
-        fun.write('}')
+        errorIf('!(%d %s %s)', [value, operator, name], message)
       }
 
       if (Number.isFinite(node.exclusiveMinimum)) {
@@ -327,9 +326,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node[multipleOf] !== undefined) {
         enforce(Number.isFinite(node[multipleOf]), `Invalid ${multipleOf}:`, node[multipleOf])
         scope.isMultipleOf = functions.isMultipleOf
-        fun.write('if (!isMultipleOf(%s, %d)) {', name, node[multipleOf])
-        error('has a remainder')
-        fun.write('}')
+        errorIf('!isMultipleOf(%s, %d)', [name, node[multipleOf]], 'has a remainder')
         consume(multipleOf)
       }
     }
@@ -338,18 +335,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.maxLength !== undefined) {
         enforce(Number.isFinite(node.maxLength), 'Invalid maxLength:', node.maxLength)
         scope.stringLength = functions.stringLength
-        fun.write('if (stringLength(%s) > %d) {', name, node.maxLength)
-        error('has longer length than allowed')
-        fun.write('}')
+        errorIf('stringLength(%s) > %d', [name, node.maxLength], 'has longer length than allowed')
         consume('maxLength')
       }
 
       if (node.minLength !== undefined) {
         enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
         scope.stringLength = functions.stringLength
-        fun.write('if (stringLength(%s) < %d) {', name, node.minLength)
-        error('has less length than allowed')
-        fun.write('}')
+        errorIf('stringLength(%s) < %d', [name, node.minLength], 'has less length than allowed')
         consume('minLength')
       }
 
@@ -362,10 +355,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             scope[n] = format
             formatCache.set(format, n)
           }
-          const condition = format instanceof RegExp ? '!%s.test(%s)' : '!%s(%s)'
-          fun.write(`if (${condition}) {`, n, name)
-          error(`must be ${node.format} format`)
-          fun.write('}')
+          const isRegex = format instanceof RegExp
+          errorIf(isRegex ? '!%s.test(%s)' : '!%s(%s)', [n, name], `must be ${node.format} format`)
         } else {
           fail('Unrecognized format used:', node.format)
         }
@@ -376,9 +367,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.pattern) {
         const p = patterns(node.pattern)
-        fun.write('if (!(%s.test(%s))) {', p, name)
-        error('pattern mismatch')
-        fun.write('}')
+        errorIf('!%s.test(%s)', [p, name], 'pattern mismatch')
         consume('pattern')
       }
     }
@@ -388,18 +377,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Number.isFinite(node.maxItems), 'Invalid maxItems:', node.maxItems)
         if (Array.isArray(node.items) && node.items.length > node.maxItems)
           fail(`Invalid maxItems: ${node.maxItems} is less than items array length`)
-        fun.write('if (%s.length > %d) {', name, node.maxItems)
-        error('has more items than allowed')
-        fun.write('}')
+        errorIf('%s.length > %d', [name, node.maxItems], 'has more items than allowed')
         consume('maxItems')
       }
 
       if (node.minItems !== undefined) {
         enforce(Number.isFinite(node.minItems), 'Invalid minItems:', node.minItems)
         // can be higher that .items length with additionalItems
-        fun.write('if (%s.length < %d) {', name, node.minItems)
-        error('has less items than allowed')
-        fun.write('}')
+        errorIf('%s.length < %d', [name, node.minItems], 'has less items than allowed')
         consume('minItems')
       }
 
@@ -409,9 +394,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             rule(genobj(name, p), node.items[p], subPath(`${p}`))
         } else {
           const i = genloop()
-          fun.write('for (let %s = 0; %s < %s.length; %s++) {', i, i, name, i)
-          rule(`${name}[${i}]`, node.items, subPath('items'))
-          fun.write('}')
+          fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
+            rule(`${name}[${i}]`, node.items, subPath('items'))
+          })
         }
         consume('items')
       } else if (typeApplicable('array')) {
@@ -423,15 +408,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         // We do nothing and let it throw except for in allowUnusedKeywords mode
         // As a result, this is not allowed by default, only in allowUnusedKeywords mode
       } else if (node.additionalItems === false) {
-        fun.write('if (%s.length > %d) {', name, node.items.length)
-        error('has additional items')
-        fun.write('}')
+        errorIf('%s.length > %d', [name, node.items.length], 'has additional items')
         consume('additionalItems')
       } else if (node.additionalItems) {
         const i = genloop()
-        fun.write('for (let %s = %d; %s < %s.length; %s++) {', i, node.items.length, i, name, i)
-        rule(`${name}[${i}]`, node.additionalItems, subPath('additionalItems'))
-        fun.write('}')
+        const offset = node.items.length
+        fun.block('for (let %s = %d; %s < %s.length; %s++) {', [i, offset, i, name, i], '}', () => {
+          rule(`${name}[${i}]`, node.additionalItems, subPath('additionalItems'))
+        })
         consume('additionalItems')
       } else if (node.items.length === node.maxItems) {
         // No additional items are possible
@@ -456,20 +440,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('}')
 
         if (Number.isFinite(node.minContains)) {
-          fun.write('if (%s < %d) {', passes, node.minContains)
-          error('array contains too few matching items')
-          fun.write('}')
+          errorIf('%s < %d', [passes, node.minContains], 'array contains too few matching items')
           consume('minContains')
         } else {
-          fun.write('if (%s < 1) {', passes)
-          error('array does not contain a match')
-          fun.write('}')
+          errorIf('%s < 1', [passes], 'array does not contain a match')
         }
 
         if (Number.isFinite(node.maxContains)) {
-          fun.write('if (%s > %d) {', passes, node.maxContains)
-          error('array contains too many matching items')
-          fun.write('}')
+          errorIf('%s > %d', [passes, node.maxContains], 'array contains too many matching items')
           consume('maxContains')
         }
 
@@ -479,9 +457,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.uniqueItems === true) {
         scope.unique = functions.unique
         scope.deepEqual = functions.deepEqual
-        fun.write('if (!(unique(%s))) {', name)
-        error('must be unique')
-        fun.write('}')
+        errorIf('!unique(%s)', [name], 'must be unique')
         consume('uniqueItems')
       } else if (node.uniqueItems === false) {
         consume('uniqueItems')
@@ -491,29 +467,23 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const checkObjects = () => {
       if (node.maxProperties !== undefined) {
         enforce(Number.isFinite(node.maxProperties), 'Invalid maxProperties:', node.maxProperties)
-        fun.write('if (Object.keys(%s).length > %d) {', name, node.maxProperties)
-        error('has more properties than allowed')
-        fun.write('}')
+        errorIf('Object.keys(%s).length > %d', [name, node.maxProperties], 'too many properties')
         consume('maxProperties')
       }
 
       if (node.minProperties !== undefined) {
         enforce(Number.isFinite(node.minProperties), 'Invalid minProperties:', node.minProperties)
-        fun.write('if (Object.keys(%s).length < %d) {', name, node.minProperties)
-        error('has less properties than allowed')
-        fun.write('}')
+        errorIf('Object.keys(%s).length < %d', [name, node.minProperties], 'too few properties')
         consume('minProperties')
       }
 
       if (typeof node.propertyNames === 'object' || typeof node.propertyNames === 'boolean') {
         const key = gensym('key')
-        fun.write('for (const %s of Object.keys(%s)) {', key, name)
-        const nameSchema =
-          typeof node.propertyNames === 'object'
-            ? { type: 'string', ...node.propertyNames }
-            : node.propertyNames
-        rule(key, nameSchema, subPath('propertyNames'))
-        fun.write('}')
+        fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
+          const names = node.propertyNames
+          const nameSchema = typeof names === 'object' ? { type: 'string', ...names } : names
+          rule(key, nameSchema, subPath('propertyNames'))
+        })
         consume('propertyNames')
       }
       if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object') {
@@ -523,9 +493,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (Array.isArray(node.required)) {
         for (const req of node.required) {
           const prop = genobj(name, req)
-          fun.write('if (%s === undefined) {', prop)
-          error('is required', prop)
-          fun.write('}')
+          errorIf('%s === undefined', [prop], 'is required', prop)
         }
         consume('required')
       }
@@ -540,13 +508,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
           if (Array.isArray(deps)) {
             const condition = deps.map(exists).join(' && ') || 'true'
-            fun.write('if (%s !== undefined && !(%s)) {', item, condition)
-            error('dependencies not set')
-            fun.write('}')
+            errorIf('%s !== undefined && !(%s)', [item, condition], 'dependencies not set')
           } else if (typeof deps === 'object' || typeof deps === 'boolean') {
-            fun.write('if (%s !== undefined) {', item)
-            rule(name, deps, subPath('dependencies', key))
-            fun.write('}')
+            fun.block('if (%s !== undefined) {', [item], '}', () => {
+              rule(name, deps, subPath('dependencies', key))
+            })
           } else {
             fail('Unexpected dependencies entry')
           }
@@ -563,13 +529,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.patternProperties) {
         const key = gensym('key')
-        fun.write('for (const %s of Object.keys(%s)) {', key, name)
-        for (const p of Object.keys(node.patternProperties)) {
-          fun.write('if (%s.test(%s)) {', patterns(p), key)
-          rule(`${name}[${key}]`, node.patternProperties[p], subPath('patternProperties', p))
-          fun.write('}')
-        }
-        fun.write('}')
+        fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
+          for (const p of Object.keys(node.patternProperties)) {
+            fun.block('if (%s.test(%s)) {', [patterns(p), key], '}', () => {
+              rule(`${name}[${key}]`, node.patternProperties[p], subPath('patternProperties', p))
+            })
+          }
+        })
         consume('patternProperties')
       }
 
@@ -577,23 +543,20 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const key = gensym('key')
         const toCompare = (p) => `${key} !== ${JSON.stringify(p)}`
         const toTest = (p) => `!${patterns(p)}.test(${key})`
-
         const additionalProp =
           Object.keys(node.properties || {})
             .map(toCompare)
             .concat(Object.keys(node.patternProperties || {}).map(toTest))
             .join(' && ') || 'true'
-
-        fun.write('for (const %s of Object.keys(%s)) {', key, name)
-        fun.write('if (%s) {', additionalProp)
-        if (node.additionalProperties === false) {
-          error('has additional properties', null, `${JSON.stringify(`${name}.`)} + ${key}`)
-        } else {
-          rule(`${name}[${key}]`, node.additionalProperties, subPath('additionalProperties'))
-        }
-        fun.write('}')
-        fun.write('}')
-
+        fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
+          fun.block('if (%s) {', [additionalProp], '}', () => {
+            if (node.additionalProperties === false) {
+              error('has additional properties', null, `${JSON.stringify(`${name}.`)} + ${key}`)
+            } else {
+              rule(`${name}[${key}]`, node.additionalProperties, subPath('additionalProperties'))
+            }
+          })
+        })
         consume('additionalProperties')
       } else if (typeApplicable('object')) {
         enforceValidation('additionalProperties rule must be specified')
@@ -604,17 +567,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.const !== undefined) {
         const complex = typeof node.const === 'object'
         const compare = makeCompare(name, complex)
-        fun.write('if (!%s) {', compare(node.const))
-        error('must be const value')
-        fun.write('}')
+        errorIf('!%s', [compare(node.const)], 'must be const value')
         consume('const')
       } else if (node.enum) {
         enforce(Array.isArray(node.enum), 'Invalid enum')
         const complex = node.enum.some((e) => typeof e === 'object')
         const compare = makeCompare(name, complex)
-        fun.write('if (!(%s)) {', node.enum.map(compare).join(' || '))
-        error('must be an enum value')
-        fun.write('}')
+        errorIf('!(%s)', [node.enum.map(compare).join(' || ')], 'must be an enum value')
         consume('enum')
       }
 
@@ -685,10 +644,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Array.isArray(node.oneOf), 'Invalid oneOf')
         const prev = gensym('prev')
         const passes = gensym('passes')
-
         fun.write('const %s = errors', prev)
         fun.write('let %s = 0', passes)
-
         for (const sch of node.oneOf) {
           subrule(name, sch, schemaPath)
           fun.write('if (%s === errors) {', prev)
@@ -697,10 +654,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           fun.write('errors = %s', prev)
           fun.write('}')
         }
-
-        fun.write('if (%s !== 1) {', passes)
-        error('no (or more than one) schemas match')
-        fun.write('}')
+        errorIf('%s !== 1', [passes], 'no (or more than one) schemas match')
         consume('oneOf')
       }
     }
