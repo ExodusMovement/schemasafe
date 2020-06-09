@@ -209,27 +209,22 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const booleanRequired = getMeta().booleanRequired && typeof node.required === 'boolean'
+    if (node.default !== undefined && !applyDefault) consume('default') // unused in this case
+    const defaultIsPresent = node.default !== undefined && applyDefault // will consume on use
     if (isTopLevel) {
       // top-level data is coerced to null above, it can't be undefined
-      if (node.default !== undefined) {
-        enforce(!applyDefault, 'Can not apply default value at root')
-        consume('default')
-      }
+      if (defaultIsPresent) fail('Can not apply default value at root')
       if (node.required === true || node.required === false)
         fail('Can not apply boolean required at root')
-    } else if (node.default !== undefined || booleanRequired) {
+    } else if (defaultIsPresent || booleanRequired) {
       fun.write('if (%s === undefined) {', name)
-      let defaultApplied = false
-      if (node.default !== undefined) {
-        if (applyDefault) {
-          fun.write('%s = %s', name, jaystring(node.default))
-          defaultApplied = true
-        }
+      if (defaultIsPresent) {
+        fun.write('%s = %s', name, jaystring(node.default))
         consume('default')
       }
       if (booleanRequired) {
         if (node.required === true) {
-          if (!defaultApplied) error('is required')
+          if (!defaultIsPresent) error('is required')
           consume('required')
         } else if (node.required === false) {
           consume('required')
