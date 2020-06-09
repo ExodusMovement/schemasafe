@@ -675,6 +675,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           if (i) fun.write('}')
         })
         fun.write('if (%s !== errors) {', prev)
+        fun.write('errors = %s', prev)
         error('no schemas match')
         fun.write('}')
         consume('anyOf')
