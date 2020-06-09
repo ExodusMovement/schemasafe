@@ -10,6 +10,13 @@
     "prettier/standard"
   ],
   "rules": {
+    "no-restricted-syntax": [
+      2,
+      {
+        "selector": "MemberExpression[property.name='toString']",
+        "message": "Use template literals instead of .toString()"
+      }
+    ],
     "prefer-const": 2,
     "prefer-template": 2,
     "no-var": 2

@@ -13,7 +13,7 @@ const stringify = {
     if (Object.getPrototypeOf(func) !== Function.prototype)
       throw new Error('Can not stringify a function with unexpected prototype')
 
-    const stringified = func.toString()
+    const stringified = `${func}`
     if (func.prototype) return stringified // normal function
     if (isArrowFnWithParensRegex.test(stringified) || isArrowFnWithoutParensRegex.test(stringified))
       return stringified // Arrow function

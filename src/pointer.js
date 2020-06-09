@@ -47,7 +47,7 @@ function joinPath(base, sub) {
   base = base.replace(/#.*/, '')
   if (sub.startsWith('#')) return `${base}${sub}`
   if (!base.includes('/') || protocolRegex.test(sub)) return sub
-  if (protocolRegex.test(base)) return new URL(sub, base).toString()
+  if (protocolRegex.test(base)) return `${new URL(sub, base)}`
   if (sub.startsWith('/')) return sub
   return `${base.replace(/\/?[^/]*$/, '')}/${sub}`
 }
