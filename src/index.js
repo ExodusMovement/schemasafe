@@ -1,4 +1,3 @@
-const jaystring = require('./jaystring')
 const genfun = require('./generate-function')
 const { toPointer, resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
@@ -116,9 +115,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (verboseErrors) {
           const type = node.type || 'any'
           Object.assign(errorObject, { type, schemaPath: toPointer(schemaPath) })
-          writeErrorObject('{ ...%s, value: %s }', JSON.stringify(errorObject), value || name)
+          writeErrorObject('{ ...%j, value: %s }', errorObject, value || name)
         } else {
-          writeErrorObject('%s', JSON.stringify(errorObject))
+          writeErrorObject('%j', errorObject)
         }
       }
       if (allErrors) {
@@ -219,7 +218,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     } else if (defaultIsPresent || booleanRequired) {
       fun.write('if (%s === undefined) {', name)
       if (defaultIsPresent) {
-        fun.write('%s = %s', name, jaystring(node.default))
+        fun.write('%s = %j', name, node.default)
         consume('default')
       }
       if (booleanRequired) {
@@ -290,7 +289,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const checkNumbers = () => {
       const applyMinMax = (value, operator, message) => {
         enforce(Number.isFinite(value), 'Invalid minimum or maximum:', value)
-        errorIf('!(%d %s %s)', [value, operator, name], message)
+        errorIf('!(%d %c %s)', [value, operator, name], message)
       }
 
       if (Number.isFinite(node.exclusiveMinimum)) {

@@ -6,6 +6,7 @@
   "main": "src/index.js",
   "files": [
     "src/generate-function.js",
+    "src/safe-format.js",
     "src/jaystring.js",
     "src/formats.js",
     "src/scope-functions.js",

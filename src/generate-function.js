@@ -1,4 +1,4 @@
-const { format: utilFormat } = require('util')
+const { format } = require('./safe-format')
 const jaystring = require('./jaystring')
 
 const INDENT_START = /[{[]/
@@ -22,7 +22,7 @@ module.exports = () => {
     write(fmt, ...args) {
       if (typeof fmt !== 'string') throw new Error('Format must be a string!')
       if (fmt.includes('\n')) throw new Error('Only single lines are supported')
-      pushLine(args.length > 0 ? utilFormat(fmt, ...args) : fmt)
+      pushLine(args.length > 0 ? format(fmt, ...args) : fmt)
     },
 
     size() {
