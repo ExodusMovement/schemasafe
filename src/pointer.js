@@ -1,7 +1,5 @@
 'use strict'
 
-const { URL } = require('url')
-
 function toPointer(path) {
   if (path.length === 0) return ''
   return `#/${path.map((part) => `${part}`.replace(/~/g, '~0').replace(/\//g, '~1')).join('/')}`
