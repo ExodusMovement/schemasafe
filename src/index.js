@@ -37,7 +37,7 @@ const rootMeta = new WeakMap()
 const compile = (schema, root, opts, scope, basePathRoot) => {
   const {
     mode = 'default',
-    applyDefault = false,
+    useDefaults = false,
     includeErrors: optIncludeErrors = false,
     allErrors: optAllErrors = false,
     verboseErrors = false,
@@ -216,8 +216,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const booleanRequired = getMeta().booleanRequired && typeof node.required === 'boolean'
-    if (node.default !== undefined && !applyDefault) consume('default') // unused in this case
-    const defaultIsPresent = node.default !== undefined && applyDefault // will consume on use
+    if (node.default !== undefined && !useDefaults) consume('default') // unused in this case
+    const defaultIsPresent = node.default !== undefined && useDefaults // will consume on use
     if (isTopLevel) {
       // top-level data is coerced to null above, it can't be undefined
       if (defaultIsPresent) fail('Can not apply default value at root')
