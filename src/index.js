@@ -268,14 +268,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (type !== undefined && typeof type !== 'string' && !Array.isArray(type))
       fail('Unexpected type')
 
-    const typeArray = type ? (Array.isArray(type) ? type : [type]) : []
+    const typeArray = type ? (Array.isArray(type) ? type : [type]) : ['any']
     for (const t of typeArray) {
       enforce(typeof t === 'string' && types.hasOwnProperty(t), 'Unknown type:', t)
       if (t === 'any') enforceValidation('type = any is not allowed')
     }
 
     const typeApplicable = (...types) =>
-      !type || typeArray.includes('any') || typeArray.some((x) => types.includes(x))
+      typeArray.includes('any') || typeArray.some((x) => types.includes(x))
 
     const makeCompare = (name, complex) => {
       if (complex) {
@@ -663,7 +663,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     /* Actual post-$ref validation happens here */
 
-    const typeValidate = typeArray.map((t) => types[t](name)).join(' || ') || 'true'
+    const typeValidate = typeArray.map((t) => types[t](name)).join(' || ')
     if (typeValidate !== 'true') {
       fun.write('if (!(%s)) {', typeValidate)
       error('is the wrong type')
