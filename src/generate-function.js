@@ -18,6 +18,8 @@ module.exports = () => {
     if (INDENT_START.test(line[line.length - 1])) indent++
   }
 
+  const build = () => `return (${lines.join('\n')})`
+
   return {
     write(fmt, ...args) {
       if (typeof fmt !== 'string') throw new Error('Format must be a string!')
@@ -43,19 +45,15 @@ module.exports = () => {
       this.write(close)
     },
 
-    makeRawSource() {
-      return lines.join('\n')
-    },
-
     makeModule(scope = {}) {
       const scopeSource = Object.entries(scope)
         .map(([key, value]) => `const ${key} = ${jaystring(value)};`)
         .join('\n')
-      return `(function() {\n${scopeSource}\nreturn (${this.makeRawSource()})})();`
+      return `(function() {\n${scopeSource}\n${build()}})();`
     },
 
     makeFunction(scope = {}) {
-      const src = `return (${this.makeRawSource()})`
+      const src = build()
       const keys = Object.keys(scope)
       const vals = keys.map((key) => scope[key])
       // eslint-disable-next-line no-new-func
