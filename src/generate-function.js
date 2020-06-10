@@ -20,6 +20,16 @@ module.exports = () => {
 
   const build = () => `return (${lines.join('\n')})`
 
+  const processScope = (scope) => {
+    const entries = Object.entries(scope)
+    for (const [key, value] of entries) {
+      if (!/^[a-z][a-z0-9]*$/i.test(key)) throw new Error('Unexpected scope key!')
+      if (!(typeof value === 'function' || value instanceof RegExp))
+        throw new Error('Unexpected scope value!')
+    }
+    return entries
+  }
+
   return {
     write(fmt, ...args) {
       if (typeof fmt !== 'string') throw new Error('Format must be a string!')
@@ -46,16 +56,15 @@ module.exports = () => {
     },
 
     makeModule(scope = {}) {
-      const scopeSource = Object.entries(scope)
-        .map(([key, value]) => `const ${key} = ${jaystring(value)};`)
-        .join('\n')
-      return `(function() {\n${scopeSource}\n${build()}})();`
+      const scopeDefs = processScope(scope).map(([key, val]) => `const ${key} = ${jaystring(val)};`)
+      return `(function() {\n${scopeDefs.join('\n')}\n${build()}})();`
     },
 
     makeFunction(scope = {}) {
       const src = build()
-      const keys = Object.keys(scope)
-      const vals = keys.map((key) => scope[key])
+      const scopeEntries = processScope(scope)
+      const keys = scopeEntries.map((entry) => entry[0])
+      const vals = scopeEntries.map((entry) => entry[1])
       // eslint-disable-next-line no-new-func
       return Function(...keys, src)(...vals)
     },
