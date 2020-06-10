@@ -1,3 +1,4 @@
+const { format, safe, safeand, safeor } = require('./safe-format')
 const genfun = require('./generate-function')
 const { toPointer, resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
@@ -7,18 +8,19 @@ const KNOWN_KEYWORDS = require('./known-keywords')
 // name is assumed to be already processed and can contain complex paths
 const genobj = (name, property) => {
   if (!['string', 'number'].includes(typeof property)) throw new Error('Invalid property path')
-  return `${name}[${JSON.stringify(property)}]`
+  return format('%s[%j]', name, property)
 }
+const propvar = (name, key) => format('%s[%s]', name, key)
 
 const types = {}
-types.any = () => 'true'
-types.null = (name) => `${name} === null`
-types.boolean = (name) => `typeof ${name} === "boolean"`
-types.array = (name) => `Array.isArray(${name})`
-types.object = (name) => `typeof ${name} === "object" && ${name} && !Array.isArray(${name})`
-types.number = (name) => `typeof ${name} === "number"`
-types.integer = (name) => `Number.isInteger(${name})`
-types.string = (name) => `typeof ${name} === "string"`
+types.any = () => format('true')
+types.null = (name) => format('%s === null', name)
+types.boolean = (name) => format('typeof %s === "boolean"', name)
+types.array = (name) => format('Array.isArray(%s)', name)
+types.object = (n) => format('typeof %s === "object" && %s && !Array.isArray(%s)', n, n, n)
+types.number = (name) => format('typeof %s === "number"', name)
+types.integer = (name) => format('Number.isInteger(%s)', name)
+types.string = (name) => format('typeof %s === "string"', name)
 
 const scopeSyms = Symbol('syms')
 const scopeRefCache = Symbol('refcache')
@@ -76,7 +78,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (!syms.get(name)) syms.set(name, 0)
     const index = syms.get(name)
     syms.set(name, index + 1)
-    return name + index
+    return safe(`${name}${index}`)
   }
 
   const reversePatterns = {}
@@ -92,7 +94,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   const genloop = () => {
     const v = vars.shift()
     vars.push(v + v[0])
-    return v
+    return safe(v)
   }
 
   const fun = genfun()
@@ -169,7 +171,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       unused.delete(property)
     }
 
-    const isTopLevel = name === 'data'
+    const isTopLevel = `${name}` === 'data'
     const finish = () => {
       if (!isTopLevel) fun.write('}') // undefined check
       enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
@@ -287,9 +289,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const makeCompare = (name, complex) => {
       if (complex) {
         scope.deepEqual = functions.deepEqual
-        return (e) => `deepEqual(${name}, ${JSON.stringify(e)})`
+        return (e) => format('deepEqual(%s, %j)', name, e)
       }
-      return (e) => `(${name} === ${JSON.stringify(e)})`
+      return (e) => format(`(%s === %j)`, name, e)
     }
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
@@ -391,7 +393,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         } else {
           const i = genloop()
           fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
-            rule(`${name}[${i}]`, node.items, subPath('items'))
+            rule(propvar(name, i), node.items, subPath('items'))
           })
         }
         consume('items')
@@ -410,7 +412,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const i = genloop()
         const offset = node.items.length
         fun.block('for (let %s = %d; %s < %s.length; %s++) {', [i, offset, i, name, i], '}', () => {
-          rule(`${name}[${i}]`, node.additionalItems, subPath('additionalItems'))
+          rule(propvar(name, i), node.additionalItems, subPath('additionalItems'))
         })
         consume('additionalItems')
       } else if (node.items.length === node.maxItems) {
@@ -427,7 +429,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const i = genloop()
         fun.write('for (let %s = 0; %s < %s.length; %s++) {', i, i, name, i)
         fun.write('const %s = errors', prev)
-        subrule(`${name}[${i}]`, node.contains, subPath('contains'))
+        subrule(propvar(name, i), node.contains, subPath('contains'))
         fun.write('if (%s === errors) {', prev)
         fun.write('%s++', passes)
         fun.write('} else {')
@@ -499,11 +501,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           let deps = node.dependencies[key]
           if (typeof deps === 'string') deps = [deps]
 
-          const exists = (k) => `${genobj(name, k)} !== undefined`
+          const exists = (k) => format('%s !== undefined', genobj(name, k))
           const item = genobj(name, key)
 
           if (Array.isArray(deps)) {
-            const condition = deps.map(exists).join(' && ') || 'true'
+            const condition = safeand(...deps.map(exists))
             errorIf('%s !== undefined && !(%s)', [item, condition], 'dependencies not set')
           } else if (typeof deps === 'object' || typeof deps === 'boolean') {
             fun.block('if (%s !== undefined) {', [item], '}', () => {
@@ -528,7 +530,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
           for (const p of Object.keys(node.patternProperties)) {
             fun.block('if (%s.test(%s)) {', [patterns(p), key], '}', () => {
-              rule(`${name}[${key}]`, node.patternProperties[p], subPath('patternProperties', p))
+              rule(propvar(name, key), node.patternProperties[p], subPath('patternProperties', p))
             })
           }
         })
@@ -537,19 +539,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.additionalProperties || node.additionalProperties === false) {
         const key = gensym('key')
-        const toCompare = (p) => `${key} !== ${JSON.stringify(p)}`
-        const toTest = (p) => `!${patterns(p)}.test(${key})`
-        const additionalProp =
-          Object.keys(node.properties || {})
-            .map(toCompare)
-            .concat(Object.keys(node.patternProperties || {}).map(toTest))
-            .join(' && ') || 'true'
+        const toCompare = (p) => format(`%s !== %j`, key, p)
+        const toTest = (p) => format(`!%s.test(%s)`, patterns(p), key)
+        const additionalProp = safeand(
+          ...Object.keys(node.properties || {}).map(toCompare),
+          ...Object.keys(node.patternProperties || {}).map(toTest)
+        )
         fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
           fun.block('if (%s) {', [additionalProp], '}', () => {
             if (node.additionalProperties === false) {
-              error('has additional properties', null, `${JSON.stringify(`${name}.`)} + ${key}`)
+              error('has additional properties', null, format('%j + %s', `${name}.`, key))
             } else {
-              rule(`${name}[${key}]`, node.additionalProperties, subPath('additionalProperties'))
+              rule(propvar(name, key), node.additionalProperties, subPath('additionalProperties'))
             }
           })
         })
@@ -569,7 +570,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Array.isArray(node.enum), 'Invalid enum')
         const complex = node.enum.some((e) => typeof e === 'object')
         const compare = makeCompare(name, complex)
-        errorIf('!(%s)', [node.enum.map(compare).join(' || ')], 'must be an enum value')
+        errorIf('!(%s)', [safeor(...node.enum.map(compare))], 'must be an enum value')
         consume('enum')
       }
 
@@ -670,8 +671,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     /* Actual post-$ref validation happens here */
 
-    const typeValidate = typeArray.map((t) => types[t](name)).join(' || ')
-    if (typeValidate !== 'true') {
+    const typeValidate = safeor(...typeArray.map((t) => types[t](name)))
+    const needTypeValidation = `${typeValidate}` !== 'true'
+    if (needTypeValidation) {
       fun.write('if (!(%s)) {', typeValidate)
       error('is the wrong type')
     }
@@ -679,7 +681,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     // If type validation was needed, we should wrap this inside an else clause.
     // No need to close, type validation would always close at the end if it's used.
-    maybeWrap(typeValidate !== 'true', '} else {', [], '', () => {
+    maybeWrap(needTypeValidation, '} else {', [], '', () => {
       typeWrap(checkNumbers, ['number', 'integer'], types.number(name))
       typeWrap(checkStrings, ['string'], types.string(name))
       typeWrap(checkArrays, ['array'], types.array(name))
@@ -687,12 +689,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       checkGeneric()
     })
 
-    if (typeValidate !== 'true') fun.write('}') // type check
+    if (needTypeValidation) fun.write('}') // type check
 
     finish()
   }
 
-  visit(optAllErrors, optIncludeErrors, 'data', schema, [])
+  visit(optAllErrors, optIncludeErrors, safe('data'), schema, [])
 
   fun.write('return errors === 0')
   fun.write('}')
