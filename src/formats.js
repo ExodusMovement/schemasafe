@@ -4,10 +4,9 @@
  * 'style' also deliberately removed
  */
 
-module.exports = {
+const core = {
   email: (input) => input.indexOf('@') !== -1 && !/\s/.test(input),
   uri: /^[a-zA-Z][a-zA-Z0-9+-.]*:[^\s]*$/,
-  color: /(#?([0-9A-Fa-f]{3,6})\b)|(aqua)|(black)|(blue)|(fuchsia)|(gray)|(green)|(lime)|(maroon)|(navy)|(olive)|(orange)|(purple)|(red)|(silver)|(teal)|(white)|(yellow)|(rgb\(\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*\))|(rgb\(\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*\))/,
   hostname: (input) => {
     if (input.length > 255) return false
     if (!/^[a-zA-Z0-9.-]+$/.test(input)) return false
@@ -16,24 +15,12 @@ module.exports = {
       /^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])$/.test(part)
     )
   },
-  alpha: /^[a-zA-Z]+$/,
-  alphanumeric: /^[a-zA-Z0-9]+$/,
-  phone: (input) => {
-    if (input.length > 30) return false
-    if (!/^\+[0-9][0-9 ]{5,27}[0-9]$/.test(input)) return false
-    if (/ {2}/.test(input)) return false
-    const digits = input.substring(1).replace(/ /g, '').length
-    return digits >= 7 && digits <= 15
-  },
-  'utc-millisec': /^[0-9]{1,15}\.?[0-9]{0,15}$/,
-}
 
-/**
- * Formats below are mostly from ajv, "fast" mode (default)
- * additional length restrictions were added where applicable
- */
+  /**
+   * Formats below are mostly from ajv, "fast" mode (default)
+   * additional length restrictions were added where applicable
+   */
 
-Object.assign(module.exports, {
   // date: http://tools.ietf.org/html/rfc3339#section-5.6
   // date-time: http://tools.ietf.org/html/rfc3339#section-5.6
   // 11: 1990-01-01, 1: T, 9: 00:00:00., 12: maxiumum fraction length (non-standard), 6: +00:00
@@ -57,15 +44,37 @@ Object.assign(module.exports, {
     /^\s*(?:(?:(?:[0-9a-f]{1,4}:){7}(?:[0-9a-f]{1,4}|:))|(?:(?:[0-9a-f]{1,4}:){6}(?::[0-9a-f]{1,4}|(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(?:(?:[0-9a-f]{1,4}:){5}(?:(?:(?::[0-9a-f]{1,4}){1,2})|:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(?:(?:[0-9a-f]{1,4}:){4}(?:(?:(?::[0-9a-f]{1,4}){1,3})|(?:(?::[0-9a-f]{1,4})?:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9a-f]{1,4}:){3}(?:(?:(?::[0-9a-f]{1,4}){1,4})|(?:(?::[0-9a-f]{1,4}){0,2}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9a-f]{1,4}:){2}(?:(?:(?::[0-9a-f]{1,4}){1,5})|(?:(?::[0-9a-f]{1,4}){0,3}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9a-f]{1,4}:){1}(?:(?:(?::[0-9a-f]{1,4}){1,6})|(?:(?::[0-9a-f]{1,4}){0,4}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?::(?:(?:(?::[0-9a-f]{1,4}){1,7})|(?:(?::[0-9a-f]{1,4}){0,5}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(?:%.+)?\s*$/i.test(
       input
     ),
+
+  // TODO:
+  // iri, iri-reference, uri-reference, uri-template, json-pointer, relative-json-pointer,
+  // idn-email, idn-hostname
+}
+
+// Compatibility formats
+core['host-name'] = core['hostname'] // draft3 backwards compat
+core['ip-address'] = core['ipv4'] // draft3 backwards compat
+
+const optional = {
+  color: /(#?([0-9A-Fa-f]{3,6})\b)|(aqua)|(black)|(blue)|(fuchsia)|(gray)|(green)|(lime)|(maroon)|(navy)|(olive)|(orange)|(purple)|(red)|(silver)|(teal)|(white)|(yellow)|(rgb\(\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*\))|(rgb\(\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*,\s*(\d?\d%|100%)+\s*\))/,
+
+  // TODO: duration
+}
+
+const extra = {
+  alpha: /^[a-zA-Z]+$/,
+  alphanumeric: /^[a-zA-Z0-9]+$/,
+  'utc-millisec': /^[0-9]{1,15}\.?[0-9]{0,15}$/,
+  phone: (input) => {
+    if (input.length > 30) return false
+    if (!/^\+[0-9][0-9 ]{5,27}[0-9]$/.test(input)) return false
+    if (/ {2}/.test(input)) return false
+    const digits = input.substring(1).replace(/ /g, '').length
+    return digits >= 7 && digits <= 15
+  },
   // uuid: http://tools.ietf.org/html/rfc4122
   uuid: (input) =>
     input.length <= 36 + 9 &&
     /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input),
-})
+}
 
-/**
- * Compatibility formats
- */
-
-module.exports['host-name'] = module.exports['hostname'] // draft3 backwards compat
-module.exports['ip-address'] = module.exports['ipv4'] // draft3 backwards compat
+module.exports = { core, optional, extra }

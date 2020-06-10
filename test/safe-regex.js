@@ -4,10 +4,12 @@ const safeRegex = require('safe-regex')
 const formats = require('../src/formats')
 
 tape('safe-regex', function(t) {
-  let key
-  for (key in formats) {
-    if (formats[key] instanceof RegExp) {
-      t.ok(safeRegex(formats[key]), `${key} should be a safe regex`)
+  for (const type of Object.keys(formats)) {
+    let key
+    for (key of Object.keys(formats[type])) {
+      if (formats[type][key] instanceof RegExp) {
+        t.ok(safeRegex(formats[type][key]), `${key} should be a safe regex (in ${type})`)
+      }
     }
   }
 

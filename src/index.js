@@ -46,10 +46,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     requireValidation = opts.mode === 'strong',
     $schemaDefault = null,
     formats: optFormats = {},
+    optionalFormats = true,
+    extraFormats = false,
     schemas = {},
     ...unknown
   } = opts
-  const fmts = Object.assign({}, formats, optFormats)
+  const fmts = Object.assign(
+    {},
+    formats.core,
+    optionalFormats ? formats.optional : {},
+    extraFormats ? formats.extra : {},
+    optFormats
+  )
   if (Object.keys(unknown).length !== 0)
     throw new Error(`Unknown options: ${Object.keys(unknown).join(', ')}`)
 
