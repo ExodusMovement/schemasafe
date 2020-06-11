@@ -24,7 +24,6 @@ const unsupported = new Set([
   //  draft2019-09
   'anchor.json',
   'dependentSchemas.json',
-  'dependentRequired.json',
   'unevaluatedProperties.json',
   'unevaluatedItems.json',
   'defs.json',
