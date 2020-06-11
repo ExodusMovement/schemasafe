@@ -1,10 +1,10 @@
 const path = require('path')
-const orig = require('.')
+const orig = require('../..')
 
 // This is a bit evil, but used only in tests to avoid code duplication
 // and polluting the main index.js file
 
-const id = path.join(__dirname, 'src/index.js')
+const id = path.join(__dirname, '../../src/index.js')
 const indexModule = require.cache[id] // extract index.js module to override it
 
 // Sanity check
