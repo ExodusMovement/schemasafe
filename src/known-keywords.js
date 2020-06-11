@@ -32,6 +32,7 @@ module.exports = [
   'patternProperties',
   'propertyNames',
   'dependencies',
+  'dependentRequired',
   'enum',
   'const',
   'contains',

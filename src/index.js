@@ -524,9 +524,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('required')
       }
 
-      if (node.dependencies) {
-        for (const key of Object.keys(node.dependencies)) {
-          let deps = node.dependencies[key]
+      const dependencies = node.dependencies === undefined ? 'dependentRequired' : 'dependencies'
+      if (node[dependencies]) {
+        for (const key of Object.keys(node[dependencies])) {
+          let deps = node[dependencies][key]
           if (typeof deps === 'string') deps = [deps]
 
           const exists = (k) => present(propimm(name, k))
@@ -537,13 +538,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             errorIf('%s && !(%s)', [present(item), condition], 'dependencies not set')
           } else if (typeof deps === 'object' || typeof deps === 'boolean') {
             fun.block('if (%s) {', [present(item)], '}', () => {
-              rule(current, deps, subPath('dependencies', key))
+              rule(current, deps, subPath(dependencies, key))
             })
           } else {
             fail('Unexpected dependencies entry')
           }
         }
-        consume('dependencies')
+        consume(dependencies)
       }
 
       if (typeof node.properties === 'object') {
