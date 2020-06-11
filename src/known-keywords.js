@@ -1,53 +1,16 @@
 module.exports = [
-  '$schema',
-  'items',
-  'id', // up to draft4
-  '$id', // since draft6
-  'type',
-  'not',
-  'properties',
-  'additionalItems',
-  'additionalProperties',
-  'format',
-  'required',
-  'allOf',
-  'anyOf',
-  'oneOf',
-  'maximum',
-  'minimum',
-  'exclusiveMaximum',
-  'exclusiveMinimum',
-  'maxItems',
-  'minItems',
-  'maxLength',
-  'minLength',
-  'maxProperties',
-  'minProperties',
-  'multipleOf',
-  'divisibleBy',
-  'if',
-  'then',
-  'else',
-  'pattern',
-  'patternProperties',
-  'propertyNames',
-  'dependencies',
-  'dependentRequired',
-  'enum',
-  'const',
-  'contains',
-  'minContains',
-  'maxContains',
-  'uniqueItems',
-  '$ref',
-  'default',
-  'definitions', // up to draft7
-  '$defs', // since draft2019-09
-
+  '$schema', // version
+  ...['id', '$id', '$ref', 'definitions', '$defs'], // pointers
+  ...['type', 'required', 'default'], // generic
+  ...['enum', 'const'], // constant values
+  ...['not', 'allOf', 'anyOf', 'oneOf', 'if', 'then', 'else'], // logical checks
+  ...['maximum', 'minimum', 'exclusiveMaximum', 'exclusiveMinimum', 'multipleOf', 'divisibleBy'], // numbers
+  ...['items', 'maxItems', 'minItems', 'additionalItems'], // arrays, basic
+  ...['contains', 'minContains', 'maxContains', 'uniqueItems'], // arrays, complex
+  ...['maxLength', 'minLength', 'format', 'pattern'], // strings
+  ...['properties', 'maxProperties', 'minProperties', 'additionalProperties', 'patternProperties'], // objects
+  ...['propertyNames', 'dependencies', 'dependentRequired'], // objects
   // Unused meta keywords not affecting validation (annotations and comments)
   // https://json-schema.org/understanding-json-schema/reference/generic.html
-  'description',
-  'title',
-  'examples',
-  '$comment',
+  ...['description', 'title', 'examples', '$comment'], // unused
 ]
