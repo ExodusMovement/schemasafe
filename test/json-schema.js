@@ -7,6 +7,7 @@ const validator = require('../')
 const unsafe = new Set([
   'additionalItems.json/items is schema, no additionalItems',
   'additionalItems.json/additionalItems as false without items',
+  'additionalItems.json/additionalItems should not look in applicators, valid case',
   'maxContains.json/maxContains without contains is ignored',
   'minContains.json/minContains without contains is ignored',
   'ref.json/escaped pointer ref',
@@ -15,6 +16,10 @@ const unsafe = new Set([
   'if-then-else.json/ignore then without if',
   'if-then-else.json/ignore else without if',
   'if-then-else.json/non-interference across combined schemas',
+
+  // draft3 only
+  'draft3/additionalItems.json/additionalItems should not look in applicators',
+  'draft3/additionalProperties.json/additionalProperties should not look in applicators',
 ])
 
 const unsupported = new Set([
@@ -28,6 +33,7 @@ const unsupported = new Set([
   'unevaluatedItems.json',
   'defs.json',
   'draft2019-09/refRemote.json', // earlier versions are fine
+  'draft2019-09/id.json', // earlier versions are fine
   //  draft3 only
   'draft3/extends.json',
   'draft3/disallow.json',
@@ -52,7 +58,6 @@ const unsupported = new Set([
   //  draft2019-09
   'ref.json/ref creates new scope when adjacent to keywords',
   //  draft3 only
-  'draft3/additionalProperties.json/additionalProperties should not look in applicators',
   'draft3/type.json/types can include schemas',
   'draft3/type.json/when types includes a schema it should fully validate the schema',
   'draft3/type.json/types from separate schemas are merged',
@@ -62,7 +67,6 @@ const unsupported = new Set([
   'optional/format/regex.json', // deliberately unsupported
   'optional/ecmascript-regex.json', // deliberately unsupported
   'optional/format.json/validation of regular expressions', // deliberately unsupported
-  'optional/format/ecmascript-regex.json', // deliberately unsupported
   'optional/format.json/validation of JSON-pointers (JSON String Representation)',
   'optional/format.json/validation of URI References',
   'optional/format.json/format: uri-template',
@@ -80,7 +84,7 @@ const unsupported = new Set([
   'optional/refOfUnknownKeyword.json',
   'optional/format/duration.json',
   //  draft3 only
-  'draft3/optional/format.json/validation of CSS colors',
+  'draft3/optional/format/color.json',
 ])
 
 const schemaDir = path.join(__dirname, 'JSON-Schema-Test-Suite/tests')
