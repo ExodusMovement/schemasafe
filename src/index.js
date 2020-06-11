@@ -137,13 +137,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const name = buildName(current)
     const rule = (...args) => visit(allErrors, includeErrors, ...args)
     const subrule = (...args) => visit(true, false, ...args)
-    const writeErrorObject = (format, ...params) => {
+    const writeErrorObject = (error) => {
       if (allErrors) {
         fun.write('if (validate.errors === null) validate.errors = []')
-        fun.write(`validate.errors.push(${format})`, ...params)
+        fun.write('validate.errors.push(%s)', error)
       } else {
         // Array assignment is significantly faster, do not refactor the two branches
-        fun.write(`validate.errors = [${format}]`, ...params)
+        fun.write('validate.errors = [%s]', error)
         fun.write('return false')
       }
     }
@@ -153,9 +153,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (verboseErrors) {
           const type = node.type || 'any'
           Object.assign(errorObject, { type, schemaPath: toPointer(schemaPath) })
-          writeErrorObject('{ ...%j, value: %s }', errorObject, value || name)
+          writeErrorObject(format('{ ...%j, value: %s }', errorObject, value || name))
         } else {
-          writeErrorObject('%j', errorObject)
+          writeErrorObject(format('%j', errorObject))
         }
       }
       if (allErrors) {
@@ -165,7 +165,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
     }
     const errorIf = (fmt, args, ...errorArgs) => {
-      fun.write(`if (${fmt}) {`, ...args)
+      fun.write('if (%s) {', format(fmt, ...args))
       error(...errorArgs)
       fun.write('}')
     }
@@ -319,7 +319,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         scope.deepEqual = functions.deepEqual
         return (e) => format('deepEqual(%s, %j)', name, e)
       }
-      return (e) => format(`(%s === %j)`, name, e)
+      return (e) => format('(%s === %j)', name, e)
     }
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
@@ -381,8 +381,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             scope[n] = format
             formatCache.set(format, n)
           }
-          const isRegex = format instanceof RegExp
-          errorIf(isRegex ? '!%s.test(%s)' : '!%s(%s)', [n, name], `must be ${node.format} format`)
+          if (format instanceof RegExp) {
+            errorIf('!%s.test(%s)', [n, name], `must be ${node.format} format`)
+          } else {
+            errorIf('!%s(%s)', [n, name], `must be ${node.format} format`)
+          }
         } else {
           fail('Unrecognized format used:', node.format)
         }
@@ -568,8 +571,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.additionalProperties || node.additionalProperties === false) {
         const key = gensym('key')
-        const toCompare = (p) => format(`%s !== %j`, key, p)
-        const toTest = (p) => format(`!%s.test(%s)`, patterns(p), key)
+        const toCompare = (p) => format('%s !== %j', key, p)
+        const toTest = (p) => format('!%s.test(%s)', patterns(p), key)
         const additionalProp = safeand(
           ...Object.keys(node.properties || {}).map(toCompare),
           ...Object.keys(node.patternProperties || {}).map(toTest)
