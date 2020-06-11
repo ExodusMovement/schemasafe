@@ -5,13 +5,6 @@ const formats = require('./formats')
 const functions = require('./scope-functions')
 const KNOWN_KEYWORDS = require('./known-keywords')
 
-// name is assumed to be already processed and can contain complex paths
-const genobj = (name, property) => {
-  if (!['string', 'number'].includes(typeof property)) throw new Error('Invalid property path')
-  return format('%s[%j]', name, property)
-}
-const propvar = (name, key) => format('%s[%s]', name, key)
-
 const types = {}
 types.any = () => format('true')
 types.null = (name) => format('%s === null', name)
@@ -34,6 +27,25 @@ const schemaVersions = [
   'https://json-schema.org/draft-04/schema',
   'https://json-schema.org/draft-03/schema',
 ]
+
+// Helper methods for semi-structured paths
+const propvar = (name, key) => ({ parent: name, keyname: key }) // property by variable
+const propimm = (name, val) => ({ parent: name, keyval: val }) // property by immediate value
+const buildName = ({ name, parent, keyval, keyname }) => {
+  if (name) {
+    if (parent || keyval || keyname) throw new Error('name can be used only stand-alone')
+    return name // top-level
+  }
+  if (keyval && keyname) throw new Error('Can not use key value and name at the same time')
+  if (!parent) throw new Error('Can not use property of undefined parent!')
+  if (parent && keyval !== undefined) {
+    if (!['string', 'number'].includes(typeof keyval)) throw new Error('Invalid property path')
+    return format('%s[%j]', parent, keyval)
+  } else if (parent && keyname) {
+    return format('%s[%s]', parent, keyname)
+  }
+  throw new Error('Unreachable')
+}
 
 const rootMeta = new WeakMap()
 const compile = (schema, root, opts, scope, basePathRoot) => {
@@ -97,6 +109,21 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     return safe(v)
   }
 
+  const present = (location) => {
+    const name = buildName(location) // also checks for sanity, do not remove
+    const { parent, keyval, keyname } = location
+    if (parent) {
+      if (keyval) {
+        scope.ownPresent = functions.ownPresent
+        return format('ownPresent(%s, %j)', parent, keyval)
+      } else if (keyname) {
+        scope.ownPresent = functions.ownPresent
+        return format('ownPresent(%s, %s)', parent, keyname)
+      }
+    }
+    return format('%s !== undefined', name)
+  }
+
   const fun = genfun()
   fun.write('function validate(data) {')
   // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
@@ -106,7 +133,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
   const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
-  const visit = (allErrors, includeErrors, name, node, schemaPath) => {
+  const visit = (allErrors, includeErrors, current, node, schemaPath) => {
+    const name = buildName(current)
     const rule = (...args) => visit(allErrors, includeErrors, ...args)
     const subrule = (...args) => visit(true, false, ...args)
     const writeErrorObject = (format, ...params) => {
@@ -156,7 +184,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforceValidation('schema = true is not allowed')
       } else {
         // node === false
-        errorIf('%s !== undefined', [name], 'is unexpected')
+        errorIf('%s', [present(current)], 'is unexpected')
       }
       return
     }
@@ -171,7 +199,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       unused.delete(property)
     }
 
-    const isTopLevel = `${name}` === 'data'
+    const isTopLevel = !current.parent // e.g. top-level data and property names
     const finish = () => {
       if (!isTopLevel) fun.write('}') // undefined check
       enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
@@ -221,12 +249,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (node.default !== undefined && !useDefaults) consume('default') // unused in this case
     const defaultIsPresent = node.default !== undefined && useDefaults // will consume on use
     if (isTopLevel) {
-      // top-level data is coerced to null above, it can't be undefined
+      // top-level data is coerced to null above, or is an object key, it can't be undefined
       if (defaultIsPresent) fail('Can not apply default value at root')
       if (node.required === true || node.required === false)
         fail('Can not apply boolean required at root')
     } else if (defaultIsPresent || booleanRequired) {
-      fun.write('if (%s === undefined) {', name)
+      fun.write('if (!(%s)) {', present(current))
       if (defaultIsPresent) {
         fun.write('%s = %j', name, node.default)
         consume('default')
@@ -241,7 +269,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
       fun.write('} else {')
     } else {
-      fun.write('if (%s !== undefined) {', name)
+      fun.write('if (%s) {', present(current))
     }
 
     if (node.$ref) {
@@ -389,7 +417,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.items || node.items === false) {
         if (Array.isArray(node.items)) {
           for (let p = 0; p < node.items.length; p++)
-            rule(genobj(name, p), node.items[p], subPath(`${p}`))
+            rule(propimm(name, p), node.items[p], subPath(`${p}`))
         } else {
           const i = genloop()
           fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
@@ -480,7 +508,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
           const names = node.propertyNames
           const nameSchema = typeof names === 'object' ? { type: 'string', ...names } : names
-          rule(key, nameSchema, subPath('propertyNames'))
+          rule({ name: key }, nameSchema, subPath('propertyNames'))
         })
         consume('propertyNames')
       }
@@ -490,8 +518,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (Array.isArray(node.required)) {
         for (const req of node.required) {
-          const prop = genobj(name, req)
-          errorIf('%s === undefined', [prop], 'is required', prop)
+          const prop = propimm(name, req)
+          errorIf('!(%s)', [present(prop)], 'is required', buildName(prop))
         }
         consume('required')
       }
@@ -501,15 +529,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           let deps = node.dependencies[key]
           if (typeof deps === 'string') deps = [deps]
 
-          const exists = (k) => format('%s !== undefined', genobj(name, k))
-          const item = genobj(name, key)
+          const exists = (k) => present(propimm(name, k))
+          const item = propimm(name, key)
 
           if (Array.isArray(deps)) {
             const condition = safeand(...deps.map(exists))
-            errorIf('%s !== undefined && !(%s)', [item, condition], 'dependencies not set')
+            errorIf('%s && !(%s)', [present(item), condition], 'dependencies not set')
           } else if (typeof deps === 'object' || typeof deps === 'boolean') {
-            fun.block('if (%s !== undefined) {', [item], '}', () => {
-              rule(name, deps, subPath('dependencies', key))
+            fun.block('if (%s) {', [present(item)], '}', () => {
+              rule(current, deps, subPath('dependencies', key))
             })
           } else {
             fail('Unexpected dependencies entry')
@@ -520,7 +548,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (typeof node.properties === 'object') {
         for (const p of Object.keys(node.properties)) {
-          rule(genobj(name, p), node.properties[p], subPath('properties', p))
+          rule(propimm(name, p), node.properties[p], subPath('properties', p))
         }
         consume('properties')
       }
@@ -577,7 +605,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.not || node.not === false) {
         const prev = gensym('prev')
         fun.write('const %s = errors', prev)
-        subrule(name, node.not, subPath('not'))
+        subrule(current, node.not, subPath('not'))
         fun.write('if (%s === errors) {', prev)
         error('negative schema matches')
         fun.write('} else {')
@@ -590,16 +618,16 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if ((node.if || node.if === false) && thenOrElse) {
         const prev = gensym('prev')
         fun.write('const %s = errors', prev)
-        subrule(name, node.if, subPath('if'))
+        subrule(current, node.if, subPath('if'))
         fun.write('if (%s !== errors) {', prev)
         fun.write('errors = %s', prev)
         if (node.else || node.else === false) {
-          rule(name, node.else, subPath('else'))
+          rule(current, node.else, subPath('else'))
           consume('else')
         }
         if (node.then || node.then === false) {
           fun.write('} else {')
-          rule(name, node.then, subPath('then'))
+          rule(current, node.then, subPath('then'))
           consume('then')
         }
         fun.write('}')
@@ -609,7 +637,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.allOf) {
         enforce(Array.isArray(node.allOf), 'Invalid allOf')
         node.allOf.forEach((sch, key) => {
-          rule(name, sch, subPath('allOf', key))
+          rule(current, sch, subPath('allOf', key))
         })
         consume('allOf')
       }
@@ -625,7 +653,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             fun.write('if (errors !== %s) {', prev)
             fun.write('errors = %s', prev)
           }
-          subrule(name, sch, schemaPath)
+          subrule(current, sch, schemaPath)
         })
         node.anyOf.forEach((sch, i) => {
           if (i) fun.write('}')
@@ -644,7 +672,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('const %s = errors', prev)
         fun.write('let %s = 0', passes)
         for (const sch of node.oneOf) {
-          subrule(name, sch, schemaPath)
+          subrule(current, sch, schemaPath)
           fun.write('if (%s === errors) {', prev)
           fun.write('%s++', passes)
           fun.write('} else {')
@@ -694,7 +722,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     finish()
   }
 
-  visit(optAllErrors, optIncludeErrors, safe('data'), schema, [])
+  visit(optAllErrors, optIncludeErrors, { name: safe('data') }, schema, [])
 
   fun.write('return errors === 0')
   fun.write('}')
