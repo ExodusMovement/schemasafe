@@ -64,6 +64,7 @@ const unique = (array) => {
   return true
 }
 
-const hasOwn = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop)
+const ownPresent = (obj, prop) =>
+  Object.prototype.hasOwnProperty.call(obj, prop) && obj[prop] !== undefined
 
-module.exports = { stringLength, isMultipleOf, deepEqual, unique, hasOwn }
+module.exports = { stringLength, isMultipleOf, deepEqual, unique, ownPresent }

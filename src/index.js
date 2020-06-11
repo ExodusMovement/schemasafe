@@ -110,15 +110,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   }
 
   const present = (location) => {
-    const name = buildName(location) // also checks for sanity
+    const name = buildName(location) // also checks for sanity, do not remove
     const { parent, keyval, keyname } = location
     if (parent) {
       if (keyval) {
-        scope.hasOwn = functions.hasOwn
-        return format('hasOwn(%s, %j) && %s !== undefined', parent, keyval, name)
+        scope.ownPresent = functions.ownPresent
+        return format('ownPresent(%s, %j)', parent, keyval)
       } else if (keyname) {
-        scope.hasOwn = functions.hasOwn
-        return format('hasOwn(%s, %s) && %s !== undefined', parent, keyname, name)
+        scope.ownPresent = functions.ownPresent
+        return format('ownPresent(%s, %s)', parent, keyname)
       }
     }
     return format('%s !== undefined', name)
