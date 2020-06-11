@@ -5,14 +5,6 @@ const formats = require('./formats')
 const functions = require('./scope-functions')
 const KNOWN_KEYWORDS = require('./known-keywords')
 
-// name is assumed to be already processed and can contain complex paths
-const genobj = (name, property) => {
-  if (!['string', 'number'].includes(typeof property)) throw new Error('Invalid property path')
-  return format('%s[%j]', name, property)
-}
-const propvar = (name, key) => ({ parent: name, keyname: key }) // property by variable
-const propimm = (name, val) => ({ parent: name, keyval: val }) // property by immediate value
-
 const types = {}
 types.any = () => format('true')
 types.null = (name) => format('%s === null', name)
@@ -36,6 +28,9 @@ const schemaVersions = [
   'https://json-schema.org/draft-03/schema',
 ]
 
+// Helper methods for semi-structured paths
+const propvar = (name, key) => ({ parent: name, keyname: key }) // property by variable
+const propimm = (name, val) => ({ parent: name, keyval: val }) // property by immediate value
 const buildName = ({ name, parent, keyval, keyname }) => {
   if (name) {
     if (parent || keyval || keyname) throw new Error('name can be used only stand-alone')
@@ -114,6 +109,21 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     return safe(v)
   }
 
+  const present = (location) => {
+    const name = buildName(location) // also checks for sanity
+    const { parent, keyval, keyname } = location
+    if (parent) {
+      if (keyval) {
+        scope.hasOwn = functions.hasOwn
+        return format('hasOwn(%s, %j) && %s !== undefined', parent, keyval, name)
+      } else if (keyname) {
+        scope.hasOwn = functions.hasOwn
+        return format('hasOwn(%s, %s) && %s !== undefined', parent, keyname, name)
+      }
+    }
+    return format('%s !== undefined', name)
+  }
+
   const fun = genfun()
   fun.write('function validate(data) {')
   // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
@@ -174,7 +184,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforceValidation('schema = true is not allowed')
       } else {
         // node === false
-        errorIf('%s !== undefined', [name], 'is unexpected')
+        errorIf('%s', [present(current)], 'is unexpected')
       }
       return
     }
@@ -239,12 +249,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (node.default !== undefined && !useDefaults) consume('default') // unused in this case
     const defaultIsPresent = node.default !== undefined && useDefaults // will consume on use
     if (isTopLevel) {
-      // top-level data is coerced to null above, it can't be undefined
+      // top-level data is coerced to null above, or is an object key, it can't be undefined
       if (defaultIsPresent) fail('Can not apply default value at root')
       if (node.required === true || node.required === false)
         fail('Can not apply boolean required at root')
     } else if (defaultIsPresent || booleanRequired) {
-      fun.write('if (%s === undefined) {', name)
+      fun.write('if (!(%s)) {', present(current))
       if (defaultIsPresent) {
         fun.write('%s = %j', name, node.default)
         consume('default')
@@ -259,7 +269,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
       fun.write('} else {')
     } else {
-      fun.write('if (%s !== undefined) {', name)
+      fun.write('if (%s) {', present(current))
     }
 
     if (node.$ref) {
@@ -508,8 +518,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (Array.isArray(node.required)) {
         for (const req of node.required) {
-          const prop = genobj(name, req)
-          errorIf('%s === undefined', [prop], 'is required', prop)
+          const prop = propimm(name, req)
+          errorIf('!(%s)', [present(prop)], 'is required', buildName(prop))
         }
         consume('required')
       }
@@ -519,14 +529,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           let deps = node.dependencies[key]
           if (typeof deps === 'string') deps = [deps]
 
-          const exists = (k) => format('%s !== undefined', genobj(name, k))
-          const item = genobj(name, key)
+          const exists = (k) => present(propimm(name, k))
+          const item = propimm(name, key)
 
           if (Array.isArray(deps)) {
             const condition = safeand(...deps.map(exists))
-            errorIf('%s !== undefined && !(%s)', [item, condition], 'dependencies not set')
+            errorIf('%s && !(%s)', [present(item), condition], 'dependencies not set')
           } else if (typeof deps === 'object' || typeof deps === 'boolean') {
-            fun.block('if (%s !== undefined) {', [item], '}', () => {
+            fun.block('if (%s) {', [present(item)], '}', () => {
               rule(current, deps, subPath('dependencies', key))
             })
           } else {
