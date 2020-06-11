@@ -764,5 +764,5 @@ const parser = function(schema, opts = {}) {
   return parse
 }
 
+Object.assign(validator, { validator, parser })
 module.exports = validator
-Object.assign(module.exports, { validator, parser })
