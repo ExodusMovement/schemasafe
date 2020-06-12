@@ -50,8 +50,15 @@ const core = {
     input.length < 2100 &&
     /^(?:(?:[a-z][a-z0-9+-.]*:)?\/?\/)?(?:[^\\\s#][^\s#]*)?(?:#[^\\\s]*)?$/i.test(input),
 
+  // ajv has /^(?:\/(?:[^~/]|~0|~1)*)*$/, this is equivalent
+  // JSON-pointer: https://tools.ietf.org/html/rfc6901
+  'json-pointer': /^(?:|\/(?:[^~]|~0|~1)*)$/,
+  // ajv has /^(?:0|[1-9][0-9]*)(?:#|(?:\/(?:[^~/]|~0|~1)*)*)$/, this is equivalent
+  // relative JSON-pointer: http://tools.ietf.org/html/draft-luff-relative-json-pointer-00
+  'relative-json-pointer': /^(?:0|[1-9][0-9]*)(?:|#|\/(?:[^~]|~0|~1)*)$/,
+
   // TODO:
-  // iri, iri-reference, uri-template, json-pointer, relative-json-pointer,
+  // iri, iri-reference, uri-template,
   // idn-email, idn-hostname
 }
 
@@ -84,6 +91,10 @@ const extra = {
     const digits = input.substring(1).replace(/ /g, '').length
     return digits >= 7 && digits <= 15
   },
+
+  // ajv has /^#(?:\/(?:[a-z0-9_\-.!$&'()*+,;:=@]|%[0-9a-f]{2}|~0|~1)*)*$/i, this is equivalent
+  // uri fragment: https://tools.ietf.org/html/rfc3986#appendix-A
+  'json-pointer-uri-fragment': /^#(?:|\/(?:\/|[a-z0-9_\-.!$&'()*+,;:=@]|%[0-9a-f]{2}|~0|~1)*)$/i,
 
   // matches ajv + length checks
   // uuid: http://tools.ietf.org/html/rfc4122

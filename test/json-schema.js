@@ -38,8 +38,6 @@ const unsupported = new Set([
 
   // Unsupported formats
   //  draft6 and later
-  'format.json/validation of JSON pointers',
-  'format.json/validation of relative JSON pointers',
   'format.json/validation of URI templates',
   'format.json/validation of IRIs',
   'format.json/validation of IRI references',
@@ -59,15 +57,12 @@ const unsupported = new Set([
 
   // Optional
   'optional/zeroTerminatedFloats.json',
-  'optional/format.json/validation of JSON-pointers (JSON String Representation)',
   'optional/format.json/format: uri-template',
   'optional/format/uri-template.json',
   'optional/format/iri-reference.json',
   'optional/format/iri.json',
   'optional/format/idn-email.json',
   'optional/format/idn-hostname.json',
-  'optional/format/json-pointer.json',
-  'optional/format/relative-json-pointer.json',
   //  draft7
   'optional/content.json',
   //  draft2019-09
