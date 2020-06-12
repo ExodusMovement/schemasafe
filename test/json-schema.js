@@ -87,8 +87,6 @@ const unsupported = new Set([
   'draft3/optional/format/color.json',
 ])
 
-const schemaDir = path.join(__dirname, 'JSON-Schema-Test-Suite/tests')
-
 const schemas = {
   // standard
   'https://json-schema.org/draft/2019-09/schema': require('./schemas/json-schema-draft-2019-09.json'),
@@ -104,19 +102,19 @@ const schemas = {
   'http://localhost:1234/name-defs.json': require('./JSON-Schema-Test-Suite/remotes/name-defs.json'),
 }
 
-function processTestDir(main, subdir = '') {
-  const dir = path.join(schemaDir, main, subdir)
+function processTestDir(schemaDir, main, subdir = '') {
+  const dir = path.join(__dirname, schemaDir, main, subdir)
   const shouldIngore = (id) => unsupported.has(id) || unsupported.has(`${main}/${id}`)
   const requiresLax = (id) => unsafe.has(id) || unsafe.has(`${main}/${id}`)
   for (const file of fs.readdirSync(dir)) {
     const sub = path.join(subdir, file) // relative to schemaDir
     if (shouldIngore(sub)) continue
     if (file.endsWith('.json')) {
-      const content = fs.readFileSync(path.join(schemaDir, main, sub))
+      const content = fs.readFileSync(path.join(dir, file))
       processTest(main, sub, JSON.parse(content), shouldIngore, requiresLax)
     } else {
       // assume it's a dir and let it fail otherwise
-      processTestDir(main, sub)
+      processTestDir(schemaDir, main, sub)
     }
   }
 }
@@ -152,8 +150,9 @@ function processTest(main, id, file, shouldIngore, requiresLax) {
   }
 }
 
-processTestDir('draft4')
-processTestDir('draft6')
-processTestDir('draft7')
-processTestDir('draft3')
-processTestDir('draft2019-09')
+const testsDir = 'JSON-Schema-Test-Suite/tests'
+processTestDir(testsDir, 'draft4')
+processTestDir(testsDir, 'draft6')
+processTestDir(testsDir, 'draft7')
+processTestDir(testsDir, 'draft3')
+processTestDir(testsDir, 'draft2019-09')
