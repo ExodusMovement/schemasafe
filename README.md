@@ -2,8 +2,6 @@
 
 A [JSONSchema](https://json-schema.org/) validator that uses code generation to be extremely fast.
 
-It passes the entire JSONSchema v4 test suite except for `remoteRefs` and `maxLength`/`minLength` when using unicode surrogate pairs.
-
 [![Node CI Status](https://github.com/ExodusMovement/schemasafe/workflows/Node%20CI/badge.svg)](https://github.com/ExodusMovement/schemasafe/actions)
 
 ## Installation
