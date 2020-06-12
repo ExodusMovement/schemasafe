@@ -114,11 +114,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const { parent, keyval, keyname } = location
     if (parent) {
       if (keyval) {
-        scope.ownPresent = functions.ownPresent
-        return format('ownPresent(%s, %j)', parent, keyval)
+        return format('%s !== undefined && hasOwn(%s, %j)', name, parent, keyval)
       } else if (keyname) {
-        scope.ownPresent = functions.ownPresent
-        return format('ownPresent(%s, %s)', parent, keyname)
+        return format('%s !== undefined && hasOwn(%s, %s)', name, parent, keyname)
       }
     }
     return format('%s !== undefined', name)
@@ -129,6 +127,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
   fun.write('if (data === undefined) data = null')
   if (optIncludeErrors) fun.write('validate.errors = null')
+  fun.write('const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty)')
   fun.write('let errors = 0')
 
   const getMeta = () => rootMeta.get(root) || {}
