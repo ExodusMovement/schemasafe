@@ -47,6 +47,10 @@ const core = {
   uri: /^[a-z][a-z0-9+-.]*:[^\s]*$/i,
   // ajv has /^(?:(?:[a-z][a-z0-9+-.]*:)?\/?\/)?(?:[^\\\s#][^\s#]*)?(?:#[^\\\s]*)?$/i, this is equivalent
   'uri-reference': /^(?:|(?:|[a-z][a-z0-9+-.]*:)\/?\/)(?:|[^\\\s#][^\s#]*)(?:|#[^\\\s]*)$/i,
+  // ajv has /^(?:(?:[^\x00-\x20"'<>%\\^`{|}]|%[0-9a-f]{2})|\{[+#./;?&=,!@|]?(?:[a-z0-9_]|%[0-9a-f]{2})+(?::[1-9][0-9]{0,3}|\*)?(?:,(?:[a-z0-9_]|%[0-9a-f]{2})+(?::[1-9][0-9]{0,3}|\*)?)*\})*$/i
+  // this is equivalent
+  // uri-template: https://tools.ietf.org/html/rfc6570
+  'uri-template': /^(?:[^\x00-\x20"'<>%\\^`{|}]|%[0-9a-f]{2}|\{[+#./;?&=,!@|]?(?:[a-z0-9_]|%[0-9a-f]{2})+(?::[1-9][0-9]{0,3}|\*)?(?:,(?:[a-z0-9_]|%[0-9a-f]{2})+(?::[1-9][0-9]{0,3}|\*)?)*\})*$/i,
 
   // ajv has /^(?:\/(?:[^~/]|~0|~1)*)*$/, this is equivalent
   // JSON-pointer: https://tools.ietf.org/html/rfc6901
@@ -61,7 +65,7 @@ const core = {
     input.length <= 36 + 9 &&
     /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input),
 
-  // TODO: iri, iri-reference, uri-template, idn-email, idn-hostname, duration
+  // TODO: iri, iri-reference, idn-email, idn-hostname, duration
 }
 
 const extra = {
