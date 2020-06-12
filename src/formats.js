@@ -108,6 +108,8 @@ const extra = {
 const weak = {
   // In weak because don't accept regexes from untrusted sources, using them can cause DoS
   // matches ajv + length checks
+  // eslint comment outside because we don't want comments in functions, those affect output
+  /* eslint-disable no-new */
   regex: (str) => {
     if (str.length > 1e5) return false
     const Z_ANCHOR = /[^\\]\\Z/
@@ -119,6 +121,7 @@ const weak = {
       return false
     }
   },
+  /* eslint-enable no-new */
 }
 
 module.exports = { core, optional, extra, weak }
