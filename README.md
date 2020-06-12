@@ -17,31 +17,24 @@ npm install --save @exodus/schemasafe
 Simply pass a schema to compile it
 
 ```js
-var validator = require('@exodus/schemasafe')
+const validator = require('@exodus/schemasafe')
 
-var validate = validator({
-  required: true,
+const validate = validator({
   type: 'object',
+  required: ['hello'],
   properties: {
     hello: {
-      required: true,
       type: 'string'
     }
   }
 })
 
-console.log('should be valid', validate({hello: 'world'}))
+console.log('should be valid', validate({ hello: 'world' }))
 console.log('should not be valid', validate({}))
 
 // get the last list of errors by checking validate.errors
 // the following will print [{field: 'data.hello', message: 'is required'}]
 console.log(validate.errors)
-```
-
-You can also pass the schema as a string
-
-```js
-var validate = validator('{"type": ... }')
 ```
 
 ## Custom formats
@@ -50,9 +43,8 @@ var validate = validator('{"type": ... }')
 If you want to add your own custom formats pass them as the formats options to the validator
 
 ```js
-var validate = validator({
+const validate = validator({
   type: 'string',
-  required: true,
   format: 'only-a'
 }, {
   formats: {
@@ -69,20 +61,19 @@ console.log(validate('ab')) // false
 You can pass in external schemas that you reference using the `$ref` attribute as the `schemas` option
 
 ```js
-var ext = {
-  required: true,
+const ext = {
   type: 'string'
 }
 
-var schema = {
-  $ref: '#ext' // references another schema called ext
+const schema = {
+  $ref: 'ext#' // references another schema called ext
 }
 
 // pass the external schemas as an option
-var validate = validator(schema, {schemas: {ext: ext}})
+const validate = validator(schema, { schemas: { ext: ext }})
 
-validate('hello') // returns true
-validate(42) // return false
+console.log(validate('hello')) // true
+console.log(validate(42)) // false
 ```
 
 ## Verbose mode shows more information about the source of the error
@@ -93,43 +84,28 @@ When the `verbose` options is set to `true`, `@exodus/schemasafe` also outputs:
 - `schemaPath`: an array of keys indicating which sub-schema failed
 
 ```js
-var schema = {
-  required: true,
+const schema = {
   type: 'object',
+  required: ['hello'],
   properties: {
     hello: {
-      required: true,
       type: 'string'
     }
   }
 }
-var validate = validator(schema, {
-  verbose: true
+const validate = validator(schema, {
+  includeErrors: true,
+  verboseErrors: true
 })
 
-validate({hello: 100});
+validate({ hello: 100 });
 console.log(validate.errors)
-// [ { field: 'data.hello',
+// [ { field: 'data["hello"]',
 //     message: 'is the wrong type',
-//     value: 100,
 //     type: 'string',
-//     schemaPath: [ 'properties', 'hello' ] } ]
-```
+//     schemaPath: '#/properties/hello',
+//     value: 100 } ]
 
-Many popular libraries make it easy to retrieve the failing rule with the `schemaPath`:
-
-```js
-var schemaPath = validate.errors[0].schemaPath
-var R = require('ramda')
-
-console.log( 'All evaluate to the same thing: ', R.equals(
-  schema.properties.hello,
-  { required: true, type: 'string' },
-  R.path(schemaPath, schema),
-  require('lodash').get(schema, schemaPath),
-  require('jsonpointer').get(schema, [""].concat(schemaPath))
-))
-// All evaluate to the same thing: true
 ```
 
 ## Generate Modules
@@ -137,16 +113,16 @@ console.log( 'All evaluate to the same thing: ', R.equals(
 To compile a validator function to an IIFE, call `validate.toModule()`:
 
 ```js
+const validator = require('@exodus/schemasafe')
+
 const schema = {
   type: 'string',
   format: 'hex'
 }
 
-const validator = require('@exodus/schemasafe')
-
 // This works with custom formats as well.
 const formats = {
-  hex: (value) => typeof value === 'string' && /^0x[0-9A-Fa-f]*$/.test(value),
+  hex: (value) => /^0x[0-9A-Fa-f]*$/.test(value),
 }
 
 const validate = validator(schema, { formats })
@@ -154,22 +130,15 @@ const validate = validator(schema, { formats })
 console.log(validate.toModule())
 /** Prints:
  * (function() {
- * var format1 = (value) => typeof value === 'string' && /^0x[0-9A-Fa-f]*$/.test(value);
+ * const format0 = (value) => /^0x[0-9A-Fa-f]*$/.test(value);
  * return (function validate(data) {
  *   if (data === undefined) data = null
- *   validate.errors = null
- *   var errors = 0
- *   if (data !== undefined) {
- *     if (!(typeof data === "string")) {
- *       errors++
- *       if (validate.errors === null) validate.errors = []
- *       validate.errors.push({field:"data",message:"is the wrong type"})
- *     } else {
- *       if (!format1(data)) {
- *         errors++
- *         if (validate.errors === null) validate.errors = []
- *         validate.errors.push({field:"data",message:"must be hex format"})
- *       }
+ *   let errors = 0
+ *   if (!(typeof data === "string")) {
+ *     return false
+ *   } else {
+ *     if (!format0(data)) {
+ *       return false
  *     }
  *   }
  *   return errors === 0
