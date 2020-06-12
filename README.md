@@ -4,7 +4,7 @@ A [JSONSchema](https://json-schema.org/) validator that uses code generation to 
 
 It passes the entire JSONSchema v4 test suite except for `remoteRefs` and `maxLength`/`minLength` when using unicode surrogate pairs.
 
-[![build status](https://img.shields.io/travis/mafintosh/is-my-json-valid.svg?style=flat)](https://travis-ci.org/mafintosh/is-my-json-valid)
+[![Node CI Status](https://github.com/ExodusMovement/schemasafe/workflows/Node%20CI/badge.svg)](https://github.com/ExodusMovement/schemasafe/actions)
 
 ## Installation
 
