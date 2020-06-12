@@ -738,10 +738,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   return validate
 }
 
-const validator = function(schema, opts = {}) {
-  if (typeof schema === 'string') schema = JSON.parse(schema)
-  return compile(schema, schema, opts)
-}
+const validator = (schema, opts = {}) => compile(schema, schema, opts)
 
 const parser = function(schema, opts = {}) {
   // strong mode is default in parser
