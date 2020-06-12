@@ -57,9 +57,7 @@ const core = {
   // relative JSON-pointer: http://tools.ietf.org/html/draft-luff-relative-json-pointer-00
   'relative-json-pointer': /^(?:0|[1-9][0-9]*)(?:|#|\/(?:[^~]|~0|~1)*)$/,
 
-  // TODO:
-  // iri, iri-reference, uri-template,
-  // idn-email, idn-hostname
+  // TODO: iri, iri-reference, uri-template, idn-email, idn-hostname
 }
 
 const optional = {
