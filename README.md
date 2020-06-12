@@ -181,6 +181,17 @@ console.log(validate.toModule())
 
 `@exodus/schemasafe` uses code generation to turn your JSON schema into basic javascript code that is easily optimizeable by v8.
 
+## Previous work
+
+This is based on a heavily rewritten version of the amazing (but outdated)
+[is-my-json-valid](https://github.com/mafintosh/is-my-json-valid) by
+[@mafintosh](https://github.com/mafintosh/is-my-json-valid).
+
+Compared to `is-my-json-valid`, `@exodus/schemasafe` adds security-first design, many new features,
+newer spec versions support, slimmer and more maintainable code, 0 dependencies, self-contained JS
+module generation, fixes bugs and adds better test coverage, and drops support for outdated Node.js
+versions.
+
 ## License
 
 MIT
