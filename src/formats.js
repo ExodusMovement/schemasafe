@@ -121,4 +121,4 @@ const weak = {
   },
 }
 
-module.exports = { core, weak, optional, extra }
+module.exports = { core, optional, extra, weak }
