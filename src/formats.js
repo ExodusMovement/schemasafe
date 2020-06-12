@@ -76,7 +76,7 @@ const extra = {
   'hex-bytes': /^(?:[0-9a-f][0-9a-f])+$/i,
   'hex-bytes-prefixed': /^0x(?:[0-9a-f][0-9a-f])+$/i,
 
-  base64: (input) => input.length % 4 === 0 && /^[a-z0-9+/]=?=?=?$/i.text(input),
+  base64: (input) => input.length % 4 === 0 && /^[a-z0-9+/]=?=?=?$/i.test(input),
 
   // other
   'utc-millisec': /^[0-9]{1,15}\.?[0-9]{0,15}$/,
