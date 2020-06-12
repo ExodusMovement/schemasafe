@@ -61,7 +61,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     $schemaDefault = null,
     formats: optFormats = {},
     weakFormats = opts.mode !== 'strong',
-    optionalFormats = true,
     extraFormats = false,
     schemas = {},
     ...unknown
@@ -69,7 +68,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   const fmts = Object.assign(
     {},
     formats.core,
-    optionalFormats ? formats.optional : {},
     weakFormats ? formats.weak : {},
     extraFormats ? formats.extra : {},
     optFormats

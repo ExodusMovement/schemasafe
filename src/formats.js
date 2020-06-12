@@ -55,14 +55,13 @@ const core = {
   // relative JSON-pointer: http://tools.ietf.org/html/draft-luff-relative-json-pointer-00
   'relative-json-pointer': /^(?:0|[1-9][0-9]*)(?:|#|\/(?:[^~]|~0|~1)*)$/,
 
-  // TODO: iri, iri-reference, uri-template, idn-email, idn-hostname
-}
+  // matches ajv + length checks
+  // uuid: http://tools.ietf.org/html/rfc4122
+  uuid: (input) =>
+    input.length <= 36 + 9 &&
+    /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input),
 
-const optional = {
-  // manually cleaned up from is-my-json-valid, CSS 2.1 colors only per draft03 spec
-  color: /^(?:#[0-9A-Fa-f]{3,6}|aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|orange|purple|red|silver|teal|white|yellow|rgb\(\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*\)|rgb\(\s*(?:\d?\d%|100%)+\s*,\s*(?:\d?\d%|100%)+\s*,\s*(?:\d?\d%|100%)+\s*\))$/,
-
-  // TODO: duration
+  // TODO: iri, iri-reference, uri-template, idn-email, idn-hostname, duration
 }
 
 const extra = {
@@ -92,15 +91,12 @@ const extra = {
   // uri fragment: https://tools.ietf.org/html/rfc3986#appendix-A
   'json-pointer-uri-fragment': /^#(?:|\/(?:\/|[a-z0-9_\-.!$&'()*+,;:=@]|%[0-9a-f]{2}|~0|~1)*)$/i,
 
-  // matches ajv + length checks
-  // uuid: http://tools.ietf.org/html/rfc4122
-  uuid: (input) =>
-    input.length <= 36 + 9 &&
-    /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input),
-
   // draft3 backwards compat
   'host-name': core.hostname,
   'ip-address': core.ipv4,
+
+  // manually cleaned up from is-my-json-valid, CSS 2.1 colors only per draft03 spec
+  color: /^(?:#[0-9A-Fa-f]{3,6}|aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|orange|purple|red|silver|teal|white|yellow|rgb\(\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*\)|rgb\(\s*(?:\d?\d%|100%)+\s*,\s*(?:\d?\d%|100%)+\s*,\s*(?:\d?\d%|100%)+\s*\))$/,
 
   // style is deliberately unsupported, don't accept untrusted styles
 }
@@ -124,4 +120,4 @@ const weak = {
   /* eslint-enable no-new */
 }
 
-module.exports = { core, optional, extra, weak }
+module.exports = { core, extra, weak }
