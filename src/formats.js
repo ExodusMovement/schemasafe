@@ -45,10 +45,8 @@ const core = {
     ),
   // matches ajv
   uri: /^[a-z][a-z0-9+-.]*:[^\s]*$/i,
-  // matches ajv + length checks
-  'uri-reference': (input) =>
-    input.length < 2100 &&
-    /^(?:(?:[a-z][a-z0-9+-.]*:)?\/?\/)?(?:[^\\\s#][^\s#]*)?(?:#[^\\\s]*)?$/i.test(input),
+  // ajv has /^(?:(?:[a-z][a-z0-9+-.]*:)?\/?\/)?(?:[^\\\s#][^\s#]*)?(?:#[^\\\s]*)?$/i, this is equivalent
+  'uri-reference': /^(?:|(?:|[a-z][a-z0-9+-.]*:)\/?\/)(?:|[^\\\s#][^\s#]*)(?:|#[^\\\s]*)$/i,
 
   // ajv has /^(?:\/(?:[^~/]|~0|~1)*)*$/, this is equivalent
   // JSON-pointer: https://tools.ietf.org/html/rfc6901
