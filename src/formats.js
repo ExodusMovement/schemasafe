@@ -63,8 +63,19 @@ const optional = {
 }
 
 const extra = {
+  // basic
   alpha: /^[a-zA-Z]+$/,
   alphanumeric: /^[a-zA-Z0-9]+$/,
+
+  // hex
+  'hex-digits': /^[0-9a-f]+$/i,
+  'hex-digits-prefixed': /^0x[0-9a-f]+$/i,
+  'hex-bytes': /^(?:[0-9a-f][0-9a-f])+$/i,
+  'hex-bytes-prefixed': /^0x(?:[0-9a-f][0-9a-f])+$/i,
+
+  base64: (input) => input.length % 4 === 0 && /^[a-z0-9+/]=?=?=?$/i.text(input),
+
+  // other
   'utc-millisec': /^[0-9]{1,15}\.?[0-9]{0,15}$/,
   phone: (input) => {
     if (input.length > 30) return false
@@ -73,14 +84,17 @@ const extra = {
     const digits = input.substring(1).replace(/ /g, '').length
     return digits >= 7 && digits <= 15
   },
+
   // matches ajv + length checks
   // uuid: http://tools.ietf.org/html/rfc4122
   uuid: (input) =>
     input.length <= 36 + 9 &&
     /^(?:urn:uuid:)?[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input),
+
   // draft3 backwards compat
   'host-name': core.hostname,
   'ip-address': core.ipv4,
+
   // style is deliberately unsupported, don't accept untrusted styles
 }
 
