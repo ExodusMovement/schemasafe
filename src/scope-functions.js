@@ -64,4 +64,8 @@ const unique = (array) => {
   return true
 }
 
-module.exports = { stringLength, isMultipleOf, deepEqual, unique }
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty)
+// special handling for stringification
+hasOwn[Symbol.for('toJayString')] = 'Function.prototype.call.bind(Object.prototype.hasOwnProperty)'
+
+module.exports = { stringLength, isMultipleOf, deepEqual, unique, hasOwn }

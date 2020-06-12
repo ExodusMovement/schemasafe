@@ -114,6 +114,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const name = buildName(location) // also checks for sanity, do not remove
     const { parent, keyval, keyname } = location
     if (parent) {
+      scope.hasOwn = functions.hasOwn
       if (keyval) {
         return format('%s !== undefined && hasOwn(%s, %j)', name, parent, keyval)
       } else if (keyname) {
@@ -128,7 +129,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
   fun.write('if (data === undefined) data = null')
   if (optIncludeErrors) fun.write('validate.errors = null')
-  fun.write('const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty)')
   fun.write('let errors = 0')
 
   const getMeta = () => rootMeta.get(root) || {}

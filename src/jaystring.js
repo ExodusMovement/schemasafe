@@ -3,8 +3,12 @@ const isArrowFnWithoutParensRegex = /^[^=]*=>/
 
 // Supports only functions and regexps, for scope
 
+const toJayString = Symbol.for('toJayString')
+
 function jaystring(item) {
   if (typeof item === 'function') {
+    if (item[toJayString]) return item[toJayString] // this is supported only for functions
+
     if (Object.getPrototypeOf(item) !== Function.prototype)
       throw new Error('Can not stringify a function with unexpected prototype')
 
