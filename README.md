@@ -79,7 +79,7 @@ console.log(validate(42)) // false
 When the `verbose` options is set to `true`, `@exodus/schemasafe` also outputs:
 
 - `value`: The data value that caused the error
-- `schemaPath`: an array of keys indicating which sub-schema failed
+- `schemaPath`: a JSON pointer string as an URI fragment indicating which sub-schema failed, e.g. `#/type`
 
 ```js
 const schema = {
