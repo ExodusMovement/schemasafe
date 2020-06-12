@@ -7,7 +7,7 @@ const core = {
     if (input[0] === '"') return false
     const [name, host, ...rest] = input.split('@')
     if (!name || !host || rest.length !== 0 || name.length > 64 || host.length > 253) return false
-    if (name[0] === '.' || name.endsWith('.')) return false
+    if (name[0] === '.' || name.endsWith('.') || name.includes('..')) return false
     if (!/^[a-z0-9.-]+$/i.test(host) || !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+/.test(name)) return false
     return host.split('.').every((part) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(part))
   },
