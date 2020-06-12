@@ -1,8 +1,6 @@
 'use strict'
 
 const core = {
-  // matches ajv
-  uri: /^[a-z][a-z0-9+-.]*:[^\s]*$/i,
   // matches ajv + length checks + does not start with a dot
   // note that quoted emails are deliberately unsupported (as in ajv), who would want \x01 in email
   email: (input) => {
@@ -45,13 +43,15 @@ const core = {
     /^\s*(?:(?:(?:[0-9a-f]{1,4}:){7}(?:[0-9a-f]{1,4}|:))|(?:(?:[0-9a-f]{1,4}:){6}(?::[0-9a-f]{1,4}|(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(?:(?:[0-9a-f]{1,4}:){5}(?:(?:(?::[0-9a-f]{1,4}){1,2})|:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(?:(?:[0-9a-f]{1,4}:){4}(?:(?:(?::[0-9a-f]{1,4}){1,3})|(?:(?::[0-9a-f]{1,4})?:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9a-f]{1,4}:){3}(?:(?:(?::[0-9a-f]{1,4}){1,4})|(?:(?::[0-9a-f]{1,4}){0,2}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9a-f]{1,4}:){2}(?:(?:(?::[0-9a-f]{1,4}){1,5})|(?:(?::[0-9a-f]{1,4}){0,3}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9a-f]{1,4}:){1}(?:(?:(?::[0-9a-f]{1,4}){1,6})|(?:(?::[0-9a-f]{1,4}){0,4}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?::(?:(?:(?::[0-9a-f]{1,4}){1,7})|(?:(?::[0-9a-f]{1,4}){0,5}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(?:%.+)?\s*$/i.test(
       input
     ),
+  // matches ajv
+  uri: /^[a-z][a-z0-9+-.]*:[^\s]*$/i,
   // matches ajv + length checks
   'uri-reference': (input) =>
     input.length < 2100 &&
     /^(?:(?:[a-z][a-z0-9+-.]*:)?\/?\/)?(?:[^\\\s#][^\s#]*)?(?:#[^\\\s]*)?$/i.test(input),
 
   // TODO:
-  // iri, iri-reference, uri-reference, uri-template, json-pointer, relative-json-pointer,
+  // iri, iri-reference, uri-template, json-pointer, relative-json-pointer,
   // idn-email, idn-hostname
 }
 
@@ -81,13 +81,14 @@ const extra = {
   // draft3 backwards compat
   'host-name': core.hostname,
   'ip-address': core.ipv4,
+  // style is deliberately unsupported, don't accept untrusted styles
 }
 
 const weak = {
   // In weak because don't accept regexes from untrusted sources, using them can cause DoS
+  // matches ajv + length checks
   regex: (str) => {
     if (str.length > 1e5) return false
-    // from ajv
     const Z_ANCHOR = /[^\\]\\Z/
     if (Z_ANCHOR.test(str)) return false
     try {
