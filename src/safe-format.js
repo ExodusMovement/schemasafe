@@ -2,6 +2,8 @@
 
 class SafeString extends String {} // used for instanceof checks
 
+const compares = new Set(['<', '>', '<=', '>='])
+
 const format = (fmt, ...args) => {
   const res = fmt.replace(/%[%dscj]/g, (match) => {
     if (match === '%%') return '%'
@@ -15,7 +17,7 @@ const format = (fmt, ...args) => {
         if (val instanceof SafeString) return val
         throw new Error('Expected a safe string')
       case '%c':
-        if (['<', '>', '<=', '>='].includes(val)) return val
+        if (compares.has(val)) return val
         throw new Error('Expected a compare op')
       case '%j':
         if ([Infinity, -Infinity, NaN, undefined].includes(val)) return `${val}`
