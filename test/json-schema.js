@@ -55,7 +55,7 @@ const unsupported = new Set([
   'draft3/type.json/types can include schemas',
   'draft3/type.json/when types includes a schema it should fully validate the schema',
   'draft3/type.json/types from separate schemas are merged',
-  'draft3/format.json/validation of regular expressions', // broken assumption in test
+  'draft3/optional/ecmascript-regex.json/ECMA 262 regex dialect recognition', // broken assumption in test
 
   // Optional
   'optional/zeroTerminatedFloats.json',
@@ -73,10 +73,6 @@ const unsupported = new Set([
   //  draft2019-09
   'draft2019-09/optional/refOfUnknownKeyword.json',
   'draft2019-09/optional/format/duration.json',
-  //  draft3 only
-  'draft3/optional/format/color.json',
-  'draft3/optional/ecmascript-regex.json',
-  'draft3/optional/format.json/validation of CSS colors',
 ])
 
 const schemaDir = path.join(__dirname, 'JSON-Schema-Test-Suite/tests')
@@ -130,7 +126,8 @@ function processTest(main, id, file, shouldIngore, requiresLax) {
       try {
         const mode = requiresLax(`${id}/${block.description}`) ? 'lax' : 'default'
         const $schemaDefault = schemaVersions.get(main)
-        const validate = validator(block.schema, { schemas, mode, $schemaDefault })
+        const extraFormats = main === 'draft3' // needs old formats
+        const validate = validator(block.schema, { schemas, mode, $schemaDefault, extraFormats })
         for (const test of block.tests) {
           if (shouldIngore(`${id}/${block.description}/${test.description}`)) continue
           t.same(validate(test.data), test.valid, test.description)

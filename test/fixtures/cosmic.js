@@ -17,11 +17,14 @@ exports.valid = {
     "&'*+-./=?^_{}~@other-valid-characters-in-local.net",
     'mixed-1234-in-{+^}-local@sld.net',
     'a@single-character-in-local.org',
+    // Support for quoted emails has been deliberately dropped (which is also how ajv behaves)
+    /*
     '"quoted"@sld.com',
     '"\\e\\s\\c\\a\\p\\e\\d"@sld.com',
     '"quoted-at-sign@sld.org"@sld.com',
     '"escaped\\"quote"@sld.com',
     '"back\\slash"@sld.com',
+    */
     'one-character-third-level@a.example.com',
     'single-character-in-sld@x.org',
     'local@dash-in-sld.com',
