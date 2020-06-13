@@ -2,7 +2,7 @@
 
 const { format, safe, safeand, safeor } = require('./safe-format')
 const genfun = require('./generate-function')
-const { toPointer, resolveReference, joinPath } = require('./pointer')
+const { resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
 const functions = require('./scope-functions')
 const KNOWN_KEYWORDS = require('./known-keywords')
@@ -50,22 +50,27 @@ const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
 // Helper methods for semi-structured paths
 const propvar = (parent, keyname, inKeys = false) => Object.freeze({ parent, keyname, inKeys }) // property by variable
 const propimm = (parent, keyval) => Object.freeze({ parent, keyval }) // property by immediate value
-const buildName = ({ name, parent, keyval, keyname }) => {
+const buildNameOrPath = ({ name, parent, errorParent, keyval, keyname }, toPathArray = false) => {
   if (name) {
     if (parent || keyval || keyname) throw new Error('name can be used only stand-alone')
+    if (toPathArray) return errorParent ? buildNameOrPath(errorParent, true) : format('%j', '#')
     return name // top-level
   }
   if (keyval && keyname) throw new Error('Can not use key value and name at the same time')
   if (!parent) throw new Error('Can not use property of undefined parent!')
   if (parent && keyval !== undefined) {
     if (!['string', 'number'].includes(typeof keyval)) throw new Error('Invalid property path')
+    if (toPathArray) return format('%s, %j', buildNameOrPath(parent, toPathArray), keyval)
     return format('%s[%j]', buildName(parent), keyval)
   } else if (parent && keyname) {
+    if (toPathArray) return format('%s, %s', buildNameOrPath(parent, toPathArray), keyname)
     return format('%s[%s]', buildName(parent), keyname)
   }
   /* c8 ignore next */
   throw new Error('Unreachable')
 }
+const buildName = (prop) => buildNameOrPath(prop) // to ensure that second argument isn't used
+const buildPath = (prop) => format('toPointer([%s].slice(1))', buildNameOrPath(prop, true))
 
 const rootMeta = new WeakMap()
 const compile = (schema, root, opts, scope, basePathRoot) => {
@@ -172,11 +177,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const currPropVar = (...args) => propvar(current, ...args)
     const currPropImm = (...args) => propimm(current, ...args)
 
-    const error = (msg, prop, value) => {
+    const error = (msg, prop = current) => {
       if (includeErrors === true) {
-        const errorObj = { field: prop || name, message: msg, schemaPath: toPointer(schemaPath) }
+        const errorObj = { message: msg, schemaPath: functions.toPointer(schemaPath) }
+        if (verboseErrors) scope.toPointer = functions.toPointer
         const errorJS = verboseErrors
-          ? format('{ ...%j, value: %s }', errorObj, value || name)
+          ? format('{ ...%j, field: %s, value: %s }', errorObj, buildPath(prop), buildName(prop))
           : format('%j', errorObj)
         if (allErrors) {
           fun.write('if (validate.errors === null) validate.errors = []')
@@ -210,7 +216,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const fail = (msg, value) => {
       const comment = value !== undefined ? ` ${JSON.stringify(value)}` : ''
-      throw new Error(`${msg}${comment} at ${toPointer(schemaPath)}`)
+      throw new Error(`${msg}${comment} at ${functions.toPointer(schemaPath)}`)
     }
     const enforce = (ok, ...args) => ok || fail(...args)
     const enforceValidation = (msg) => enforce(!requireValidation, `[requireValidation] ${msg}`)
@@ -605,7 +611,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
           const names = node.propertyNames
           const nameSchema = typeof names === 'object' ? { type: 'string', ...names } : names
-          rule({ name: key }, nameSchema, subPath('propertyNames'))
+          const sub = currPropVar(key, true) // always own property, from Object.keys
+          rule({ name: key, errorParent: sub }, nameSchema, subPath('propertyNames'))
         })
         consume('propertyNames', 'object', 'boolean')
       }
@@ -616,7 +623,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (Array.isArray(node.required)) {
         for (const req of node.required) {
           const prop = currPropImm(req)
-          errorIf('!(%s)', [present(prop)], 'is required', buildName(prop))
+          errorIf('!(%s)', [present(prop)], 'is required', prop)
         }
         consume('required', 'array')
       }
@@ -679,7 +686,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
               if (removeAdditional) {
                 fun.write('delete %s[%s]', name, key)
               } else {
-                error('has additional properties', null, format('%j + %s', `${name}.`, key))
+                error('is an additional property', currPropVar(key))
               }
             } else {
               const sub = currPropVar(key, true) // always own property, from Object.keys

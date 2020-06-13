@@ -1,10 +1,5 @@
 'use strict'
 
-function toPointer(path) {
-  if (path.length === 0) return '#'
-  return `#/${path.map((part) => `${part}`.replace(/~/g, '~0').replace(/\//g, '~1')).join('/')}`
-}
-
 function untilde(string) {
   if (!string.includes('~')) return string
   return string.replace(/~[01]/g, (match) => {
@@ -103,4 +98,4 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
   return results
 }
 
-module.exports = { toPointer, get, joinPath, resolveReference }
+module.exports = { get, joinPath, resolveReference }
