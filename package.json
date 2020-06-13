@@ -1,9 +1,17 @@
 {
-  "name": "@exodus/is-my-json-valid",
-  "version": "2.20.0-exodus4",
+  "name": "@exodus/schemasafe",
+  "version": "1.0.0-alpha.1",
+  "description": "JSON Safe Parser & Schema Validator",
   "license": "MIT",
-  "repository": "github.com/ExodusMovement/is-my-json-valid",
   "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ExodusMovement/schemasafe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ExodusMovement/schemasafe/issues"
+  },
+  "homepage": "https://github.com/ExodusMovement/schemasafe",
   "files": [
     "src/generate-function.js",
     "src/safe-format.js",
@@ -39,9 +47,13 @@
     "tape": "^4.7.0"
   },
   "keywords": [
-    "json",
+    "JSON",
     "schema",
-    "orderly",
-    "jsonschema"
+    "validator",
+    "validation",
+    "jsonschema",
+    "json-schema",
+    "json-schema-validator",
+    "json-schema-validation"
   ]
 }
