@@ -23,46 +23,39 @@ const unsafe = new Set([
 ])
 
 const unsupported = new Set([
-  // Whole files, meaning unsupported keywords / features
-  //  draft2019-09
-  'draft2019-09/anchor.json',
-  'draft2019-09/dependentSchemas.json',
-  'draft2019-09/unevaluatedProperties.json',
-  'draft2019-09/unevaluatedItems.json',
-  'draft2019-09/defs.json',
-  'draft2019-09/refRemote.json', // earlier versions are fine
-  'draft2019-09/id.json', // earlier versions are fine
-  //  draft3 only
-  'draft3/extends.json',
-  'draft3/disallow.json',
-
   // Unsupported formats
-  //  draft6 and later
   'format.json/validation of IRIs',
   'format.json/validation of IRI references',
   'format.json/validation of IDN hostnames',
   'format.json/validation of IDN e-mail addresses',
+  'optional/format/iri-reference.json',
+  'optional/format/iri.json',
+  'optional/format/idn-email.json',
+  'optional/format/idn-hostname.json',
 
-  // Blocks and individual tests
-  //  draft2019-09
-  'draft2019-09/ref.json/ref creates new scope when adjacent to keywords',
-  'draft2019-09/ref.json/remote ref, containing refs itself',
-  //  draft3 only
+  // Optional
+  'optional/content.json', // draft7+
+  'optional/zeroTerminatedFloats.json', // makes no sense in js
+
+  //  draft3 is deprecated and not fully supported
+  'draft3/extends.json',
+  'draft3/disallow.json',
   'draft3/ref.json/remote ref, containing refs itself',
   'draft3/type.json/types can include schemas',
   'draft3/type.json/when types includes a schema it should fully validate the schema',
   'draft3/type.json/types from separate schemas are merged',
   'draft3/optional/ecmascript-regex.json/ECMA 262 regex dialect recognition', // broken assumption in test
 
-  // Optional
-  'optional/zeroTerminatedFloats.json',
-  'optional/format/iri-reference.json',
-  'optional/format/iri.json',
-  'optional/format/idn-email.json',
-  'optional/format/idn-hostname.json',
-  //  draft7
-  'optional/content.json',
-  //  draft2019-09
+  //  draft2019-09 is not supported yet
+  'draft2019-09/anchor.json',
+  'draft2019-09/dependentSchemas.json',
+  'draft2019-09/unevaluatedProperties.json',
+  'draft2019-09/unevaluatedItems.json',
+  'draft2019-09/defs.json',
+  'draft2019-09/refRemote.json',
+  'draft2019-09/id.json',
+  'draft2019-09/ref.json/ref creates new scope when adjacent to keywords',
+  'draft2019-09/ref.json/remote ref, containing refs itself',
   'draft2019-09/optional/refOfUnknownKeyword.json',
   'draft2019-09/optional/format/duration.json',
 ])
