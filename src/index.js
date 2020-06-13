@@ -328,7 +328,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       enforce(typeof pattern === 'string', 'Invalid pattern:', pattern)
       if (requireValidation)
         enforce(/^\^.*\$$/.test(pattern), 'Should start with ^ and end with $:', pattern)
-      if (complexityChecks && pattern.match(/[{+*]/g).length > 1)
+      if (complexityChecks && (pattern.match(/[{+*]/g) || []).length > 1)
         enforce(target.maxLength !== undefined, 'maxLength should be specified for:', pattern)
     }
 
