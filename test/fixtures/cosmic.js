@@ -1,4 +1,6 @@
-exports.valid = {
+'use strict'
+
+const valid = {
   fullName: 'John Doe',
   age: 47,
   state: 'Massachusetts',
@@ -42,7 +44,7 @@ exports.valid = {
   ],
 }
 
-exports.invalid = {
+const invalid = {
   fullName: null,
   age: -1,
   state: 47,
@@ -58,7 +60,7 @@ exports.invalid = {
   emailAddresses: [],
 }
 
-exports.schema = {
+const schema = {
   // from cosmic thingy
   type: 'object',
   additionalProperties: false,
@@ -109,3 +111,5 @@ exports.schema = {
     },
   },
 }
+
+module.exports = { valid, invalid, schema }

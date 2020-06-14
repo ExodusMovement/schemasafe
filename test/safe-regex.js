@@ -1,3 +1,5 @@
+'use strict'
+
 const tape = require('tape')
 const safeRegex = require('safe-regex')
 

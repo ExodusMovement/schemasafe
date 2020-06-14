@@ -1,4 +1,7 @@
 {
+  "parserOptions": {
+    "sourceType": "script"
+  },
   "env": {
     "browser": true,
     "node": true
@@ -45,6 +48,7 @@
         "message": "Identifiers 'fmt' / 'close' can be only defined as function arguments"
       }
     ],
+    "strict": 2,
     "prefer-const": 2,
     "prefer-template": 2,
     "no-var": 2

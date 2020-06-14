@@ -1,3 +1,5 @@
+'use strict'
+
 const { format, safe, safeand, safeor } = require('./safe-format')
 const genfun = require('./generate-function')
 const { toPointer, resolveReference, joinPath } = require('./pointer')

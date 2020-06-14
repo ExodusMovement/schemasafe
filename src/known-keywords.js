@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = [
   '$schema', // version
   ...['id', '$id', '$ref', 'definitions', '$defs'], // pointers
