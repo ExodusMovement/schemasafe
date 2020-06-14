@@ -194,12 +194,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     enforce(Object.getPrototypeOf(node) === Object.prototype, 'Schema is not an object')
+    enforce(node.hasOwnProperty === Object.prototype.hasOwnProperty, 'hasOwnProperty is overriden')
     for (const key of Object.keys(node))
       enforce(KNOWN_KEYWORDS.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
     const unused = new Set(Object.keys(node))
     const consume = (property) => {
       enforce(unused.has(property), 'Unexpected double consumption:', property)
+      enforce(node.hasOwnProperty(property), 'Is not an own property:', property)
       unused.delete(property)
     }
 
