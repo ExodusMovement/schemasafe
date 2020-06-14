@@ -5,15 +5,16 @@ const formats = require('./formats')
 const functions = require('./scope-functions')
 const KNOWN_KEYWORDS = require('./known-keywords')
 
-const types = {}
-types.any = () => format('true')
-types.null = (name) => format('%s === null', name)
-types.boolean = (name) => format('typeof %s === "boolean"', name)
-types.array = (name) => format('Array.isArray(%s)', name)
-types.object = (n) => format('typeof %s === "object" && %s && !Array.isArray(%s)', n, n, n)
-types.number = (name) => format('typeof %s === "number"', name)
-types.integer = (name) => format('Number.isInteger(%s)', name)
-types.string = (name) => format('typeof %s === "string"', name)
+const types = Object.freeze({
+  any: () => format('true'),
+  null: (name) => format('%s === null', name),
+  boolean: (name) => format('typeof %s === "boolean"', name),
+  array: (name) => format('Array.isArray(%s)', name),
+  object: (n) => format('typeof %s === "object" && %s && !Array.isArray(%s)', n, n, n),
+  number: (name) => format('typeof %s === "number"', name),
+  integer: (name) => format('Number.isInteger(%s)', name),
+  string: (name) => format('typeof %s === "string"', name),
+})
 
 const scopeSyms = Symbol('syms')
 const scopeRefCache = Symbol('refcache')
