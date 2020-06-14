@@ -7,6 +7,7 @@ const formats = require('./formats')
 const functions = require('./scope-functions')
 const KNOWN_KEYWORDS = require('./known-keywords')
 
+// for building into the validation function
 const types = Object.freeze({
   any: () => format('true'),
   null: (name) => format('%s === null', name),
@@ -16,6 +17,18 @@ const types = Object.freeze({
   number: (name) => format('typeof %s === "number"', name),
   integer: (name) => format('Number.isInteger(%s)', name),
   string: (name) => format('typeof %s === "string"', name),
+})
+
+// for checking schema parts in consume()
+const schemaTypes = Object.freeze({
+  boolean: (arg) => typeof arg === 'boolean',
+  array: (arg) => Array.isArray(arg),
+  object: (arg) => typeof arg === 'object' && arg && !Array.isArray(arg),
+  finite: (arg) => Number.isFinite(arg),
+  integer: (arg) => Number.isInteger(arg),
+  natural: (arg) => Number.isInteger(arg) && arg >= 0,
+  string: (arg) => typeof arg === 'string',
+  jsonval: (arg) => functions.deepEqual(arg, JSON.parse(JSON.stringify(arg))),
 })
 
 const scopeSyms = Symbol('syms')
@@ -199,10 +212,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       enforce(KNOWN_KEYWORDS.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
     const unused = new Set(Object.keys(node))
-    const consume = (property) => {
-      enforce(unused.has(property), 'Unexpected double consumption:', property)
-      enforce(node.hasOwnProperty(property), 'Is not an own property:', property)
-      unused.delete(property)
+    const consume = (prop, ...types) => {
+      enforce(unused.has(prop), 'Unexpected double consumption:', prop)
+      enforce(node.hasOwnProperty(prop), 'Is not an own property:', prop)
+      enforce(types.every((t) => schemaTypes.hasOwnProperty(t)), 'Invalid type used in consume()')
+      enforce(types.some((t) => schemaTypes[t](node[prop])), 'Is not of expected type:', prop)
+      unused.delete(prop)
     }
 
     const isTopLevel = !current.parent // e.g. top-level data and property names
@@ -215,7 +230,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const $schema = node.$schema || $schemaDefault
       if (node.$schema) {
         if (typeof node.$schema !== 'string') throw new Error('Unexpected $schema')
-        consume('$schema')
+        consume('$schema', 'string')
       }
       if ($schema) {
         const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
@@ -230,29 +245,29 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
     }
 
-    if (typeof node.description === 'string') consume('description') // unused, meta-only
-    if (typeof node.title === 'string') consume('title') // unused, meta-only
-    if (typeof node.$comment === 'string') consume('$comment') // unused, meta-only
-    if (Array.isArray(node.examples)) consume('examples') // unused, meta-only
+    if (typeof node.description === 'string') consume('description', 'string') // unused, meta-only
+    if (typeof node.title === 'string') consume('title', 'string') // unused, meta-only
+    if (typeof node.$comment === 'string') consume('$comment', 'string') // unused, meta-only
+    if (Array.isArray(node.examples)) consume('examples', 'array') // unused, meta-only
 
     // defining defs are allowed, those are validated on usage
     if (typeof node.$defs === 'object') {
-      consume('$defs')
+      consume('$defs', 'object')
     } else if (typeof node.definitions === 'object') {
-      consume('definitions')
+      consume('definitions', 'object')
     }
 
     const basePath = () => (basePathStack.length > 0 ? basePathStack[basePathStack.length - 1] : '')
     if (typeof node.$id === 'string') {
       basePathStack.push(joinPath(basePath(), node.$id))
-      consume('$id')
+      consume('$id', 'string')
     } else if (typeof node.id === 'string') {
       basePathStack.push(joinPath(basePath(), node.id))
-      consume('id')
+      consume('id', 'string')
     }
 
     const booleanRequired = getMeta().booleanRequired && typeof node.required === 'boolean'
-    if (node.default !== undefined && !useDefaults) consume('default') // unused in this case
+    if (node.default !== undefined && !useDefaults) consume('default', 'jsonval') // unused in this case
     const defaultIsPresent = node.default !== undefined && useDefaults // will consume on use
     if (isTopLevel) {
       // top-level data is coerced to null above, or is an object key, it can't be undefined
@@ -263,14 +278,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       fun.write('if (!(%s)) {', present(current))
       if (defaultIsPresent) {
         fun.write('%s = %j', name, node.default)
-        consume('default')
+        consume('default', 'jsonval')
       }
       if (booleanRequired) {
         if (node.required === true) {
           if (!defaultIsPresent) error('is required')
-          consume('required')
+          consume('required', 'boolean')
         } else if (node.required === false) {
-          consume('required')
+          consume('required', 'boolean')
         }
       }
       fun.write('} else {')
@@ -295,7 +310,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       } else {
         fail('failed to resolve $ref:', node.$ref)
       }
-      consume('$ref')
+      consume('$ref', 'string')
 
       if (getMeta().exclusiveRefs) {
         // ref overrides any sibling keywords for older schemas
@@ -338,20 +353,20 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (Number.isFinite(node.exclusiveMinimum)) {
         applyMinMax(node.exclusiveMinimum, '<', 'is less than exclusiveMinimum')
-        consume('exclusiveMinimum')
+        consume('exclusiveMinimum', 'finite')
       } else if (node.minimum !== undefined) {
         applyMinMax(node.minimum, node.exclusiveMinimum ? '<' : '<=', 'is less than minimum')
-        consume('minimum')
-        if (typeof node.exclusiveMinimum === 'boolean') consume('exclusiveMinimum')
+        consume('minimum', 'finite')
+        if (typeof node.exclusiveMinimum === 'boolean') consume('exclusiveMinimum', 'boolean')
       }
 
       if (Number.isFinite(node.exclusiveMaximum)) {
         applyMinMax(node.exclusiveMaximum, '>', 'is more than exclusiveMaximum')
-        consume('exclusiveMaximum')
+        consume('exclusiveMaximum', 'finite')
       } else if (node.maximum !== undefined) {
         applyMinMax(node.maximum, node.exclusiveMaximum ? '>' : '>=', 'is more than maximum')
-        consume('maximum')
-        if (typeof node.exclusiveMaximum === 'boolean') consume('exclusiveMaximum')
+        consume('maximum', 'finite')
+        if (typeof node.exclusiveMaximum === 'boolean') consume('exclusiveMaximum', 'boolean')
       }
 
       const multipleOf = node.multipleOf === undefined ? 'divisibleBy' : 'multipleOf' // draft3 support
@@ -359,7 +374,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Number.isFinite(node[multipleOf]), `Invalid ${multipleOf}:`, node[multipleOf])
         scope.isMultipleOf = functions.isMultipleOf
         errorIf('!isMultipleOf(%s, %d)', [name, node[multipleOf]], 'has a remainder')
-        consume(multipleOf)
+        consume(multipleOf, 'finite')
       }
     }
 
@@ -368,14 +383,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Number.isFinite(node.maxLength), 'Invalid maxLength:', node.maxLength)
         scope.stringLength = functions.stringLength
         errorIf('stringLength(%s) > %d', [name, node.maxLength], 'has longer length than allowed')
-        consume('maxLength')
+        consume('maxLength', 'natural')
       }
 
       if (node.minLength !== undefined) {
         enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
         scope.stringLength = functions.stringLength
         errorIf('stringLength(%s) < %d', [name, node.minLength], 'has less length than allowed')
-        consume('minLength')
+        consume('minLength', 'natural')
       }
 
       if (node.format && fmts.hasOwnProperty(node.format)) {
@@ -395,7 +410,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         } else {
           fail('Unrecognized format used:', node.format)
         }
-        consume('format')
+        consume('format', 'string')
       } else {
         enforce(!node.format, 'Unrecognized format used:', node.format)
       }
@@ -403,7 +418,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.pattern) {
         const p = patterns(node.pattern)
         errorIf('!%s.test(%s)', [p, name], 'pattern mismatch')
-        consume('pattern')
+        consume('pattern', 'string')
       }
     }
 
@@ -413,14 +428,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (Array.isArray(node.items) && node.items.length > node.maxItems)
           fail(`Invalid maxItems: ${node.maxItems} is less than items array length`)
         errorIf('%s.length > %d', [name, node.maxItems], 'has more items than allowed')
-        consume('maxItems')
+        consume('maxItems', 'natural')
       }
 
       if (node.minItems !== undefined) {
         enforce(Number.isFinite(node.minItems), 'Invalid minItems:', node.minItems)
         // can be higher that .items length with additionalItems
         errorIf('%s.length < %d', [name, node.minItems], 'has less items than allowed')
-        consume('minItems')
+        consume('minItems', 'natural')
       }
 
       if (node.items || node.items === false) {
@@ -433,7 +448,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             rule(propvar(name, i), node.items, subPath('items'))
           })
         }
-        consume('items')
+        consume('items', 'object', 'array', 'boolean')
       } else if (typeApplicable('array')) {
         enforceValidation('items rule must be specified')
       }
@@ -444,14 +459,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         // As a result, this is not allowed by default, only in allowUnusedKeywords mode
       } else if (node.additionalItems === false) {
         errorIf('%s.length > %d', [name, node.items.length], 'has additional items')
-        consume('additionalItems')
+        consume('additionalItems', 'boolean')
       } else if (node.additionalItems) {
         const i = genloop()
         const offset = node.items.length
         fun.block('for (let %s = %d; %s < %s.length; %s++) {', [i, offset, i, name, i], '}', () => {
           rule(propvar(name, i), node.additionalItems, subPath('additionalItems'))
         })
-        consume('additionalItems')
+        consume('additionalItems', 'object', 'boolean')
       } else if (node.items.length === node.maxItems) {
         // No additional items are possible
       } else {
@@ -476,26 +491,26 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
         if (Number.isFinite(node.minContains)) {
           errorIf('%s < %d', [passes, node.minContains], 'array contains too few matching items')
-          consume('minContains')
+          consume('minContains', 'natural')
         } else {
           errorIf('%s < 1', [passes], 'array does not contain a match')
         }
 
         if (Number.isFinite(node.maxContains)) {
           errorIf('%s > %d', [passes, node.maxContains], 'array contains too many matching items')
-          consume('maxContains')
+          consume('maxContains', 'natural')
         }
 
-        consume('contains')
+        consume('contains', 'object', 'boolean')
       }
 
       if (node.uniqueItems === true) {
         scope.unique = functions.unique
         scope.deepEqual = functions.deepEqual
         errorIf('!unique(%s)', [name], 'must be unique')
-        consume('uniqueItems')
+        consume('uniqueItems', 'boolean')
       } else if (node.uniqueItems === false) {
-        consume('uniqueItems')
+        consume('uniqueItems', 'boolean')
       }
     }
 
@@ -503,13 +518,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.maxProperties !== undefined) {
         enforce(Number.isFinite(node.maxProperties), 'Invalid maxProperties:', node.maxProperties)
         errorIf('Object.keys(%s).length > %d', [name, node.maxProperties], 'too many properties')
-        consume('maxProperties')
+        consume('maxProperties', 'natural')
       }
 
       if (node.minProperties !== undefined) {
         enforce(Number.isFinite(node.minProperties), 'Invalid minProperties:', node.minProperties)
         errorIf('Object.keys(%s).length < %d', [name, node.minProperties], 'too few properties')
-        consume('minProperties')
+        consume('minProperties', 'natural')
       }
 
       if (typeof node.propertyNames === 'object' || typeof node.propertyNames === 'boolean') {
@@ -519,7 +534,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           const nameSchema = typeof names === 'object' ? { type: 'string', ...names } : names
           rule({ name: key }, nameSchema, subPath('propertyNames'))
         })
-        consume('propertyNames')
+        consume('propertyNames', 'object', 'boolean')
       }
       if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object') {
         enforceValidation('wild-card additionalProperties requires propertyNames')
@@ -530,7 +545,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           const prop = propimm(name, req)
           errorIf('!(%s)', [present(prop)], 'is required', buildName(prop))
         }
-        consume('required')
+        consume('required', 'array')
       }
 
       const dependencies = node.dependencies === undefined ? 'dependentRequired' : 'dependencies'
@@ -553,14 +568,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             fail('Unexpected dependencies entry')
           }
         }
-        consume(dependencies)
+        consume(dependencies, 'object')
       }
 
       if (typeof node.properties === 'object') {
         for (const p of Object.keys(node.properties)) {
           rule(propimm(name, p), node.properties[p], subPath('properties', p))
         }
-        consume('properties')
+        consume('properties', 'object')
       }
 
       if (node.patternProperties) {
@@ -572,7 +587,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             })
           }
         })
-        consume('patternProperties')
+        consume('patternProperties', 'object')
       }
 
       if (node.additionalProperties || node.additionalProperties === false) {
@@ -592,7 +607,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             }
           })
         })
-        consume('additionalProperties')
+        consume('additionalProperties', 'object', 'boolean')
       } else if (typeApplicable('object')) {
         enforceValidation('additionalProperties rule must be specified')
       }
@@ -603,13 +618,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const complex = typeof node.const === 'object'
         const compare = makeCompare(name, complex)
         errorIf('!%s', [compare(node.const)], 'must be const value')
-        consume('const')
+        consume('const', 'jsonval')
       } else if (node.enum) {
         enforce(Array.isArray(node.enum), 'Invalid enum')
         const complex = node.enum.some((e) => typeof e === 'object')
         const compare = makeCompare(name, complex)
         errorIf('!(%s)', [safeor(...node.enum.map(compare))], 'must be an enum value')
-        consume('enum')
+        consume('enum', 'array')
       }
 
       if (node.not || node.not === false) {
@@ -621,7 +636,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('} else {')
         fun.write('errors = %s', prev)
         fun.write('}')
-        consume('not')
+        consume('not', 'object', 'boolean')
       }
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
@@ -633,15 +648,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('errors = %s', prev)
         if (node.else || node.else === false) {
           rule(current, node.else, subPath('else'))
-          consume('else')
+          consume('else', 'object', 'boolean')
         }
         if (node.then || node.then === false) {
           fun.write('} else {')
           rule(current, node.then, subPath('then'))
-          consume('then')
+          consume('then', 'object', 'boolean')
         }
         fun.write('}')
-        consume('if')
+        consume('if', 'object', 'boolean')
       }
 
       if (node.allOf) {
@@ -649,7 +664,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         node.allOf.forEach((sch, key) => {
           rule(current, sch, subPath('allOf', key))
         })
-        consume('allOf')
+        consume('allOf', 'array')
       }
 
       if (node.anyOf && node.anyOf.length) {
@@ -672,7 +687,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('errors = %s', prev)
         error('no schemas match')
         fun.write('}')
-        consume('anyOf')
+        consume('anyOf', 'array')
       }
 
       if (node.oneOf && node.oneOf.length) {
@@ -690,7 +705,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           fun.write('}')
         }
         errorIf('%s !== 1', [passes], 'no (or more than one) schemas match')
-        consume('oneOf')
+        consume('oneOf', 'array')
       }
     }
 
@@ -715,7 +730,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       fun.write('if (!(%s)) {', typeValidate)
       error('is the wrong type')
     }
-    if (type) consume('type')
+    if (type) consume('type', 'string', 'array')
 
     // If type validation was needed, we should wrap this inside an else clause.
     // No need to close, type validation would always close at the end if it's used.
