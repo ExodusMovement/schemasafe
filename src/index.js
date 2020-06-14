@@ -44,6 +44,7 @@ const buildName = ({ name, parent, keyval, keyname }) => {
   } else if (parent && keyname) {
     return format('%s[%s]', parent, keyname)
   }
+  /* c8 ignore next */
   throw new Error('Unreachable')
 }
 
