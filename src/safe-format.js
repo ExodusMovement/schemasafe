@@ -23,6 +23,7 @@ const format = (fmt, ...args) => {
         if ([Infinity, -Infinity, NaN, undefined].includes(val)) return `${val}`
         return JSON.stringify(val)
     }
+    /* c8 ignore next */
     throw new Error(`Unreachable`)
   })
   if (args.length !== 0) throw new Error('Unexpected arguments count')
