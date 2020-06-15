@@ -1,7 +1,7 @@
 const tape = require('tape')
 const fs = require('fs')
 const path = require('path')
-const validator = require('../')
+const { validator } = require('../')
 
 // these tests require lax mode
 const unsafe = new Set([

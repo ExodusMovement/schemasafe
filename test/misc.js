@@ -1,6 +1,6 @@
 const tape = require('tape')
 const cosmic = require('./fixtures/cosmic')
-const validator = require('../')
+const { validator } = require('../')
 
 tape('simple', function(t) {
   const schema = {

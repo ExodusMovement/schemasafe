@@ -1,5 +1,5 @@
 const tape = require('tape')
-const validator = require('../')
+const { validator } = require('../')
 const { get } = require('../src/pointer')
 
 const target = Symbol('target')
