@@ -75,6 +75,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     dryRun = false,
     allowUnusedKeywords = opts.mode === 'lax',
     requireValidation = opts.mode === 'strong',
+    complexityChecks = opts.mode === 'strong',
     $schemaDefault = null,
     formats: optFormats = {},
     weakFormats = opts.mode !== 'strong',
@@ -93,9 +94,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     throw new Error(`Unknown options: ${Object.keys(unknown).join(', ')}`)
 
   if (!['strong', 'lax', 'default'].includes(mode)) throw new Error(`Invalid mode: ${mode}`)
-  if (mode === 'strong' && (!requireValidation || allowUnusedKeywords))
-    throw new Error('Strong mode demands requireValidation and no allowUnusedKeywords')
-  if (mode === 'strong' && weakFormats) throw new Error('Strong mode forbids weakFormats')
+  if (mode === 'strong' && (!requireValidation || !complexityChecks))
+    throw new Error('Strong mode demands requireValidation and complexityChecks')
+  if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
+    throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
 
   if (!scope) scope = Object.create(null)
   if (!scope[scopeRefCache]) scope[scopeRefCache] = new Map()
@@ -343,6 +345,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       return (e) => format('(%s === %j)', name, e)
     }
 
+    const enforceRegex = (pattern, target = node) => {
+      enforce(typeof pattern === 'string', 'Invalid pattern:', pattern)
+      if (requireValidation)
+        enforce(/^\^.*\$$/.test(pattern), 'Should start with ^ and end with $:', pattern)
+      if (complexityChecks && (pattern.match(/[{+*]/g) || []).length > 1)
+        enforce(target.maxLength !== undefined, 'maxLength should be specified for:', pattern)
+    }
+
     /* Checks inside blocks are independent, they are happening on the same code depth */
 
     const checkNumbers = () => {
@@ -403,6 +413,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             formatCache.set(format, n)
           }
           if (format instanceof RegExp) {
+            if (optFormats.hasOwnProperty(node.format)) enforceRegex(format.source) // built-in formats are fine, check only ones from options
             errorIf('!%s.test(%s)', [n, name], `must be ${node.format} format`)
           } else {
             errorIf('!%s(%s)', [n, name], `must be ${node.format} format`)
@@ -416,6 +427,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
 
       if (node.pattern) {
+        enforceRegex(node.pattern)
         const p = patterns(node.pattern)
         errorIf('!%s.test(%s)', [p, name], 'pattern mismatch')
         consume('pattern', 'string')
@@ -504,7 +516,21 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('contains', 'object', 'boolean')
       }
 
+      const isSimpleForUnique = () => {
+        if (node.maxItems !== undefined) return true
+        if (typeof node.items === 'object') {
+          if (Array.isArray(node.items) && node.additionalItems === false) return true
+          if (!Array.isArray(node.items) && node.items.type) {
+            const types = Array.isArray(node.items.type) ? node.items.type : [node.items.type]
+            const primitiveTypes = ['null', 'boolean', 'number', 'integer', 'string']
+            if (types.every((type) => primitiveTypes.includes(type))) return true
+          }
+        }
+        return false
+      }
       if (node.uniqueItems === true) {
+        if (complexityChecks)
+          enforce(isSimpleForUnique(), 'maxItems should be specified for non-primitive uniqueItems')
         scope.unique = functions.unique
         scope.deepEqual = functions.deepEqual
         errorIf('!unique(%s)', [name], 'must be unique')
@@ -582,6 +608,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const key = gensym('key')
         fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
           for (const p of Object.keys(node.patternProperties)) {
+            enforceRegex(p, node.propertyNames || {})
             fun.block('if (%s.test(%s)) {', [patterns(p), key], '}', () => {
               rule(propvar(name, key), node.patternProperties[p], subPath('patternProperties', p))
             })
