@@ -1,7 +1,7 @@
 'use strict'
 
 const tape = require('tape')
-const validator = require('../')
+const { validator } = require('../')
 
 const formats = {
   simple: /^[a-z]+$/,
