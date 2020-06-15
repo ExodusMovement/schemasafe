@@ -20,16 +20,18 @@ const types = Object.freeze({
 })
 
 // for checking schema parts in consume()
-const schemaTypes = Object.freeze({
-  boolean: (arg) => typeof arg === 'boolean',
-  array: (arg) => Array.isArray(arg),
-  object: (arg) => typeof arg === 'object' && arg && !Array.isArray(arg),
-  finite: (arg) => Number.isFinite(arg),
-  integer: (arg) => Number.isInteger(arg),
-  natural: (arg) => Number.isInteger(arg) && arg >= 0,
-  string: (arg) => typeof arg === 'string',
-  jsonval: (arg) => functions.deepEqual(arg, JSON.parse(JSON.stringify(arg))),
-})
+const schemaTypes = new Map(
+  Object.entries({
+    boolean: (arg) => typeof arg === 'boolean',
+    array: (arg) => Array.isArray(arg),
+    object: (arg) => typeof arg === 'object' && arg && !Array.isArray(arg),
+    finite: (arg) => Number.isFinite(arg),
+    integer: (arg) => Number.isInteger(arg),
+    natural: (arg) => Number.isInteger(arg) && arg >= 0,
+    string: (arg) => typeof arg === 'string',
+    jsonval: (arg) => functions.deepEqual(arg, JSON.parse(JSON.stringify(arg))),
+  })
+)
 
 const scopeSyms = Symbol('syms')
 const scopeRefCache = Symbol('refcache')
@@ -207,16 +209,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     enforce(Object.getPrototypeOf(node) === Object.prototype, 'Schema is not an object')
-    enforce(node.hasOwnProperty === Object.prototype.hasOwnProperty, 'hasOwnProperty is overriden')
     for (const key of Object.keys(node))
       enforce(KNOWN_KEYWORDS.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
     const unused = new Set(Object.keys(node))
     const consume = (prop, ...ruleTypes) => {
       enforce(unused.has(prop), 'Unexpected double consumption:', prop)
-      enforce(node.hasOwnProperty(prop), 'Is not an own property:', prop)
-      enforce(ruleTypes.every((t) => schemaTypes.hasOwnProperty(t)), 'Invalid type used in consume')
-      enforce(ruleTypes.some((t) => schemaTypes[t](node[prop])), 'Is not of expected type:', prop)
+      enforce(functions.hasOwn(node, prop), 'Is not an own property:', prop)
+      enforce(ruleTypes.every((t) => schemaTypes.has(t)), 'Invalid type used in consume')
+      enforce(ruleTypes.some((t) => schemaTypes.get(t)(node[prop])), 'Type not expected:', prop)
       unused.delete(prop)
     }
 
@@ -328,7 +329,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const typeArray = type ? (Array.isArray(type) ? type : [type]) : ['any']
     for (const t of typeArray) {
-      enforce(typeof t === 'string' && types.hasOwnProperty(t), 'Unknown type:', t)
+      enforce(typeof t === 'string' && functions.hasOwn(types, t), 'Unknown type:', t)
       if (t === 'any') enforceValidation('type = any is not allowed')
     }
 
@@ -401,7 +402,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('minLength', 'natural')
       }
 
-      if (node.format && fmts.hasOwnProperty(node.format)) {
+      if (node.format && functions.hasOwn(fmts, node.format)) {
         const formatImpl = fmts[node.format]
         if (formatImpl instanceof RegExp || typeof formatImpl === 'function') {
           let n = formatCache.get(formatImpl)
@@ -412,7 +413,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           }
           if (formatImpl instanceof RegExp) {
             // built-in formats are fine, check only ones from options
-            if (optFormats.hasOwnProperty(node.format)) enforceRegex(formatImpl.source)
+            if (functions.hasOwn(optFormats, node.format)) enforceRegex(formatImpl.source)
             errorIf('!%s.test(%s)', [n, name], `must be ${node.format} format`)
           } else {
             errorIf('!%s(%s)', [n, name], `must be ${node.format} format`)

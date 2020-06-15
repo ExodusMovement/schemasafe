@@ -30,7 +30,7 @@ function get(obj, pointer, objpath) {
     if (typeof part !== 'string') throw new Error('Invalid JSON pointer')
     const prop = untilde(part)
     if (typeof curr !== 'object') return undefined
-    if (!curr.hasOwnProperty(prop)) return undefined
+    if (!Object.prototype.hasOwnProperty.call(curr, prop)) return undefined
     curr = curr[prop]
     if (objpath) objpath.push(curr)
   }
