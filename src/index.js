@@ -8,16 +8,18 @@ const functions = require('./scope-functions')
 const KNOWN_KEYWORDS = require('./known-keywords')
 
 // for building into the validation function
-const types = Object.freeze({
-  any: () => format('true'),
-  null: (name) => format('%s === null', name),
-  boolean: (name) => format('typeof %s === "boolean"', name),
-  array: (name) => format('Array.isArray(%s)', name),
-  object: (n) => format('typeof %s === "object" && %s && !Array.isArray(%s)', n, n, n),
-  number: (name) => format('typeof %s === "number"', name),
-  integer: (name) => format('Number.isInteger(%s)', name),
-  string: (name) => format('typeof %s === "string"', name),
-})
+const types = new Map(
+  Object.entries({
+    any: () => format('true'),
+    null: (name) => format('%s === null', name),
+    boolean: (name) => format('typeof %s === "boolean"', name),
+    array: (name) => format('Array.isArray(%s)', name),
+    object: (n) => format('typeof %s === "object" && %s && !Array.isArray(%s)', n, n, n),
+    number: (name) => format('typeof %s === "number"', name),
+    integer: (name) => format('Number.isInteger(%s)', name),
+    string: (name) => format('typeof %s === "string"', name),
+  })
+)
 
 // for checking schema parts in consume()
 const schemaTypes = new Map(
@@ -329,7 +331,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const typeArray = type ? (Array.isArray(type) ? type : [type]) : ['any']
     for (const t of typeArray) {
-      enforce(typeof t === 'string' && functions.hasOwn(types, t), 'Unknown type:', t)
+      enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
       if (t === 'any') enforceValidation('type = any is not allowed')
     }
 
@@ -751,7 +753,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     /* Actual post-$ref validation happens here */
 
-    const typeValidate = safeor(...typeArray.map((t) => types[t](name)))
+    const typeValidate = safeor(...typeArray.map((t) => types.get(t)(name)))
     const needTypeValidation = `${typeValidate}` !== 'true'
     if (needTypeValidation) {
       fun.write('if (!(%s)) {', typeValidate)
@@ -762,10 +764,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     // If type validation was needed, we should wrap this inside an else clause.
     // No need to close, type validation would always close at the end if it's used.
     maybeWrap(needTypeValidation, '} else {', [], '', () => {
-      typeWrap(checkNumbers, ['number', 'integer'], types.number(name))
-      typeWrap(checkStrings, ['string'], types.string(name))
-      typeWrap(checkArrays, ['array'], types.array(name))
-      typeWrap(checkObjects, ['object'], types.object(name))
+      typeWrap(checkNumbers, ['number', 'integer'], types.get('number')(name))
+      typeWrap(checkStrings, ['string'], types.get('string')(name))
+      typeWrap(checkArrays, ['array'], types.get('array')(name))
+      typeWrap(checkObjects, ['object'], types.get('object')(name))
       checkGeneric()
     })
 
