@@ -55,7 +55,12 @@ function objpath2path(objpath) {
   return ids.filter((id) => id).reduce(joinPath, '')
 }
 
-function resolveReference(root, additionalSchemas, ptr) {
+function resolveReference(root, additionalSchemas, ref, base = '') {
+  const ptr = joinPath(base, ref)
+  const schemas = new Map(Object.entries(additionalSchemas))
+  const self = (base || '').split('#')[0]
+  if (self) schemas.set(self, root)
+
   const results = []
 
   const [main, hash = ''] = ptr.split('#')
@@ -87,15 +92,11 @@ function resolveReference(root, additionalSchemas, ptr) {
   }
 
   // Find in additional schemas
-  if (additionalSchemas.hasOwnProperty(main))
-    results.push(...resolveReference(additionalSchemas[main], additionalSchemas, `#${hash}`))
+  if (schemas.has(main))
+    results.push(...resolveReference(schemas.get(main), additionalSchemas, `#${hash}`))
 
   // Full refs to additional schemas
-  if (additionalSchemas.hasOwnProperty(ptr))
-    results.push([additionalSchemas[ptr], additionalSchemas, ptr])
-  const altname = ptr.replace(/^#/, '').replace(/\/$/, '') // is-my-json-valid test
-  if (altname !== ptr && additionalSchemas.hasOwnProperty(altname))
-    results.push([additionalSchemas[altname], additionalSchemas, ptr])
+  if (schemas.has(ptr)) results.push([schemas.get(ptr), schemas.get(ptr), ptr])
 
   return results
 }

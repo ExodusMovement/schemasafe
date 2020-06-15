@@ -318,7 +318,7 @@ tape('#toJSON()', function(t) {
 tape('external schemas', function(t) {
   const ext = { type: 'string' }
   const schema = {
-    $ref: '#ext',
+    $ref: 'ext#',
   }
 
   const validate = validator(schema, { schemas: { ext: ext } })
