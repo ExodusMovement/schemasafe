@@ -49,7 +49,12 @@
       }
     ],
     "strict": 2,
+    "no-else-return": 2,
+    "no-fallthrough": 2,
+    "no-param-reassign": 2,
+    "no-shadow": 2,
     "prefer-const": 2,
+    "prefer-object-spread": 2,
     "prefer-template": 2,
     "no-var": 2
   }
