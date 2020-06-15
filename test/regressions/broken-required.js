@@ -1,7 +1,7 @@
 'use strict'
 
 const tape = require('tape')
-const validator = require('../../')
+const { validator } = require('../../')
 
 const runWithOptions = (t, opts) => {
   t.notOk(validator({ required: [], uniqueItems: true }, opts)([1, 1]), 'required + uniqueItems')

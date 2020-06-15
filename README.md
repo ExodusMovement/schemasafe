@@ -15,7 +15,7 @@ npm install --save @exodus/schemasafe
 Simply pass a schema to compile it
 
 ```js
-const validator = require('@exodus/schemasafe')
+const { validator } = require('@exodus/schemasafe')
 
 const validate = validator({
   type: 'object',
@@ -111,7 +111,7 @@ console.log(validate.errors)
 To compile a validator function to an IIFE, call `validate.toModule()`:
 
 ```js
-const validator = require('@exodus/schemasafe')
+const { validator } = require('@exodus/schemasafe')
 
 const schema = {
   type: 'string',

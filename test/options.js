@@ -1,7 +1,7 @@
 'use strict'
 
 const tape = require('tape')
-const validator = require('../')
+const { validator } = require('../')
 
 tape('unknown', (t) => {
   t.throws(() => validator({}, { whatever: 1 }), /option.*whatever/)

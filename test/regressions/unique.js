@@ -1,7 +1,7 @@
 'use strict'
 
 const tape = require('tape')
-const validator = require('../../')
+const { validator } = require('../../')
 
 tape('unique is not confused by type mismatch', (t) => {
   const validate = validator({ type: 'array', uniqueItems: true })

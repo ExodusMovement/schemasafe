@@ -1,7 +1,7 @@
 'use strict'
 
 const tape = require('tape')
-const validator = require('../../')
+const { validator } = require('../../')
 
 tape('number', (t) => {
   const validate = validator({ type: 'number' })

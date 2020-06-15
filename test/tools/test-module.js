@@ -28,5 +28,4 @@ const wrap = (orig) =>
 const validator = wrap(validatorOrig)
 const parser = wrap(parserOrig)
 
-indexModule.exports = validator
-Object.assign(indexModule.exports, { validator, parser })
+indexModule.exports = { validator, parser }

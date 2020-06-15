@@ -1,7 +1,7 @@
 'use strict'
 
 const tape = require('tape')
-const validator = require('../../')
+const { validator } = require('../../')
 
 tape('contains does not pollute errors', (t) => {
   const validate = validator({ type: 'array', contains: { const: 2 } }, { includeErrors: true })
