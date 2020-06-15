@@ -1,3 +1,5 @@
+'use strict'
+
 const { format } = require('./safe-format')
 const jaystring = require('./jaystring')
 

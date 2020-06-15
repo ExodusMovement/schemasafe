@@ -1,3 +1,5 @@
+'use strict'
+
 const tape = require('tape')
 const cosmic = require('./fixtures/cosmic')
 const validator = require('../')

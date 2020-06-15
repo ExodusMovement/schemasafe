@@ -1,3 +1,5 @@
+'use strict'
+
 const isArrowFnWithParensRegex = /^\([^)]*\) *=>/
 const isArrowFnWithoutParensRegex = /^[^=]*=>/
 
