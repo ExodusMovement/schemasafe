@@ -57,7 +57,7 @@ module.exports = () => {
 
     makeModule(scope = {}) {
       const scopeDefs = processScope(scope).map(([key, val]) => `const ${key} = ${jaystring(val)};`)
-      return `(function() {\n${scopeDefs.join('\n')}\n${build()}})();`
+      return `(function() {\n'use strict'\n${scopeDefs.join('\n')}\n${build()}})();`
     },
 
     makeFunction(scope = {}) {
@@ -66,7 +66,7 @@ module.exports = () => {
       const keys = scopeEntries.map((entry) => entry[0])
       const vals = scopeEntries.map((entry) => entry[1])
       // eslint-disable-next-line no-new-func
-      return Function(...keys, src)(...vals)
+      return Function(...keys, `'use strict'\n${src}`)(...vals)
     },
   }
 }
