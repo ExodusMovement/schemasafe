@@ -100,7 +100,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
     throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
 
-  if (!scope[scopeCache]) scope[scopeCache] = { sym: new Map(), ref: new Map(), format: new Map() }
+  if (!scope[scopeCache])
+    scope[scopeCache] = { sym: new Map(), ref: new Map(), format: new Map(), pattern: new Map() }
   const cache = scope[scopeCache] // cache meta info for known scope variables, per meta type
 
   const gensym = (name) => {
@@ -110,12 +111,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     return safe(`${name}${index}`)
   }
 
-  const reversePatterns = {}
   const patterns = (p) => {
-    if (reversePatterns[p]) return reversePatterns[p]
+    if (cache.pattern.has(p)) return cache.pattern.get(p)
     const n = gensym('pattern')
     scope[n] = new RegExp(p, 'u')
-    reversePatterns[p] = n
+    cache.pattern.set(p, n)
     return n
   }
 
