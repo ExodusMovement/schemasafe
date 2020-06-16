@@ -49,8 +49,16 @@
       }
     ],
     "strict": 2,
+    "no-else-return": 2,
+    "no-fallthrough": 2,
+    "no-param-reassign": 2,
+    "no-proto": 2,
+    "no-prototype-builtins": 2,
+    "no-shadow": 2,
     "prefer-const": 2,
+    "prefer-object-spread": 2,
     "prefer-template": 2,
+    "valid-typeof": [2, { "requireStringLiterals": true }],
     "no-var": 2
   }
 }

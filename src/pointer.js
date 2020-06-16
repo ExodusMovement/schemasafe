@@ -25,24 +25,25 @@ function get(obj, pointer, objpath) {
   if (!['', '#'].includes(parts.shift())) throw new Error('Invalid JSON pointer')
   if (parts.length === 0) return obj
 
+  let curr = obj
   for (const part of parts) {
     if (typeof part !== 'string') throw new Error('Invalid JSON pointer')
     const prop = untilde(part)
-    if (typeof obj !== 'object') return undefined
-    if (!obj.hasOwnProperty(prop)) return undefined
-    obj = obj[prop]
-    if (objpath) objpath.push(obj)
+    if (typeof curr !== 'object') return undefined
+    if (!Object.prototype.hasOwnProperty.call(curr, prop)) return undefined
+    curr = curr[prop]
+    if (objpath) objpath.push(curr)
   }
   if (objpath) objpath.pop() // does not include head or result
-  return obj
+  return curr
 }
 
 const protocolRegex = /^https?:\/\//
 
-function joinPath(base, sub) {
-  if (typeof base !== 'string' || typeof sub !== 'string') throw new Error('Unexpected path!')
-  if (sub.length === 0) return base
-  base = base.replace(/#.*/, '')
+function joinPath(baseFull, sub) {
+  if (typeof baseFull !== 'string' || typeof sub !== 'string') throw new Error('Unexpected path!')
+  if (sub.length === 0) return baseFull
+  const base = baseFull.replace(/#.*/, '')
   if (sub.startsWith('#')) return `${base}${sub}`
   if (!base.includes('/') || protocolRegex.test(sub)) return sub
   if (protocolRegex.test(base)) return `${new URL(sub, base)}`
@@ -67,9 +68,10 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
   const local = decodeURI(hash).replace(/\/$/, '')
 
   // Find in self by id path
-  const visit = (sub, path) => {
+  const visit = (sub, oldPath) => {
     if (!sub || typeof sub !== 'object') return
     const id = sub.$id || sub.id
+    let path = oldPath
     if (id && typeof id === 'string') {
       path = joinPath(path, id)
       if (path === ptr || (path === main && local === '')) {

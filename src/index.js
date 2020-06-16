@@ -8,28 +8,32 @@ const functions = require('./scope-functions')
 const KNOWN_KEYWORDS = require('./known-keywords')
 
 // for building into the validation function
-const types = Object.freeze({
-  any: () => format('true'),
-  null: (name) => format('%s === null', name),
-  boolean: (name) => format('typeof %s === "boolean"', name),
-  array: (name) => format('Array.isArray(%s)', name),
-  object: (n) => format('typeof %s === "object" && %s && !Array.isArray(%s)', n, n, n),
-  number: (name) => format('typeof %s === "number"', name),
-  integer: (name) => format('Number.isInteger(%s)', name),
-  string: (name) => format('typeof %s === "string"', name),
-})
+const types = new Map(
+  Object.entries({
+    any: () => format('true'),
+    null: (name) => format('%s === null', name),
+    boolean: (name) => format('typeof %s === "boolean"', name),
+    array: (name) => format('Array.isArray(%s)', name),
+    object: (n) => format('typeof %s === "object" && %s && !Array.isArray(%s)', n, n, n),
+    number: (name) => format('typeof %s === "number"', name),
+    integer: (name) => format('Number.isInteger(%s)', name),
+    string: (name) => format('typeof %s === "string"', name),
+  })
+)
 
 // for checking schema parts in consume()
-const schemaTypes = Object.freeze({
-  boolean: (arg) => typeof arg === 'boolean',
-  array: (arg) => Array.isArray(arg),
-  object: (arg) => typeof arg === 'object' && arg && !Array.isArray(arg),
-  finite: (arg) => Number.isFinite(arg),
-  integer: (arg) => Number.isInteger(arg),
-  natural: (arg) => Number.isInteger(arg) && arg >= 0,
-  string: (arg) => typeof arg === 'string',
-  jsonval: (arg) => functions.deepEqual(arg, JSON.parse(JSON.stringify(arg))),
-})
+const schemaTypes = new Map(
+  Object.entries({
+    boolean: (arg) => typeof arg === 'boolean',
+    array: (arg) => Array.isArray(arg),
+    object: (arg) => typeof arg === 'object' && arg && !Array.isArray(arg),
+    finite: (arg) => Number.isFinite(arg),
+    integer: (arg) => Number.isInteger(arg),
+    natural: (arg) => Number.isInteger(arg) && arg >= 0,
+    string: (arg) => typeof arg === 'string',
+    jsonval: (arg) => functions.deepEqual(arg, JSON.parse(JSON.stringify(arg))),
+  })
+)
 
 const scopeSyms = Symbol('syms')
 const scopeRefCache = Symbol('refcache')
@@ -83,13 +87,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     schemas = {},
     ...unknown
   } = opts
-  const fmts = Object.assign(
-    {},
-    formats.core,
-    weakFormats ? formats.weak : {},
-    extraFormats ? formats.extra : {},
-    optFormats
-  )
+  const fmts = {
+    ...formats.core,
+    ...(weakFormats ? formats.weak : {}),
+    ...(extraFormats ? formats.extra : {}),
+    ...optFormats,
+  }
   if (Object.keys(unknown).length !== 0)
     throw new Error(`Unknown options: ${Object.keys(unknown).join(', ')}`)
 
@@ -99,7 +102,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
     throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
 
-  if (!scope) scope = Object.create(null)
   if (!scope[scopeRefCache]) scope[scopeRefCache] = new Map()
   const refCache = scope[scopeRefCache]
   if (!scope[scopeFormatCache]) scope[scopeFormatCache] = new Map()
@@ -168,13 +170,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
     const error = (msg, prop, value) => {
       if (includeErrors === true) {
-        const errorObject = { field: prop || name, message: msg }
+        const leanError = { field: prop || name, message: msg }
         if (verboseErrors) {
           const type = node.type || 'any'
-          Object.assign(errorObject, { type, schemaPath: toPointer(schemaPath) })
-          writeErrorObject(format('{ ...%j, value: %s }', errorObject, value || name))
+          const fullError = { ...leanError, type, schemaPath: toPointer(schemaPath) }
+          writeErrorObject(format('{ ...%j, value: %s }', fullError, value || name))
         } else {
-          writeErrorObject(format('%j', errorObject))
+          writeErrorObject(format('%j', leanError))
         }
       }
       if (allErrors) {
@@ -209,16 +211,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     enforce(Object.getPrototypeOf(node) === Object.prototype, 'Schema is not an object')
-    enforce(node.hasOwnProperty === Object.prototype.hasOwnProperty, 'hasOwnProperty is overriden')
     for (const key of Object.keys(node))
       enforce(KNOWN_KEYWORDS.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
     const unused = new Set(Object.keys(node))
-    const consume = (prop, ...types) => {
+    const consume = (prop, ...ruleTypes) => {
       enforce(unused.has(prop), 'Unexpected double consumption:', prop)
-      enforce(node.hasOwnProperty(prop), 'Is not an own property:', prop)
-      enforce(types.every((t) => schemaTypes.hasOwnProperty(t)), 'Invalid type used in consume()')
-      enforce(types.some((t) => schemaTypes[t](node[prop])), 'Is not of expected type:', prop)
+      enforce(functions.hasOwn(node, prop), 'Is not an own property:', prop)
+      enforce(ruleTypes.every((t) => schemaTypes.has(t)), 'Invalid type used in consume')
+      enforce(ruleTypes.some((t) => schemaTypes.get(t)(node[prop])), 'Type not expected:', prop)
       unused.delete(prop)
     }
 
@@ -330,19 +331,19 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const typeArray = type ? (Array.isArray(type) ? type : [type]) : ['any']
     for (const t of typeArray) {
-      enforce(typeof t === 'string' && types.hasOwnProperty(t), 'Unknown type:', t)
+      enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
       if (t === 'any') enforceValidation('type = any is not allowed')
     }
 
-    const typeApplicable = (...types) =>
-      typeArray.includes('any') || typeArray.some((x) => types.includes(x))
+    const typeApplicable = (...possibleTypes) =>
+      typeArray.includes('any') || typeArray.some((x) => possibleTypes.includes(x))
 
-    const makeCompare = (name, complex) => {
+    const makeCompare = (variableName, complex) => {
       if (complex) {
         scope.deepEqual = functions.deepEqual
-        return (e) => format('deepEqual(%s, %j)', name, e)
+        return (e) => format('deepEqual(%s, %j)', variableName, e)
       }
-      return (e) => format('(%s === %j)', name, e)
+      return (e) => format('(%s === %j)', variableName, e)
     }
 
     const enforceRegex = (pattern, target = node) => {
@@ -403,17 +404,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('minLength', 'natural')
       }
 
-      if (node.format && fmts.hasOwnProperty(node.format)) {
-        const format = fmts[node.format]
-        if (format instanceof RegExp || typeof format === 'function') {
-          let n = formatCache.get(format)
+      if (node.format && functions.hasOwn(fmts, node.format)) {
+        const formatImpl = fmts[node.format]
+        if (formatImpl instanceof RegExp || typeof formatImpl === 'function') {
+          let n = formatCache.get(formatImpl)
           if (!n) {
             n = gensym('format')
-            scope[n] = format
-            formatCache.set(format, n)
+            scope[n] = formatImpl
+            formatCache.set(formatImpl, n)
           }
-          if (format instanceof RegExp) {
-            if (optFormats.hasOwnProperty(node.format)) enforceRegex(format.source) // built-in formats are fine, check only ones from options
+          if (formatImpl instanceof RegExp) {
+            // built-in formats are fine, check only ones from options
+            if (functions.hasOwn(optFormats, node.format)) enforceRegex(formatImpl.source)
             errorIf('!%s.test(%s)', [n, name], `must be ${node.format} format`)
           } else {
             errorIf('!%s(%s)', [n, name], `must be ${node.format} format`)
@@ -521,9 +523,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (typeof node.items === 'object') {
           if (Array.isArray(node.items) && node.additionalItems === false) return true
           if (!Array.isArray(node.items) && node.items.type) {
-            const types = Array.isArray(node.items.type) ? node.items.type : [node.items.type]
+            const itemTypes = Array.isArray(node.items.type) ? node.items.type : [node.items.type]
             const primitiveTypes = ['null', 'boolean', 'number', 'integer', 'string']
-            if (types.every((type) => primitiveTypes.includes(type))) return true
+            if (itemTypes.every((itemType) => primitiveTypes.includes(itemType))) return true
           }
         }
         return false
@@ -751,7 +753,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     /* Actual post-$ref validation happens here */
 
-    const typeValidate = safeor(...typeArray.map((t) => types[t](name)))
+    const typeValidate = safeor(...typeArray.map((t) => types.get(t)(name)))
     const needTypeValidation = `${typeValidate}` !== 'true'
     if (needTypeValidation) {
       fun.write('if (!(%s)) {', typeValidate)
@@ -762,10 +764,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     // If type validation was needed, we should wrap this inside an else clause.
     // No need to close, type validation would always close at the end if it's used.
     maybeWrap(needTypeValidation, '} else {', [], '', () => {
-      typeWrap(checkNumbers, ['number', 'integer'], types.number(name))
-      typeWrap(checkStrings, ['string'], types.string(name))
-      typeWrap(checkArrays, ['array'], types.array(name))
-      typeWrap(checkObjects, ['object'], types.object(name))
+      typeWrap(checkNumbers, ['number', 'integer'], types.get('number')(name))
+      typeWrap(checkStrings, ['string'], types.get('string')(name))
+      typeWrap(checkArrays, ['array'], types.get('array')(name))
+      typeWrap(checkObjects, ['object'], types.get('object')(name))
       checkGeneric()
     })
 
@@ -787,7 +789,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   return validate
 }
 
-const validator = (schema, opts = {}) => compile(schema, schema, opts)
+const validator = (schema, opts = {}) => compile(schema, schema, opts, Object.create(null))
 
 const parser = function(schema, opts = {}) {
   // strong mode is default in parser
