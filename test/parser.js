@@ -16,7 +16,7 @@ tape('default is strong mode', (t) => {
 
   t.throws(() => {
     parser({}, { requireValidation: false })
-  }, /Strong mode demands requireValidation/)
+  }, /Strong mode demands/)
 
   t.doesNotThrow(() => {
     parser({}, { mode: 'default' })
@@ -28,7 +28,7 @@ tape('default is strong mode', (t) => {
 tape('parser works correctly', (t) => {
   let parsed
 
-  t.strictEqual(typeof parser({ type: 'string' }), 'function', 'returns a function')
+  t.strictEqual(typeof parser({ type: 'string', format: 'date' }), 'function', 'returns a function')
 
   t.throws(() => {
     parser({ type: 'integer' })('{}')
