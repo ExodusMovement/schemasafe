@@ -35,9 +35,7 @@ const schemaTypes = new Map(
   })
 )
 
-const scopeSyms = Symbol('syms')
-const scopeRefCache = Symbol('refcache')
-const scopeFormatCache = Symbol('formatcache')
+const scopeCache = Symbol('cache')
 
 // Order is important, newer at the top!
 const schemaVersions = [
@@ -102,16 +100,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
     throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
 
-  if (!scope[scopeRefCache]) scope[scopeRefCache] = new Map()
-  const refCache = scope[scopeRefCache]
-  if (!scope[scopeFormatCache]) scope[scopeFormatCache] = new Map()
-  const formatCache = scope[scopeFormatCache]
-  if (!scope[scopeSyms]) scope[scopeSyms] = new Map()
-  const syms = scope[scopeSyms]
+  if (!scope[scopeCache]) scope[scopeCache] = { sym: new Map(), ref: new Map(), format: new Map() }
+  const cache = scope[scopeCache] // cache meta info for known scope variables, per meta type
+
   const gensym = (name) => {
-    if (!syms.get(name)) syms.set(name, 0)
-    const index = syms.get(name)
-    syms.set(name, index + 1)
+    if (!cache.sym.get(name)) cache.sym.set(name, 0)
+    const index = cache.sym.get(name)
+    cache.sym.set(name, index + 1)
     return safe(`${name}${index}`)
   }
 
@@ -300,10 +295,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const resolved = resolveReference(root, schemas || {}, node.$ref, basePath())
       const [sub, subRoot, path] = resolved[0] || []
       if (sub || sub === false) {
-        let n = refCache.get(sub)
+        let n = cache.ref.get(sub)
         if (!n) {
           n = gensym('ref')
-          refCache.set(sub, n)
+          cache.ref.set(sub, n)
           let fn = null // resolve cyclic dependencies
           scope[n] = (...args) => fn(...args)
           fn = compile(sub, subRoot, { ...opts, includeErrors: false }, scope, path)
@@ -407,11 +402,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.format && functions.hasOwn(fmts, node.format)) {
         const formatImpl = fmts[node.format]
         if (formatImpl instanceof RegExp || typeof formatImpl === 'function') {
-          let n = formatCache.get(formatImpl)
+          let n = cache.format.get(formatImpl)
           if (!n) {
             n = gensym('format')
             scope[n] = formatImpl
-            formatCache.set(formatImpl, n)
+            cache.format.set(formatImpl, n)
           }
           if (formatImpl instanceof RegExp) {
             // built-in formats are fine, check only ones from options
