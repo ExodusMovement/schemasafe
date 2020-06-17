@@ -491,3 +491,30 @@ tape.skip('field shows item index in arrays', function(t) {
   )
   t.end()
 })
+
+tape('jsonCheck option', function(t) {
+  const schema = {
+    type: 'object',
+    required: ['bar'],
+    properties: {
+      bar: {
+        type: 'boolean',
+      },
+    },
+  }
+
+  class Foo {
+    constructor() {
+      this.bar = true
+    }
+  }
+
+  t.ok(validator(schema)(new Foo()), 'non-JSON is OK without jsonCheck')
+
+  const validate = validator(schema, { jsonCheck: true, includeErrors: true })
+  t.notOk(validate(new Foo()), 'non-JSON fails with jsonCheck')
+  const [error] = validate.errors
+  t.is(error.message, 'not JSON compatible', 'correct error message')
+
+  t.end()
+})

@@ -79,6 +79,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     requireValidation = opts.mode === 'strong',
     requireStringValidation = opts.mode === 'strong',
     complexityChecks = opts.mode === 'strong',
+    jsonCheck = false, // disabled by default, it's assumed that data is from JSON.parse
     $schemaDefault = null,
     formats: optFormats = {},
     weakFormats = opts.mode !== 'strong',
@@ -292,6 +293,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       fun.write('if (%s) {', present(current))
     }
 
+    if (jsonCheck) {
+      // this check has to be done only after existance check and before all other checks
+      scope.deepEqual = functions.deepEqual
+      errorIf('!deepEqual(%s, JSON.parse(JSON.stringify(%s)))', [name, name], 'not JSON compatible')
+    }
+
     if (node.$ref) {
       const resolved = resolveReference(root, schemas || {}, node.$ref, basePath())
       const [sub, subRoot, path] = resolved[0] || []
@@ -302,7 +309,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           cache.ref.set(sub, n)
           let fn = null // resolve cyclic dependencies
           scope[n] = (...args) => fn(...args)
-          fn = compile(sub, subRoot, { ...opts, includeErrors: false }, scope, path)
+          const override = { includeErrors: false, jsonCheck: false }
+          fn = compile(sub, subRoot, { ...opts, ...override }, scope, path)
           scope[n] = fn
         }
         errorIf('!%s(%s)', [n, name], 'referenced schema does not match')
