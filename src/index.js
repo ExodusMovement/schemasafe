@@ -755,23 +755,17 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const typeValidate = safeor(...typeArray.map((t) => types.get(t)(name)))
     const needTypeValidation = `${typeValidate}` !== 'true'
-    if (needTypeValidation) {
-      fun.write('if (!(%s)) {', typeValidate)
-      error('is the wrong type')
-    }
+    if (needTypeValidation) errorIf('!(%s)', [typeValidate], 'is the wrong type')
     if (type) consume('type', 'string', 'array')
 
-    // If type validation was needed, we should wrap this inside an else clause.
-    // No need to close, type validation would always close at the end if it's used.
-    maybeWrap(needTypeValidation, '} else {', [], '', () => {
+    // If type validation was needed and did not return early, wrap this inside an else clause.
+    maybeWrap(needTypeValidation && allErrors, 'else {', [], '}', () => {
       typeWrap(checkNumbers, ['number', 'integer'], types.get('number')(name))
       typeWrap(checkStrings, ['string'], types.get('string')(name))
       typeWrap(checkArrays, ['array'], types.get('array')(name))
       typeWrap(checkObjects, ['object'], types.get('object')(name))
       checkGeneric()
     })
-
-    if (needTypeValidation) fun.write('}') // type check
 
     finish()
   }

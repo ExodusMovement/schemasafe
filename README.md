@@ -128,16 +128,16 @@ const validate = validator(schema, { formats })
 console.log(validate.toModule())
 /** Prints:
  * (function() {
+ * 'use strict'
  * const format0 = (value) => /^0x[0-9A-Fa-f]*$/.test(value);
  * return (function validate(data) {
  *   if (data === undefined) data = null
  *   let errors = 0
  *   if (!(typeof data === "string")) {
  *     return false
- *   } else {
- *     if (!format0(data)) {
- *       return false
- *     }
+ *   }
+ *   if (!format0(data)) {
+ *     return false
  *   }
  *   return errors === 0
  * })})();
