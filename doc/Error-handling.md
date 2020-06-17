@@ -12,11 +12,11 @@ and/or produce invalid validation code.
 At the moment of writing, correct error reporting is still in progress. \
 Most significant known issue is that error pointers stop at `$ref` usage.
 
-This does not affect the _result_ of the validation, just the informaton inside of the produced
+This does not affect the _result_ of the validation, just the information inside of the produced
 error objects.
 
 It's significantly better than in `is-my-json-valid` though.\
-Futher improvements should bring this on par with `ajv`.
+Further improvements should bring this on par with `ajv`.
 
 ### Validation errors are opt-in
 
