@@ -758,8 +758,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (needTypeValidation) errorIf('!(%s)', [typeValidate], 'is the wrong type')
     if (type) consume('type', 'string', 'array')
 
-    // If type validation was needed, wrap this inside an else clause.
-    maybeWrap(needTypeValidation, 'else {', [], '}', () => {
+    // If type validation was needed and did not return early, wrap this inside an else clause.
+    maybeWrap(needTypeValidation && allErrors, 'else {', [], '}', () => {
       typeWrap(checkNumbers, ['number', 'integer'], types.get('number')(name))
       typeWrap(checkStrings, ['string'], types.get('string')(name))
       typeWrap(checkArrays, ['array'], types.get('array')(name))
