@@ -184,9 +184,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
     const errorIf = (fmt, args, ...errorArgs) => {
       const condition = format(fmt, ...args)
-      if (!allErrors && includeErrors === false) {
+      if (includeErrors === false) {
         // in this case, we can fast-track and inline this to generate more readable code
-        fun.write('if (%s) return false', condition)
+        if (allErrors) {
+          fun.write('if (%s) errors++', condition)
+        } else {
+          fun.write('if (%s) return false', condition)
+        }
       } else {
         fun.write('if (%s) {', condition)
         error(...errorArgs)
