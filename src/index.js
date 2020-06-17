@@ -77,6 +77,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     dryRun = false,
     allowUnusedKeywords = opts.mode === 'lax',
     requireValidation = opts.mode === 'strong',
+    requireStringValidation = opts.mode === 'strong',
     complexityChecks = opts.mode === 'strong',
     $schemaDefault = null,
     formats: optFormats = {},
@@ -95,8 +96,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     throw new Error(`Unknown options: ${Object.keys(unknown).join(', ')}`)
 
   if (!['strong', 'lax', 'default'].includes(mode)) throw new Error(`Invalid mode: ${mode}`)
-  if (mode === 'strong' && (!requireValidation || !complexityChecks))
-    throw new Error('Strong mode demands requireValidation and complexityChecks')
+  if (mode === 'strong' && (!requireValidation || !requireStringValidation || !complexityChecks))
+    throw new Error('Strong mode demands require(String)Validation and complexityChecks')
   if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
     throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
 
@@ -343,7 +344,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const enforceRegex = (pattern, target = node) => {
       enforce(typeof pattern === 'string', 'Invalid pattern:', pattern)
-      if (requireValidation)
+      if (requireValidation || requireStringValidation)
         enforce(/^\^.*\$$/.test(pattern), 'Should start with ^ and end with $:', pattern)
       if (complexityChecks && (pattern.match(/[{+*]/g) || []).length > 1)
         enforce(target.maxLength !== undefined, 'maxLength should be specified for:', pattern)
@@ -425,9 +426,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.pattern) {
         enforceRegex(node.pattern)
-        const p = patterns(node.pattern)
-        errorIf('!%s.test(%s)', [p, name], 'pattern mismatch')
+        if (node.pattern !== '^[\\s\\S]*$' && node.pattern !== '^[\\S\\s]*$') {
+          const p = patterns(node.pattern)
+          errorIf('!%s.test(%s)', [p, name], 'pattern mismatch')
+        }
         consume('pattern', 'string')
+      } else if (typeApplicable('string') && requireStringValidation && !node.format) {
+        fail('pattern or format must be specified for strings, use pattern: ^[\\s\\S]*$ to opt-out')
       }
     }
 
