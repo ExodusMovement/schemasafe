@@ -133,12 +133,8 @@ console.log(validate.toModule())
  * return (function validate(data) {
  *   if (data === undefined) data = null
  *   let errors = 0
- *   if (!(typeof data === "string")) {
- *     return false
- *   }
- *   if (!format0(data)) {
- *     return false
- *   }
+ *   if (!(typeof data === "string")) return false
+ *   if (!format0(data)) return false
  *   return errors === 0
  * })})();
  */
