@@ -501,15 +501,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('let %s = 0', passes)
 
         const i = genloop()
-        fun.write('for (let %s = 0; %s < %s.length; %s++) {', i, i, name, i)
-        fun.write('const %s = errors', prev)
-        subrule(propvar(name, i), node.contains, subPath('contains'))
-        fun.write('if (%s === errors) {', prev)
-        fun.write('%s++', passes)
-        fun.write('} else {')
-        fun.write('errors = %s', prev)
-        fun.write('}')
-        fun.write('}')
+        fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
+          fun.write('const %s = errors', prev)
+          subrule(propvar(name, i), node.contains, subPath('contains'))
+          fun.write('if (%s === errors) {', prev)
+          fun.write('%s++', passes)
+          fun.write('} else {')
+          fun.write('errors = %s', prev)
+          fun.write('}')
+        })
 
         if (Number.isFinite(node.minContains)) {
           errorIf('%s < %d', [passes, node.minContains], 'array contains too few matching items')
