@@ -67,6 +67,12 @@ const buildName = ({ name, parent, keyval, keyname }) => {
   throw new Error('Unreachable')
 }
 
+const jsonProtoKeys = new Set(
+  [].concat(
+    ...[Object, Array, String, Number, Boolean].map((c) => Object.getOwnPropertyNames(c.prototype))
+  )
+)
+
 const rootMeta = new WeakMap()
 const compile = (schema, root, opts, scope, basePathRoot) => {
   const {
@@ -81,6 +87,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     requireValidation = opts.mode === 'strong',
     requireStringValidation = opts.mode === 'strong',
     complexityChecks = opts.mode === 'strong',
+    unmodifiedPrototypes = false, // assumes no mangled Object/Array prototypes
     isJSON: optIsJSON = false, // assume input to be JSON, which e.g. makes undefined impossible
     jsonCheck = false, // disabled by default, it's assumed that data is from JSON.parse
     $schemaDefault = null,
@@ -166,6 +173,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       scope.hasOwn = functions.hasOwn
       return format('%s !== undefined && hasOwn(%s, %s)', name, buildName(parent), keyname)
     } else if (parent && keyval !== undefined) {
+      // numbers must be converted to strings for this check, hence `${keyval}` in check below
+      if (unmodifiedPrototypes && !jsonProtoKeys.has(`${keyval}`))
+        return format('%s !== undefined', name)
       scope.hasOwn = functions.hasOwn
       return format('%s !== undefined && hasOwn(%s, %j)', name, buildName(parent), keyval)
     }
@@ -533,7 +543,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         } else {
           const i = genloop()
           fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
-            rule(currPropVar(i), node.items, subPath('items'))
+            const prop = currPropVar(i, unmodifiedPrototypes) // own property in Array if proto not mangled
+            rule(prop, node.items, subPath('items'))
           })
         }
         consume('items', 'object', 'array', 'boolean')
@@ -557,7 +568,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const i = genloop()
         const offset = node.items.length
         fun.block('for (let %s = %d; %s < %s.length; %s++) {', [i, offset, i, name, i], '}', () => {
-          rule(currPropVar(i), node.additionalItems, subPath('additionalItems'))
+          const prop = currPropVar(i, unmodifiedPrototypes) // own property in Array if proto not mangled
+          rule(prop, node.additionalItems, subPath('additionalItems'))
         })
         consume('additionalItems', 'object', 'boolean')
       } else if (node.items.length === node.maxItems) {
@@ -572,8 +584,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
         const i = genloop()
         fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
-          const sub = subrule(currPropVar(i), node.contains, subPath('contains'))
-          fun.write('if (%s) %s++', sub, passes)
+          const prop = currPropVar(i, unmodifiedPrototypes) // own property in Array if proto not mangled
+          fun.write('if (%s) %s++', subrule(prop, node.contains, subPath('contains')), passes)
         })
 
         if (Number.isFinite(node.minContains)) {
