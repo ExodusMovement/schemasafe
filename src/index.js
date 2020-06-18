@@ -46,6 +46,8 @@ const schemaVersions = [
   'https://json-schema.org/draft-03/schema',
 ]
 
+const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
+
 // Helper methods for semi-structured paths
 const propvar = (name, key) => ({ parent: name, keyname: key }) // property by variable
 const propimm = (name, val) => ({ parent: name, keyval: val }) // property by immediate value
@@ -455,7 +457,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.pattern) {
         enforceRegex(node.pattern)
-        if (node.pattern !== '^[\\s\\S]*$' && node.pattern !== '^[\\S\\s]*$') {
+        if (!noopRegExps.has(node.pattern)) {
           const p = patterns(node.pattern)
           errorIf('!%s.test(%s)', [p, name], 'pattern mismatch')
         }
