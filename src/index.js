@@ -151,11 +151,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
   const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
-  const visit = (allErrors, includeErrors, current, node, schemaPath) => {
-    const isTopLevel = !current.parent // e.g. top-level data and property names
+  const visit = (allErrors, includeErrors, history, current, node, schemaPath) => {
+    // e.g. top-level data and property names, OR already checked by present() in history
+    const definitelyPresent = !current.parent || history.includes(current)
+
     const name = buildName(current)
-    const rule = (...args) => visit(allErrors, includeErrors, ...args)
-    const subrule = (...args) => visit(true, false, ...args)
     const writeErrorObject = (error) => {
       if (allErrors) {
         fun.write('if (validate.errors === null) validate.errors = []')
@@ -211,8 +211,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node === true) {
         // any is valid
         enforceValidation('schema = true is not allowed')
-      } else if (isTopLevel) {
-        // node === false always fails at top level
+      } else if (definitelyPresent) {
+        // node === false always fails in this case
         error('is unexpected')
       } else {
         // node === false
@@ -240,7 +240,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const finish = () => {
-      if (!isTopLevel) fun.write('}') // undefined check
+      if (!definitelyPresent) fun.write('}') // undefined check
       enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
     }
 
@@ -287,11 +287,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const booleanRequired = getMeta().booleanRequired && typeof node.required === 'boolean'
     if (node.default !== undefined && !useDefaults) consume('default', 'jsonval') // unused in this case
     const defaultIsPresent = node.default !== undefined && useDefaults // will consume on use
-    if (isTopLevel) {
-      // top-level data is coerced to null above, or is an object key, it can't be undefined
-      if (defaultIsPresent) fail('Can not apply default value at root')
+    if (definitelyPresent) {
+      if (defaultIsPresent) fail('Can not apply default value here (e.g. at root)')
       if (node.required === true || node.required === false)
-        fail('Can not apply boolean required at root')
+        fail('Can not apply boolean required here (e.g. at root)')
     } else if (defaultIsPresent || booleanRequired) {
       fun.write('if (!(%s)) {', present(current))
       if (defaultIsPresent) {
@@ -375,6 +374,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (complexityChecks && (pattern.match(/[{+*]/g) || []).length > 1)
         enforce(target.maxLength !== undefined, 'maxLength should be specified for:', pattern)
     }
+
+    // Can not be used before undefined check above! The one performed by present()
+    const rule = (...args) => visit(allErrors, includeErrors, [...history, current], ...args)
+    const subrule = (...args) => visit(true, false, [...history, current], ...args)
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
 
@@ -796,7 +799,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     finish()
   }
 
-  visit(optAllErrors, optIncludeErrors, { name: safe('data') }, schema, [])
+  visit(optAllErrors, optIncludeErrors, [], { name: safe('data') }, schema, [])
 
   fun.write('return errors === 0')
   fun.write('}')
