@@ -138,7 +138,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       scope.hasOwn = functions.hasOwn
       return format('%s !== undefined && hasOwn(%s, %j)', name, parent, keyval)
     }
-    return format('%s !== undefined', name)
+    /* c8 ignore next */
+    throw new Error('Unreachable: present() check without parent')
   }
 
   const fun = genfun()
@@ -151,6 +152,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (allErrors, includeErrors, current, node, schemaPath) => {
+    const isTopLevel = !current.parent // e.g. top-level data and property names
     const name = buildName(current)
     const rule = (...args) => visit(allErrors, includeErrors, ...args)
     const subrule = (...args) => visit(true, false, ...args)
@@ -199,6 +201,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node === true) {
         // any is valid
         enforceValidation('schema = true is not allowed')
+      } else if (isTopLevel) {
+        // node === false always fails at top level
+        error('is unexpected')
       } else {
         // node === false
         errorIf('%s', [present(current)], 'is unexpected')
@@ -219,7 +224,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       unused.delete(prop)
     }
 
-    const isTopLevel = !current.parent // e.g. top-level data and property names
     const finish = () => {
       if (!isTopLevel) fun.write('}') // undefined check
       enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
