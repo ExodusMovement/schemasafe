@@ -525,11 +525,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
           fun.write('const %s = errors', prev)
           subrule(propvar(name, i), node.contains, subPath('contains'))
-          fun.write('if (%s === errors) {', prev)
-          fun.write('%s++', passes)
-          fun.write('} else {')
-          fun.write('errors = %s', prev)
-          fun.write('}')
+          fun.write('if (%s === errors) { %s++ } else errors = %s', prev, passes, prev)
         })
 
         if (Number.isFinite(node.minContains)) {
@@ -691,9 +687,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         subrule(current, node.not, subPath('not'))
         fun.write('if (%s === errors) {', prev)
         error('negative schema matches')
-        fun.write('} else {')
-        fun.write('errors = %s', prev)
-        fun.write('}')
+        fun.write('} else errors = %s', prev)
         consume('not', 'object', 'boolean')
       }
 
@@ -739,7 +733,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           subrule(current, sch, schemaPath)
         })
         node.anyOf.forEach((sch, i) => {
-          if (i) fun.write('}')
+          if (i > 0) fun.write('}')
         })
         fun.write('if (%s !== errors) {', prev)
         fun.write('errors = %s', prev)
@@ -756,11 +750,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('let %s = 0', passes)
         for (const sch of node.oneOf) {
           subrule(current, sch, schemaPath)
-          fun.write('if (%s === errors) {', prev)
-          fun.write('%s++', passes)
-          fun.write('} else {')
-          fun.write('errors = %s', prev)
-          fun.write('}')
+          fun.write('if (%s === errors) { %s++ } else errors = %s', prev, passes, prev)
         }
         errorIf('%s !== 1', [passes], 'no (or more than one) schemas match')
         consume('oneOf', 'array')
