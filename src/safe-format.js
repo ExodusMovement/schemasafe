@@ -5,7 +5,7 @@ class SafeString extends String {} // used for instanceof checks
 const compares = new Set(['<', '>', '<=', '>='])
 const escapeCode = (code) => `\\u${code.toString(16).padStart(4, '0')}`
 
-// Supports simple js vaiables only, i.e. constants and JSON-stringifiable
+// Supports simple js variables only, i.e. constants and JSON-stringifiable
 const jsval = (val) => {
   if ([Infinity, -Infinity, NaN, undefined].includes(val)) return `${val}`
   // https://v8.dev/features/subsume-json#security, e.g. {'\u2028':0} on Node.js 8
