@@ -16,7 +16,7 @@
     "no-restricted-syntax": [
       2,
       {
-        "selector": "MemberExpression[property.name='toString']",
+        "selector": "CallExpression[callee.property.name='toString']:not(:matches([arguments.0]))",
         "message": "Use template literals instead of .toString()"
       },
       {
