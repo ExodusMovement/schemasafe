@@ -221,6 +221,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     for (const key of Object.keys(node))
       enforce(KNOWN_KEYWORDS.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
+    if (Object.keys(node).length === 0) {
+      enforceValidation('empty rules node encountered')
+      return // nothing to validate here, basically the same as node === true
+    }
+
     const unused = new Set(Object.keys(node))
     const consume = (prop, ...ruleTypes) => {
       enforce(unused.has(prop), 'Unexpected double consumption:', prop)
