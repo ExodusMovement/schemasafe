@@ -1,5 +1,7 @@
 'use strict'
 
+const { jsval } = require('./safe-format')
+
 const isArrowFnWithParensRegex = /^\([^)]*\) *=>/
 const isArrowFnWithoutParensRegex = /^[^=]*=>/
 
@@ -26,7 +28,10 @@ function jaystring(item) {
     throw new Error('Can stringify only either normal or arrow functions')
   } else if (typeof item === 'object') {
     const proto = Object.getPrototypeOf(item)
-    if (item instanceof RegExp && proto === RegExp.prototype) return String(item)
+    if (item instanceof RegExp && proto === RegExp.prototype) {
+      // String(regex) is not ok on Node.js 10 and below: console.log(String(new RegExp('\n')))
+      return `new RegExp(${jsval(item.source)}, ${jsval(item.flags)})`
+    }
     throw new Error('Can not stringify an object with unexpected prototype')
   }
   throw new Error(`Cannot stringify ${item} - unknown type ${typeof item}`)

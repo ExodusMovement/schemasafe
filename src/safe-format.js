@@ -51,4 +51,4 @@ const safewrap = (fun) => (...args) => {
 const safeor = safewrap((...args) => args.join(' || ') || 'false')
 const safeand = safewrap((...args) => args.join(' && ') || 'true')
 
-module.exports = { format, safe, safeor, safeand }
+module.exports = { format, safe, safeor, safeand, jsval }
