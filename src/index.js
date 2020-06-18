@@ -131,13 +131,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   const present = (location) => {
     const name = buildName(location) // also checks for sanity, do not remove
     const { parent, keyval, keyname } = location
-    if (parent) {
+    if (parent && keyname) {
       scope.hasOwn = functions.hasOwn
-      if (keyval) {
-        return format('%s !== undefined && hasOwn(%s, %j)', name, parent, keyval)
-      } else if (keyname) {
-        return format('%s !== undefined && hasOwn(%s, %s)', name, parent, keyname)
-      }
+      return format('%s !== undefined && hasOwn(%s, %s)', name, parent, keyname)
+    } else if (parent && keyval !== undefined) {
+      scope.hasOwn = functions.hasOwn
+      return format('%s !== undefined && hasOwn(%s, %j)', name, parent, keyval)
     }
     return format('%s !== undefined', name)
   }
