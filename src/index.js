@@ -49,8 +49,8 @@ const schemaVersions = [
 const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
 
 // Helper methods for semi-structured paths
-const propvar = (name, key) => ({ parent: name, keyname: key }) // property by variable
-const propimm = (name, val) => ({ parent: name, keyval: val }) // property by immediate value
+const propvar = (parent, keyname, inKeys = false) => ({ parent, keyname, inKeys }) // property by variable
+const propimm = (parent, keyval) => ({ parent, keyval }) // property by immediate value
 const buildName = ({ name, parent, keyval, keyname }) => {
   if (name) {
     if (parent || keyval || keyname) throw new Error('name can be used only stand-alone')
@@ -81,6 +81,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     requireValidation = opts.mode === 'strong',
     requireStringValidation = opts.mode === 'strong',
     complexityChecks = opts.mode === 'strong',
+    isJSON = false, // assume input to be JSON, which e.g. makes undefined impossible
     jsonCheck = false, // disabled by default, it's assumed that data is from JSON.parse
     $schemaDefault = null,
     formats: optFormats = {},
@@ -132,7 +133,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
   const present = (location) => {
     const name = buildName(location) // also checks for sanity, do not remove
-    const { parent, keyval, keyname } = location
+    const { parent, keyval, keyname, inKeys } = location
+    if (inKeys) {
+      /* c8 ignore next */
+      if (isJSON) throw new Error('Unreachable: useless check, can not be undefined')
+      return format('%s !== undefined', name)
+    }
     if (parent && keyname) {
       scope.hasOwn = functions.hasOwn
       return format('%s !== undefined && hasOwn(%s, %s)', name, parent, keyname)
@@ -155,8 +161,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (allErrors, includeErrors, history, current, node, schemaPath) => {
-    // e.g. top-level data and property names, OR already checked by present() in history
-    const definitelyPresent = !current.parent || history.includes(current)
+    // e.g. top-level data and property names, OR already checked by present() in history, OR in keys and not undefined
+    const definitelyPresent =
+      !current.parent || history.includes(current) || (current.inKeys && isJSON)
 
     const name = buildName(current)
     const writeErrorObject = (error) => {
@@ -643,7 +650,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           for (const p of Object.keys(node.patternProperties)) {
             enforceRegex(p, node.propertyNames || {})
             fun.block('if (%s.test(%s)) {', [patterns(p), key], '}', () => {
-              rule(propvar(name, key), node.patternProperties[p], subPath('patternProperties', p))
+              const sub = propvar(name, key, true) // always own property, from Object.keys
+              rule(sub, node.patternProperties[p], subPath('patternProperties', p))
             })
           }
         })
@@ -663,7 +671,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             if (node.additionalProperties === false) {
               error('has additional properties', null, format('%j + %s', `${name}.`, key))
             } else {
-              rule(propvar(name, key), node.additionalProperties, subPath('additionalProperties'))
+              const sub = propvar(name, key, true) // always own property, from Object.keys
+              rule(sub, node.additionalProperties, subPath('additionalProperties'))
             }
           })
         })
@@ -812,7 +821,7 @@ const validator = (schema, opts = {}) => compile(schema, schema, opts, Object.cr
 
 const parser = function(schema, opts = {}) {
   // strong mode is default in parser
-  const validate = validator(schema, { mode: 'strong', ...opts })
+  const validate = validator(schema, { mode: 'strong', ...opts, jsonCheck: false, isJSON: true })
   const parse = (src) => {
     if (typeof src !== 'string') throw new Error('Invalid type!')
     const data = JSON.parse(src)
