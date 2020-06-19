@@ -1,6 +1,6 @@
 'use strict'
 
-const { jsval } = require('./safe-format')
+const { format } = require('./safe-format')
 
 const isArrowFnWithParensRegex = /^\([^)]*\) *=>/
 const isArrowFnWithoutParensRegex = /^[^=]*=>/
