@@ -30,7 +30,7 @@ function jaystring(item) {
     const proto = Object.getPrototypeOf(item)
     if (item instanceof RegExp && proto === RegExp.prototype) {
       // String(regex) is not ok on Node.js 10 and below: console.log(String(new RegExp('\n')))
-      return `new RegExp(${jsval(item.source)}, ${jsval(item.flags)})`
+      return format('new RegExp(%j, %j)', item.source, item.flags)
     }
     throw new Error('Can not stringify an object with unexpected prototype')
   }
