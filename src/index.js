@@ -73,6 +73,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   const {
     mode = 'default',
     useDefaults = false,
+    removeAdditional = false, // supports additionalProperties: false and additionalItems: false
     includeErrors: optIncludeErrors = false,
     allErrors: optAllErrors = false,
     verboseErrors = false,
@@ -503,7 +504,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         // We do nothing and let it throw except for in allowUnusedKeywords mode
         // As a result, this is not allowed by default, only in allowUnusedKeywords mode
       } else if (node.additionalItems === false) {
-        errorIf('%s.length > %d', [name, node.items.length], 'has additional items')
+        const limit = node.items.length
+        if (removeAdditional) {
+          fun.write('if (%s.length > %d) %s.length = %d', name, limit, name, limit)
+        } else {
+          errorIf('%s.length > %d', [name, limit], 'has additional items')
+        }
         consume('additionalItems', 'boolean')
       } else if (node.additionalItems) {
         const i = genloop()
@@ -657,7 +663,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
           fun.block('if (%s) {', [additionalProp], '}', () => {
             if (node.additionalProperties === false) {
-              error('has additional properties', null, format('%j + %s', `${name}.`, key))
+              if (removeAdditional) {
+                fun.write('delete %s[%s]', name, key)
+              } else {
+                error('has additional properties', null, format('%j + %s', `${name}.`, key))
+              }
             } else {
               rule(propvar(name, key), node.additionalProperties, subPath('additionalProperties'))
             }
