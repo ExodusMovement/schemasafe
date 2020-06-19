@@ -28,10 +28,7 @@ function jaystring(item) {
     throw new Error('Can stringify only either normal or arrow functions')
   } else if (typeof item === 'object') {
     const proto = Object.getPrototypeOf(item)
-    if (item instanceof RegExp && proto === RegExp.prototype) {
-      // String(regex) is not ok on Node.js 10 and below: console.log(String(new RegExp('\n')))
-      return format('new RegExp(%j, %j)', item.source, item.flags)
-    }
+    if (item instanceof RegExp && proto === RegExp.prototype) return format('%r', item)
     throw new Error('Can not stringify an object with unexpected prototype')
   }
   throw new Error(`Cannot stringify ${item} - unknown type ${typeof item}`)
