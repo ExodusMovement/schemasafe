@@ -170,12 +170,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
     const error = (msg, prop, value) => {
       if (includeErrors === true) {
-        const leanError = { field: prop || name, message: msg }
+        const error = { field: prop || name, message: msg, schemaPath: toPointer(schemaPath) }
         if (verboseErrors) {
-          const fullError = { ...leanError, schemaPath: toPointer(schemaPath) }
-          writeErrorObject(format('{ ...%j, value: %s }', fullError, value || name))
+          writeErrorObject(format('{ ...%j, value: %s }', error, value || name))
         } else {
-          writeErrorObject(format('%j', leanError))
+          writeErrorObject(format('%j', error))
         }
       }
       if (allErrors) {

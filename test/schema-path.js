@@ -79,7 +79,7 @@ tape('schemaPath', function(t) {
     },
     additionalProperties: false,
   }
-  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
+  const validate = validator(schema, { includeErrors: true })
 
   function notOkAt(data, path, message) {
     if (validate(data)) {
