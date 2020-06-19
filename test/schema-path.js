@@ -96,8 +96,8 @@ tape('schemaPath', function(t) {
   }
 
   // Top level errors
-  notOkAt(null, '', 'should target parent of failed type error')
-  notOkAt(undefined, '', 'should target parent of failed type error')
+  notOkAt(null, '#', 'should target parent of failed type error')
+  notOkAt(undefined, '#', 'should target parent of failed type error')
   notOkWithTarget(
     { invalidAdditionalProp: '*whistles innocently*' },
     'top level',
