@@ -816,7 +816,9 @@ const parser = function(schema, opts = {}) {
     const message = validate.errors
       ? validate.errors.map((err) => `${err.field} ${err.message}`).join('\n')
       : ''
-    throw new Error(`JSON validation error${message ? `: ${message}` : ''}`)
+    const error = new Error(`JSON validation error${message ? `: ${message}` : ''}`)
+    error.errors = validate.errors
+    throw error
   }
   parse.toModule = () =>
     [
