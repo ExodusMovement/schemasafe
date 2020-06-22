@@ -1,5 +1,7 @@
 'use strict'
 
+const { format } = require('./safe-format')
+
 const isArrowFnWithParensRegex = /^\([^)]*\) *=>/
 const isArrowFnWithoutParensRegex = /^[^=]*=>/
 
@@ -26,7 +28,7 @@ function jaystring(item) {
     throw new Error('Can stringify only either normal or arrow functions')
   } else if (typeof item === 'object') {
     const proto = Object.getPrototypeOf(item)
-    if (item instanceof RegExp && proto === RegExp.prototype) return String(item)
+    if (item instanceof RegExp && proto === RegExp.prototype) return format('%r', item)
     throw new Error('Can not stringify an object with unexpected prototype')
   }
   throw new Error(`Cannot stringify ${item} - unknown type ${typeof item}`)

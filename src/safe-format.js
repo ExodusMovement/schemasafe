@@ -13,7 +13,7 @@ const jsval = (val) => {
 }
 
 const format = (fmt, ...args) => {
-  const res = fmt.replace(/%[%dscj]/g, (match) => {
+  const res = fmt.replace(/%[%drscj]/g, (match) => {
     if (match === '%%') return '%'
     if (args.length === 0) throw new Error('Unexpected arguments count')
     const val = args.shift()
@@ -21,6 +21,10 @@ const format = (fmt, ...args) => {
       case '%d':
         if (typeof val === 'number') return val
         throw new Error('Expected a number')
+      case '%r':
+        // String(regex) is not ok on Node.js 10 and below: console.log(String(new RegExp('\n')))
+        if (val instanceof RegExp) return format('new RegExp(%j, %j)', val.source, val.flags)
+        throw new Error('Expected a RegExp instance')
       case '%s':
         if (val instanceof SafeString) return val
         throw new Error('Expected a safe string')
