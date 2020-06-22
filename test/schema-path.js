@@ -79,7 +79,7 @@ tape('schemaPath', function(t) {
     },
     additionalProperties: false,
   }
-  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
+  const validate = validator(schema, { includeErrors: true })
 
   function notOkAt(data, path, message) {
     if (validate(data)) {
@@ -96,8 +96,8 @@ tape('schemaPath', function(t) {
   }
 
   // Top level errors
-  notOkAt(null, '', 'should target parent of failed type error')
-  notOkAt(undefined, '', 'should target parent of failed type error')
+  notOkAt(null, '#', 'should target parent of failed type error')
+  notOkAt(undefined, '#', 'should target parent of failed type error')
   notOkWithTarget(
     { invalidAdditionalProp: '*whistles innocently*' },
     'top level',
