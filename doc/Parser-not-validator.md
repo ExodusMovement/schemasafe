@@ -28,7 +28,7 @@ containing JSON-encoded input, with a few differences:
 
  2. If validation fails, it will throw instead of returning `false`.
  
- 3. Validation errors (if enabled) are available as the `err.errors` of the thrown `err` object.
+ 3. Validation errors (if enabled) are available as `errors` property of the thrown `err` object: `err.errors`.
  
  4. Parser operates in [strong mode](./Strong-mode.md) by default. To override it, use
     `mode: 'default'` option.
