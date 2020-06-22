@@ -81,7 +81,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     requireValidation = opts.mode === 'strong',
     requireStringValidation = opts.mode === 'strong',
     complexityChecks = opts.mode === 'strong',
-    isJSON = false, // assume input to be JSON, which e.g. makes undefined impossible
+    isJSON: optIsJSON = false, // assume input to be JSON, which e.g. makes undefined impossible
     jsonCheck = false, // disabled by default, it's assumed that data is from JSON.parse
     $schemaDefault = null,
     formats: optFormats = {},
@@ -104,6 +104,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     throw new Error('Strong mode demands require(String)Validation and complexityChecks')
   if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
     throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
+  if (optIsJSON && jsonCheck)
+    throw new Error('Can not specify both isJSON and jsonCheck options, please choose one')
+  const isJSON = optIsJSON || jsonCheck
 
   if (!scope[scopeCache])
     scope[scopeCache] = { sym: new Map(), ref: new Map(), format: new Map(), pattern: new Map() }
@@ -339,7 +342,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           cache.ref.set(sub, n)
           let fn = null // resolve cyclic dependencies
           scope[n] = (...args) => fn(...args)
-          const override = { includeErrors: false, jsonCheck: false }
+          const override = { includeErrors: false, jsonCheck: false, isJSON }
           fn = compile(sub, subRoot, { ...opts, ...override }, scope, path)
           scope[n] = fn
         }
