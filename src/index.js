@@ -152,6 +152,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (optIncludeErrors) fun.write('validate.errors = null')
   fun.write('let errors = 0')
 
+  let jsonCheckPerformed = false
   const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (allErrors, includeErrors, history, current, node, schemaPath) => {
@@ -207,6 +208,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const enforce = (ok, ...args) => ok || fail(...args)
     const enforceValidation = (msg) => enforce(!requireValidation, `[requireValidation] ${msg}`)
     const subPath = (...args) => [...schemaPath, ...args]
+
+    // JSON check is once only for the top-level object, before everything else
+    if (jsonCheck && !jsonCheckPerformed) {
+      /* c8 ignore next */
+      if (`${name}` !== 'data') throw new Error('Unreachable: invalid json check')
+      scope.deepEqual = functions.deepEqual
+      errorIf('!deepEqual(%s, JSON.parse(JSON.stringify(%s)))', [name, name], 'not JSON compatible')
+      jsonCheckPerformed = true
+    }
 
     if (typeof node === 'boolean') {
       if (node === true) {
@@ -309,12 +319,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       fun.write('} else {')
     } else {
       fun.write('if (%s) {', present(current))
-    }
-
-    if (jsonCheck) {
-      // this check has to be done only after existance check and before all other checks
-      scope.deepEqual = functions.deepEqual
-      errorIf('!deepEqual(%s, JSON.parse(JSON.stringify(%s)))', [name, name], 'not JSON compatible')
     }
 
     if (node.$ref) {
