@@ -7,7 +7,7 @@ While DoS safety of an untrusted schema can't be guaranteed even with
 validator/parser code are supposed to be safe against arbitrary code execution, even when both
 schema and the data being validated were received as untrusted JSON input.
 
-It should be noted that _supplying untrusted schemas is not recommented_.
+It should be noted that _supplying untrusted schemas is not recommended_.
 
 Even though they should not cause arbitrary code execution, they can cause DoS.
 Also, security issues can happen on any point of the path, and the best way to avoid the problem is
@@ -52,7 +52,7 @@ To protect code generation against code injection from schemas, the following ap
     example, have to come _before_ the code is prepared.
     
     The approach used here wraps block body generators so that when generating the body of the block
-    did not emit any code, the whole block is excluded.
+    does not emit any code, the whole block is excluded.
 
 
 Source code for that could be seen in [safe-format.js](../src/safe-format.js).
@@ -91,12 +91,12 @@ Using `/regexp/` form, produced by converting a `RegExp` object to a string, is 
 Consider this _on Node.js 10 and below_: `console.log(String(new RegExp("\n")))`.\
 That behaviour differs between platforms and versions.
 
-If pattern is arbitrary input from the schema and RegExp object is stringified via converting it
+If the pattern is arbitrary input from the schema and the RegExp object is stringified via converting it
 to a string (e.g. <code>`${regexp}`</code>, `regexp + ''`, `regexp.toString()` or `String(regexp)`,
 it can break the generated code in certain cases.
 
-Instead, convert those to code in a form of `new RegExp(pattern, flags)` (where pattern and flags
-should be property escaped, as other string variables).
+Instead, convert those to code in the form of `new RegExp(pattern, flags)` (where pattern and flags
+should be properly escaped, as with other string variables).
 
 Stringification of `RegExp` objects is supported in the `format()` function.
 
