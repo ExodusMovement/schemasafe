@@ -11,8 +11,8 @@ Both of those stages should work natively in modern browsers and Node.js version
 
 ---
 
-For code clarity and performance, compatibility with older platform versions than which are
-supported by upstream is not targeted in this package, but that should be possible by using
+For code clarity and performance, older platform versions which are not supported
+by upstream are not targeted by this package, but that should be possible by using
 [Babel](https://github.com/babel/babel).
 
 Depending on the use-case, that might require either processing just the generated code with Babel,
