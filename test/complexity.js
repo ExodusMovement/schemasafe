@@ -35,7 +35,7 @@ const complex = [
   { format: 'complex' },
   { pattern: '^(a[a-z]+)*$' },
   { uniqueItems: true },
-  { uniqueItems: true, items: { type: 'any' } },
+  { uniqueItems: true, items: {} },
   { uniqueItems: true, items: { type: 'object' } },
   { uniqueItems: true, items: { type: ['string', 'number', 'array'] } },
   { uniqueItems: true, items: [{ type: 'string' }] },

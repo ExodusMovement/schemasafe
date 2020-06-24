@@ -10,7 +10,6 @@ const KNOWN_KEYWORDS = require('./known-keywords')
 // for building into the validation function
 const types = new Map(
   Object.entries({
-    any: () => format('true'),
     null: (name) => format('%s === null', name),
     boolean: (name) => format('typeof %s === "boolean"', name),
     array: (name) => format('Array.isArray(%s)', name),
@@ -365,14 +364,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (type !== undefined && typeof type !== 'string' && !Array.isArray(type))
       fail('Unexpected type')
 
-    const typeArray = type ? (Array.isArray(type) ? type : [type]) : ['any']
-    for (const t of typeArray) {
+    const typeArray = type ? (Array.isArray(type) ? type : [type]) : null // null = no type validation
+    for (const t of typeArray || [])
       enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
-      if (t === 'any') enforceValidation('type = any is not allowed')
-    }
 
     const typeApplicable = (...possibleTypes) =>
-      typeArray.includes('any') || typeArray.some((x) => possibleTypes.includes(x))
+      typeArray === null || typeArray.some((x) => possibleTypes.includes(x))
 
     const makeCompare = (variableName, complex) => {
       if (complex) {
@@ -798,9 +795,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     /* Actual post-$ref validation happens here */
 
-    const typeValidate = safeor(...typeArray.map((t) => types.get(t)(name)))
-    const needTypeValidation = `${typeValidate}` !== 'true'
-    if (needTypeValidation) errorIf('!(%s)', [typeValidate], 'is the wrong type')
+    const needTypeValidation = typeArray !== null
+    if (needTypeValidation) {
+      const typeValidate = safeor(...typeArray.map((t) => types.get(t)(name)))
+      errorIf('!(%s)', [typeValidate], 'is the wrong type')
+    }
     if (type) consume('type', 'string', 'array')
 
     // If type validation was needed and did not return early, wrap this inside an else clause.
