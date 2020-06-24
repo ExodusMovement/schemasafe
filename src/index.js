@@ -358,7 +358,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       node.type === undefined ? null : Array.isArray(node.type) ? node.type : [node.type]
     for (const t of typeArray || [])
       enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
-    if (typeArray === null) enforceValidation('type is required') // typeArray === null means no type validation
+    // typeArray === null means no type validation, which is required if we don't have const or enum
+    if (typeArray === null && node.const === undefined && !node.enum)
+      enforceValidation('type is required')
 
     const typeApplicable = (...possibleTypes) =>
       typeArray === null || typeArray.some((x) => possibleTypes.includes(x))
@@ -682,20 +684,25 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
     }
 
-    const checkGeneric = () => {
+    const checkConst = () => {
       if (node.const !== undefined) {
         const complex = typeof node.const === 'object'
         const compare = makeCompare(name, complex)
         errorIf('!%s', [compare(node.const)], 'must be const value')
         consume('const', 'jsonval')
+        return true
       } else if (node.enum) {
         enforce(Array.isArray(node.enum), 'Invalid enum')
         const complex = node.enum.some((e) => typeof e === 'object')
         const compare = makeCompare(name, complex)
         errorIf('!(%s)', [safeor(...node.enum.map(compare))], 'must be an enum value')
         consume('enum', 'array')
+        return true
       }
+      return false
+    }
 
+    const checkGeneric = () => {
       if (node.not || node.not === false) {
         const prev = gensym('prev')
         fun.write('const %s = errors', prev)
@@ -797,6 +804,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     // If type validation was needed and did not return early, wrap this inside an else clause.
     maybeWrap(needTypeValidation && allErrors, 'else {', [], '}', () => {
+      if (checkConst()) {
+        // const/enum shouldn't have any other validation rules except for already checked type/$ref
+        enforce(unused.size === 0, 'Unexpected keywords mixed with const or enum:', [...unused])
+        return
+      }
       typeWrap(checkNumbers, ['number', 'integer'], types.get('number')(name))
       typeWrap(checkStrings, ['string'], types.get('string')(name))
       typeWrap(checkArrays, ['array'], types.get('array')(name))
