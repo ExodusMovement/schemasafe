@@ -354,12 +354,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
 
+    const hasSubValidation =
+      node.$ref || ['allOf', 'anyOf', 'oneOf'].some((key) => Array.isArray(node[key]))
+
     const typeArray =
       node.type === undefined ? null : Array.isArray(node.type) ? node.type : [node.type]
     for (const t of typeArray || [])
       enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
     // typeArray === null means no type validation, which is required if we don't have const or enum
-    if (typeArray === null && node.const === undefined && !node.enum)
+    if (typeArray === null && node.const === undefined && !node.enum && !hasSubValidation)
       enforceValidation('type is required')
 
     const typeApplicable = (...possibleTypes) =>
@@ -466,7 +469,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           errorIf('!%s.test(%s)', [p, name], 'pattern mismatch')
         }
         consume('pattern', 'string')
-      } else if (typeApplicable('string') && requireStringValidation && !node.format) {
+      }
+
+      const stringValidated = node.format || node.pattern || hasSubValidation
+      if (typeApplicable('string') && requireStringValidation && !stringValidated) {
         fail('pattern or format must be specified for strings, use pattern: ^[\\s\\S]*$ to opt-out')
       }
     }
@@ -498,7 +504,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           })
         }
         consume('items', 'object', 'array', 'boolean')
-      } else if (typeApplicable('array')) {
+      } else if (typeApplicable('array') && !hasSubValidation) {
         enforceValidation('items rule must be specified')
       }
 
@@ -679,7 +685,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           })
         })
         consume('additionalProperties', 'object', 'boolean')
-      } else if (typeApplicable('object')) {
+      } else if (typeApplicable('object') && !hasSubValidation) {
         enforceValidation('additionalProperties rule must be specified')
       }
     }
@@ -733,7 +739,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('if', 'object', 'boolean')
       }
 
-      if (node.allOf) {
+      if (node.allOf !== undefined) {
         enforce(Array.isArray(node.allOf), 'Invalid allOf')
         node.allOf.forEach((sch, key) => {
           rule(current, sch, subPath('allOf', key))
@@ -741,7 +747,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('allOf', 'array')
       }
 
-      if (node.anyOf && node.anyOf.length) {
+      if (node.anyOf !== undefined) {
         enforce(Array.isArray(node.anyOf), 'Invalid anyOf')
         const prev = gensym('prev')
 
@@ -764,7 +770,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('anyOf', 'array')
       }
 
-      if (node.oneOf && node.oneOf.length) {
+      if (node.oneOf !== undefined) {
         enforce(Array.isArray(node.oneOf), 'Invalid oneOf')
         const prev = gensym('prev')
         const passes = gensym('passes')
