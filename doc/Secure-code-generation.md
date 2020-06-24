@@ -90,7 +90,7 @@ Even with the `\u2028` and `\u2029` difference resolved in newer ECMA Script spe
 and by post-processing, there is one more parsing difference between JSON and JS contexts which has
 to be accounted for before including JSON-stringified variables into JS context.
 
-`{"__proto__": ...` parses differently due JS having special-handling for it which JSON ingores:
+`{"__proto__": ...` parses differently due to JS having special-handling for it which JSON ignores:
  * [ECMA 262, 24.5.1 `JSON.parse ( text [ , reviver ] )`](https://www.ecma-international.org/ecma-262/#sec-json.parse)
  * [ECMA 262, B.3.1 `__proto__` Property Names in Object Initializers](https://www.ecma-international.org/ecma-262/#sec-__proto__-property-names-in-object-initializers)
 
