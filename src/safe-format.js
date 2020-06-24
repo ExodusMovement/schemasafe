@@ -6,10 +6,26 @@ const compares = new Set(['<', '>', '<=', '>='])
 const escapeCode = (code) => `\\u${code.toString(16).padStart(4, '0')}`
 
 // Supports simple js variables only, i.e. constants and JSON-stringifiable
+// Converts a variable to be safe for inclusion in JS context
+// This works on top of JSON.stringify with minor fixes to negate the JS/JSON parsing differences
 const jsval = (val) => {
   if ([Infinity, -Infinity, NaN, undefined].includes(val)) return `${val}`
-  // https://v8.dev/features/subsume-json#security, e.g. {'\u2028':0} on Node.js 8
-  return JSON.stringify(val).replace(/[\u2028\u2029]/g, (char) => escapeCode(char.charCodeAt(0)))
+  return (
+    JSON.stringify(val)
+      // JSON context and JS eval context have different handling of __proto__ property name
+      // Refs: https://www.ecma-international.org/ecma-262/#sec-json.parse
+      // Refs: https://www.ecma-international.org/ecma-262/#sec-__proto__-property-names-in-object-initializers
+      // Replacement is safe because it's the only way that encodes __proto__ property in JSON and
+      // it can't occur inside strings or other properties, due to the leading `"` and traling `":`
+      .replace(/([{,])"__proto__":/g, '$1["__proto__"]:')
+      // The above line should cover all `"__proto__":` occurances except for `"...\"__proto__":`
+      .replace(/[^\\]"__proto__":/g, () => {
+        /* c8 ignore next */
+        throw new Error('Unreachable')
+      })
+      // https://v8.dev/features/subsume-json#security, e.g. {'\u2028':0} on Node.js 8
+      .replace(/[\u2028\u2029]/g, (char) => escapeCode(char.charCodeAt(0)))
+  )
 }
 
 const format = (fmt, ...args) => {

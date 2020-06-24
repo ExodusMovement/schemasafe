@@ -84,6 +84,24 @@ See https://v8.dev/features/subsume-json#security for more details.
 
 `format()` function handles that.
 
+### `__proto__` properties should be post-processed after `JSON.stringify`
+
+Even with the `\u2028` and `\u2029` difference resolved in newer ECMA Script specification versions
+and by post-processing, there is one more parsing difference between JSON and JS contexts which has
+to be accounted for before including JSON-stringified variables into JS context.
+
+`{"__proto__": ...` parses differently due to JS having special-handling for it which JSON ignores:
+ * [ECMA 262, 24.5.1 `JSON.parse ( text [ , reviver ] )`](https://www.ecma-international.org/ecma-262/#sec-json.parse)
+ * [ECMA 262, B.3.1 `__proto__` Property Names in Object Initializers](https://www.ecma-international.org/ecma-262/#sec-__proto__-property-names-in-object-initializers)
+
+To account for that, all occurances of `{"__proto__":` should be replaced with `{["__proto__"]:`
+and all occurances of `,"__proto__":` — with `,["__proto__"]:`, after each `JSON.stringify` call.
+
+_The replacement above works given that `JSON.stringify` is used without the `space` formatting
+option. Full regex pattern for properties that need replacement is `/[^\\]"__proto__":/g`._
+
+`format()` function handles that.
+
 ### `RegExp` stringification should use `new RegExp()`
 
 Using `/regexp/` form, produced by converting a `RegExp` object to a string, is not safe.
