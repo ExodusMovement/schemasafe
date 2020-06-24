@@ -843,7 +843,7 @@ const validator = (schema, opts = {}) => compile(schema, schema, opts, Object.cr
 const parser = function(schema, opts = {}) {
   // strong mode is default in parser
   if (functions.hasOwn(opts, 'jsonCheck') || functions.hasOwn(opts, 'isJSON'))
-    throw new Error('jsonCheck and isJSON options have no sense in parser mode')
+    throw new Error('jsonCheck and isJSON options are not applicable in parser mode')
   const validate = validator(schema, { mode: 'strong', ...opts, jsonCheck: false, isJSON: true })
   const parse = (src) => {
     if (typeof src !== 'string') throw new Error('Invalid type!')
