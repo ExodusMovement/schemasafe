@@ -42,10 +42,8 @@ const unsupported = new Set([
   //  draft3 is deprecated and not fully supported
   'draft3/extends.json',
   'draft3/disallow.json',
+  'draft3/type.json', // we don't want draft3-specific type logic
   'draft3/ref.json/remote ref, containing refs itself',
-  'draft3/type.json/types can include schemas',
-  'draft3/type.json/when types includes a schema it should fully validate the schema',
-  'draft3/type.json/types from separate schemas are merged',
   'draft3/optional/ecmascript-regex.json/ECMA 262 regex dialect recognition', // broken assumption in test
 
   //  draft2019-09 is not supported yet

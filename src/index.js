@@ -10,7 +10,6 @@ const KNOWN_KEYWORDS = require('./known-keywords')
 // for building into the validation function
 const types = new Map(
   Object.entries({
-    any: () => format('true'),
     null: (name) => format('%s === null', name),
     boolean: (name) => format('typeof %s === "boolean"', name),
     array: (name) => format('Array.isArray(%s)', name),
@@ -355,19 +354,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
 
-    const { type } = node
-    if (!type) enforceValidation('type is required')
-    if (type !== undefined && typeof type !== 'string' && !Array.isArray(type))
-      fail('Unexpected type')
-
-    const typeArray = type ? (Array.isArray(type) ? type : [type]) : ['any']
-    for (const t of typeArray) {
+    const typeArray =
+      node.type === undefined ? null : Array.isArray(node.type) ? node.type : [node.type]
+    for (const t of typeArray || [])
       enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
-      if (t === 'any') enforceValidation('type = any is not allowed')
-    }
+    if (typeArray === null) enforceValidation('type is required') // typeArray === null means no type validation
 
     const typeApplicable = (...possibleTypes) =>
-      typeArray.includes('any') || typeArray.some((x) => possibleTypes.includes(x))
+      typeArray === null || typeArray.some((x) => possibleTypes.includes(x))
 
     const makeCompare = (variableName, complex) => {
       if (complex) {
@@ -785,18 +779,21 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const typeWrap = (checkBlock, validTypes, queryType) => {
       const [funSize, unusedSize] = [fun.size(), unused.size]
-      maybeWrap(!validTypes.includes(type), 'if (%s) {', [queryType], '}', checkBlock)
+      const alwaysValidType = typeArray && typeArray.every((type) => validTypes.includes(type))
+      maybeWrap(!alwaysValidType, 'if (%s) {', [queryType], '}', checkBlock)
       // enforce check that non-applicable blocks are empty and no rules were applied
       if (funSize !== fun.size() || unusedSize !== unused.size)
-        enforce(typeApplicable(...validTypes), `Unexpected rules in type`, type)
+        enforce(typeApplicable(...validTypes), `Unexpected rules in type`, node.type)
     }
 
     /* Actual post-$ref validation happens here */
 
-    const typeValidate = safeor(...typeArray.map((t) => types.get(t)(name)))
-    const needTypeValidation = `${typeValidate}` !== 'true'
-    if (needTypeValidation) errorIf('!(%s)', [typeValidate], 'is the wrong type')
-    if (type) consume('type', 'string', 'array')
+    const needTypeValidation = typeArray !== null
+    if (needTypeValidation) {
+      const typeValidate = safeor(...typeArray.map((t) => types.get(t)(name)))
+      errorIf('!(%s)', [typeValidate], 'is the wrong type')
+    }
+    if (node.type !== undefined) consume('type', 'string', 'array')
 
     // If type validation was needed and did not return early, wrap this inside an else clause.
     maybeWrap(needTypeValidation && allErrors, 'else {', [], '}', () => {
