@@ -48,8 +48,8 @@ const schemaVersions = [
 const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
 
 // Helper methods for semi-structured paths
-const propvar = (parent, keyname, inKeys = false) => ({ parent, keyname, inKeys }) // property by variable
-const propimm = (parent, keyval) => ({ parent, keyval }) // property by immediate value
+const propvar = (parent, keyname, inKeys = false) => Object.freeze({ parent, keyname, inKeys }) // property by variable
+const propimm = (parent, keyval) => Object.freeze({ parent, keyval }) // property by immediate value
 const buildName = ({ name, parent, keyval, keyname }) => {
   if (name) {
     if (parent || keyval || keyname) throw new Error('name can be used only stand-alone')
@@ -59,9 +59,9 @@ const buildName = ({ name, parent, keyval, keyname }) => {
   if (!parent) throw new Error('Can not use property of undefined parent!')
   if (parent && keyval !== undefined) {
     if (!['string', 'number'].includes(typeof keyval)) throw new Error('Invalid property path')
-    return format('%s[%j]', parent, keyval)
+    return format('%s[%j]', buildName(parent), keyval)
   } else if (parent && keyname) {
-    return format('%s[%s]', parent, keyname)
+    return format('%s[%s]', buildName(parent), keyname)
   }
   /* c8 ignore next */
   throw new Error('Unreachable')
@@ -144,10 +144,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
     if (parent && keyname) {
       scope.hasOwn = functions.hasOwn
-      return format('%s !== undefined && hasOwn(%s, %s)', name, parent, keyname)
+      return format('%s !== undefined && hasOwn(%s, %s)', name, buildName(parent), keyname)
     } else if (parent && keyval !== undefined) {
       scope.hasOwn = functions.hasOwn
-      return format('%s !== undefined && hasOwn(%s, %j)', name, parent, keyval)
+      return format('%s !== undefined && hasOwn(%s, %j)', name, buildName(parent), keyval)
     }
     /* c8 ignore next */
     throw new Error('Unreachable: present() check without parent')
@@ -169,6 +169,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       !current.parent || history.includes(current) || (current.inKeys && isJSON)
 
     const name = buildName(current)
+    const currPropVar = (...args) => propvar(current, ...args)
+    const currPropImm = (...args) => propimm(current, ...args)
+
     const error = (msg, prop, value) => {
       if (includeErrors === true) {
         const errorObj = { field: prop || name, message: msg, schemaPath: toPointer(schemaPath) }
@@ -496,11 +499,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.items || node.items === false) {
         if (Array.isArray(node.items)) {
           for (let p = 0; p < node.items.length; p++)
-            rule(propimm(name, p), node.items[p], subPath(`${p}`))
+            rule(currPropImm(p), node.items[p], subPath(`${p}`))
         } else {
           const i = genloop()
           fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
-            rule(propvar(name, i), node.items, subPath('items'))
+            rule(currPropVar(i), node.items, subPath('items'))
           })
         }
         consume('items', 'object', 'array', 'boolean')
@@ -524,7 +527,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const i = genloop()
         const offset = node.items.length
         fun.block('for (let %s = %d; %s < %s.length; %s++) {', [i, offset, i, name, i], '}', () => {
-          rule(propvar(name, i), node.additionalItems, subPath('additionalItems'))
+          rule(currPropVar(i), node.additionalItems, subPath('additionalItems'))
         })
         consume('additionalItems', 'object', 'boolean')
       } else if (node.items.length === node.maxItems) {
@@ -541,7 +544,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const i = genloop()
         fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
           fun.write('const %s = errors', prev)
-          subrule(propvar(name, i), node.contains, subPath('contains'))
+          subrule(currPropVar(i), node.contains, subPath('contains'))
           fun.write('if (%s === errors) { %s++ } else errors = %s', prev, passes, prev)
         })
 
@@ -612,7 +615,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (Array.isArray(node.required)) {
         for (const req of node.required) {
-          const prop = propimm(name, req)
+          const prop = currPropImm(req)
           errorIf('!(%s)', [present(prop)], 'is required', buildName(prop))
         }
         consume('required', 'array')
@@ -624,8 +627,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           let deps = node[dependencies][key]
           if (typeof deps === 'string') deps = [deps]
 
-          const exists = (k) => present(propimm(name, k))
-          const item = propimm(name, key)
+          const exists = (k) => present(currPropImm(k))
+          const item = currPropImm(key)
 
           if (Array.isArray(deps)) {
             const condition = safeand(...deps.map(exists))
@@ -643,7 +646,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (typeof node.properties === 'object') {
         for (const p of Object.keys(node.properties)) {
-          rule(propimm(name, p), node.properties[p], subPath('properties', p))
+          rule(currPropImm(p), node.properties[p], subPath('properties', p))
         }
         consume('properties', 'object')
       }
@@ -654,7 +657,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           for (const p of Object.keys(node.patternProperties)) {
             enforceRegex(p, node.propertyNames || {})
             fun.block('if (%s.test(%s)) {', [patterns(p), key], '}', () => {
-              const sub = propvar(name, key, true) // always own property, from Object.keys
+              const sub = currPropVar(key, true) // always own property, from Object.keys
               rule(sub, node.patternProperties[p], subPath('patternProperties', p))
             })
           }
@@ -679,7 +682,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
                 error('has additional properties', null, format('%j + %s', `${name}.`, key))
               }
             } else {
-              const sub = propvar(name, key, true) // always own property, from Object.keys
+              const sub = currPropVar(key, true) // always own property, from Object.keys
               rule(sub, node.additionalProperties, subPath('additionalProperties'))
             }
           })
