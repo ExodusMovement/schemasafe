@@ -359,14 +359,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
 
-    const { type } = node
-    if (!type) enforceValidation('type is required')
-    if (type !== undefined && typeof type !== 'string' && !Array.isArray(type))
-      fail('Unexpected type')
-
-    const typeArray = type ? (Array.isArray(type) ? type : [type]) : null // null = no type validation
+    const typeArray =
+      node.type !== undefined ? (Array.isArray(node.type) ? node.type : [node.type]) : null
     for (const t of typeArray || [])
       enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
+    if (typeArray === null) enforceValidation('type is required') // typeArray === null means no type validation
 
     const typeApplicable = (...possibleTypes) =>
       typeArray === null || typeArray.some((x) => possibleTypes.includes(x))
@@ -787,10 +784,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const typeWrap = (checkBlock, validTypes, queryType) => {
       const [funSize, unusedSize] = [fun.size(), unused.size]
-      maybeWrap(!validTypes.includes(type), 'if (%s) {', [queryType], '}', checkBlock)
+      const alwaysValidType = typeArray && typeArray.every((type) => validTypes.includes(type))
+      maybeWrap(!alwaysValidType, 'if (%s) {', [queryType], '}', checkBlock)
       // enforce check that non-applicable blocks are empty and no rules were applied
       if (funSize !== fun.size() || unusedSize !== unused.size)
-        enforce(typeApplicable(...validTypes), `Unexpected rules in type`, type)
+        enforce(typeApplicable(...validTypes), `Unexpected rules in type`, node.type)
     }
 
     /* Actual post-$ref validation happens here */
@@ -800,7 +798,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const typeValidate = safeor(...typeArray.map((t) => types.get(t)(name)))
       errorIf('!(%s)', [typeValidate], 'is the wrong type')
     }
-    if (type) consume('type', 'string', 'array')
+    if (node.type !== undefined) consume('type', 'string', 'array')
 
     // If type validation was needed and did not return early, wrap this inside an else clause.
     maybeWrap(needTypeValidation && allErrors, 'else {', [], '}', () => {
