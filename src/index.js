@@ -170,23 +170,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       !current.parent || history.includes(current) || (current.inKeys && isJSON)
 
     const name = buildName(current)
-    const writeErrorObject = (error) => {
-      if (allErrors) {
-        fun.write('if (validate.errors === null) validate.errors = []')
-        fun.write('validate.errors.push(%s)', error)
-      } else {
-        // Array assignment is significantly faster, do not refactor the two branches
-        fun.write('validate.errors = [%s]', error)
-        fun.write('return false')
-      }
-    }
     const error = (msg, prop, value) => {
       if (includeErrors === true) {
         const errorObj = { field: prop || name, message: msg, schemaPath: toPointer(schemaPath) }
-        if (verboseErrors) {
-          writeErrorObject(format('{ ...%j, value: %s }', errorObj, value || name))
+        const errorJS = verboseErrors
+          ? format('{ ...%j, value: %s }', errorObj, value || name)
+          : format('%j', errorObj)
+        if (allErrors) {
+          fun.write('if (validate.errors === null) validate.errors = []')
+          fun.write('validate.errors.push(%s)', errorJS)
         } else {
-          writeErrorObject(format('%j', errorObj))
+          // Array assignment is significantly faster, do not refactor the two branches
+          fun.write('validate.errors = [%s]', errorJS)
         }
       }
       if (allErrors) {
