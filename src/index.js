@@ -360,7 +360,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
 
     const typeArray =
-      node.type === undefined ? null : (Array.isArray(node.type) ? node.type : [node.type])
+      node.type === undefined ? null : Array.isArray(node.type) ? node.type : [node.type]
     for (const t of typeArray || [])
       enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
     if (typeArray === null) enforceValidation('type is required') // typeArray === null means no type validation
