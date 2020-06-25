@@ -28,25 +28,25 @@ tape('dataPath', (t) => {
 
   checkError(
     { arr: [{ foo: 2 }] },
-    '#/properties/arr/items/additionalProperties',
+    '#/properties/arr/items/additionalProperties/type',
     '#/arr/0/foo',
     'invalid type for #0'
   )
   checkError(
     { arr: [{ x: 'bar' }] },
-    '#/properties/arr/items/propertyNames',
+    '#/properties/arr/items/propertyNames/minLength',
     '#/arr/0/x',
     'invalid name for #0'
   )
   checkError(
     { arr: [{}, { foo: 2 }] },
-    '#/properties/arr/items/additionalProperties',
+    '#/properties/arr/items/additionalProperties/type',
     '#/arr/1/foo',
     'invalid type for #1'
   )
   checkError(
     { arr: [{}, { x: 'bar' }] },
-    '#/properties/arr/items/propertyNames',
+    '#/properties/arr/items/propertyNames/minLength',
     '#/arr/1/x',
     'invalid name for #1'
   )
