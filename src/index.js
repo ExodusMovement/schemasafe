@@ -182,7 +182,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const errorObj = { message: msg, schemaPath: functions.toPointer(schemaPath) }
         if (verboseErrors) scope.toPointer = functions.toPointer
         const errorJS = verboseErrors
-          ? format('{ ...%j, field: %s, value: %s }', errorObj, buildPath(prop), buildName(prop))
+          ? format('{ ...%j, dataPath: %s, value: %s }', errorObj, buildPath(prop), buildName(prop))
           : format('%j', errorObj)
         if (allErrors) {
           fun.write('if (validate.errors === null) validate.errors = []')

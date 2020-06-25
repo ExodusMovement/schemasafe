@@ -52,15 +52,15 @@ tape('allErrors/false', function(t) {
   )
   t.notOk(validate({}), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
-  t.strictEqual(validate.errors[0].field, '#/x')
+  t.strictEqual(validate.errors[0].dataPath, '#/x')
   t.strictEqual(validate.errors[0].message, 'is required')
   t.notOk(validate({ x: 'string' }), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
-  t.strictEqual(validate.errors[0].field, '#/y')
+  t.strictEqual(validate.errors[0].dataPath, '#/y')
   t.strictEqual(validate.errors[0].message, 'is required')
   t.notOk(validate({ x: 'string', y: 'value' }), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
-  t.strictEqual(validate.errors[0].field, '#/x')
+  t.strictEqual(validate.errors[0].dataPath, '#/x')
   t.strictEqual(validate.errors[0].message, 'is the wrong type')
   t.end()
 })
@@ -80,19 +80,19 @@ tape('allErrors/true', function(t) {
   )
   t.notOk(validate({}), 'should be invalid')
   t.strictEqual(validate.errors.length, 2)
-  t.strictEqual(validate.errors[0].field, '#/x')
+  t.strictEqual(validate.errors[0].dataPath, '#/x')
   t.strictEqual(validate.errors[0].message, 'is required')
-  t.strictEqual(validate.errors[1].field, '#/y')
+  t.strictEqual(validate.errors[1].dataPath, '#/y')
   t.strictEqual(validate.errors[1].message, 'is required')
   t.notOk(validate({ x: 'string' }), 'should be invalid')
   t.strictEqual(validate.errors.length, 2)
-  t.strictEqual(validate.errors[0].field, '#/y')
+  t.strictEqual(validate.errors[0].dataPath, '#/y')
   t.strictEqual(validate.errors[0].message, 'is required')
-  t.strictEqual(validate.errors[1].field, '#/x')
+  t.strictEqual(validate.errors[1].dataPath, '#/x')
   t.strictEqual(validate.errors[1].message, 'is the wrong type')
   t.notOk(validate({ x: 'string', y: 'value' }), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
-  t.strictEqual(validate.errors[0].field, '#/x')
+  t.strictEqual(validate.errors[0].dataPath, '#/x')
   t.strictEqual(validate.errors[0].message, 'is the wrong type')
   t.ok(validate({ x: 1, y: 'value' }), 'should be invalid')
   t.end()
@@ -394,7 +394,7 @@ tape('nested required array decl', function(t) {
 
   t.ok(validate({ x: {} }), 'should be valid')
   t.notOk(validate({}), 'should not be valid')
-  t.strictEqual(validate.errors[0].field, '#/x', 'should output the missing field')
+  t.strictEqual(validate.errors[0].dataPath, '#/x', 'should output the missing field')
   t.end()
 })
 
@@ -480,7 +480,7 @@ tape.skip('field shows item index in arrays', function(t) {
   validate([[{ foo: 'test' }, { foo: 'test' }], [{ foo: 'test' }, { baz: 'test' }]])
 
   t.strictEqual(
-    validate.errors[0].field,
+    validate.errors[0].dataPath,
     'data.1.1.foo',
     'should output the field with specific index of failing item in the error'
   )
