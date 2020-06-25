@@ -55,12 +55,12 @@ const buildName = ({ name, parent, keyval, keyname }) => {
     if (parent || keyval || keyname) throw new Error('name can be used only stand-alone')
     return name // top-level
   }
-  if (keyval && keyname) throw new Error('Can not use key value and name at the same time')
   if (!parent) throw new Error('Can not use property of undefined parent!')
-  if (parent && keyval !== undefined) {
+  if (keyval !== undefined) {
+    if (keyname) throw new Error('Can not use key value and name together')
     if (!['string', 'number'].includes(typeof keyval)) throw new Error('Invalid property path')
     return format('%s[%j]', buildName(parent), keyval)
-  } else if (parent && keyname) {
+  } else if (keyname) {
     return format('%s[%s]', buildName(parent), keyname)
   }
   /* c8 ignore next */
