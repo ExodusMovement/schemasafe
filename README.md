@@ -29,10 +29,6 @@ const validate = validator({
 
 console.log('should be valid', validate({ hello: 'world' }))
 console.log('should not be valid', validate({}))
-
-// get the last list of errors by checking validate.errors
-// the following will print [{field: 'data.hello', message: 'is required'}]
-console.log(validate.errors)
 ```
 
 ## Custom formats
@@ -98,12 +94,10 @@ const validate = validator(schema, {
 
 validate({ hello: 100 });
 console.log(validate.errors)
-// [ { field: 'data["hello"]',
-//     message: 'is the wrong type',
-//     type: 'string',
+// [ { message: 'is the wrong type',
 //     schemaPath: '#/properties/hello',
+//     dataPath: '#/hello',
 //     value: 100 } ]
-
 ```
 
 ## Generate Modules
