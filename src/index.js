@@ -860,7 +860,7 @@ const parser = function(schema, opts = {}) {
     const data = JSON.parse(src)
     if (validate(data)) return data
     const message = validate.errors
-      ? validate.errors.map((err) => `${err.field} ${err.message}`).join('\n')
+      ? validate.errors.map((err) => `${err.schemaPath} ${err.message}`).join('\n')
       : ''
     const error = new Error(`JSON validation error${message ? `: ${message}` : ''}`)
     error.errors = validate.errors
