@@ -2,7 +2,6 @@
 
 const tape = require('tape')
 const { validator } = require('../')
-const { get } = require('../src/pointer')
 
 tape('schemaPath', function(t) {
   const schema = {
