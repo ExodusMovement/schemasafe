@@ -458,8 +458,7 @@ tape('Date.now() is an integer', function(t) {
   t.end()
 })
 
-// Due to altered (safer) formatName function, this does not work
-tape.skip('field shows item index in arrays', function(t) {
+tape('field shows item index in arrays', function(t) {
   const schema = {
     type: 'array',
     items: {
@@ -475,13 +474,13 @@ tape.skip('field shows item index in arrays', function(t) {
     },
   }
 
-  const validate = validator(schema)
+  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
 
   validate([[{ foo: 'test' }, { foo: 'test' }], [{ foo: 'test' }, { baz: 'test' }]])
 
   t.strictEqual(
     validate.errors[0].dataPath,
-    'data.1.1.foo',
+    '#/1/1/foo',
     'should output the field with specific index of failing item in the error'
   )
   t.end()
