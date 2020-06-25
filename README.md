@@ -98,8 +98,7 @@ const validate = validator(schema, {
 
 validate({ hello: 100 });
 console.log(validate.errors)
-// [ { message: 'is the wrong type',
-//     schemaPath: '#/properties/hello',
+// [ { schemaPath: '#/properties/hello/type',
 //     dataPath: '#/hello',
 //     value: 100 } ]
 ```

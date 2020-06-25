@@ -192,9 +192,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const currPropVar = (...args) => propvar(current, ...args)
     const currPropImm = (...args) => propimm(current, ...args)
 
-    const error = (msg, prop = current) => {
+    const error = ({ path = [], prop = current, ...more }) => {
       if (includeErrors === true) {
-        const errorObj = { message: msg, schemaPath: functions.toPointer(schemaPath) }
+        const errorObj = { schemaPath: functions.toPointer([...schemaPath, ...path]), ...more }
         const errorJS = verboseErrors
           ? format('{ ...%j, dataPath: %s, value: %s }', errorObj, buildPath(prop), buildName(prop))
           : format('%j', errorObj)
@@ -212,7 +212,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('return false')
       }
     }
-    const errorIf = (fmt, args, ...errorArgs) => {
+    const errorIf = (fmt, args, errorArgs) => {
       const condition = format(fmt, ...args)
       if (includeErrors === false) {
         // in this case, we can fast-track and inline this to generate more readable code
@@ -223,7 +223,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         }
       } else {
         fun.write('if (%s) {', condition)
-        error(...errorArgs)
+        error(errorArgs)
         fun.write('}')
       }
     }
@@ -241,7 +241,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       /* c8 ignore next */
       if (`${name}` !== 'data') throw new Error('Unreachable: invalid json check')
       scope.deepEqual = functions.deepEqual
-      errorIf('!deepEqual(%s, JSON.parse(JSON.stringify(%s)))', [name, name], 'not JSON compatible')
+      errorIf('!deepEqual(%s, JSON.parse(JSON.stringify(%s)))', [name, name], {
+        message: 'not JSON compatible',
+      })
       jsonCheckPerformed = true
     }
 
@@ -251,10 +253,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforceValidation('schema = true is not allowed')
       } else if (definitelyPresent) {
         // node === false always fails in this case
-        error('is unexpected')
+        error({})
       } else {
         // node === false
-        errorIf('%s', [present(current)], 'is unexpected')
+        errorIf('%s', [present(current)], {})
       }
       return
     }
@@ -337,7 +339,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
       if (booleanRequired) {
         if (node.required === true) {
-          if (!defaultIsPresent) error('is required')
+          if (!defaultIsPresent) error({ path: ['required'] })
           consume('required', 'boolean')
         } else if (node.required === false) {
           consume('required', 'boolean')
@@ -362,7 +364,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           fn = compile(sub, subRoot, { ...opts, ...override }, scope, path)
           scope[n] = fn
         }
-        errorIf('!%s(%s)', [n, name], 'referenced schema does not match')
+        errorIf('!%s(%s)', [n, name], { path: ['$ref'] })
       } else {
         fail('failed to resolve $ref:', node.$ref)
       }
@@ -414,25 +416,25 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     /* Checks inside blocks are independent, they are happening on the same code depth */
 
     const checkNumbers = () => {
-      const applyMinMax = (value, operator, message) => {
+      const applyMinMax = (value, operator, errorArgs) => {
         enforce(Number.isFinite(value), 'Invalid minimum or maximum:', value)
-        errorIf('!(%d %c %s)', [value, operator, name], message)
+        errorIf('!(%d %c %s)', [value, operator, name], errorArgs)
       }
 
       if (Number.isFinite(node.exclusiveMinimum)) {
-        applyMinMax(node.exclusiveMinimum, '<', 'is less than exclusiveMinimum')
+        applyMinMax(node.exclusiveMinimum, '<', { path: ['exclusiveMinimum'] })
         consume('exclusiveMinimum', 'finite')
       } else if (node.minimum !== undefined) {
-        applyMinMax(node.minimum, node.exclusiveMinimum ? '<' : '<=', 'is less than minimum')
+        applyMinMax(node.minimum, node.exclusiveMinimum ? '<' : '<=', { path: ['minimum'] })
         consume('minimum', 'finite')
         if (typeof node.exclusiveMinimum === 'boolean') consume('exclusiveMinimum', 'boolean')
       }
 
       if (Number.isFinite(node.exclusiveMaximum)) {
-        applyMinMax(node.exclusiveMaximum, '>', 'is more than exclusiveMaximum')
+        applyMinMax(node.exclusiveMaximum, '>', { path: ['exclusiveMaximum'] })
         consume('exclusiveMaximum', 'finite')
       } else if (node.maximum !== undefined) {
-        applyMinMax(node.maximum, node.exclusiveMaximum ? '>' : '>=', 'is more than maximum')
+        applyMinMax(node.maximum, node.exclusiveMaximum ? '>' : '>=', { path: ['maximum'] })
         consume('maximum', 'finite')
         if (typeof node.exclusiveMaximum === 'boolean') consume('exclusiveMaximum', 'boolean')
       }
@@ -441,7 +443,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node[multipleOf] !== undefined) {
         enforce(Number.isFinite(node[multipleOf]), `Invalid ${multipleOf}:`, node[multipleOf])
         scope.isMultipleOf = functions.isMultipleOf
-        errorIf('!isMultipleOf(%s, %d)', [name, node[multipleOf]], 'has a remainder')
+        errorIf('!isMultipleOf(%s, %d)', [name, node[multipleOf]], { path: ['isMultipleOf'] })
         consume(multipleOf, 'finite')
       }
     }
@@ -450,14 +452,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.maxLength !== undefined) {
         enforce(Number.isFinite(node.maxLength), 'Invalid maxLength:', node.maxLength)
         scope.stringLength = functions.stringLength
-        errorIf('stringLength(%s) > %d', [name, node.maxLength], 'has longer length than allowed')
+        errorIf('stringLength(%s) > %d', [name, node.maxLength], { path: ['maxLength'] })
         consume('maxLength', 'natural')
       }
 
       if (node.minLength !== undefined) {
         enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
         scope.stringLength = functions.stringLength
-        errorIf('stringLength(%s) < %d', [name, node.minLength], 'has less length than allowed')
+        errorIf('stringLength(%s) < %d', [name, node.minLength], { path: ['minLength'] })
         consume('minLength', 'natural')
       }
 
@@ -473,9 +475,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           if (formatImpl instanceof RegExp) {
             // built-in formats are fine, check only ones from options
             if (functions.hasOwn(optFormats, node.format)) enforceRegex(formatImpl.source)
-            errorIf('!%s.test(%s)', [n, name], `must be ${node.format} format`)
+            errorIf('!%s.test(%s)', [n, name], { path: ['format'] })
           } else {
-            errorIf('!%s(%s)', [n, name], `must be ${node.format} format`)
+            errorIf('!%s(%s)', [n, name], { path: ['format'] })
           }
         } else {
           fail('Unrecognized format used:', node.format)
@@ -489,7 +491,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforceRegex(node.pattern)
         if (!noopRegExps.has(node.pattern)) {
           const p = patterns(node.pattern)
-          errorIf('!%s.test(%s)', [p, name], 'pattern mismatch')
+          errorIf('!%s.test(%s)', [p, name], { path: ['pattern'] })
         }
         consume('pattern', 'string')
       }
@@ -505,14 +507,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Number.isFinite(node.maxItems), 'Invalid maxItems:', node.maxItems)
         if (Array.isArray(node.items) && node.items.length > node.maxItems)
           fail(`Invalid maxItems: ${node.maxItems} is less than items array length`)
-        errorIf('%s.length > %d', [name, node.maxItems], 'has more items than allowed')
+        errorIf('%s.length > %d', [name, node.maxItems], { path: ['maxItems'] })
         consume('maxItems', 'natural')
       }
 
       if (node.minItems !== undefined) {
         enforce(Number.isFinite(node.minItems), 'Invalid minItems:', node.minItems)
         // can be higher that .items length with additionalItems
-        errorIf('%s.length < %d', [name, node.minItems], 'has less items than allowed')
+        errorIf('%s.length < %d', [name, node.minItems], { path: ['minItems'] })
         consume('minItems', 'natural')
       }
 
@@ -540,7 +542,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (removeAdditional) {
           fun.write('if (%s.length > %d) %s.length = %d', name, limit, name, limit)
         } else {
-          errorIf('%s.length > %d', [name, limit], 'has additional items')
+          errorIf('%s.length > %d', [name, limit], { path: ['additionalItems'] })
         }
         consume('additionalItems', 'boolean')
       } else if (node.additionalItems) {
@@ -569,14 +571,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         })
 
         if (Number.isFinite(node.minContains)) {
-          errorIf('%s < %d', [passes, node.minContains], 'array contains too few matching items')
+          errorIf('%s < %d', [passes, node.minContains], { path: ['minContains'] })
           consume('minContains', 'natural')
         } else {
-          errorIf('%s < 1', [passes], 'array does not contain a match')
+          errorIf('%s < 1', [passes], 'array does not contain a match', ['contains'])
         }
 
         if (Number.isFinite(node.maxContains)) {
-          errorIf('%s > %d', [passes, node.maxContains], 'array contains too many matching items')
+          errorIf('%s > %d', [passes, node.maxContains], { path: ['maxContains'] })
           consume('maxContains', 'natural')
         }
 
@@ -600,7 +602,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           enforce(isSimpleForUnique(), 'maxItems should be specified for non-primitive uniqueItems')
         scope.unique = functions.unique
         scope.deepEqual = functions.deepEqual
-        errorIf('!unique(%s)', [name], 'must be unique')
+        errorIf('!unique(%s)', [name], { path: ['uniqueItems'] })
         consume('uniqueItems', 'boolean')
       } else if (node.uniqueItems === false) {
         consume('uniqueItems', 'boolean')
@@ -610,13 +612,17 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const checkObjects = () => {
       if (node.maxProperties !== undefined) {
         enforce(Number.isFinite(node.maxProperties), 'Invalid maxProperties:', node.maxProperties)
-        errorIf('Object.keys(%s).length > %d', [name, node.maxProperties], 'too many properties')
+        errorIf('Object.keys(%s).length > %d', [name, node.maxProperties], {
+          path: ['maxProperties'],
+        })
         consume('maxProperties', 'natural')
       }
 
       if (node.minProperties !== undefined) {
         enforce(Number.isFinite(node.minProperties), 'Invalid minProperties:', node.minProperties)
-        errorIf('Object.keys(%s).length < %d', [name, node.minProperties], 'too few properties')
+        errorIf('Object.keys(%s).length < %d', [name, node.minProperties], {
+          path: ['minProperties'],
+        })
         consume('minProperties', 'natural')
       }
 
@@ -637,7 +643,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (Array.isArray(node.required)) {
         for (const req of node.required) {
           const prop = currPropImm(req)
-          errorIf('!(%s)', [present(prop)], 'is required', prop)
+          errorIf('!(%s)', [present(prop)], { path: ['required'], prop })
         }
         consume('required', 'array')
       }
@@ -653,7 +659,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
           if (Array.isArray(deps)) {
             const condition = safeand(...deps.map(exists))
-            errorIf('%s && !(%s)', [present(item), condition], 'dependencies not set')
+            errorIf('%s && !(%s)', [present(item), condition], { path: [dependencies, key] })
           } else if (typeof deps === 'object' || typeof deps === 'boolean') {
             fun.block('if (%s) {', [present(item)], '}', () => {
               rule(current, deps, subPath(dependencies, key))
@@ -700,7 +706,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
               if (removeAdditional) {
                 fun.write('delete %s[%s]', name, key)
               } else {
-                error('is an additional property', currPropVar(key))
+                error({ path: ['additionalProperties'], prop: currPropVar(key) })
               }
             } else {
               const sub = currPropVar(key, true) // always own property, from Object.keys
@@ -718,14 +724,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.const !== undefined) {
         const complex = typeof node.const === 'object'
         const compare = makeCompare(name, complex)
-        errorIf('!%s', [compare(node.const)], 'must be const value')
+        errorIf('!%s', [compare(node.const)], { path: ['const'] })
         consume('const', 'jsonval')
         return true
       } else if (node.enum) {
         enforce(Array.isArray(node.enum), 'Invalid enum')
         const complex = node.enum.some((e) => typeof e === 'object')
         const compare = makeCompare(name, complex)
-        errorIf('!(%s)', [safeor(...node.enum.map(compare))], 'must be an enum value')
+        errorIf('!(%s)', [safeor(...node.enum.map(compare))], { path: ['enum'] })
         consume('enum', 'array')
         return true
       }
@@ -738,7 +744,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('const %s = errors', prev)
         subrule(current, node.not, subPath('not'))
         fun.write('if (%s === errors) {', prev)
-        error('negative schema matches')
+        error({ path: ['not'] })
         fun.write('} else errors = %s', prev)
         consume('not', 'object', 'boolean')
       }
@@ -789,7 +795,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         })
         fun.write('if (%s !== errors) {', prev)
         fun.write('errors = %s', prev)
-        error('no schemas match')
+        error({ path: ['anyOf'] })
         fun.write('}')
         consume('anyOf', 'array')
       }
@@ -804,7 +810,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           subrule(current, sch, schemaPath)
           fun.write('if (%s === errors) { %s++ } else errors = %s', prev, passes, prev)
         }
-        errorIf('%s !== 1', [passes], 'no (or more than one) schemas match')
+        errorIf('%s !== 1', [passes], { path: ['oneOf'] })
         consume('oneOf', 'array')
       }
     }
@@ -828,7 +834,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const needTypeValidation = typeArray !== null
     if (needTypeValidation) {
       const typeValidate = safeor(...typeArray.map((t) => types.get(t)(name)))
-      errorIf('!(%s)', [typeValidate], 'is the wrong type')
+      errorIf('!(%s)', [typeValidate], { path: ['type'] })
     }
     if (node.type !== undefined) consume('type', 'string', 'array')
 

@@ -2,22 +2,15 @@
 
 const tape = require('tape')
 const { validator } = require('../')
-const { get } = require('../src/pointer')
-
-const target = Symbol('target')
 
 tape('schemaPath', function(t) {
   const schema = {
     type: 'object',
-    [target]: 'top level',
     properties: {
-      [target]: 'inside properties',
       hello: {
-        [target]: 'inside hello',
         type: 'string',
       },
       someItems: {
-        [target]: 'in someItems',
         type: 'array',
         items: [
           {
@@ -28,20 +21,16 @@ tape('schemaPath', function(t) {
           },
         ],
         additionalItems: {
-          [target]: 'inside additionalItems',
           type: 'boolean',
         },
       },
       nestedOuter: {
         type: 'object',
-        [target]: 'in nestedOuter',
         properties: {
           nestedInner: {
             type: 'object',
-            [target]: 'in nestedInner',
             properties: {
               deeplyNestedProperty: {
-                [target]: 'in deeplyNestedProperty',
                 type: 'boolean',
               },
             },
@@ -53,17 +42,14 @@ tape('schemaPath', function(t) {
         allOf: [{ pattern: 'z$' }, { pattern: '^a' }, { pattern: '-' }, { pattern: '^...$' }],
       },
       negate: {
-        [target]: 'in negate',
         not: {
           type: 'boolean',
         },
       },
       selection: {
-        [target]: 'in selection',
         anyOf: [{ pattern: '^[a-z]{3}$' }, { pattern: '^[0-9]$' }],
       },
       exclusiveSelection: {
-        [target]: 'There can be only one',
         oneOf: [
           { pattern: 'a' },
           { pattern: 'e' },
@@ -88,85 +74,78 @@ tape('schemaPath', function(t) {
     t.deepEqual(validate.errors[0].schemaPath, path, message)
   }
 
-  function notOkWithTarget(data, targetValue, message) {
-    if (validate(data)) {
-      return t.fail(`should have failed: ${message}`)
-    }
-    t.deepEqual(get(schema, validate.errors[0].schemaPath)[target], targetValue, message)
-  }
-
   // Top level errors
-  notOkAt(null, '#', 'should target parent of failed type error')
-  notOkAt(undefined, '#', 'should target parent of failed type error')
-  notOkWithTarget(
+  notOkAt(null, '#/type', 'should target parent of failed type error')
+  notOkAt(undefined, '#/type', 'should target parent of failed type error')
+  notOkAt(
     { invalidAdditionalProp: '*whistles innocently*' },
-    'top level',
+    '#/additionalProperties',
     'additionalProperties should be associated with containing schema'
   )
 
   // Errors in properties
-  notOkAt({ hello: 42 }, '#/properties/hello', 'should target property with type error')
+  notOkAt({ hello: 42 }, '#/properties/hello/type', 'should target property with type error')
   notOkAt(
     { someItems: [42] },
-    '#/properties/someItems/0',
+    '#/properties/someItems/0/type',
     'should target specific someItems rule(0)'
   )
   notOkAt(
     { someItems: ['astring', 42] },
-    '#/properties/someItems/1',
+    '#/properties/someItems/1/type',
     'should target specific someItems rule(1)'
   )
   notOkAt(
     { someItems: ['astring', [], 'not a boolean'] },
-    '#/properties/someItems/additionalItems',
+    '#/properties/someItems/additionalItems/type',
     'should target additionalItems'
   )
-  notOkWithTarget(
+  notOkAt(
     { someItems: ['astring', [], true, false, 42] },
-    'inside additionalItems',
+    '#/properties/someItems/additionalItems/type',
     'should sitll target additionalProperties after valid additional items'
   )
 
-  notOkWithTarget(
+  notOkAt(
     { nestedOuter: {} },
-    'in nestedOuter',
+    '#/properties/nestedOuter/required',
     'should target container of missing required property'
   )
-  notOkWithTarget(
+  notOkAt(
     { nestedOuter: { nestedInner: 'not an object' } },
-    'in nestedInner',
+    '#/properties/nestedOuter/properties/nestedInner/type',
     'should target property with type error (inner)'
   )
-  notOkWithTarget(
+  notOkAt(
     { nestedOuter: { nestedInner: { deeplyNestedProperty: 'not a boolean' } } },
-    'in deeplyNestedProperty',
+    '#/properties/nestedOuter/properties/nestedInner/properties/deeplyNestedProperty/type',
     'should target property with type error (deep)'
   )
 
   notOkAt(
     { aggregate: 'a-a' },
-    '#/properties/aggregate/allOf/0',
+    '#/properties/aggregate/allOf/0/pattern',
     'should target specific rule in allOf (0)'
   )
   notOkAt(
     { aggregate: 'z-z' },
-    '#/properties/aggregate/allOf/1',
+    '#/properties/aggregate/allOf/1/pattern',
     'should target specific rule in allOf (1)'
   )
   notOkAt(
     { aggregate: 'a:z' },
-    '#/properties/aggregate/allOf/2',
+    '#/properties/aggregate/allOf/2/pattern',
     'should target specific rule in allOf (2)'
   )
   notOkAt(
     { aggregate: 'a--z' },
-    '#/properties/aggregate/allOf/3',
+    '#/properties/aggregate/allOf/3/pattern',
     'should target specific rule in allOf (3)'
   )
 
   notOkAt(
     { notAString: 42 },
-    '#/patternProperties/.*String',
+    '#/patternProperties/.*String/type',
     'should target the specific pattern in patternProperties (wildcards)'
   )
   notOkAt(
@@ -174,25 +153,25 @@ tape('schemaPath', function(t) {
       'I am a String': 'I really am',
       '001100111011000111100': "Don't stand around jabbering when you're in mortal danger",
     },
-    '#/patternProperties/^[01]+$',
+    '#/patternProperties/^[01]+$/type',
     'should target the specific pattern in patternProperties ("binary" keys)'
   )
 
-  notOkWithTarget({ negate: false }, 'in negate', 'should target container of not')
+  notOkAt({ negate: false }, '#/properties/negate/not', 'should target container of not')
 
-  notOkWithTarget(
+  notOkAt(
     { selection: 'grit' },
-    'in selection',
+    '#/properties/selection/anyOf',
     'should target container for anyOf (no matches)'
   )
-  notOkWithTarget(
+  notOkAt(
     { exclusiveSelection: 'fly' },
-    'There can be only one',
+    '#/properties/exclusiveSelection/oneOf',
     'should target container for oneOf (no match)'
   )
-  notOkWithTarget(
+  notOkAt(
     { exclusiveSelection: 'ice' },
-    'There can be only one',
+    '#/properties/exclusiveSelection/oneOf',
     'should target container for oneOf (multiple matches)'
   )
 
