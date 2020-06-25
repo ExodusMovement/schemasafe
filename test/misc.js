@@ -48,19 +48,19 @@ tape('allErrors/false', function(t) {
       },
       required: ['x', 'y'],
     },
-    { includeErrors: true, allErrors: false }
+    { includeErrors: true, verboseErrors: true, allErrors: false }
   )
   t.notOk(validate({}), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
-  t.strictEqual(validate.errors[0].field, 'data["x"]')
+  t.strictEqual(validate.errors[0].dataPath, '#/x')
   t.strictEqual(validate.errors[0].message, 'is required')
   t.notOk(validate({ x: 'string' }), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
-  t.strictEqual(validate.errors[0].field, 'data["y"]')
+  t.strictEqual(validate.errors[0].dataPath, '#/y')
   t.strictEqual(validate.errors[0].message, 'is required')
   t.notOk(validate({ x: 'string', y: 'value' }), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
-  t.strictEqual(validate.errors[0].field, 'data["x"]')
+  t.strictEqual(validate.errors[0].dataPath, '#/x')
   t.strictEqual(validate.errors[0].message, 'is the wrong type')
   t.end()
 })
@@ -76,23 +76,23 @@ tape('allErrors/true', function(t) {
       },
       required: ['x', 'y'],
     },
-    { includeErrors: true, allErrors: true }
+    { includeErrors: true, verboseErrors: true, allErrors: true }
   )
   t.notOk(validate({}), 'should be invalid')
   t.strictEqual(validate.errors.length, 2)
-  t.strictEqual(validate.errors[0].field, 'data["x"]')
+  t.strictEqual(validate.errors[0].dataPath, '#/x')
   t.strictEqual(validate.errors[0].message, 'is required')
-  t.strictEqual(validate.errors[1].field, 'data["y"]')
+  t.strictEqual(validate.errors[1].dataPath, '#/y')
   t.strictEqual(validate.errors[1].message, 'is required')
   t.notOk(validate({ x: 'string' }), 'should be invalid')
   t.strictEqual(validate.errors.length, 2)
-  t.strictEqual(validate.errors[0].field, 'data["y"]')
+  t.strictEqual(validate.errors[0].dataPath, '#/y')
   t.strictEqual(validate.errors[0].message, 'is required')
-  t.strictEqual(validate.errors[1].field, 'data["x"]')
+  t.strictEqual(validate.errors[1].dataPath, '#/x')
   t.strictEqual(validate.errors[1].message, 'is the wrong type')
   t.notOk(validate({ x: 'string', y: 'value' }), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
-  t.strictEqual(validate.errors[0].field, 'data["x"]')
+  t.strictEqual(validate.errors[0].dataPath, '#/x')
   t.strictEqual(validate.errors[0].message, 'is the wrong type')
   t.ok(validate({ x: 1, y: 'value' }), 'should be invalid')
   t.end()
@@ -112,10 +112,7 @@ tape('additional props', function(t) {
 
   t.ok(validate({}))
   t.notOk(validate({ foo: 'bar' }))
-  t.ok(
-    validate.errors[0].value === 'data.foo',
-    'should output the property not allowed in verbose mode'
-  )
+  t.ok(validate.errors[0].value === 'bar', 'should output the property not allowed in verbose mode')
   t.end()
 })
 
@@ -393,11 +390,11 @@ tape('nested required array decl', function(t) {
     required: ['x'],
   }
 
-  const validate = validator(schema, { includeErrors: true })
+  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
 
   t.ok(validate({ x: {} }), 'should be valid')
   t.notOk(validate({}), 'should not be valid')
-  t.strictEqual(validate.errors[0].field, 'data["x"]', 'should output the missing field')
+  t.strictEqual(validate.errors[0].dataPath, '#/x', 'should output the missing field')
   t.end()
 })
 
@@ -447,8 +444,8 @@ tape('additional props in verbose mode', function(t) {
 
   t.strictEqual(
     validate.errors[0].value,
-    'data["hello world"].bar',
-    'should output the path to the additional prop in the error'
+    'string',
+    'should output the value of the additional prop in the error'
   )
   t.end()
 })
@@ -461,8 +458,7 @@ tape('Date.now() is an integer', function(t) {
   t.end()
 })
 
-// Due to altered (safer) formatName function, this does not work
-tape.skip('field shows item index in arrays', function(t) {
+tape('field shows item index in arrays', function(t) {
   const schema = {
     type: 'array',
     items: {
@@ -478,13 +474,13 @@ tape.skip('field shows item index in arrays', function(t) {
     },
   }
 
-  const validate = validator(schema)
+  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
 
   validate([[{ foo: 'test' }, { foo: 'test' }], [{ foo: 'test' }, { baz: 'test' }]])
 
   t.strictEqual(
-    validate.errors[0].field,
-    'data.1.1.foo',
+    validate.errors[0].dataPath,
+    '#/1/1/foo',
     'should output the field with specific index of failing item in the error'
   )
   t.end()

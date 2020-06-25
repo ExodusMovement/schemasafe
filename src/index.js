@@ -2,7 +2,7 @@
 
 const { format, safe, safeand, safeor } = require('./safe-format')
 const genfun = require('./generate-function')
-const { toPointer, resolveReference, joinPath } = require('./pointer')
+const { resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
 const functions = require('./scope-functions')
 const KNOWN_KEYWORDS = require('./known-keywords')
@@ -134,6 +134,26 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     return safe(v)
   }
 
+  const buildPath = (prop) => {
+    const path = []
+    let curr = prop
+    while (curr) {
+      if (!curr.name) path.unshift(curr)
+      curr = curr.parent || curr.errorParent
+    }
+
+    // fast case when there are no variables inside path
+    if (path.every((part) => part.keyval !== undefined))
+      return format('%j', functions.toPointer(path.map((part) => part.keyval)))
+
+    // slow case with variables
+    const first = path[0].keyname ? format('%s', path[0].keyname) : format('%j', path[0].keyval)
+    const next = (code, { keyname, keyval }) =>
+      keyname ? format('%s, %s', code, keyname) : format('%s, %j', code, keyval)
+    scope.toPointer = functions.toPointer
+    return format('toPointer([%s])', path.slice(1).reduce(next, first))
+  }
+
   const present = (location) => {
     const name = buildName(location) // also checks for sanity, do not remove
     const { parent, keyval, keyname, inKeys } = location
@@ -172,11 +192,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const currPropVar = (...args) => propvar(current, ...args)
     const currPropImm = (...args) => propimm(current, ...args)
 
-    const error = (msg, prop, value) => {
+    const error = (msg, prop = current) => {
       if (includeErrors === true) {
-        const errorObj = { field: prop || name, message: msg, schemaPath: toPointer(schemaPath) }
+        const errorObj = { message: msg, schemaPath: functions.toPointer(schemaPath) }
         const errorJS = verboseErrors
-          ? format('{ ...%j, value: %s }', errorObj, value || name)
+          ? format('{ ...%j, dataPath: %s, value: %s }', errorObj, buildPath(prop), buildName(prop))
           : format('%j', errorObj)
         if (allErrors) {
           fun.write('if (validate.errors === null) validate.errors = []')
@@ -210,7 +230,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const fail = (msg, value) => {
       const comment = value !== undefined ? ` ${JSON.stringify(value)}` : ''
-      throw new Error(`${msg}${comment} at ${toPointer(schemaPath)}`)
+      throw new Error(`${msg}${comment} at ${functions.toPointer(schemaPath)}`)
     }
     const enforce = (ok, ...args) => ok || fail(...args)
     const enforceValidation = (msg) => enforce(!requireValidation, `[requireValidation] ${msg}`)
@@ -605,7 +625,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
           const names = node.propertyNames
           const nameSchema = typeof names === 'object' ? { type: 'string', ...names } : names
-          rule({ name: key }, nameSchema, subPath('propertyNames'))
+          const sub = currPropVar(key, true) // always own property, from Object.keys
+          rule({ name: key, errorParent: sub }, nameSchema, subPath('propertyNames'))
         })
         consume('propertyNames', 'object', 'boolean')
       }
@@ -616,7 +637,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (Array.isArray(node.required)) {
         for (const req of node.required) {
           const prop = currPropImm(req)
-          errorIf('!(%s)', [present(prop)], 'is required', buildName(prop))
+          errorIf('!(%s)', [present(prop)], 'is required', prop)
         }
         consume('required', 'array')
       }
@@ -679,7 +700,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
               if (removeAdditional) {
                 fun.write('delete %s[%s]', name, key)
               } else {
-                error('has additional properties', null, format('%j + %s', `${name}.`, key))
+                error('is an additional property', currPropVar(key))
               }
             } else {
               const sub = currPropVar(key, true) // always own property, from Object.keys
@@ -853,7 +874,7 @@ const parser = function(schema, opts = {}) {
     const data = JSON.parse(src)
     if (validate(data)) return data
     const message = validate.errors
-      ? validate.errors.map((err) => `${err.field} ${err.message}`).join('\n')
+      ? validate.errors.map((err) => `${err.schemaPath} ${err.message}`).join('\n')
       : ''
     const error = new Error(`JSON validation error${message ? `: ${message}` : ''}`)
     error.errors = validate.errors
