@@ -50,27 +50,22 @@ const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
 // Helper methods for semi-structured paths
 const propvar = (parent, keyname, inKeys = false) => Object.freeze({ parent, keyname, inKeys }) // property by variable
 const propimm = (parent, keyval) => Object.freeze({ parent, keyval }) // property by immediate value
-const buildNameOrPath = ({ name, parent, errorParent, keyval, keyname }, toPathArray = false) => {
+const buildName = ({ name, parent, keyval, keyname }) => {
   if (name) {
     if (parent || keyval || keyname) throw new Error('name can be used only stand-alone')
-    if (toPathArray) return errorParent ? buildNameOrPath(errorParent, true) : format('%j', '#')
     return name // top-level
   }
   if (keyval && keyname) throw new Error('Can not use key value and name at the same time')
   if (!parent) throw new Error('Can not use property of undefined parent!')
   if (parent && keyval !== undefined) {
     if (!['string', 'number'].includes(typeof keyval)) throw new Error('Invalid property path')
-    if (toPathArray) return format('%s, %j', buildNameOrPath(parent, toPathArray), keyval)
     return format('%s[%j]', buildName(parent), keyval)
   } else if (parent && keyname) {
-    if (toPathArray) return format('%s, %s', buildNameOrPath(parent, toPathArray), keyname)
     return format('%s[%s]', buildName(parent), keyname)
   }
   /* c8 ignore next */
   throw new Error('Unreachable')
 }
-const buildName = (prop) => buildNameOrPath(prop) // to ensure that second argument isn't used
-const buildPath = (prop) => format('toPointer([%s].slice(1))', buildNameOrPath(prop, true))
 
 const rootMeta = new WeakMap()
 const compile = (schema, root, opts, scope, basePathRoot) => {
@@ -139,6 +134,26 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     return safe(v)
   }
 
+  const buildPath = (prop) => {
+    const path = []
+    let curr = prop
+    while (curr) {
+      if (!curr.name) path.unshift(curr)
+      curr = curr.parent || curr.errorParent
+    }
+
+    // fast case when there are no variables inside path
+    if (path.every((part) => part.keyval !== undefined))
+      return format('%j', functions.toPointer(path.map((part) => part.keyval)))
+
+    // slow case with variables
+    const first = path[0].keyname ? format('%s', path[0].keyname) : format('%j', path[0].keyval)
+    const next = (code, { keyname, keyval }) =>
+      keyname ? format('%s, %s', code, keyname) : format('%s, %j', code, keyval)
+    scope.toPointer = functions.toPointer
+    return format('toPointer([%s])', path.slice(1).reduce(next, first))
+  }
+
   const present = (location) => {
     const name = buildName(location) // also checks for sanity, do not remove
     const { parent, keyval, keyname, inKeys } = location
@@ -180,7 +195,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const error = (msg, prop = current) => {
       if (includeErrors === true) {
         const errorObj = { message: msg, schemaPath: functions.toPointer(schemaPath) }
-        if (verboseErrors) scope.toPointer = functions.toPointer
         const errorJS = verboseErrors
           ? format('{ ...%j, dataPath: %s, value: %s }', errorObj, buildPath(prop), buildName(prop))
           : format('%j', errorObj)
