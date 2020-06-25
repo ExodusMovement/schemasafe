@@ -72,10 +72,14 @@ console.log(validate(42)) // false
 
 ## Verbose mode shows more information about the source of the error
 
-When the `verbose` options is set to `true`, `@exodus/schemasafe` also outputs:
+When the `includeErrors` and `verboseErrors` options are set to `true`, `@exodus/schemasafe` also
+outputs:
 
+- `schemaPath`: a JSON pointer string as an URI fragment indicating which sub-schema failed, e.g.
+  `#/properties/item/type`
+- `dataPath`: a JSON pointer string as an URI fragment indicating which property of the object
+  failed validation, e.g. `#/item`
 - `value`: The data value that caused the error
-- `schemaPath`: a JSON pointer string as an URI fragment indicating which sub-schema failed, e.g. `#/type`
 
 ```js
 const schema = {
