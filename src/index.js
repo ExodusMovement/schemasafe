@@ -178,7 +178,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
   fun.write('if (data === undefined) data = null')
   if (optIncludeErrors) fun.write('validate.errors = null')
-  fun.write('let errors = 0')
+  fun.write('let errored = false')
 
   let jsonCheckPerformed = false
   const getMeta = () => rootMeta.get(root) || {}
@@ -207,7 +207,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         }
       }
       if (allErrors) {
-        fun.write('errors++')
+        fun.write('errored = true')
       } else {
         fun.write('return false')
       }
@@ -217,7 +217,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (includeErrors === false) {
         // in this case, we can fast-track and inline this to generate more readable code
         if (allErrors) {
-          fun.write('if (%s) errors++', condition)
+          fun.write('if (%s) errored = true', condition)
         } else {
           fun.write('if (%s) return false', condition)
         }
@@ -411,7 +411,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     // Can not be used before undefined check above! The one performed by present()
     const rule = (...args) => visit(allErrors, includeErrors, [...history, current], ...args)
-    const subrule = (...args) => visit(true, false, [...history, current], ...args)
+    const subrule = (...args) => {
+      const result = gensym('sub')
+      fun.write('const %s = (() => {', result)
+      fun.write('let errored = false') // scoped error flag, should be unused due to !includeErrors
+      visit(false, false, [...history, current], ...args)
+      fun.write('return errored === false')
+      fun.write('})()')
+      return result
+    }
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
 
@@ -559,15 +567,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
 
       if (node.contains || node.contains === false) {
-        const prev = gensym('prev')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
 
         const i = genloop()
         fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
-          fun.write('const %s = errors', prev)
-          subrule(currPropVar(i), node.contains, subPath('contains'))
-          fun.write('if (%s === errors) { %s++ } else errors = %s', prev, passes, prev)
+          const sub = subrule(currPropVar(i), node.contains, subPath('contains'))
+          fun.write('if (%s) %s++', sub, passes)
         })
 
         if (Number.isFinite(node.minContains)) {
@@ -740,22 +746,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const checkGeneric = () => {
       if (node.not || node.not === false) {
-        const prev = gensym('prev')
-        fun.write('const %s = errors', prev)
-        subrule(current, node.not, subPath('not'))
-        fun.write('if (%s === errors) {', prev)
-        error({ path: ['not'] })
-        fun.write('} else errors = %s', prev)
+        const sub = subrule(current, node.not, subPath('not'))
+        errorIf('%s', [sub], { path: ['not'] })
         consume('not', 'object', 'boolean')
       }
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
       if ((node.if || node.if === false) && thenOrElse) {
-        const prev = gensym('prev')
-        fun.write('const %s = errors', prev)
-        subrule(current, node.if, subPath('if'))
-        fun.write('if (%s !== errors) {', prev)
-        fun.write('errors = %s', prev)
+        const sub = subrule(current, node.if, subPath('if'))
+        fun.write('if (!%s) {', sub)
         if (node.else || node.else === false) {
           rule(current, node.else, subPath('else'))
           consume('else', 'object', 'boolean')
@@ -771,45 +770,24 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.allOf !== undefined) {
         enforce(Array.isArray(node.allOf), 'Invalid allOf')
-        node.allOf.forEach((sch, key) => {
-          rule(current, sch, subPath('allOf', key))
-        })
+        node.allOf.forEach((sch, key) => rule(current, sch, subPath('allOf', key)))
         consume('allOf', 'array')
       }
 
       if (node.anyOf !== undefined) {
         enforce(Array.isArray(node.anyOf), 'Invalid anyOf')
-        const prev = gensym('prev')
-
-        node.anyOf.forEach((sch, i) => {
-          if (i === 0) {
-            fun.write('const %s = errors', prev)
-          } else {
-            fun.write('if (errors !== %s) {', prev)
-            fun.write('errors = %s', prev)
-          }
-          subrule(current, sch, schemaPath)
-        })
-        node.anyOf.forEach((sch, i) => {
-          if (i > 0) fun.write('}')
-        })
-        fun.write('if (%s !== errors) {', prev)
-        fun.write('errors = %s', prev)
+        for (const sch of node.anyOf) fun.write('if (!%s) {', subrule(current, sch, schemaPath))
         error({ path: ['anyOf'] })
-        fun.write('}')
+        node.anyOf.forEach(() => fun.write('}'))
         consume('anyOf', 'array')
       }
 
       if (node.oneOf !== undefined) {
         enforce(Array.isArray(node.oneOf), 'Invalid oneOf')
-        const prev = gensym('prev')
         const passes = gensym('passes')
-        fun.write('const %s = errors', prev)
         fun.write('let %s = 0', passes)
-        for (const sch of node.oneOf) {
-          subrule(current, sch, schemaPath)
-          fun.write('if (%s === errors) { %s++ } else errors = %s', prev, passes, prev)
-        }
+        for (const sch of node.oneOf)
+          fun.write('if (%s) %s++', subrule(current, sch, schemaPath), passes)
         errorIf('%s !== 1', [passes], { path: ['oneOf'] })
         consume('oneOf', 'array')
       }
@@ -857,7 +835,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
   visit(optAllErrors, optIncludeErrors, [], { name: safe('data') }, schema, [])
 
-  fun.write('return errors === 0')
+  fun.write('return errored === false')
   fun.write('}')
 
   if (dryRun) return
