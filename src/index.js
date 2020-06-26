@@ -770,22 +770,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.allOf !== undefined) {
         enforce(Array.isArray(node.allOf), 'Invalid allOf')
-        node.allOf.forEach((sch, key) => {
-          rule(current, sch, subPath('allOf', key))
-        })
+        node.allOf.forEach((sch, key) => rule(current, sch, subPath('allOf', key)))
         consume('allOf', 'array')
       }
 
       if (node.anyOf !== undefined) {
         enforce(Array.isArray(node.anyOf), 'Invalid anyOf')
-
-        node.anyOf.forEach((sch, i) => {
-          const sub = subrule(current, sch, schemaPath)
-          fun.write('if (!%s) {', sub)
-        })
+        for (const sch of node.anyOf) fun.write('if (!%s) {', subrule(current, sch, schemaPath))
         error({ path: ['anyOf'] })
-        node.anyOf.forEach((sch, i) => fun.write('}'))
-
+        node.anyOf.forEach(() => fun.write('}'))
         consume('anyOf', 'array')
       }
 
@@ -793,10 +786,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Array.isArray(node.oneOf), 'Invalid oneOf')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
-        for (const sch of node.oneOf) {
-          const sub = subrule(current, sch, schemaPath)
-          fun.write('if (%s) %s++', sub, passes)
-        }
+        for (const sch of node.oneOf)
+          fun.write('if (%s) %s++', subrule(current, sch, schemaPath), passes)
         errorIf('%s !== 1', [passes], { path: ['oneOf'] })
         consume('oneOf', 'array')
       }
