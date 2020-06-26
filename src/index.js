@@ -49,7 +49,7 @@ const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
 
 // Helper methods for semi-structured paths
 const propvar = (parent, keyname, inKeys = false) => Object.freeze({ parent, keyname, inKeys }) // property by variable
-const propimm = (parent, keyval) => Object.freeze({ parent, keyval }) // property by immediate value
+const propimm = (parent, keyval, checked = false) => Object.freeze({ parent, keyval, checked }) // property by immediate value
 const buildName = ({ name, parent, keyval, keyname }) => {
   if (name) {
     if (parent || keyval || keyname) throw new Error('name can be used only stand-alone')
@@ -156,12 +156,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
   const present = (location) => {
     const name = buildName(location) // also checks for sanity, do not remove
-    const { parent, keyval, keyname, inKeys } = location
-    if (inKeys) {
-      /* c8 ignore next */
-      if (isJSON) throw new Error('Unreachable: useless check, can not be undefined')
-      return format('%s !== undefined', name)
-    }
+    const { parent, keyval, keyname, inKeys, checked } = location
+    /* c8 ignore next */
+    if (checked || (inKeys && isJSON)) throw new Error('Unreachable: useless check for undefined')
+    if (inKeys) return format('%s !== undefined', name)
     if (parent && keyname) {
       scope.hasOwn = functions.hasOwn
       return format('%s !== undefined && hasOwn(%s, %s)', name, buildName(parent), keyname)
@@ -186,7 +184,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   const visit = (allErrors, includeErrors, history, current, node, schemaPath) => {
     // e.g. top-level data and property names, OR already checked by present() in history, OR in keys and not undefined
     const definitelyPresent =
-      !current.parent || history.includes(current) || (current.inKeys && isJSON)
+      !current.parent || history.includes(current) || current.checked || (current.inKeys && isJSON)
 
     const name = buildName(current)
     const currPropVar = (...args) => propvar(current, ...args)
@@ -673,7 +671,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (typeof node.properties === 'object') {
         for (const p of Object.keys(node.properties)) {
-          rule(currPropImm(p), node.properties[p], subPath('properties', p))
+          // if allErrors is false, we can skip present check for required properties validated above
+          const checked = !allErrors && Array.isArray(node.required) && node.required.includes(p)
+          rule(currPropImm(p, checked), node.properties[p], subPath('properties', p))
         }
         consume('properties', 'object')
       }
