@@ -411,7 +411,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     // Can not be used before undefined check above! The one performed by present()
     const rule = (...args) => visit(allErrors, includeErrors, [...history, current], ...args)
-    const subrule = (...args) => visit(true, false, [...history, current], ...args)
+    const subrule = (...args) => {
+      const result = gensym('sub')
+      fun.write('const %s = (() => {', result)
+      fun.write('let errors = 0') // scoped error counter, should be unused due to !includeErrors
+      visit(false, false, [...history, current], ...args)
+      fun.write('return errors === 0')
+      fun.write('})()')
+      return result
+    }
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
 
@@ -559,15 +567,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
 
       if (node.contains || node.contains === false) {
-        const prev = gensym('prev')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
 
         const i = genloop()
         fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
-          fun.write('const %s = errors', prev)
-          subrule(currPropVar(i), node.contains, subPath('contains'))
-          fun.write('if (%s === errors) { %s++ } else errors = %s', prev, passes, prev)
+          const sub = subrule(currPropVar(i), node.contains, subPath('contains'))
+          fun.write('if (%s) %s++', sub, passes)
         })
 
         if (Number.isFinite(node.minContains)) {
@@ -740,22 +746,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const checkGeneric = () => {
       if (node.not || node.not === false) {
-        const prev = gensym('prev')
-        fun.write('const %s = errors', prev)
-        subrule(current, node.not, subPath('not'))
-        fun.write('if (%s === errors) {', prev)
-        error({ path: ['not'] })
-        fun.write('} else errors = %s', prev)
+        const sub = subrule(current, node.not, subPath('not'))
+        errorIf('%s', [sub], { path: ['not'] })
         consume('not', 'object', 'boolean')
       }
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
       if ((node.if || node.if === false) && thenOrElse) {
-        const prev = gensym('prev')
-        fun.write('const %s = errors', prev)
-        subrule(current, node.if, subPath('if'))
-        fun.write('if (%s !== errors) {', prev)
-        fun.write('errors = %s', prev)
+        const sub = subrule(current, node.if, subPath('if'))
+        fun.write('if (!%s) {', sub)
         if (node.else || node.else === false) {
           rule(current, node.else, subPath('else'))
           consume('else', 'object', 'boolean')
@@ -779,36 +778,24 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.anyOf !== undefined) {
         enforce(Array.isArray(node.anyOf), 'Invalid anyOf')
-        const prev = gensym('prev')
 
         node.anyOf.forEach((sch, i) => {
-          if (i === 0) {
-            fun.write('const %s = errors', prev)
-          } else {
-            fun.write('if (errors !== %s) {', prev)
-            fun.write('errors = %s', prev)
-          }
-          subrule(current, sch, schemaPath)
+          const sub = subrule(current, sch, schemaPath)
+          fun.write('if (!%s) {', sub)
         })
-        node.anyOf.forEach((sch, i) => {
-          if (i > 0) fun.write('}')
-        })
-        fun.write('if (%s !== errors) {', prev)
-        fun.write('errors = %s', prev)
         error({ path: ['anyOf'] })
-        fun.write('}')
+        node.anyOf.forEach((sch, i) => fun.write('}'))
+
         consume('anyOf', 'array')
       }
 
       if (node.oneOf !== undefined) {
         enforce(Array.isArray(node.oneOf), 'Invalid oneOf')
-        const prev = gensym('prev')
         const passes = gensym('passes')
-        fun.write('const %s = errors', prev)
         fun.write('let %s = 0', passes)
         for (const sch of node.oneOf) {
-          subrule(current, sch, schemaPath)
-          fun.write('if (%s === errors) { %s++ } else errors = %s', prev, passes, prev)
+          const sub = subrule(current, sch, schemaPath)
+          fun.write('if (%s) %s++', sub, passes)
         }
         errorIf('%s !== 1', [passes], { path: ['oneOf'] })
         consume('oneOf', 'array')
