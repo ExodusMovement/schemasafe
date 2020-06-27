@@ -399,12 +399,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       return (e) => format('(%s === %j)', variableName, e)
     }
 
-    const enforceRegex = (pattern, target = node) => {
-      enforce(typeof pattern === 'string', 'Invalid pattern:', pattern)
+    const enforceRegex = (source, target = node) => {
+      enforce(typeof source === 'string', 'Invalid pattern:', source)
       if (requireValidation || requireStringValidation)
-        enforce(/^\^.*\$$/.test(pattern), 'Should start with ^ and end with $:', pattern)
-      if (complexityChecks && (pattern.match(/[{+*]/g) || []).length > 1)
-        enforce(target.maxLength !== undefined, 'maxLength should be specified for:', pattern)
+        enforce(/^\^.*\$$/.test(source), 'Should start with ^ and end with $:', source)
+      if (complexityChecks && ((source.match(/[{+*]/g) || []).length > 1 || /\)[{+*]/.test(source)))
+        enforce(target.maxLength !== undefined, 'maxLength should be specified for:', source)
     }
 
     // Can not be used before undefined check above! The one performed by present()
