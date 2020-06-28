@@ -578,7 +578,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           errorIf('%s < %d', [passes, node.minContains], { path: ['minContains'] })
           consume('minContains', 'natural')
         } else {
-          errorIf('%s < 1', [passes], 'array does not contain a match', ['contains'])
+          errorIf('%s < 1', [passes], { path: ['contains'] })
         }
 
         if (Number.isFinite(node.maxContains)) {
