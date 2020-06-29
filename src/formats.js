@@ -101,7 +101,7 @@ const extra = {
   'ip-address': core.ipv4,
 
   // manually cleaned up from is-my-json-valid, CSS 2.1 colors only per draft03 spec
-  color: /^(?:#[0-9A-Fa-f]{3,6}|aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|orange|purple|red|silver|teal|white|yellow|rgb\(\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*\)|rgb\(\s*(?:\d?\d%|100%)+\s*,\s*(?:\d?\d%|100%)+\s*,\s*(?:\d?\d%|100%)+\s*\))$/,
+  color: /^(?:#[0-9A-Fa-f]{3,6}|aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|orange|purple|red|silver|teal|white|yellow|rgb\(\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*,\s*(?:[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\s*\)|rgb\(\s*(?:\d?\d%|100%)\s*,\s*(?:\d?\d%|100%)\s*,\s*(?:\d?\d%|100%)\s*\))$/,
 
   // style is deliberately unsupported, don't accept untrusted styles
 }
