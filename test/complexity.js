@@ -34,6 +34,8 @@ const simple = [
 const complex = [
   { format: 'complex' },
   { pattern: '^(a[a-z]+)*$' },
+  { pattern: '^(a|aa)*$' },
+  { pattern: '^(aa?)*$' },
   { uniqueItems: true },
   { uniqueItems: true, items: {} },
   { uniqueItems: true, items: { type: 'object' } },
