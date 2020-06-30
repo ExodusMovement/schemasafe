@@ -186,7 +186,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
   fun.write('if (data === undefined) data = null')
   if (optIncludeErrors) fun.write('validate.errors = null')
-  fun.write('let errored = false')
+  fun.write('let errors = 0')
 
   let jsonCheckPerformed = false
   const getMeta = () => rootMeta.get(root) || {}
@@ -215,7 +215,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         }
       }
       if (allErrors) {
-        fun.write('errored = true')
+        fun.write('errors++')
       } else {
         fun.write('return false')
       }
@@ -225,7 +225,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (includeErrors === false) {
         // in this case, we can fast-track and inline this to generate more readable code
         if (allErrors) {
-          fun.write('if (%s) errored = true', condition)
+          fun.write('if (%s) errors++', condition)
         } else {
           fun.write('if (%s) return false', condition)
         }
@@ -422,9 +422,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const subrule = (...args) => {
       const result = gensym('sub')
       fun.write('const %s = (() => {', result)
-      fun.write('let errored = false') // scoped error flag, should be unused due to !includeErrors
+      fun.write('let errors = 0') // scoped error flag, should be unused due to !includeErrors
       visit(false, false, [...history, current], ...args)
-      fun.write('return errored === false')
+      fun.write('return errors === 0')
       fun.write('})()')
       return result
     }
@@ -847,7 +847,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
   visit(optAllErrors, optIncludeErrors, [], { name: safe('data') }, schema, [])
 
-  fun.write('return errored === false')
+  fun.write('return errors === 0')
   fun.write('}')
 
   if (dryRun) return
