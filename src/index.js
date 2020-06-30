@@ -417,6 +417,19 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(target.maxLength !== undefined, 'maxLength should be specified for:', source)
     }
 
+    const maybeWrap = (shouldWrap, fmt, args, close, writeBody) => {
+      if (!shouldWrap) return writeBody()
+      fun.block(fmt, args, close, writeBody)
+    }
+
+    // Those checks will need to be skipped if another error is set in this block before those ones
+    const prev =
+      allErrors && (node.uniqueItems || node.pattern || node.patternProperties || node.format)
+        ? gensym('prev')
+        : null
+    const prevWrap = (shouldWrap, writeBody) =>
+      maybeWrap(prev !== null && shouldWrap, 'if (errors === %s) {', [prev], '}', writeBody)
+
     // Can not be used before undefined check above! The one performed by present()
     const rule = (...args) => visit(allErrors, includeErrors, [...history, current], ...args)
     const subrule = (...args) => {
@@ -479,38 +492,40 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('minLength', 'natural')
       }
 
-      if (node.format && functions.hasOwn(fmts, node.format)) {
-        const formatImpl = fmts[node.format]
-        if (formatImpl instanceof RegExp || typeof formatImpl === 'function') {
-          let n = cache.format.get(formatImpl)
-          if (!n) {
-            n = gensym('format')
-            scope[n] = formatImpl
-            cache.format.set(formatImpl, n)
-          }
-          if (formatImpl instanceof RegExp) {
-            // built-in formats are fine, check only ones from options
-            if (functions.hasOwn(optFormats, node.format)) enforceRegex(formatImpl.source)
-            errorIf('!%s.test(%s)', [n, name], { path: ['format'] })
+      prevWrap(true, () => {
+        if (node.format && functions.hasOwn(fmts, node.format)) {
+          const formatImpl = fmts[node.format]
+          if (formatImpl instanceof RegExp || typeof formatImpl === 'function') {
+            let n = cache.format.get(formatImpl)
+            if (!n) {
+              n = gensym('format')
+              scope[n] = formatImpl
+              cache.format.set(formatImpl, n)
+            }
+            if (formatImpl instanceof RegExp) {
+              // built-in formats are fine, check only ones from options
+              if (functions.hasOwn(optFormats, node.format)) enforceRegex(formatImpl.source)
+              errorIf('!%s.test(%s)', [n, name], { path: ['format'] })
+            } else {
+              errorIf('!%s(%s)', [n, name], { path: ['format'] })
+            }
           } else {
-            errorIf('!%s(%s)', [n, name], { path: ['format'] })
+            fail('Unrecognized format used:', node.format)
           }
+          consume('format', 'string')
         } else {
-          fail('Unrecognized format used:', node.format)
+          enforce(!node.format, 'Unrecognized format used:', node.format)
         }
-        consume('format', 'string')
-      } else {
-        enforce(!node.format, 'Unrecognized format used:', node.format)
-      }
 
-      if (node.pattern) {
-        enforceRegex(node.pattern)
-        if (!noopRegExps.has(node.pattern)) {
-          const p = patterns(node.pattern)
-          errorIf('!%s.test(%s)', [p, name], { path: ['pattern'] })
+        if (node.pattern) {
+          enforceRegex(node.pattern)
+          if (!noopRegExps.has(node.pattern)) {
+            const p = patterns(node.pattern)
+            errorIf('!%s.test(%s)', [p, name], { path: ['pattern'] })
+          }
+          consume('pattern', 'string')
         }
-        consume('pattern', 'string')
-      }
+      })
 
       const stringValidated = node.format || node.pattern || hasSubValidation
       if (typeApplicable('string') && requireStringValidation && !stringValidated) {
@@ -601,7 +616,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('contains', 'object', 'boolean')
       }
 
-      const isSimpleForUnique = () => {
+      const uniqueIsSimple = () => {
         if (node.maxItems !== undefined) return true
         if (typeof node.items === 'object') {
           if (Array.isArray(node.items) && node.additionalItems === false) return true
@@ -613,16 +628,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         }
         return false
       }
-      if (node.uniqueItems === true) {
-        if (complexityChecks)
-          enforce(isSimpleForUnique(), 'maxItems should be specified for non-primitive uniqueItems')
-        scope.unique = functions.unique
-        scope.deepEqual = functions.deepEqual
-        errorIf('!unique(%s)', [name], { path: ['uniqueItems'] })
-        consume('uniqueItems', 'boolean')
-      } else if (node.uniqueItems === false) {
-        consume('uniqueItems', 'boolean')
-      }
+      prevWrap(true, () => {
+        if (node.uniqueItems === true) {
+          if (complexityChecks)
+            enforce(uniqueIsSimple(), 'maxItems should be specified for non-primitive uniqueItems')
+          scope.unique = functions.unique
+          scope.deepEqual = functions.deepEqual
+          errorIf('!unique(%s)', [name], { path: ['uniqueItems'] })
+          consume('uniqueItems', 'boolean')
+        } else if (node.uniqueItems === false) {
+          consume('uniqueItems', 'boolean')
+        }
+      })
     }
 
     const checkObjects = () => {
@@ -696,46 +713,48 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('properties', 'object')
       }
 
-      if (node.patternProperties) {
-        const key = gensym('key')
-        fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
-          for (const p of Object.keys(node.patternProperties)) {
-            enforceRegex(p, node.propertyNames || {})
-            fun.block('if (%s.test(%s)) {', [patterns(p), key], '}', () => {
-              const sub = currPropVar(key, true) // always own property, from Object.keys
-              rule(sub, node.patternProperties[p], subPath('patternProperties', p))
-            })
-          }
-        })
-        consume('patternProperties', 'object')
-      }
-
-      if (node.additionalProperties || node.additionalProperties === false) {
-        const key = gensym('key')
-        const toCompare = (p) => format('%s !== %j', key, p)
-        const toTest = (p) => format('!%s.test(%s)', patterns(p), key)
-        const additionalProp = safeand(
-          ...Object.keys(node.properties || {}).map(toCompare),
-          ...Object.keys(node.patternProperties || {}).map(toTest)
-        )
-        fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
-          fun.block('if (%s) {', [additionalProp], '}', () => {
-            if (node.additionalProperties === false) {
-              if (removeAdditional) {
-                fun.write('delete %s[%s]', name, key)
-              } else {
-                error({ path: ['additionalProperties'], prop: currPropVar(key) })
-              }
-            } else {
-              const sub = currPropVar(key, true) // always own property, from Object.keys
-              rule(sub, node.additionalProperties, subPath('additionalProperties'))
+      prevWrap(node.patternProperties, () => {
+        if (node.patternProperties) {
+          const key = gensym('key')
+          fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
+            for (const p of Object.keys(node.patternProperties)) {
+              enforceRegex(p, node.propertyNames || {})
+              fun.block('if (%s.test(%s)) {', [patterns(p), key], '}', () => {
+                const sub = currPropVar(key, true) // always own property, from Object.keys
+                rule(sub, node.patternProperties[p], subPath('patternProperties', p))
+              })
             }
           })
-        })
-        consume('additionalProperties', 'object', 'boolean')
-      } else if (typeApplicable('object') && !hasSubValidation) {
-        enforceValidation('additionalProperties rule must be specified')
-      }
+          consume('patternProperties', 'object')
+        }
+
+        if (node.additionalProperties || node.additionalProperties === false) {
+          const key = gensym('key')
+          const toCompare = (p) => format('%s !== %j', key, p)
+          const toTest = (p) => format('!%s.test(%s)', patterns(p), key)
+          const additionalProp = safeand(
+            ...Object.keys(node.properties || {}).map(toCompare),
+            ...Object.keys(node.patternProperties || {}).map(toTest)
+          )
+          fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
+            fun.block('if (%s) {', [additionalProp], '}', () => {
+              if (node.additionalProperties === false) {
+                if (removeAdditional) {
+                  fun.write('delete %s[%s]', name, key)
+                } else {
+                  error({ path: ['additionalProperties'], prop: currPropVar(key) })
+                }
+              } else {
+                const sub = currPropVar(key, true) // always own property, from Object.keys
+                rule(sub, node.additionalProperties, subPath('additionalProperties'))
+              }
+            })
+          })
+          consume('additionalProperties', 'object', 'boolean')
+        } else if (typeApplicable('object') && !hasSubValidation) {
+          enforceValidation('additionalProperties rule must be specified')
+        }
+      })
     }
 
     const checkConst = () => {
@@ -805,11 +824,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
     }
 
-    const maybeWrap = (shouldWrap, fmt, args, close, writeBody) => {
-      if (!shouldWrap) return writeBody()
-      fun.block(fmt, args, close, writeBody)
-    }
-
     const typeWrap = (checkBlock, validTypes, queryType) => {
       const [funSize, unusedSize] = [fun.size(), unused.size]
       const alwaysValidType = typeArray && typeArray.every((type) => validTypes.includes(type))
@@ -830,6 +844,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     // If type validation was needed and did not return early, wrap this inside an else clause.
     maybeWrap(needTypeValidation && allErrors, 'else {', [], '}', () => {
+      if (prev !== null) fun.write('let %s = errors', prev)
       if (checkConst()) {
         // const/enum shouldn't have any other validation rules except for already checked type/$ref
         enforce(unused.size === 0, 'Unexpected keywords mixed with const or enum:', [...unused])

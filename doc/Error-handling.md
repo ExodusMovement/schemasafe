@@ -35,6 +35,10 @@ The options relevant to error reporting are:
 
   * `allErrors` — list all encountered errors, not just the first one. Requires `includeErrors`.
 
+    To ensure that this is not a [DoS vector](./Complexity-checks.md), `pattern`, `format`,
+    `propertyPatterns` and `uniqueItems` checks will be still skipped if the same exact data
+    property already failed length restrictions.
+
   * `verboseErrors` — include more information in each error object. Requires `includeErrors`.
 
 All of those are opt-ins (i.e. `false` by default).
