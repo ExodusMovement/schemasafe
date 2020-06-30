@@ -172,7 +172,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       return format('%s !== undefined && hasOwn(%s, %s)', name, buildName(parent), keyname)
     } else if (parent && keyval !== undefined) {
       // numbers must be converted to strings for this check, hence `${keyval}` in check below
-      if (unmodifiedPrototypes && !jsonProtoKeys.has(`${keyval}`))
+      if (unmodifiedPrototypes && isJSON && !jsonProtoKeys.has(`${keyval}`))
         return format('%s !== undefined', name)
       scope.hasOwn = functions.hasOwn
       return format('%s !== undefined && hasOwn(%s, %j)', name, buildName(parent), keyval)
