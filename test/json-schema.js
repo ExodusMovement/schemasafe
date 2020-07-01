@@ -60,20 +60,35 @@ const unsupported = new Set([
   'draft2019-09/optional/format/duration.json',
 ])
 
-const schemas = {
+const schemas = [
   // standard
-  'https://json-schema.org/draft/2019-09/schema': require('./schemas/json-schema-draft-2019-09.json'),
-  'http://json-schema.org/draft-07/schema': require('./schemas/json-schema-draft-07.json'),
-  'http://json-schema.org/draft-06/schema': require('./schemas/json-schema-draft-06.json'),
-  'http://json-schema.org/draft-04/schema': require('./schemas/json-schema-draft-04.json'),
-  'http://json-schema.org/draft-03/schema': require('./schemas/json-schema-draft-03.json'),
+  require('./schemas/json-schema-draft-2019-09.json'),
+  require('./schemas/json-schema-draft-07.json'),
+  require('./schemas/json-schema-draft-06.json'),
+  require('./schemas/json-schema-draft-04.json'),
+  require('./schemas/json-schema-draft-03.json'),
   // remote
-  'http://localhost:1234/integer.json': require('./JSON-Schema-Test-Suite/remotes/integer.json'),
-  'http://localhost:1234/subSchemas.json': require('./JSON-Schema-Test-Suite/remotes/subSchemas.json'),
-  'http://localhost:1234/folder/folderInteger.json': require('./JSON-Schema-Test-Suite/remotes/folder/folderInteger.json'),
-  'http://localhost:1234/name.json': require('./JSON-Schema-Test-Suite/remotes/name.json'),
-  'http://localhost:1234/name-defs.json': require('./JSON-Schema-Test-Suite/remotes/name-defs.json'),
-}
+  {
+    $id: 'http://localhost:1234/integer.json',
+    ...require('./JSON-Schema-Test-Suite/remotes/integer.json'),
+  },
+  {
+    $id: 'http://localhost:1234/subSchemas.json',
+    ...require('./JSON-Schema-Test-Suite/remotes/subSchemas.json'),
+  },
+  {
+    $id: 'http://localhost:1234/folder/folderInteger.json',
+    ...require('./JSON-Schema-Test-Suite/remotes/folder/folderInteger.json'),
+  },
+  {
+    $id: 'http://localhost:1234/name.json',
+    ...require('./JSON-Schema-Test-Suite/remotes/name.json'),
+  },
+  {
+    $id: 'http://localhost:1234/name-defs.json',
+    ...require('./JSON-Schema-Test-Suite/remotes/name-defs.json'),
+  },
+]
 
 function processTestDir(schemaDir, main, subdir = '') {
   const dir = path.join(__dirname, schemaDir, main, subdir)
