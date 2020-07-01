@@ -12,7 +12,8 @@ const core = {
     return host.split('.').every((part) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(part))
   },
   // matches ajv + length checks
-  hostname: (host) => {
+  hostname: (input) => {
+    const host = input.endsWith('.') ? input.slice(0, input.length - 1) : input
     if (host.length > 253) return false
     if (!/^[a-z0-9.-]+$/i.test(host)) return false
     return host.split('.').every((part) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(part))
