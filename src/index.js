@@ -269,7 +269,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       return
     }
 
-    enforce(Object.getPrototypeOf(node) === Object.prototype, 'Schema is not an object')
+    enforce(node && Object.getPrototypeOf(node) === Object.prototype, 'Schema is not an object')
     for (const key of Object.keys(node))
       enforce(KNOWN_KEYWORDS.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
