@@ -52,7 +52,7 @@ function objpath2path(objpath) {
 
 function resolveReference(root, additionalSchemas, ref, base = '') {
   const ptr = joinPath(base, ref)
-  const schemas = new Map(Object.entries(additionalSchemas))
+  const schemas = new Map(additionalSchemas)
   const self = (base || '').split('#')[0]
   if (self) schemas.set(self, root)
 
@@ -97,4 +97,28 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
   return results
 }
 
-module.exports = { get, joinPath, resolveReference }
+const buildSchemas = (input) => {
+  if (input) {
+    switch (Object.getPrototypeOf(input)) {
+      case Object.prototype:
+        return new Map(Object.entries(input))
+      case Map.prototype:
+        return new Map(input)
+      case Array.prototype: {
+        const schemas = new Map()
+        for (const schema of input) {
+          const id = schema.$id || schema.id
+          if (!id || typeof id !== 'string') throw new Error("Schema without $id in 'schemas'")
+          const cleanId = id.replace(/#$/, '') // # is allowed only as the last symbol here
+          if (!cleanId || cleanId.includes('#')) throw new Error("Unexpected $id in 'schemas'")
+          if (schemas.has(cleanId)) throw new Error("Duplicate schema $id in 'schemas'")
+          schemas.set(cleanId, schema)
+        }
+        return schemas
+      }
+    }
+  }
+  throw new Error("Unexpected value of 'schemas' option")
+}
+
+module.exports = { get, joinPath, resolveReference, buildSchemas }

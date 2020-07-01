@@ -2,7 +2,7 @@
 
 const { format, safe, safeand, safeor } = require('./safe-format')
 const genfun = require('./generate-function')
-const { resolveReference, joinPath } = require('./pointer')
+const { resolveReference, joinPath, buildSchemas } = require('./pointer')
 const formats = require('./formats')
 const functions = require('./scope-functions')
 const KNOWN_KEYWORDS = require('./known-keywords')
@@ -94,7 +94,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     formats: optFormats = {},
     weakFormats = opts.mode !== 'strong',
     extraFormats = false,
-    schemas = {},
+    schemas: optSchemas = {},
     ...unknown
   } = opts
   const fmts = {
@@ -114,6 +114,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (optIsJSON && jsonCheck)
     throw new Error('Can not specify both isJSON and jsonCheck options, please choose one')
   const isJSON = optIsJSON || jsonCheck
+  const schemas = buildSchemas(optSchemas)
 
   if (!scope[scopeCache])
     scope[scopeCache] = { sym: new Map(), ref: new Map(), format: new Map(), pattern: new Map() }
@@ -359,7 +360,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     if (node.$ref) {
-      const resolved = resolveReference(root, schemas || {}, node.$ref, basePath())
+      const resolved = resolveReference(root, schemas, node.$ref, basePath())
       const [sub, subRoot, path] = resolved[0] || []
       if (sub || sub === false) {
         let n = cache.ref.get(sub)
