@@ -1,0 +1,73 @@
+[
+  {
+    "description": "IDs in refs without root id (#1)",
+    "schemas": [
+      {
+        "definitions": {
+          "int": {
+            "$id": "#int",
+            "type": "integer"
+          }
+        },
+        "$ref": "#int"
+      },
+      {
+        "definitions": {
+          "int": {
+            "$id": "#int",
+            "type": "integer"
+          }
+        },
+        "$ref": "#int"
+      }
+    ],
+    "tests": [
+      { "description": "valid", "data": 1, "valid": true },
+      { "description": "invalid", "data": "foo", "valid": false }
+    ]
+  },
+  {
+    "description": "IDs in refs with root id",
+    "schemas": [
+      {
+        "$id": "http://example.com/int_1.json",
+        "definitions": {
+          "int": {
+            "$id": "#int",
+            "type": "integer"
+          }
+        },
+        "$ref": "#int"
+      },
+      {
+        "$id": "http://example.com/int_2.json",
+        "definitions": {
+          "int": {
+            "$id": "#int",
+            "type": "integer"
+          }
+        },
+        "$ref": "#int"
+      }
+    ],
+    "tests": [
+      { "description": "valid", "data": 1, "valid": true },
+      { "description": "invalid", "data": "foo", "valid": false }
+    ]
+  },
+  {
+    "description": "Definitions instead of IDs",
+    "schema": {
+      "definitions": {
+        "int": {
+          "type": "integer"
+        }
+      },
+      "$ref": "#/definitions/int"
+    },
+    "tests": [
+      { "description": "valid", "data": 1, "valid": true },
+      { "description": "invalid", "data": "foo", "valid": false }
+    ]
+  }
+]
