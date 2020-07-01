@@ -48,7 +48,7 @@ function joinPath(baseFull, sub) {
 
 function objpath2path(objpath) {
   const ids = objpath.map((obj) => (obj && (obj.$id || obj.id)) || '')
-  return ids.filter((id) => id).reduce(joinPath, '')
+  return ids.filter((id) => id && typeof id === 'string').reduce(joinPath, '')
 }
 
 function resolveReference(root, additionalSchemas, ref, base = '') {
