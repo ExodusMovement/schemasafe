@@ -20,6 +20,9 @@ jobs:
         run: |
           yarn --frozen-lockfile
           yarn lint
-          yarn test
+          yarn run ci
         env:
           CI: true
+      - uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage/lcov.info
