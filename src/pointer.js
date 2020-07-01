@@ -23,13 +23,12 @@ function get(obj, pointer, objpath) {
   let curr = obj
   for (const part of parts) {
     if (typeof part !== 'string') throw new Error('Invalid JSON pointer')
+    if (objpath) objpath.push(curr) // does not include target itself, but includes head
     const prop = untilde(part)
     if (typeof curr !== 'object') return undefined
     if (!Object.prototype.hasOwnProperty.call(curr, prop)) return undefined
     curr = curr[prop]
-    if (objpath) objpath.push(curr)
   }
-  if (objpath) objpath.pop() // does not include head or result
   return curr
 }
 
