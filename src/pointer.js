@@ -105,14 +105,24 @@ const buildSchemas = (input) => {
       case Map.prototype:
         return new Map(input)
       case Array.prototype: {
+        // In this case, schema ids are extracted from the schemas themselves
         const schemas = new Map()
+        const cleanId = (id) =>
+          // # is allowed only as the last symbol here
+          id && typeof id === 'string' && !/#./.test(id) ? id.replace(/#$/, '') : null
         for (const schema of input) {
-          const id = schema.$id || schema.id
-          if (!id || typeof id !== 'string') throw new Error("Schema without $id in 'schemas'")
-          const cleanId = id.replace(/#$/, '') // # is allowed only as the last symbol here
-          if (!cleanId || cleanId.includes('#')) throw new Error("Unexpected $id in 'schemas'")
-          if (schemas.has(cleanId)) throw new Error("Duplicate schema $id in 'schemas'")
-          schemas.set(cleanId, schema)
+          const visit = (sub) => {
+            if (!sub || typeof sub !== 'object') return
+            const id = cleanId(sub.$id || sub.id)
+            if (id && id.includes('://')) {
+              if (schemas.has(id)) throw new Error("Duplicate schema $id in 'schemas'")
+              schemas.set(id, sub)
+            } else if (sub === schema) {
+              throw new Error("Schema with missing or invalid $id in 'schemas'")
+            }
+            for (const k of Object.keys(sub)) visit(sub[k])
+          }
+          visit(schema)
         }
         return schemas
       }
