@@ -45,6 +45,9 @@ const schemaVersions = [
   'https://json-schema.org/draft-03/schema',
 ]
 
+const vocab2019 = ['core', 'applicator', 'validation', 'meta-data', 'format', 'content']
+const knownVocabularies = vocab2019.map((v) => `https://json-schema.org/draft/2019-09/vocab/${v}`)
+
 const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
 
 // Helper methods for semi-structured paths
@@ -311,6 +314,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           exclusiveRefs: schemaIsOlderThan('draft/2019-09'),
           booleanRequired: schemaIsOlderThan('draft-04'),
         })
+      }
+      if (node.$vocabulary) {
+        for (const [vocab, flag] of Object.entries(node.$vocabulary)) {
+          if (flag === false) continue
+          enforce(flag === true && knownVocabularies.includes(vocab), 'Unknown vocabulary:', vocab)
+        }
+        consume('$vocabulary', 'object')
       }
     }
 

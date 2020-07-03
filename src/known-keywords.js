@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = [
-  '$schema', // version
+  ...['$schema', '$vocabulary'], // version
   ...['id', '$id', '$ref', 'definitions', '$defs'], // pointers
   ...['type', 'required', 'default'], // generic
   ...['enum', 'const'], // constant values
