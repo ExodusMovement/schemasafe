@@ -56,12 +56,14 @@ const buildName = ({ name, parent, keyval, keyname }) => {
     return name // top-level
   }
   if (!parent) throw new Error('Can not use property of undefined parent!')
+  const parentName = buildName(parent)
   if (keyval !== undefined) {
     if (keyname) throw new Error('Can not use key value and name together')
     if (!['string', 'number'].includes(typeof keyval)) throw new Error('Invalid property path')
-    return format('%s[%j]', buildName(parent), keyval)
+    if (/^[a-z][a-z0-9_]*$/i.test(keyval)) return format('%s.%s', parentName, safe(keyval))
+    return format('%s[%j]', parentName, keyval)
   } else if (keyname) {
-    return format('%s[%s]', buildName(parent), keyname)
+    return format('%s[%s]', parentName, keyname)
   }
   /* c8 ignore next */
   throw new Error('Unreachable')
