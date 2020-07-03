@@ -684,27 +684,31 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('required', 'array')
       }
 
-      const dependencies = node.dependencies === undefined ? 'dependentRequired' : 'dependencies'
-      if (node[dependencies]) {
-        for (const key of Object.keys(node[dependencies])) {
-          let deps = node[dependencies][key]
-          if (typeof deps === 'string') deps = [deps]
+      for (const dependencies of ['dependencies', 'dependentRequired', 'dependentSchemas']) {
+        if (node[dependencies]) {
+          for (const key of Object.keys(node[dependencies])) {
+            let deps = node[dependencies][key]
+            if (typeof deps === 'string') deps = [deps]
 
-          const exists = (k) => present(currPropImm(k))
-          const item = currPropImm(key)
+            const exists = (k) => present(currPropImm(k))
+            const item = currPropImm(key)
 
-          if (Array.isArray(deps)) {
-            const condition = safeand(...deps.map(exists))
-            errorIf('%s && !(%s)', [present(item), condition], { path: [dependencies, key] })
-          } else if (typeof deps === 'object' || typeof deps === 'boolean') {
-            fun.block('if (%s) {', [present(item)], '}', () => {
-              rule(current, deps, subPath(dependencies, key))
-            })
-          } else {
-            fail('Unexpected dependencies entry')
+            if (Array.isArray(deps) && dependencies !== 'dependentSchemas') {
+              const condition = safeand(...deps.map(exists))
+              errorIf('%s && !(%s)', [present(item), condition], { path: [dependencies, key] })
+            } else if (
+              (typeof deps === 'object' || typeof deps === 'boolean') &&
+              dependencies !== 'dependentRequired'
+            ) {
+              fun.block('if (%s) {', [present(item)], '}', () => {
+                rule(current, deps, subPath(dependencies, key))
+              })
+            } else {
+              fail(`Unexpected ${dependencies} entry`)
+            }
           }
+          consume(dependencies, 'object')
         }
-        consume(dependencies, 'object')
       }
 
       if (typeof node.properties === 'object') {

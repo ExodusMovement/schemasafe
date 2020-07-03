@@ -11,7 +11,7 @@ module.exports = [
   ...['contains', 'minContains', 'maxContains', 'uniqueItems'], // arrays, complex
   ...['maxLength', 'minLength', 'format', 'pattern'], // strings
   ...['properties', 'maxProperties', 'minProperties', 'additionalProperties', 'patternProperties'], // objects
-  ...['propertyNames', 'dependencies', 'dependentRequired'], // objects
+  ...['propertyNames', 'dependencies', 'dependentRequired', 'dependentSchemas'], // objects
   // Unused meta keywords not affecting validation (annotations and comments)
   // https://json-schema.org/understanding-json-schema/reference/generic.html
   ...['description', 'title', 'examples', '$comment'], // unused
