@@ -58,7 +58,7 @@ const format = (fmt, ...args) => {
 }
 
 const safe = (string) => {
-  if (!/^[a-z][a-z0-9]*$/.test(string)) throw new Error('Does not look like a safe id')
+  if (!/^[a-z][a-z0-9_]*$/i.test(string)) throw new Error('Does not look like a safe id')
   return new SafeString(string)
 }
 
