@@ -22,6 +22,12 @@ const unsafe = new Set([
   // draft3 only
   'draft3/additionalItems.json/additionalItems should not look in applicators',
   'draft3/additionalProperties.json/additionalProperties should not look in applicators',
+
+  // draft2019-09 only
+  'draft2019-09/optional/refOfUnknownKeyword.json/reference of a root arbitrary keyword ',
+  'draft2019-09/optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
+  // we don't support $vocabulary but that is not _required_ per spec, hence let it be unprocessed
+  'draft2019-09/ref.json/remote ref, containing refs itself', // $vocabulary
 ])
 
 const unsupported = new Set([
@@ -54,14 +60,18 @@ const unsupported = new Set([
   'draft2019-09/refRemote.json',
   'draft2019-09/id.json',
   'draft2019-09/ref.json/ref creates new scope when adjacent to keywords',
-  'draft2019-09/ref.json/remote ref, containing refs itself',
-  'draft2019-09/optional/refOfUnknownKeyword.json',
   'draft2019-09/optional/format/duration.json',
 ])
 
 const schemas = [
   // standard
-  require('./schemas/json-schema-draft-2019-09.json'),
+  require('./schemas/json-schema-draft-2019-09/meta/core.json'),
+  require('./schemas/json-schema-draft-2019-09/meta/applicator.json'),
+  require('./schemas/json-schema-draft-2019-09/meta/validation.json'),
+  require('./schemas/json-schema-draft-2019-09/meta/meta-data.json'),
+  require('./schemas/json-schema-draft-2019-09/meta/format.json'),
+  require('./schemas/json-schema-draft-2019-09/meta/content.json'),
+  require('./schemas/json-schema-draft-2019-09/schema.json'),
   require('./schemas/json-schema-draft-07.json'),
   require('./schemas/json-schema-draft-06.json'),
   require('./schemas/json-schema-draft-04.json'),
@@ -74,6 +84,10 @@ const schemas = [
   {
     $id: 'http://localhost:1234/subSchemas.json',
     ...require('./JSON-Schema-Test-Suite/remotes/subSchemas.json'),
+  },
+  {
+    $id: 'http://localhost:1234/subSchemas-defs.json',
+    ...require('./JSON-Schema-Test-Suite/remotes/subSchemas-defs.json'),
   },
   {
     $id: 'http://localhost:1234/folder/folderInteger.json',
