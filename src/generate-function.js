@@ -1,6 +1,6 @@
 'use strict'
 
-const { format } = require('./safe-format')
+const { format, safe } = require('./safe-format')
 const jaystring = require('./jaystring')
 
 const INDENT_START = /[{[]/
@@ -55,7 +55,9 @@ module.exports = () => {
     },
 
     makeModule(scope = {}) {
-      const scopeDefs = processScope(scope).map(([key, val]) => `const ${key} = ${jaystring(val)};`)
+      const scopeDefs = processScope(scope).map(
+        ([key, val]) => `const ${safe(key)} = ${jaystring(val)};`
+      )
       return `(function() {\n'use strict'\n${scopeDefs.join('\n')}\n${build()}})();`
     },
 
