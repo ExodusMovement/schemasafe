@@ -413,10 +413,11 @@ const ref11 = function validate(data, recursive) {
   }
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!ref0(data, recursive)) return false
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -837,10 +838,11 @@ const ref11 = function validate(data, recursive) {
   }
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!ref0(data, recursive)) return false
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices

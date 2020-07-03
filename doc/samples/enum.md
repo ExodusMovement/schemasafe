@@ -12,11 +12,11 @@
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(data === 1 || data === 2 || data === 3)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -51,10 +51,11 @@ const deepEqual = (obj, obj2) => {
   }
   return false
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(data === 6 || data === "foo" || data === true || deepEqual(data, []) || deepEqual(data, {"foo":12}))) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -70,11 +71,11 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(data === 6 || data === null)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -95,7 +96,7 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
   if (data.foo !== undefined && hasOwn(data, "foo")) {
@@ -103,7 +104,8 @@ return (function validate(data, recursive) {
   }
   if (!(data.bar === "bar")) return false
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -123,11 +125,11 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(data === "foo\nbar" || data === "foo\rbar")) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -143,11 +145,11 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(data === false)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -163,11 +165,11 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(data === true)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -183,11 +185,11 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(data === 0)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -203,11 +205,11 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(data === 1)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -223,10 +225,10 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(data === "hello\u0000there")) return false
   return true
-})
+};
+return validate
 ```
 

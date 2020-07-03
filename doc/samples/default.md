@@ -13,14 +13,15 @@
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
       if (!Number.isInteger(data.foo)) return false
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -47,7 +48,7 @@ return (function validate(data, recursive) {
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const stringLength = (string) =>
   /[\uD800-\uDFFF]/.test(string) ? [...string].length : string.length;
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.bar !== undefined && hasOwn(data, "bar")) {
       if (!(typeof data.bar === "string")) return false
@@ -55,7 +56,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices

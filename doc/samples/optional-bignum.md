@@ -12,11 +12,11 @@
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -32,11 +32,11 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(typeof data === "number")) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -52,11 +52,11 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -72,11 +72,11 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(typeof data === "number")) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -92,11 +92,11 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -116,13 +116,13 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "number") {
     if (!(18446744073709552000 >= data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -142,13 +142,13 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "number") {
     if (!(9.727837981879871e+26 > data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -168,13 +168,13 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "number") {
     if (!(-18446744073709552000 <= data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -194,13 +194,13 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "number") {
     if (!(-9.727837981879871e+26 < data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices

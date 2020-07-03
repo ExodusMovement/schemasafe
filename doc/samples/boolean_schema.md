@@ -12,10 +12,10 @@ true
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -35,10 +35,10 @@ false
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   return false
   return true
-})
+};
+return validate
 ```
 

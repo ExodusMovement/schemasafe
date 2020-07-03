@@ -13,7 +13,7 @@
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
       if (!Number.isInteger(data.foo)) return false
@@ -23,7 +23,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -52,7 +53,7 @@ return (function validate(data, recursive) {
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const pattern0 = new RegExp("f.o", "u");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
       if (!Array.isArray(data.foo)) return false
@@ -79,7 +80,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -100,12 +102,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.bar !== undefined && hasOwn(data, "bar")) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -135,7 +138,7 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data["foo\nbar"] !== undefined && hasOwn(data, "foo\nbar")) {
       if (!(typeof data["foo\nbar"] === "number")) return false
@@ -157,7 +160,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices

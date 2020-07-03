@@ -13,12 +13,13 @@
 ```js
 'use strict'
 const pattern0 = new RegExp("^a*$", "u");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!pattern0.test(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -39,12 +40,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const pattern0 = new RegExp("a+", "u");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!pattern0.test(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices

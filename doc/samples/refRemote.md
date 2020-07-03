@@ -16,10 +16,11 @@ const ref0 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!ref0(data, recursive)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -39,10 +40,11 @@ const ref0 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!ref0(data, recursive)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -66,10 +68,11 @@ const ref1 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!ref0(data, recursive)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -93,7 +96,7 @@ const ref0 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (Array.isArray(data)) {
     for (let i = 0; i < data.length; i++) {
       if (data[i] !== undefined && hasOwn(data, i)) {
@@ -108,7 +111,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -153,13 +157,14 @@ const ref1 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.list !== undefined && hasOwn(data, "list")) {
     if (!ref0(data.list, recursive)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -205,13 +210,14 @@ const ref1 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.list !== undefined && hasOwn(data, "list")) {
     if (!ref0(data.list, recursive)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -256,13 +262,14 @@ const ref1 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.name !== undefined && hasOwn(data, "name")) {
     if (!ref0(data.name, recursive)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices

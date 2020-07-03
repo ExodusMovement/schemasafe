@@ -12,13 +12,13 @@
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (Array.isArray(data)) {
     if (data.length > 2) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices

@@ -12,8 +12,7 @@
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     let dec0 = data
     try {
@@ -23,7 +22,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -44,12 +44,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const format0 = (input) => input.length % 4 === 0 && /^[a-z0-9+/]*={0,3}$/i.test(input);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -88,7 +89,7 @@ const deBase64 = (string) => {
   const view = new Uint8Array(bytes.buffer, bytes.byteOffset, Math.min(filled, bytes.length))
   return new TextDecoder('utf-8').decode(view)
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     let dec0 = data
     if (!format0(data)) return false
@@ -104,7 +105,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices

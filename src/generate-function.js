@@ -18,7 +18,8 @@ module.exports = () => {
 
   const build = () => {
     if (indent !== 0) throw new Error('Unexpected indent at build()')
-    return `return (${lines.join('\n')})`
+    const joined = lines.join('\n')
+    return /^[a-z][a-z0-9]*$/i.test(joined) ? `return ${joined}` : `return (${joined})`
   }
 
   const processScope = (scope) => {

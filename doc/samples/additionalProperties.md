@@ -17,7 +17,7 @@
 ```js
 'use strict'
 const pattern0 = new RegExp("^v", "u");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key1 of Object.keys(data)) {
       if (key1 !== "foo" && key1 !== "bar" && !pattern0.test(key1)) {
@@ -26,7 +26,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -47,7 +48,7 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const pattern0 = new RegExp("^á", "u");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key1 of Object.keys(data)) {
       if (!pattern0.test(key1)) {
@@ -56,7 +57,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -79,8 +81,7 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (key0 !== "foo" && key0 !== "bar") {
@@ -91,7 +92,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -111,8 +113,7 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (data[key0] !== undefined) {
@@ -121,7 +122,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -141,10 +143,10 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -167,8 +169,7 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (data[key0] !== undefined) {
@@ -177,7 +178,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices

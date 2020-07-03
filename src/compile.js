@@ -1029,8 +1029,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (dryRun) return
 
   const validate = fun.makeFunction(scope)
-  validate.toModule = () => fun.makeModule(scope)
-  validate.toJSON = () => schema
   validate[evaluatedStatic] = stat
   return validate
 }

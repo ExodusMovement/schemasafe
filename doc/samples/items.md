@@ -13,7 +13,7 @@
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (Array.isArray(data)) {
     for (let i = 0; i < data.length; i++) {
       if (data[i] !== undefined && hasOwn(data, i)) {
@@ -22,7 +22,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -43,7 +44,7 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (Array.isArray(data)) {
     if (data[0] !== undefined && hasOwn(data, 0)) {
       if (!(Number.isInteger(data[0]))) return false
@@ -53,7 +54,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -73,10 +75,10 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -97,14 +99,15 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (Array.isArray(data)) {
     for (let i = 0; i < data.length; i++) {
       if (data[i] !== undefined && hasOwn(data, i)) return false
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -125,12 +128,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (Array.isArray(data)) {
     if (data[1] !== undefined && hasOwn(data, 1)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -183,7 +187,7 @@ const ref1 = function validate(data, recursive) {
   if (!(data.foo !== undefined && hasOwn(data, "foo"))) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   if (data[0] !== undefined && hasOwn(data, 0)) {
     if (!ref0(data[0], recursive)) return false
@@ -196,7 +200,8 @@ return (function validate(data, recursive) {
   }
   if (data.length > 3) return false
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -226,7 +231,7 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
     if (data[i] !== undefined && hasOwn(data, i)) {
@@ -249,6 +254,7 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 

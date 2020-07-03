@@ -20,12 +20,13 @@ const format0 = (input) => {
     if (!/^[a-z0-9.-]+$/i.test(host) || !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(name)) return false
     return host.split('.').every((part) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(part))
   };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -73,12 +74,13 @@ const format0 = (str) => {
       return false
     }
   };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -101,12 +103,13 @@ return (function validate(data, recursive) {
 const format0 = (input) =>
     input.length <= 15 &&
     /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/.test(input);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -131,12 +134,13 @@ const format0 = (input) =>
     /^\s*(?:(?:(?:[0-9a-f]{1,4}:){7}(?:[0-9a-f]{1,4}|:))|(?:(?:[0-9a-f]{1,4}:){6}(?::[0-9a-f]{1,4}|(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(?:(?:[0-9a-f]{1,4}:){5}(?:(?:(?::[0-9a-f]{1,4}){1,2})|:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(?:(?:[0-9a-f]{1,4}:){4}(?:(?:(?::[0-9a-f]{1,4}){1,3})|(?:(?::[0-9a-f]{1,4})?:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9a-f]{1,4}:){3}(?:(?:(?::[0-9a-f]{1,4}){1,4})|(?:(?::[0-9a-f]{1,4}){0,2}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9a-f]{1,4}:){2}(?:(?:(?::[0-9a-f]{1,4}){1,5})|(?:(?::[0-9a-f]{1,4}){0,3}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?:(?:[0-9a-f]{1,4}:){1}(?:(?:(?::[0-9a-f]{1,4}){1,6})|(?:(?::[0-9a-f]{1,4}){0,4}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(?::(?:(?:(?::[0-9a-f]{1,4}){1,7})|(?:(?::[0-9a-f]{1,4}){0,5}:(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(?:%.+)?\s*$/i.test(
       input
     );
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -179,12 +183,13 @@ const format0 = (input) => {
     if (!/^[a-z0-9.-]+$/i.test(host)) return false
     return host.split('.').every((part) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(part))
   };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -205,12 +210,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const format0 = (input) => input.length === 10 && /^\d{4}-(?:0[1-9]|1[0-2])-[0-3]\d$/.test(input);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -235,12 +241,13 @@ const format0 = (input) =>
     /^\d{4}-(?:0[1-9]|1[0-2])-[0-3]\d[t\s](?:[0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(?:\.\d+)?(?:z|[+-]\d\d(?::?\d\d)?)$/i.test(
       input
     );
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -263,12 +270,13 @@ return (function validate(data, recursive) {
 const format0 = (input) =>
     input.length <= 9 + 12 + 6 &&
     /^(?:[0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(?:\.\d+)?(?:z|[+-]\d\d(?::?\d\d)?)?$/i.test(input);
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -289,12 +297,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const format0 = new RegExp("^(?:|\\/(?:[^~]|~0|~1)*)$", "");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0.test(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -315,12 +324,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const format0 = new RegExp("^(?:0|[1-9][0-9]*)(?:|#|\\/(?:[^~]|~0|~1)*)$", "");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0.test(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -375,12 +385,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const format0 = new RegExp("^[a-z][a-z0-9+-.]*:[^\\s]*$", "i");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0.test(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -401,12 +412,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const format0 = new RegExp("^(?:|(?:|[a-z][a-z0-9+-.]*:)\\/?\\/)(?:|[^\\\\\\s#][^\\s#]*)(?:|#[^\\\\\\s]*)$", "i");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0.test(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -427,12 +439,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const format0 = new RegExp("^(?:[^\\x00-\\x20\"'<>%\\\\^`{|}]|%[0-9a-f]{2}|\\{[+#./;?&=,!@|]?(?:[a-z0-9_]|%[0-9a-f]{2})+(?::[1-9][0-9]{0,3}|\\*)?(?:,(?:[a-z0-9_]|%[0-9a-f]{2})+(?::[1-9][0-9]{0,3}|\\*)?)*\\})*$", "i");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0.test(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -453,12 +466,13 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const format0 = new RegExp("^(?:urn:uuid:)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", "i");
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0.test(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -484,12 +498,13 @@ const format0 = (input) =>
     (/^P\d+([.,]\d+)?W$/.test(input) ||
       (/^P[\dYMDTHS]*(\d[.,]\d+)?[YMDHS]$/.test(input) &&
         /^P([.,\d]+Y)?([.,\d]+M)?([.,\d]+D)?(T([.,\d]+H)?([.,\d]+M)?([.,\d]+S)?)?$/.test(input)));
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices

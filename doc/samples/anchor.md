@@ -16,10 +16,11 @@ const ref0 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!ref0(data, recursive)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -48,10 +49,11 @@ const ref0 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!ref0(data, recursive)) return false
   return true
-})
+};
+return validate
 ```
 
 
@@ -80,9 +82,10 @@ const ref0 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (!ref0(data, recursive)) return false
   return true
-})
+};
+return validate
 ```
 

@@ -20,14 +20,15 @@ const ref0 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.bar !== undefined && hasOwn(data, "bar")) {
       if (!ref0(data.bar, recursive)) return false
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ### Warnings
@@ -57,7 +58,7 @@ const ref0 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
     }
@@ -66,7 +67,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ### Warnings

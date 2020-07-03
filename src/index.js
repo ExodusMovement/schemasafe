@@ -9,27 +9,28 @@ const validator = (schema, { jsonCheck = false, isJSON = false, schemas, ...opts
   if (jsonCheck && isJSON) throw new Error('Can not specify both isJSON and jsonCheck options')
   const options = { ...opts, schemas: buildSchemas(schemas || []), isJSON: isJSON || jsonCheck }
   const scope = Object.create(null)
-  const actualValidate = compile(schema, schema, options, scope)
-  if (!jsonCheck || opts.dryRun) return actualValidate
-
-  // jsonCheck wrapper implementation below
-  scope.deepEqual = functions.deepEqual
-  scope.actualValidate = actualValidate
+  scope.validate = compile(schema, schema, options, scope)
+  if (opts.dryRun) return
   const fun = genfun()
-  fun.write('function validate(data) {')
-  if (opts.includeErrors) {
-    fun.write('if (!deepEqual(data, JSON.parse(JSON.stringify(data)))) {')
-    fun.write('validate.errors = [{instanceLocation:"#",error:"not JSON compatible"}]')
-    fun.write('return false')
-    fun.write('}')
-    fun.write('const res = actualValidate(data)')
-    fun.write('validate.errors = actualValidate.errors')
-    fun.write('return res')
+  if (!jsonCheck || opts.dryRun) {
+    fun.write('validate')
   } else {
-    fun.write('return deepEqual(data, JSON.parse(JSON.stringify(data))) && actualValidate(data)')
+    // jsonCheck wrapper implementation below
+    scope.deepEqual = functions.deepEqual
+    fun.write('function validateIsJSON(data) {')
+    if (opts.includeErrors) {
+      fun.write('if (!deepEqual(data, JSON.parse(JSON.stringify(data)))) {')
+      fun.write('validateIsJSON.errors = [{instanceLocation:"#",error:"not JSON compatible"}]')
+      fun.write('return false')
+      fun.write('}')
+      fun.write('const res = validate(data)')
+      fun.write('validateIsJSON.errors = actualValidate.errors')
+      fun.write('return res')
+    } else {
+      fun.write('return deepEqual(data, JSON.parse(JSON.stringify(data))) && validate(data)')
+    }
+    fun.write('}')
   }
-  fun.write('}')
-
   const validate = fun.makeFunction(scope)
   validate.toModule = () => fun.makeModule(scope)
   validate.toJSON = () => schema

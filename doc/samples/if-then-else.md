@@ -12,10 +12,10 @@
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   return true
-})
+};
+return validate
 ```
 
 ### Warnings
@@ -35,10 +35,10 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   return true
-})
+};
+return validate
 ```
 
 ### Warnings
@@ -58,10 +58,10 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   return true
-})
+};
+return validate
 ```
 
 ### Warnings
@@ -81,8 +81,7 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   const sub0 = (() => {
     if (typeof data === "number") {
       if (!(0 > data)) return false
@@ -96,7 +95,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -116,8 +116,7 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   const sub0 = (() => {
     if (typeof data === "number") {
       if (!(0 > data)) return false
@@ -130,7 +129,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -154,8 +154,7 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   const sub0 = (() => {
     if (typeof data === "number") {
       if (!(0 > data)) return false
@@ -172,7 +171,8 @@ return (function validate(data, recursive) {
     }
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -198,10 +198,10 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   return true
-})
+};
+return validate
 ```
 
 ### Warnings
@@ -221,8 +221,7 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   const sub0 = (() => {
     return true
   })()
@@ -232,7 +231,8 @@ return (function validate(data, recursive) {
     if (!(data === "then")) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
@@ -252,8 +252,7 @@ return (function validate(data, recursive) {
 
 ```js
 'use strict'
-
-return (function validate(data, recursive) {
+const validate = function validate(data, recursive) {
   const sub0 = (() => {
     return false
     return true
@@ -264,7 +263,8 @@ return (function validate(data, recursive) {
     if (!(data === "then")) return false
   }
   return true
-})
+};
+return validate
 ```
 
 ##### Strong mode notices
