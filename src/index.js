@@ -198,10 +198,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   }
 
   const fun = genfun()
-  fun.write('function validate(data) {')
+  fun.write('function validate(data, recursive) {')
   if (includeErrors) fun.write('validate.errors = null')
   if (allErrors) fun.write('let errorCount = 0')
 
+  const recursiveAnchor = schema && schema.$recursiveAnchor === true
   const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (errors, history, current, node, schemaPath) => {
@@ -328,6 +329,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
     }
 
+    if (node === schema && recursiveAnchor) consume('$recursiveAnchor', 'boolean')
+
     if (typeof node.description === 'string') consume('description', 'string') // unused, meta-only
     if (typeof node.title === 'string') consume('title', 'string') // unused, meta-only
     if (typeof node.$comment === 'string') consume('$comment', 'string') // unused, meta-only
@@ -378,16 +381,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const applyRef = (n, errorArgs) => {
+      // Allow recursion to here only if $recursiveAnchor is true, else skip from deep recursion
+      const recursive = recursiveAnchor ? format('recursive || validate') : format('recursive')
       if (includeErrors) {
         // Save and restore errors in case of recursion
         const res = gensym('res')
         const err = gensym('err')
         fun.write('const %s = validate.errors', err)
-        fun.write('const %s = %s(%s)', res, n, name)
+        fun.write('const %s = %s(%s, %s)', res, n, name, recursive)
         fun.write('validate.errors = %s', err)
         errorIf('!%s', [res], { ...errorArgs, source: n })
       } else {
-        errorIf('!%s(%s)', [n, name], errorArgs)
+        errorIf('!%s(%s, %s)', [n, name, recursive], errorArgs)
       }
     }
     if (node.$ref) {
@@ -414,6 +419,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         finish()
         return
       }
+    }
+    if (node.$recursiveRef) {
+      enforce(node.$recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
+      // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
+      const n = recursiveAnchor ? format('(recursive || validate)') : format('validate')
+      applyRef(n, { path: ['$recursiveRef'] })
+      consume('$recursiveRef', 'string')
     }
 
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
