@@ -48,7 +48,6 @@ const unsupported = new Set([
 
   //  draft2019-09 is not supported yet
   'draft2019-09/anchor.json',
-  'draft2019-09/dependentSchemas.json',
   'draft2019-09/unevaluatedProperties.json',
   'draft2019-09/unevaluatedItems.json',
   'draft2019-09/defs.json',
