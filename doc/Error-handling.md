@@ -7,17 +7,6 @@ There are two possible types of errors:
 Schema compilation errors always throw synchronously to ensure that no invalid schemas get compiled
 and/or produce invalid validation code.
 
-## Validation errors
-
-At the moment of writing, correct error reporting is still in progress. \
-Most significant known issue is that error pointers stop at `$ref` usage.
-
-This does not affect the _result_ of the validation, just the information inside of the produced
-error objects.
-
-It's significantly better than in `is-my-json-valid` though.\
-Further improvements should bring this on par with `ajv`.
-
 ### Validation errors are opt-in
 
 Error reporting is disabled by default and is provided as an opt-in, because users who need to

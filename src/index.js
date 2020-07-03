@@ -213,10 +213,21 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const currPropVar = (...args) => propvar(current, ...args)
     const currPropImm = (...args) => propimm(current, ...args)
 
-    const error = ({ path = [], prop = current }) => {
-      if (includeErrors === true && errors) {
+    const error = ({ path = [], prop = current, source }) => {
+      const dataP = buildPath(prop)
+      if (includeErrors === true && errors && source) {
         const schemaP = functions.toPointer([...schemaPath, ...path])
-        const dataP = buildPath(prop)
+        // we can include resolvedPath for resolved schema path later, perhaps
+        scope.errorMerge = functions.errorMerge
+        const args = [source, schemaP, dataP]
+        if (allErrors) {
+          fun.write('if (validate.errors === null) validate.errors = []')
+          fun.write('validate.errors.push(...%s.errors.map(e => errorMerge(e, %j, %s)))', ...args)
+        } else {
+          fun.write('validate.errors = [errorMerge(%s.errors[0], %j, %s)]', ...args)
+        }
+      } else if (includeErrors === true && errors) {
+        const schemaP = functions.toPointer([...schemaPath, ...path])
         const errorJS = reflectErrorsValue
           ? format('{ schemaPath: %j, dataPath: %s, value: %s }', schemaP, dataP, buildName(prop))
           : format('{ schemaPath: %j, dataPath: %s }', schemaP, dataP)
@@ -366,6 +377,19 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       fun.write('if (%s) {', present(current))
     }
 
+    const applyRef = (n, errorArgs) => {
+      if (includeErrors) {
+        // Save and restore errors in case of recursion
+        const res = gensym('res')
+        const err = gensym('err')
+        fun.write('const %s = validate.errors', err)
+        fun.write('const %s = %s(%s)', res, n, name)
+        fun.write('validate.errors = %s', err)
+        errorIf('!%s', [res], { ...errorArgs, source: n })
+      } else {
+        errorIf('!%s(%s)', [n, name], errorArgs)
+      }
+    }
     if (node.$ref) {
       const resolved = resolveReference(root, schemas, node.$ref, basePath())
       const [sub, subRoot, path] = resolved[0] || []
@@ -379,7 +403,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           fn = compile(sub, subRoot, opts, scope, path)
           scope[n] = fn
         }
-        errorIf('!%s(%s)', [n, name], { path: ['$ref'] })
+        applyRef(n, { path: ['$ref'] })
       } else {
         fail('failed to resolve $ref:', node.$ref)
       }

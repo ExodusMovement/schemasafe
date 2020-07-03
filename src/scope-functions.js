@@ -63,4 +63,11 @@ hasOwn[Symbol.for('toJayString')] = 'Function.prototype.call.bind(Object.prototy
 const pointerPart = (s) => (/~\//.test(s) ? `${s}`.replace(/~/g, '~0').replace(/\//g, '~1') : s)
 const toPointer = (path) => (path.length === 0 ? '#' : `#/${path.map(pointerPart).join('/')}`)
 
-module.exports = { stringLength, isMultipleOf, deepEqual, unique, hasOwn, toPointer, pointerPart }
+const errorMerge = ({ schemaPath, dataPath, ...more }, schemaBase, dataBase) => ({
+  schemaPath: `${schemaBase}${schemaPath.slice(1)}`,
+  dataPath: `${dataBase}${dataPath.slice(1)}`,
+  ...more,
+})
+
+const errorUtils = { toPointer, pointerPart, errorMerge }
+module.exports = { stringLength, isMultipleOf, deepEqual, unique, hasOwn, ...errorUtils }
