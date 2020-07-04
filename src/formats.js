@@ -83,16 +83,6 @@ const extra = {
 
   base64: (input) => input.length % 4 === 0 && /^[a-z0-9+/]*={0,3}$/i.test(input),
 
-  // other
-  'utc-millisec': /^[0-9]{1,15}\.?[0-9]{0,15}$/,
-  phone: (input) => {
-    if (input.length > 30) return false
-    if (!/^\+[0-9][0-9 ]{5,27}[0-9]$/.test(input)) return false
-    if (/ {2}/.test(input)) return false
-    const digits = input.substring(1).replace(/ /g, '').length
-    return digits >= 7 && digits <= 15
-  },
-
   // ajv has /^#(?:\/(?:[a-z0-9_\-.!$&'()*+,;:=@]|%[0-9a-f]{2}|~0|~1)*)*$/i, this is equivalent
   // uri fragment: https://tools.ietf.org/html/rfc3986#appendix-A
   'json-pointer-uri-fragment': /^#(?:|\/(?:\/|[a-z0-9_\-.!$&'()*+,;:=@]|%[0-9a-f]{2}|~0|~1)*)$/i,
