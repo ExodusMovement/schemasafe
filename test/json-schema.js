@@ -60,7 +60,6 @@ const unsupported = new Set([
   'draft2019-09/refRemote.json',
   'draft2019-09/id.json',
   'draft2019-09/ref.json/ref creates new scope when adjacent to keywords',
-  'draft2019-09/optional/format/duration.json',
 ])
 
 const schemas = [

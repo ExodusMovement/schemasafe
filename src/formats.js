@@ -65,7 +65,18 @@ const core = {
   // uuid: http://tools.ietf.org/html/rfc4122
   uuid: /^(?:urn:uuid:)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
 
-  // TODO: iri, iri-reference, idn-email, idn-hostname, duration
+  // length restriction is an arbitrary safeguard
+  // first regex verifies structure
+  // second regex verifies no more than one fraction, and that at least 1 block is present
+  duration: (input) =>
+    input.length > 1 &&
+    input.length < 80 &&
+    /^P(?:[.,\d]+Y)?(?:[.,\d]+M)?(?:[.,\d]+W)?(?:[.,\d]+D)?(?:T(?:[.,\d]+H)?(?:[.,\d]+M)?(?:[.,\d]+S)?)?$/.test(
+      input
+    ) &&
+    /^P[\dYMWDTHMS]*(?:\d[.,]\d+)?[YMWDTHMS]$/.test(input),
+
+  // TODO: iri, iri-reference, idn-email, idn-hostname
 }
 
 const extra = {
