@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [10.x, 12.x, 14.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -20,9 +20,6 @@ jobs:
         run: |
           yarn --frozen-lockfile
           yarn lint
-          yarn run ci
+          yarn run test
         env:
           CI: true
-      - uses: codecov/codecov-action@v1
-        with:
-          file: ./coverage/lcov.info
