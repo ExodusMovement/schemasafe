@@ -50,6 +50,8 @@ function objpath2path(objpath) {
   return ids.filter((id) => id && typeof id === 'string').reduce(joinPath, '')
 }
 
+// Returns a list of resolved entries, in a form: [schema, root, basePath]
+// basePath doesn't contain the target object $id itself
 function resolveReference(root, additionalSchemas, ref, base = '') {
   const ptr = joinPath(base, ref)
   const schemas = new Map(additionalSchemas)
@@ -69,18 +71,18 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
     if (id && typeof id === 'string') {
       path = joinPath(path, id)
       if (path === ptr || (path === main && local === '')) {
-        results.push([sub, root, ptr])
+        results.push([sub, root, oldPath])
       } else if (path === main && local[0] === '/') {
         const objpath = []
         const res = get(sub, local, objpath)
-        if (res !== undefined) results.push([res, root, joinPath(path, objpath2path(objpath))])
+        if (res !== undefined) results.push([res, root, joinPath(oldPath, objpath2path(objpath))])
       }
     }
     if (sub.$anchor && typeof sub.$anchor === 'string') {
       if (sub.$anchor.includes('#')) throw new Error("$anchor can't include '#'")
       if (sub.$anchor.startsWith('/')) throw new Error("$anchor can't start with '/'")
       path = joinPath(path, `#${sub.$anchor}`)
-      if (path === ptr) results.push([sub, root, ptr])
+      if (path === ptr) results.push([sub, root, oldPath])
     }
     for (const k of Object.keys(sub)) visit(sub[k], path)
   }
