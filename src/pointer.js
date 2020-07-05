@@ -76,6 +76,12 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
         if (res !== undefined) results.push([res, root, joinPath(path, objpath2path(objpath))])
       }
     }
+    if (sub.$anchor && typeof sub.$anchor === 'string') {
+      if (sub.$anchor.includes('#')) throw new Error("$anchor can't include '#'")
+      if (sub.$anchor.startsWith('/')) throw new Error("$anchor can't start with '/'")
+      path = joinPath(path, `#${sub.$anchor}`)
+      if (path === ptr) results.push([sub, root, ptr])
+    }
     for (const k of Object.keys(sub)) visit(sub[k], path)
   }
   visit(root, '')

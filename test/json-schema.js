@@ -53,7 +53,6 @@ const unsupported = new Set([
   'draft3/optional/ecmascript-regex.json/ECMA 262 regex dialect recognition', // broken assumption in test
 
   //  draft2019-09 is not supported yet
-  'draft2019-09/anchor.json',
   'draft2019-09/unevaluatedProperties.json',
   'draft2019-09/unevaluatedItems.json',
   'draft2019-09/defs.json',
