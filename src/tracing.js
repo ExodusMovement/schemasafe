@@ -87,4 +87,4 @@ const isDynamic = wrapFun(({ unknown, items, dyn, ...stat }) => ({
   properties: !stat.properties.includes(true) && (unknown || !inProperties(stat, dyn)),
 }))
 
-module.exports = { initTracing, andDelta, orDelta, applyDelta, isDynamic }
+module.exports = { initTracing, andDelta, orDelta, applyDelta, isDynamic, inProperties }

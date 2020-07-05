@@ -1,6 +1,6 @@
 # Specification support
 
-Currently supported target JSON Schema versions are `draft04`, `draft06`, `draft07`.
+Currently supported target JSON Schema versions are `draft2019-09`, `draft07`, `draft06`, `draft04`.
 
 If you notice issues with any of those draft versions support, please file an issue here and / or
 a test case to [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)

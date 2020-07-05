@@ -93,5 +93,10 @@ const errorMerge = ({ keywordLocation, instanceLocation, ...more }, schemaBase, 
   ...more,
 })
 
-const errorUtils = { toPointer, pointerPart, errorMerge }
-module.exports = { stringLength, isMultipleOf, deepEqual, unique, deBase64, hasOwn, ...errorUtils }
+const propertyIn = (key, properties, patterns) =>
+  properties.includes(true) ||
+  properties.some((prop) => prop === key) ||
+  patterns.some((pattern) => new RegExp(pattern, 'u').test(key))
+
+const extraUtils = { toPointer, pointerPart, errorMerge, propertyIn }
+module.exports = { stringLength, isMultipleOf, deepEqual, unique, deBase64, hasOwn, ...extraUtils }

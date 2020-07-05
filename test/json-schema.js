@@ -62,14 +62,6 @@ const unsupported = new Set([
   'draft3/ref.json/remote ref, containing refs itself',
   'draft3/optional/ecmascript-regex.json/ECMA 262 regex dialect recognition', // broken assumption in test
 
-  //  draft2019-09 is not supported yet
-  'draft2019-09/unevaluatedItems.json/unevaluatedItems with anyOf',
-  'draft2019-09/unevaluatedItems.json/unevaluatedItems with if/then/else',
-  'draft2019-09/unevaluatedProperties.json/unevaluatedProperties with anyOf',
-  'draft2019-09/unevaluatedProperties.json/unevaluatedProperties with oneOf',
-  'draft2019-09/unevaluatedProperties.json/unevaluatedProperties with if/then/else',
-  'draft2019-09/unevaluatedProperties.json/unevaluatedProperties with dependentSchemas',
-
   // ajv specific non-standard tests
   'rules/format.json/whitelisted unknown format is valid',
   'rules/format.json/validation of URL strings',

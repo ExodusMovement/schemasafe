@@ -2,7 +2,7 @@
 
 A code-generating [JSON Schema](https://json-schema.org/) validator that attempts to be reasonably secure.
 
-Supports [draft-04/06/07](doc/Specification-support.md).
+Supports [draft-04/06/07/2019-09](doc/Specification-support.md).
 
 [![Node CI Status](https://github.com/ExodusMovement/schemasafe/workflows/Node%20CI/badge.svg)](https://github.com/ExodusMovement/schemasafe/actions)
 [![npm](https://img.shields.io/npm/v/@exodus/schemasafe.svg)](https://www.npmjs.com/package/@exodus/schemasafe)
