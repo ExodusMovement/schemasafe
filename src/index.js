@@ -200,12 +200,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const currPropVar = (...args) => propvar(current, ...args)
     const currPropImm = (...args) => propimm(current, ...args)
 
-    const error = ({ path = [], prop = current, ...more }) => {
+    const error = ({ path = [], prop = current }) => {
+      const schemaP = functions.toPointer([...schemaPath, ...path])
+      const dataP = buildPath(prop)
       if (includeErrors === true) {
-        const errorObj = { schemaPath: functions.toPointer([...schemaPath, ...path]), ...more }
         const errorJS = verboseErrors
-          ? format('{ ...%j, dataPath: %s, value: %s }', errorObj, buildPath(prop), buildName(prop))
-          : format('%j', errorObj)
+          ? format('{ schemaPath: %j, dataPath: %s, value: %s }', schemaP, dataP, buildName(prop))
+          : format('{ schemaPath: %j }', schemaP)
         if (allErrors) {
           fun.write('if (validate.errors === null) validate.errors = []')
           fun.write('validate.errors.push(%s)', errorJS)
