@@ -206,7 +206,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (includeErrors === true) {
         const errorJS = verboseErrors
           ? format('{ schemaPath: %j, dataPath: %s, value: %s }', schemaP, dataP, buildName(prop))
-          : format('{ schemaPath: %j }', schemaP)
+          : format('{ schemaPath: %j, dataPath: %s }', schemaP, dataP)
         if (allErrors) {
           fun.write('if (validate.errors === null) validate.errors = []')
           fun.write('validate.errors.push(%s)', errorJS)
