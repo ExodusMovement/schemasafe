@@ -48,7 +48,7 @@ tape('allErrors/false', function(t) {
       },
       required: ['x', 'y'],
     },
-    { includeErrors: true, verboseErrors: true, allErrors: false }
+    { includeErrors: true, allErrors: false }
   )
   t.notOk(validate({}), 'should be invalid')
   t.strictEqual(validate.errors.length, 1)
@@ -76,7 +76,7 @@ tape('allErrors/true', function(t) {
       },
       required: ['x', 'y'],
     },
-    { includeErrors: true, verboseErrors: true, allErrors: true }
+    { includeErrors: true, allErrors: true }
   )
   t.notOk(validate({}), 'should be invalid')
   t.strictEqual(validate.errors.length, 2)
@@ -412,7 +412,7 @@ tape('nested required array decl', function(t) {
     required: ['x'],
   }
 
-  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
+  const validate = validator(schema, { includeErrors: true })
 
   t.ok(validate({ x: {} }), 'should be valid')
   t.notOk(validate({}), 'should not be valid')

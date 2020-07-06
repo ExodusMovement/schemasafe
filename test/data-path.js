@@ -14,7 +14,7 @@ tape('dataPath', (t) => {
       },
     },
   }
-  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
+  const validate = validator(schema, { includeErrors: true })
 
   const checkError = (data, schemaPath, dataPath, message) => {
     t.deepEqual(validate(data), false, `should have failed: ${message}`)
