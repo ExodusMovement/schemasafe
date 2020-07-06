@@ -9,4 +9,4 @@ const runWithOptions = (t, opts) => {
 }
 
 tape('default', (t) => runWithOptions(t, {}))
-tape('allErrors', (t) => runWithOptions(t, { allErrors: true }))
+tape('allErrors', (t) => runWithOptions(t, { includeErrors: true, allErrors: true }))
