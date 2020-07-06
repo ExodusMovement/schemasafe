@@ -84,8 +84,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     mode = 'default',
     useDefaults = false,
     removeAdditional = false, // supports additionalProperties: false and additionalItems: false
-    includeErrors: optIncludeErrors = false,
-    allErrors: optAllErrors = false,
+    includeErrors = false,
+    allErrors = false,
     reflectErrorsValue = false,
     dryRun = false,
     allowUnusedKeywords = opts.mode === 'lax',
@@ -184,12 +184,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
   const fun = genfun()
   fun.write('function validate(data) {')
-  if (optIncludeErrors) fun.write('validate.errors = null')
+  if (includeErrors) fun.write('validate.errors = null')
   fun.write('let errors = 0')
 
   const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
-  const visit = (allErrors, includeErrors, history, current, node, schemaPath) => {
+  const visit = (errors, history, current, node, schemaPath) => {
     // e.g. top-level data and property names, OR already checked by present() in history, OR in keys and not undefined
     const definitelyPresent =
       !current.parent || history.includes(current) || current.checked || (current.inKeys && isJSON)
@@ -201,16 +201,16 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const error = ({ path = [], prop = current }) => {
       const schemaP = functions.toPointer([...schemaPath, ...path])
       const dataP = buildPath(prop)
-      if (includeErrors === true) {
+      if (includeErrors === true && errors) {
         const errorJS = reflectErrorsValue
           ? format('{ schemaPath: %j, dataPath: %s, value: %s }', schemaP, dataP, buildName(prop))
           : format('{ schemaPath: %j, dataPath: %s }', schemaP, dataP)
         if (allErrors) {
-          fun.write('if (validate.errors === null) validate.errors = []')
-          fun.write('validate.errors.push(%s)', errorJS)
+          fun.write('if (%s === null) %s = []', errors, errors)
+          fun.write('%s.push(%s)', errors, errorJS)
         } else {
           // Array assignment is significantly faster, do not refactor the two branches
-          fun.write('validate.errors = [%s]', errorJS)
+          fun.write('%s = [%s]', errors, errorJS)
         }
       }
       if (allErrors) {
@@ -221,7 +221,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
     const errorIf = (fmt, args, errorArgs) => {
       const condition = format(fmt, ...args)
-      if (includeErrors === false) {
+      if (includeErrors === false || !errors) {
         // in this case, we can fast-track and inline this to generate more readable code
         if (allErrors) {
           fun.write('if (%s) errors++', condition)
@@ -425,15 +425,25 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       maybeWrap(prev !== null && shouldWrap, 'if (errors === %s) {', [prev], '}', writeBody)
 
     // Can not be used before undefined check above! The one performed by present()
-    const rule = (...args) => visit(allErrors, includeErrors, [...history, current], ...args)
-    const subrule = (...args) => {
+    const rule = (...args) => visit(errors, [...history, current], ...args)
+    const subrule = (suberr, ...args) => {
       const result = gensym('sub')
       fun.write('const %s = (() => {', result)
-      fun.write('let errors = 0') // scoped error flag, should be unused due to !includeErrors
-      visit(false, false, [...history, current], ...args)
+      fun.write('let errors = 0') // scoped error flag
+      visit(suberr, [...history, current], ...args)
       fun.write('return errors === 0')
       fun.write('})()')
       return result
+    }
+
+    const suberror = () => {
+      const suberr = includeErrors && allErrors ? gensym('suberr') : null
+      if (suberr) fun.write('let %s = null', suberr)
+      return suberr
+    }
+    const mergeerror = (suberr) => {
+      if (!suberr) return
+      fun.write('if (%s) { %s.push(...%s) } else %s = %s', errors, errors, suberr, errors, suberr)
     }
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
@@ -589,17 +599,21 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
 
+        const suberr = suberror()
         const i = genloop()
         fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
           const prop = currPropVar(i, unmodifiedPrototypes) // own property in Array if proto not mangled
-          fun.write('if (%s) %s++', subrule(prop, node.contains, subPath('contains')), passes)
+          const sub = subrule(suberr, prop, node.contains, subPath('contains'))
+          fun.write('if (%s) %s++', sub, passes)
         })
 
         if (Number.isFinite(node.minContains)) {
           errorIf('%s < %d', [passes, node.minContains], { path: ['minContains'] })
           consume('minContains', 'natural')
+          fun.block('if (%s < %d) {', [passes, node.minContains], '}', () => mergeerror(suberr))
         } else {
           errorIf('%s < 1', [passes], { path: ['contains'] })
+          fun.block('if (%s < 1) {', [passes], '}', () => mergeerror(suberr))
         }
 
         if (Number.isFinite(node.maxContains)) {
@@ -775,14 +789,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const checkGeneric = () => {
       if (node.not || node.not === false) {
-        const sub = subrule(current, node.not, subPath('not'))
+        const sub = subrule(null, current, node.not, subPath('not'))
         errorIf('%s', [sub], { path: ['not'] })
         consume('not', 'object', 'boolean')
       }
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
       if ((node.if || node.if === false) && thenOrElse) {
-        const sub = subrule(current, node.if, subPath('if'))
+        const sub = subrule(null, current, node.if, subPath('if'))
         fun.write('if (!%s) {', sub)
         if (node.else || node.else === false) {
           rule(current, node.else, subPath('else'))
@@ -805,8 +819,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.anyOf !== undefined) {
         enforce(Array.isArray(node.anyOf), 'Invalid anyOf')
-        for (const sch of node.anyOf) fun.write('if (!%s) {', subrule(current, sch, schemaPath))
+        const suberr = suberror()
+        for (const [key, sch] of Object.entries(node.anyOf))
+          fun.write('if (!%s) {', subrule(suberr, current, sch, subPath('anyOf', key)))
         error({ path: ['anyOf'] })
+        mergeerror(suberr)
         node.anyOf.forEach(() => fun.write('}'))
         consume('anyOf', 'array')
       }
@@ -815,9 +832,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Array.isArray(node.oneOf), 'Invalid oneOf')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
-        for (const sch of node.oneOf)
-          fun.write('if (%s) %s++', subrule(current, sch, schemaPath), passes)
+        const suberr = suberror()
+        for (const [key, sch] of Object.entries(node.oneOf))
+          fun.write('if (%s) %s++', subrule(suberr, current, sch, subPath('oneOf', key)), passes)
         errorIf('%s !== 1', [passes], { path: ['oneOf'] })
+        fun.block('if (%s === 0) {', [passes], '}', () => mergeerror(suberr)) // if none matched, dump all errors
         consume('oneOf', 'array')
       }
     }
@@ -858,7 +877,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     finish()
   }
 
-  visit(optAllErrors, optIncludeErrors, [], { name: safe('data') }, schema, [])
+  visit(format('validate.errors'), [], { name: safe('data') }, schema, [])
 
   fun.write('return errors === 0')
   fun.write('}')
