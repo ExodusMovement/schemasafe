@@ -104,10 +104,7 @@ tape('additional props', function(t) {
       type: 'object',
       additionalProperties: false,
     },
-    {
-      includeErrors: true,
-      verboseErrors: true,
-    }
+    { includeErrors: true, reflectErrorsValue: true }
   )
 
   t.ok(validate({}))
@@ -431,7 +428,7 @@ tape('verbose mode', function(t) {
     },
   }
 
-  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
+  const validate = validator(schema, { includeErrors: true, reflectErrorsValue: true })
 
   t.ok(validate({ hello: 'string' }), 'should be valid')
   t.notOk(validate({ hello: 100 }), 'should not be valid')
@@ -460,7 +457,7 @@ tape('additional props in verbose mode', function(t) {
     },
   }
 
-  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
+  const validate = validator(schema, { includeErrors: true, reflectErrorsValue: true })
 
   validate({ 'hello world': { bar: 'string' } })
 
@@ -496,7 +493,7 @@ tape('field shows item index in arrays', function(t) {
     },
   }
 
-  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
+  const validate = validator(schema, { includeErrors: true, reflectErrorsValue: true })
 
   validate([[{ foo: 'test' }, { foo: 'test' }], [{ foo: 'test' }, { baz: 'test' }]])
 
