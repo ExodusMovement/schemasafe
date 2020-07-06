@@ -69,11 +69,7 @@ const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty)
 hasOwn[Symbol.for('toJayString')] = 'Function.prototype.call.bind(Object.prototype.hasOwnProperty)'
 
 // Used for error generation. Affects error performance, optimized
-function toPointer(path) {
-  if (path.length === 0) return '#'
-  const esc = (part) =>
-    /~\//.test(part) ? `${part}`.replace(/~/g, '~0').replace(/\//g, '~1') : part
-  return `#/${path.map(esc).join('/')}`
-}
+const pointerPart = (s) => (/~\//.test(s) ? `${s}`.replace(/~/g, '~0').replace(/\//g, '~1') : s)
+const toPointer = (path) => (path.length === 0 ? '#' : `#/${path.map(pointerPart).join('/')}`)
 
-module.exports = { stringLength, isMultipleOf, deepEqual, unique, hasOwn, toPointer }
+module.exports = { stringLength, isMultipleOf, deepEqual, unique, hasOwn, toPointer, pointerPart }

@@ -51,7 +51,8 @@ const knownVocabularies = vocab2019.map((v) => `https://json-schema.org/draft/20
 const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
 
 // Helper methods for semi-structured paths
-const propvar = (parent, keyname, inKeys = false) => Object.freeze({ parent, keyname, inKeys }) // property by variable
+const propvar = (parent, keyname, inKeys = false, number = false) =>
+  Object.freeze({ parent, keyname, inKeys, number }) // property by variable
 const propimm = (parent, keyval, checked = false) => Object.freeze({ parent, keyval, checked }) // property by immediate value
 const buildName = ({ name, parent, keyval, keyname }) => {
   if (name) {
@@ -156,12 +157,24 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (path.every((part) => part.keyval !== undefined))
       return format('%j', functions.toPointer(path.map((part) => part.keyval)))
 
-    // slow case with variables
-    const first = path[0].keyname ? format('%s', path[0].keyname) : format('%j', path[0].keyval)
-    const next = (code, { keyname, keyval }) =>
-      keyname ? format('%s, %s', code, keyname) : format('%s, %j', code, keyval)
-    scope.toPointer = functions.toPointer
-    return format('toPointer([%s])', path.slice(1).reduce(next, first))
+    // Be very careful while refactoring, this code significantly affects includeErrors performance
+    // It attempts to construct fast code presentation for paths, e.g. "#/abc/"+pointerPart(key0)+"/items/"+i0
+    const stringParts = ['#']
+    const stringJoined = () => {
+      const value = stringParts.map(functions.pointerPart).join('/')
+      stringParts.length = 0
+      return value
+    }
+    let res = null
+    for (const { keyname, keyval, number } of path) {
+      if (keyname) {
+        if (!number) scope.pointerPart = functions.pointerPart
+        const value = number ? keyname : format('pointerPart(%s)', keyname)
+        const str = `${stringJoined()}/`
+        res = res ? format('%s+%j+%s', res, str, value) : format('%j+%s', str, value)
+      } else if (keyval) stringParts.push(keyval)
+    }
+    return stringParts.length > 0 ? format('%s+%j', res, `/${stringJoined()}`) : res
   }
 
   const present = (location) => {
@@ -201,9 +214,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const currPropImm = (...args) => propimm(current, ...args)
 
     const error = ({ path = [], prop = current }) => {
-      const schemaP = functions.toPointer([...schemaPath, ...path])
-      const dataP = buildPath(prop)
       if (includeErrors === true && errors) {
+        const schemaP = functions.toPointer([...schemaPath, ...path])
+        const dataP = buildPath(prop)
         const errorJS = reflectErrorsValue
           ? format('{ schemaPath: %j, dataPath: %s, value: %s }', schemaP, dataP, buildName(prop))
           : format('{ schemaPath: %j, dataPath: %s }', schemaP, dataP)
@@ -562,7 +575,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         } else {
           const i = genloop()
           fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
-            const prop = currPropVar(i, unmodifiedPrototypes) // own property in Array if proto not mangled
+            const prop = currPropVar(i, unmodifiedPrototypes, true) // own property in Array if proto not mangled
             rule(prop, node.items, subPath('items'))
           })
         }
@@ -587,7 +600,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const i = genloop()
         const offset = node.items.length
         fun.block('for (let %s = %d; %s < %s.length; %s++) {', [i, offset, i, name, i], '}', () => {
-          const prop = currPropVar(i, unmodifiedPrototypes) // own property in Array if proto not mangled
+          const prop = currPropVar(i, unmodifiedPrototypes, true) // own property in Array if proto not mangled
           rule(prop, node.additionalItems, subPath('additionalItems'))
         })
         consume('additionalItems', 'object', 'boolean')
@@ -604,7 +617,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const suberr = suberror()
         const i = genloop()
         fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
-          const prop = currPropVar(i, unmodifiedPrototypes) // own property in Array if proto not mangled
+          const prop = currPropVar(i, unmodifiedPrototypes, true) // own property in Array if proto not mangled
           const sub = subrule(suberr, prop, node.contains, subPath('contains'))
           fun.write('if (%s) %s++', sub, passes)
         })
