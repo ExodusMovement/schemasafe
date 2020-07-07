@@ -477,14 +477,16 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.maxLength !== undefined) {
         enforce(Number.isFinite(node.maxLength), 'Invalid maxLength:', node.maxLength)
         scope.stringLength = functions.stringLength
-        errorIf('stringLength(%s) > %d', [name, node.maxLength], { path: ['maxLength'] })
+        const args = [name, node.maxLength, name, node.maxLength]
+        errorIf('%s.length > %d && stringLength(%s) > %d', args, { path: ['maxLength'] })
         consume('maxLength', 'natural')
       }
 
       if (node.minLength !== undefined) {
         enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
         scope.stringLength = functions.stringLength
-        errorIf('stringLength(%s) < %d', [name, node.minLength], { path: ['minLength'] })
+        const args = [name, node.minLength, name, node.minLength]
+        errorIf('%s.length < %d || stringLength(%s) < %d', args, { path: ['minLength'] })
         consume('minLength', 'natural')
       }
 

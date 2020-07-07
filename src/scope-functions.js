@@ -2,7 +2,8 @@
 
 // for correct Unicode code points processing
 // https://mathiasbynens.be/notes/javascript-unicode#accounting-for-astral-symbols
-const stringLength = (string) => [...string].length
+const stringLength = (string) =>
+  /[\uD800-\uDFFF]/.test(string) ? [...string].length : string.length
 
 const isMultipleOf = (value, multipleOf) => {
   if (typeof multipleOf !== 'number' || !Number.isFinite(value))
