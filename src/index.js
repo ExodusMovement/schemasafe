@@ -766,7 +766,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         return true
       } else if (node.enum) {
         enforce(Array.isArray(node.enum), 'Invalid enum')
-        const condition = safeor(...node.enum.map((value) => compare(name, value)))
+        const objects = node.enum.filter((value) => value && typeof value === 'object')
+        const primitive = node.enum.filter((value) => !(value && typeof value === 'object'))
+        const condition = safeor(...[...primitive, ...objects].map((value) => compare(name, value)))
         errorIf('!(%s)', [condition], { path: ['enum'] })
         consume('enum', 'array')
         return true
