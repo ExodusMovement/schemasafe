@@ -196,7 +196,7 @@ tape('schemaPath - nested selectors', function(t) {
       },
     ],
   }
-  const validate = validator(schema, { includeErrors: true, verboseErrors: true })
+  const validate = validator(schema, { includeErrors: true })
   t.notOk(validate({ nestedSelectors: 'nope' }), 'should not crash on visit inside *Of')
 
   t.end()

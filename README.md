@@ -74,16 +74,14 @@ console.log(validate('hello')) // true
 console.log(validate(42)) // false
 ```
 
-## Verbose mode shows more information about the source of the error
+## Enabling errors shows information about the source of the error
 
-When the `includeErrors` and `verboseErrors` options are set to `true`, `@exodus/schemasafe` also
-outputs:
+When the `includeErrors` option is set to `true`, `@exodus/schemasafe` also outputs:
 
 - `schemaPath`: a JSON pointer string as an URI fragment indicating which sub-schema failed, e.g.
   `#/properties/item/type`
 - `dataPath`: a JSON pointer string as an URI fragment indicating which property of the object
   failed validation, e.g. `#/item`
-- `value`: The data value that caused the error
 
 ```js
 const schema = {
@@ -95,17 +93,15 @@ const schema = {
     }
   }
 }
-const validate = validator(schema, {
-  includeErrors: true,
-  verboseErrors: true
-})
+const validate = validator(schema, { includeErrors: true })
 
 validate({ hello: 100 });
 console.log(validate.errors)
 // [ { schemaPath: '#/properties/hello/type',
-//     dataPath: '#/hello',
-//     value: 100 } ]
+//     dataPath: '#/hello' } ]
 ```
+
+See [Error handling](./doc/Error-handling.md) for more information.
 
 ## Generate Modules
 

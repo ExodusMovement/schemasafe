@@ -86,7 +86,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     removeAdditional = false, // supports additionalProperties: false and additionalItems: false
     includeErrors: optIncludeErrors = false,
     allErrors: optAllErrors = false,
-    verboseErrors = false,
+    reflectErrorsValue = false,
     dryRun = false,
     allowUnusedKeywords = opts.mode === 'lax',
     requireValidation = opts.mode === 'strong',
@@ -204,9 +204,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const schemaP = functions.toPointer([...schemaPath, ...path])
       const dataP = buildPath(prop)
       if (includeErrors === true) {
-        const errorJS = verboseErrors
+        const errorJS = reflectErrorsValue
           ? format('{ schemaPath: %j, dataPath: %s, value: %s }', schemaP, dataP, buildName(prop))
-          : format('{ schemaPath: %j }', schemaP)
+          : format('{ schemaPath: %j, dataPath: %s }', schemaP, dataP)
         if (allErrors) {
           fun.write('if (validate.errors === null) validate.errors = []')
           fun.write('validate.errors.push(%s)', errorJS)

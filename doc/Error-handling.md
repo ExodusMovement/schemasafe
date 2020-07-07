@@ -41,6 +41,29 @@ The options relevant to error reporting are:
     will be skipped if the parent data object (containing the property) failed other restrictions.\
     That does not affect the result of validation, just the list of reported errors in those cases.
 
-  * `verboseErrors` — include more information in each error object. Requires `includeErrors`.
+  * `reflectErrorsValue` — include `value` property in errors with the data that failed validation.
+    Requires `includeErrors`.
+
+    Warning: `reflectErrorsValue` reflects the original _unvalidated_ value as the `value` property
+    of each error, which is a _reference_ to the part of the orignal unvalidated object which failed
+    validation.
+
+    If the input was untrusted, then `value` property also should be treated as untrusted, e.g.
+    when manipulating it and/or reflecting it back to the user.
 
 All of those are opt-ins (i.e. `false` by default).
+
+### Properties
+
+  - `schemaPath`: a JSON pointer string as an URI fragment indicating which sub-schema failed, e.g.
+  `#/properties/item/type`
+
+  - `dataPath`: a JSON pointer string as an URI fragment indicating which property of the object
+  failed validation, e.g. `#/item`
+
+  - `value`: the _unvalidated_ data value that caused the error. Enabled only when
+  `reflectErrorsValue` is set to true. Use with care.
+
+  - `message`: can be present for certain generic validation errors, e.g. failed `jsonCheck`.
+  Absent for most errors, as the exact keyword which failed validation can be deduced from
+  `schemaPath`, and an additional error message would have just duplicated that information.
