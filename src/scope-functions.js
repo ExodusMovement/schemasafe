@@ -5,24 +5,14 @@
 const stringLength = (string) =>
   /[\uD800-\uDFFF]/.test(string) ? [...string].length : string.length
 
-const isMultipleOf = (value, multipleOf) => {
-  if (typeof multipleOf !== 'number' || !Number.isFinite(value))
-    throw new Error('multipleOf is not a number')
-  if (typeof value !== 'number' || !Number.isFinite(value)) return false
-  if (value === 0) return true
-  if (multipleOf === 0) return false
-  const digitsAfterDot = (number) => {
-    if ((number | 0) === number) return 0
-    return String(number)
-      .split('.')
-      .pop().length
-  }
-  const digits = digitsAfterDot(multipleOf)
-  if (digits === 0) return value % multipleOf === 0
-  const valueDigits = digitsAfterDot(value)
-  if (valueDigits > digits) return false
-  const factor = Math.pow(10, digits)
-  return Math.round(factor * value) % Math.round(factor * multipleOf) === 0
+// A isMultipleOf B: shortest decimal denoted as A % shortest decimal denoted as B === 0
+// Optimized, sanity checks and precomputation are outside of this method
+const isMultipleOf = (value, divisor, factor, factorMultiple) => {
+  if (value % divisor === 0) return true
+  const multiple = value * factor
+  if (multiple % factorMultiple === 0) return true
+  const normal = Math.floor(multiple + 0.5)
+  return normal / factor === value && normal % factorMultiple === 0
 }
 
 // supports only JSON-stringifyable objects, defaults to false for unsupported

@@ -466,9 +466,17 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       const multipleOf = node.multipleOf === undefined ? 'divisibleBy' : 'multipleOf' // draft3 support
       if (node[multipleOf] !== undefined) {
-        enforce(Number.isFinite(node[multipleOf]), `Invalid ${multipleOf}:`, node[multipleOf])
-        scope.isMultipleOf = functions.isMultipleOf
-        errorIf('!isMultipleOf(%s, %d)', [name, node[multipleOf]], { path: ['isMultipleOf'] })
+        const value = node[multipleOf]
+        enforce(Number.isFinite(value) && value > 0, `Invalid ${multipleOf}:`, value)
+        if (Number.isInteger(value)) {
+          errorIf('%s %% %d !== 0', [name, value], { path: ['isMultipleOf'] })
+        } else {
+          scope.isMultipleOf = functions.isMultipleOf
+          const [last, exp] = `${value}`.replace(/.*\./, '').split('e-')
+          const e = last.length + (exp ? Number(exp) : 0)
+          const args = [name, value, e, Math.round(value * Math.pow(10, e))] // precompute for performance
+          errorIf('!isMultipleOf(%s, %d, 1e%d, %d)', args, { path: ['isMultipleOf'] })
+        }
         consume(multipleOf, 'finite')
       }
     }
