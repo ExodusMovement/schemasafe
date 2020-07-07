@@ -93,13 +93,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     requireStringValidation = opts.mode === 'strong',
     complexityChecks = opts.mode === 'strong',
     unmodifiedPrototypes = false, // assumes no mangled Object/Array prototypes
-    isJSON: optIsJSON = false, // assume input to be JSON, which e.g. makes undefined impossible
-    jsonCheck = false, // disabled by default, it's assumed that data is from JSON.parse
+    isJSON = false, // assume input to be JSON, which e.g. makes undefined impossible
     $schemaDefault = null,
     formats: optFormats = {},
     weakFormats = opts.mode !== 'strong',
     extraFormats = false,
-    schemas: optSchemas = {},
+    schemas, // always a Map, produced at wrapper
     ...unknown
   } = opts
   const fmts = {
@@ -116,10 +115,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     throw new Error('Strong mode demands require(String)Validation and complexityChecks')
   if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
     throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
-  if (optIsJSON && jsonCheck)
-    throw new Error('Can not specify both isJSON and jsonCheck options, please choose one')
-  const isJSON = optIsJSON || jsonCheck
-  const schemas = buildSchemas(optSchemas)
 
   if (!scope[scopeCache])
     scope[scopeCache] = { sym: new Map(), ref: new Map(), format: new Map(), pattern: new Map() }
@@ -194,7 +189,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (optIncludeErrors) fun.write('validate.errors = null')
   fun.write('let errors = 0')
 
-  let jsonCheckPerformed = false
   const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (allErrors, includeErrors, history, current, node, schemaPath) => {
@@ -206,12 +200,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const currPropVar = (...args) => propvar(current, ...args)
     const currPropImm = (...args) => propimm(current, ...args)
 
-    const error = ({ path = [], prop = current, ...more }) => {
+    const error = ({ path = [], prop = current }) => {
+      const schemaP = functions.toPointer([...schemaPath, ...path])
+      const dataP = buildPath(prop)
       if (includeErrors === true) {
-        const errorObj = { schemaPath: functions.toPointer([...schemaPath, ...path]), ...more }
         const errorJS = verboseErrors
-          ? format('{ ...%j, dataPath: %s, value: %s }', errorObj, buildPath(prop), buildName(prop))
-          : format('%j', errorObj)
+          ? format('{ schemaPath: %j, dataPath: %s, value: %s }', schemaP, dataP, buildName(prop))
+          : format('{ schemaPath: %j }', schemaP)
         if (allErrors) {
           fun.write('if (validate.errors === null) validate.errors = []')
           fun.write('validate.errors.push(%s)', errorJS)
@@ -249,17 +244,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const enforce = (ok, ...args) => ok || fail(...args)
     const enforceValidation = (msg) => enforce(!requireValidation, `[requireValidation] ${msg}`)
     const subPath = (...args) => [...schemaPath, ...args]
-
-    // JSON check is once only for the top-level object, before everything else
-    if (jsonCheck && !jsonCheckPerformed) {
-      /* c8 ignore next */
-      if (`${name}` !== 'data') throw new Error('Unreachable: invalid json check')
-      scope.deepEqual = functions.deepEqual
-      errorIf('!deepEqual(%s, JSON.parse(JSON.stringify(%s)))', [name, name], {
-        message: 'not JSON compatible',
-      })
-      jsonCheckPerformed = true
-    }
 
     if (typeof node === 'boolean') {
       if (node === true) {
@@ -381,8 +365,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           cache.ref.set(sub, n)
           let fn = null // resolve cyclic dependencies
           scope[n] = (...args) => fn(...args)
-          const override = { includeErrors: false, jsonCheck: false, isJSON }
-          fn = compile(sub, subRoot, { ...opts, ...override }, scope, path)
+          fn = compile(sub, subRoot, opts, scope, path)
           scope[n] = fn
         }
         errorIf('!%s(%s)', [n, name], { path: ['$ref'] })
@@ -890,7 +873,36 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   return validate
 }
 
-const validator = (schema, opts = {}) => compile(schema, schema, opts, Object.create(null))
+const validator = (schema, { jsonCheck = false, isJSON = false, schemas, ...opts } = {}) => {
+  if (jsonCheck && isJSON) throw new Error('Can not specify both isJSON and jsonCheck options')
+  const options = { ...opts, schemas: buildSchemas(schemas || []), isJSON: isJSON || jsonCheck }
+  const scope = Object.create(null)
+  const actualValidate = compile(schema, schema, options, scope)
+  if (!jsonCheck || opts.dryRun) return actualValidate
+
+  // jsonCheck wrapper implementation below
+  scope.deepEqual = functions.deepEqual
+  scope.actualValidate = actualValidate
+  const fun = genfun()
+  fun.write('function validate(data) {')
+  if (opts.includeErrors) {
+    fun.write('if (!deepEqual(data, JSON.parse(JSON.stringify(data)))) {')
+    fun.write('validate.errors = [{schemaPath:"#",dataPath:"#",message:"not JSON compatible"}]')
+    fun.write('return false')
+    fun.write('}')
+    fun.write('const res = actualValidate(data)')
+    fun.write('validate.errors = actualValidate.errors')
+    fun.write('return res')
+  } else {
+    fun.write('return deepEqual(data, JSON.parse(JSON.stringify(data))) && actualValidate(data)')
+  }
+  fun.write('}')
+
+  const validate = fun.makeFunction(scope)
+  validate.toModule = () => fun.makeModule(scope)
+  validate.toJSON = () => schema
+  return validate
+}
 
 const parser = function(schema, opts = {}) {
   // strong mode is default in parser
