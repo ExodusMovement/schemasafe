@@ -14,7 +14,7 @@ function jaystring(item) {
     if (item[toJayString]) return item[toJayString] // this is supported only for functions
 
     if (Object.getPrototypeOf(item) !== Function.prototype)
-      throw new Error('Can not stringify a function with unexpected prototype')
+      throw new Error('Can not stringify: a function with unexpected prototype')
 
     const stringified = `${item}`
     if (item.prototype) {
@@ -25,13 +25,13 @@ function jaystring(item) {
       return stringified // Arrow function
 
     // Shortened ES6 object method declaration
-    throw new Error('Can stringify only either normal or arrow functions')
+    throw new Error('Can not stringify: only either normal or arrow functions are supported')
   } else if (typeof item === 'object') {
     const proto = Object.getPrototypeOf(item)
     if (item instanceof RegExp && proto === RegExp.prototype) return format('%r', item)
-    throw new Error('Can not stringify an object with unexpected prototype')
+    throw new Error('Can not stringify: an object with unexpected prototype')
   }
-  throw new Error(`Cannot stringify ${item} - unknown type ${typeof item}`)
+  throw new Error(`Can not stringify: unknown type ${typeof item}`)
 }
 
 module.exports = jaystring
