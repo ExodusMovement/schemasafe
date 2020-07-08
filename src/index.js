@@ -115,6 +115,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     throw new Error('Strong mode demands require(String)Validation and complexityChecks')
   if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
     throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
+  if (!includeErrors && (allErrors || reflectErrorsValue))
+    throw new Error('allErrors and reflectErrorsValue are not available if includeErrors = false')
 
   if (!scope[scopeCache])
     scope[scopeCache] = { sym: new Map(), ref: new Map(), format: new Map(), pattern: new Map() }
@@ -185,7 +187,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   const fun = genfun()
   fun.write('function validate(data) {')
   if (includeErrors) fun.write('validate.errors = null')
-  fun.write('let errors = 0')
+  if (allErrors) fun.write('let errorCount = 0')
 
   const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
@@ -214,24 +216,20 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         }
       }
       if (allErrors) {
-        fun.write('errors++')
+        fun.write('errorCount++')
       } else {
         fun.write('return false')
       }
     }
     const errorIf = (fmt, args, errorArgs) => {
       const condition = format(fmt, ...args)
-      if (includeErrors === false || !errors) {
-        // in this case, we can fast-track and inline this to generate more readable code
-        if (allErrors) {
-          fun.write('if (%s) errors++', condition)
-        } else {
-          fun.write('if (%s) return false', condition)
-        }
-      } else {
+      if (includeErrors === true && errors) {
         fun.write('if (%s) {', condition)
         error(errorArgs)
         fun.write('}')
+      } else {
+        // in this case, we can fast-track and inline this to generate more readable code
+        fun.write('if (%s) return false', condition)
       }
     }
 
@@ -424,16 +422,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         ? gensym('prev')
         : null
     const prevWrap = (shouldWrap, writeBody) =>
-      maybeWrap(prev !== null && shouldWrap, 'if (errors === %s) {', [prev], '}', writeBody)
+      maybeWrap(prev !== null && shouldWrap, 'if (errorCount === %s) {', [prev], '}', writeBody)
 
     // Can not be used before undefined check above! The one performed by present()
     const rule = (...args) => visit(errors, [...history, current], ...args)
     const subrule = (suberr, ...args) => {
       const result = gensym('sub')
       fun.write('const %s = (() => {', result)
-      fun.write('let errors = 0') // scoped error flag
+      if (allErrors) fun.write('let errorCount = 0') // scoped error counter
       visit(suberr, [...history, current], ...args)
-      fun.write('return errors === 0')
+      if (allErrors) {
+        fun.write('return errorCount === 0')
+      } else fun.write('return true')
       fun.write('})()')
       return result
     }
@@ -863,7 +863,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     // If type validation was needed and did not return early, wrap this inside an else clause.
     maybeWrap(needTypeValidation && allErrors, 'else {', [], '}', () => {
-      if (prev !== null) fun.write('let %s = errors', prev)
+      if (prev !== null) fun.write('let %s = errorCount', prev)
       if (checkConst()) {
         // const/enum shouldn't have any other validation rules except for already checked type/$ref
         enforce(unused.size === 0, 'Unexpected keywords mixed with const or enum:', [...unused])
@@ -881,7 +881,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
   visit(format('validate.errors'), [], { name: safe('data') }, schema, [])
 
-  fun.write('return errors === 0')
+  if (allErrors) {
+    fun.write('return errorCount === 0')
+  } else fun.write('return true')
   fun.write('}')
 
   if (dryRun) return
