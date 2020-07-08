@@ -934,11 +934,11 @@ const parser = function(schema, opts = {}) {
     if (typeof src !== 'string') throw new Error('Invalid type!')
     const data = JSON.parse(src)
     if (validate(data)) return data
-    const message = validate.errors
-      ? validate.errors.map((err) => `${err.schemaPath} ${err.message}`).join('\n')
-      : ''
-    const error = new Error(`JSON validation error${message ? `: ${message}` : ''}`)
-    error.errors = validate.errors
+    const reason = validate.errors ? validate.errors[0] : null
+    const keyword = reason && reason.schemaPath ? reason.schemaPath.replace(/.*\//, '') : '??'
+    const explanation = reason ? ` for ${keyword} at ${reason.dataPath}` : ''
+    const error = new Error(`JSON validation failed${explanation}`)
+    if (validate.errors) error.errors = validate.errors
     throw error
   }
   parse.toModule = () =>

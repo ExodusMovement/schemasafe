@@ -32,11 +32,34 @@ tape('parser works correctly', (t) => {
 
   t.throws(() => {
     parser({ type: 'integer' })('{}')
-  }, /validation error/)
+  }, /validation failed$/)
 
   t.doesNotThrow(() => {
     parsed = parser({ type: 'integer' })('10')
   })
+
+  const schema = {
+    type: 'object',
+    required: ['foo'],
+    properties: { foo: { const: 42 } },
+    additionalProperties: false,
+  }
+  const check = (data, message) => {
+    t.throws(
+      () => parser(schema)(data),
+      /validation failed$/,
+      'Error location is not included if not enabled'
+    )
+    t.throws(
+      () => parser(schema, { includeErrors: true })(data),
+      message,
+      `Error includes first failed location for ${data}`
+    )
+  }
+  check('42', /validation failed for type at #$/)
+  check('{}', /validation failed for required at #\/foo$/)
+  check('{"foo":"bar"}', /validation failed for const at #\/foo$/)
+  check('{"foo":42,"abc":24}', /validation failed for additionalProperties at #\/abc$/)
 
   t.strictEqual(parsed, 10, 'result returned correctly')
 
