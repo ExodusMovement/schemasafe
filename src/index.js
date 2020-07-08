@@ -326,6 +326,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       basePathStack.push(joinPath(basePath(), node.id))
       consume('id', 'string')
     }
+    // $anchor is used only for ref resolution, on usage
+    if (typeof node.$anchor === 'string') consume('$anchor', 'string')
 
     const booleanRequired = getMeta().booleanRequired && typeof node.required === 'boolean'
     if (node.default !== undefined && !useDefaults) consume('default', 'jsonval') // unused in this case
