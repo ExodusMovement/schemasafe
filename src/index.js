@@ -184,8 +184,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
   const fun = genfun()
   fun.write('function validate(data) {')
-  // Since undefined is not a valid JSON value, we coerce to null and other checks will catch this
-  fun.write('if (data === undefined) data = null')
   if (optIncludeErrors) fun.write('validate.errors = null')
   fun.write('let errors = 0')
 
