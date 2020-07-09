@@ -26,8 +26,6 @@ const unsafe = new Set([
   // draft2019-09 only
   'draft2019-09/optional/refOfUnknownKeyword.json/reference of a root arbitrary keyword ',
   'draft2019-09/optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
-  // we don't support $vocabulary but that is not _required_ per spec, hence let it be unprocessed
-  'draft2019-09/ref.json/remote ref, containing refs itself', // $vocabulary
 ])
 
 const unsupported = new Set([
@@ -55,8 +53,6 @@ const unsupported = new Set([
   //  draft2019-09 is not supported yet
   'draft2019-09/unevaluatedProperties.json',
   'draft2019-09/unevaluatedItems.json',
-  'draft2019-09/defs.json',
-  'draft2019-09/id.json',
   'draft2019-09/ref.json/ref creates new scope when adjacent to keywords',
 ])
 
