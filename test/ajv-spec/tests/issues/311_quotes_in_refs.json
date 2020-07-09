@@ -1,0 +1,39 @@
+[
+  {
+    "description": "quotes in refs (#311)",
+    "schema": {
+      "properties": {
+        "foo\"bar": { "$ref": "#/definitions/foo\"bar" }
+      },
+      "definitions": {
+        "foo\"bar": { "type": "number" }
+      }
+    },
+    "tests": [
+      {
+        "description": "object with all numbers is valid",
+        "data": {
+          "foo\"bar": 1,
+          "foo\\bar": 1,
+          "foo\nbar": 1,
+          "foo\rbar": 1,
+          "foo\tbar": 1,
+          "foo\fbar": 1
+        },
+        "valid": true
+      },
+      {
+        "description": "object with strings is invalid",
+        "data": {
+          "foo\"bar": "1",
+          "foo\\bar": "1",
+          "foo\nbar": "1",
+          "foo\rbar": "1",
+          "foo\tbar": "1",
+          "foo\fbar": "1"
+        },
+        "valid": false
+      }
+    ]
+  }
+]

@@ -1,0 +1,140 @@
+[
+  {
+    "description": "root ref in ref (#2)",
+    "schema": {
+      "definitions": {
+        "arr": {
+           "type": "array",
+           "items": { "$ref": "#" }
+        }
+      },
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "children": { "$ref": "#/definitions/arr" }
+      }
+    },
+    "tests": [
+      {
+        "description": "valid",
+        "data": {
+          "name": "foo",
+          "children": [
+            { "name": "bar" },
+            { "name": "baz" }
+          ]
+        },
+        "valid": true
+      },
+      {
+        "description": "child numbers are invalid",
+        "data": {
+          "name": "foo",
+          "children": [
+            { "name": 1 },
+            { "name": 2 }
+          ]
+        },
+        "valid": false
+      },
+      {
+        "description": "child arrays are invalid",
+        "data": {
+          "name": "foo",
+          "children": [
+            [ ],
+            [ ]
+          ]
+        },
+        "valid": false
+      }
+    ]
+  },
+  {
+    "description": "root ref in ref with anyOf (#2)",
+    "schema": {
+      "definitions": {
+        "orNull": {
+          "anyOf": [
+            { "type": "null" },
+            { "$ref": "#" }
+          ]
+        }
+      },
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "parent": { "$ref": "#/definitions/orNull" }
+      }
+    },
+    "tests": [
+      {
+        "description": "null parent is valid",
+        "data": {
+          "name": "foo",
+          "parent": null
+        },
+        "valid": true
+      },
+      {
+        "skip": false,
+        "description": "object parent is valid",
+        "data": {
+          "name": "foo",
+          "parent": {
+            "name": "bar",
+            "parent": null
+          }
+        },
+        "valid": true
+      },
+      {
+        "description": "object parent is valid",
+        "data": {
+          "name": "foo",
+          "parent": {
+            "name": "bar",
+            "parent": {
+              "name": "baz",
+              "parent": null
+            }
+          }
+        },
+        "valid": true
+      },
+      {
+        "description": "string parent is invalid",
+        "data": {
+          "name": "foo",
+          "parent": "buu"
+        },
+        "valid": false
+      },
+      {
+        "description": "string subparent is invalid",
+        "data": {
+          "name": "foo",
+          "parent": {
+            "name": "bar",
+            "parent": "baz"
+          }
+        },
+        "valid": false
+      },
+      {
+        "description": "string sub-subparent is invalid",
+        "data": {
+          "name": "foo",
+          "parent": {
+            "name": "bar",
+            "parent": {
+              "name": "baz",
+              "parent": "quux"
+            }
+          }
+        },
+        "valid": false
+      }
+    ]
+  }
+]
