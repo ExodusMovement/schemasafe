@@ -14,13 +14,6 @@ Most likely, any patches to improve `draft03` support would be rejected.
 
 ---
 
-`draft2019-09` support is not ready, as the specification became increasingly more complex there,
-aiming for more advanced JSON Schema features and extensibility.
-
-Authors of this module think that it is more important to provide a reasonably safe and non-broken
-version of validator and to fix the widespread security / correctness / usability issues of
-JSON Schema validators first.
-
-Patches for improving `draft2019-09` support are welcome, but as long as they don't overcomplicate
-the existing code to the point of making it less readable/clear, and do not introduce security
-issues.
+`draft2019-09` support is not ready, but in the works. Most tests pass, unsupported functionality
+will throw errors on compliation, so attempts to use `draft2019-09` should be safe as long as the
+schema compiles successfully.
