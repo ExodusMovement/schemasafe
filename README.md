@@ -138,7 +138,11 @@ console.log(validate.toModule())
 
 ## Performance
 
-`@exodus/schemasafe` uses code generation to turn a JSON schema into javascript code that is easily optimizeable by v8.
+`@exodus/schemasafe` uses code generation to turn a JSON schema into javascript code that is easily
+optimizeable by v8.
+
+See [Performance](./doc/Performance.md) for information on options that might affect performace
+both ways.
 
 ## Previous work
 
