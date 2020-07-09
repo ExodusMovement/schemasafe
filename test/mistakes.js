@@ -31,5 +31,54 @@ tape('Invalid format throws', (t) => {
 
   passes({ format: 'email' })
 
+  t.throws(
+    () => validator({ format: 'whatever' }, { formats: { whatever: 'foo' } }),
+    /Unrecognized format used/
+  )
+  t.ok(() => validator({ format: 'whatever' }, { formats: { whatever: /^x$/ } }))
+  t.ok(() => validator({ format: 'whatever' }, { formats: { whatever: () => false } }))
+
+  t.end()
+})
+
+tape('Invalid options throw', (t) => {
+  const throws = (options, message) => t.throws(() => validator({}, options), message)
+  const passes = (options) => t.doesNotThrow(() => validator({}, options))
+
+  passes({ mode: 'default' })
+  passes({ mode: 'lax' })
+  passes({})
+  throws({ mode: 'whatever' }, /Invalid mode/)
+  throws({ mode: 42 }, /Invalid mode/)
+  throws({ mode: 'stong' }, /Invalid mode/)
+  throws({ mode: 'strong', requireValidation: false }, /Strong mode/)
+
+  t.end()
+})
+
+tape('Invalid dependencies', (t) => {
+  const throws = (schema, message = /Unexpected dependen(cies|tRequired|tSchemas) entry/) =>
+    t.throws(() => validator(schema), message)
+  const passes = (schema) => t.doesNotThrow(() => validator(schema))
+
+  passes({})
+
+  passes({ dependencies: { x: false } })
+  passes({ dependencies: { x: {} } })
+  passes({ dependencies: { x: [] } })
+  passes({ dependencies: { x: ['y'] } })
+
+  passes({ dependentSchemas: { x: false } })
+  passes({ dependentSchemas: { x: {} } })
+  throws({ dependentSchemas: { x: [] } })
+  throws({ dependentSchemas: { x: ['y'] } })
+
+  throws({ dependentRequired: { x: false } })
+  throws({ dependentRequired: { x: {} } })
+  passes({ dependentRequired: { x: [] } })
+  passes({ dependentRequired: { x: ['y'] } })
+
+  throws({ dependentRequires: { x: false } }, /Keyword not supported/)
+
   t.end()
 })

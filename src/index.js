@@ -769,7 +769,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
               const condition = safeand(...deps.map(exists))
               errorIf('%s && !(%s)', [present(item), condition], { path: [dependencies, key] })
             } else if (
-              (typeof deps === 'object' || typeof deps === 'boolean') &&
+              ((typeof deps === 'object' && !Array.isArray(deps)) || typeof deps === 'boolean') &&
               dependencies !== 'dependentRequired'
             ) {
               fun.block('if (%s) {', [present(item)], '}', () => {
