@@ -527,6 +527,21 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
       consume(rulePath, 'object', 'boolean')
     }
+    const additionalProperties = (condition, ruleValue, rulePath) => {
+      const key = gensym('key')
+      forObjectKeys(key, name, (sub) => {
+        fun.block('if (%s) {', [condition(key)], '}', () => {
+          if (ruleValue === false) {
+            if (removeAdditional) {
+              fun.write('delete %s[%s]', name, key)
+            } else {
+              error({ path: [rulePath], prop: currPropVar(key) })
+            }
+          } else rule(sub, ruleValue, subPath(rulePath))
+        })
+      })
+      consume(rulePath, 'object', 'boolean')
+    }
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
 
@@ -809,27 +824,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           })
           consume('patternProperties', 'object')
         }
-
         if (node.additionalProperties || node.additionalProperties === false) {
-          const key = gensym('key')
-          const toCompare = (p) => format('%s !== %j', key, p)
-          const toTest = (p) => format('!%s', patternTest(p, key))
-          const additionalProp = safeand(
-            ...Object.keys(node.properties || {}).map(toCompare),
-            ...Object.keys(node.patternProperties || {}).map(toTest)
-          )
-          forObjectKeys(key, name, (sub) => {
-            fun.block('if (%s) {', [additionalProp], '}', () => {
-              if (node.additionalProperties === false) {
-                if (removeAdditional) {
-                  fun.write('delete %s[%s]', name, key)
-                } else {
-                  error({ path: ['additionalProperties'], prop: currPropVar(key) })
-                }
-              } else rule(sub, node.additionalProperties, subPath('additionalProperties'))
-            })
-          })
-          consume('additionalProperties', 'object', 'boolean')
+          const properties = Object.keys(node.properties || {})
+          const patternProperties = Object.keys(node.patternProperties || {})
+          const condition = (key) =>
+            safeand(
+              ...properties.map((p) => format('%s !== %j', key, p)),
+              ...patternProperties.map((p) => format('!%s', patternTest(p, key)))
+            )
+          additionalProperties(condition, node.additionalProperties, 'additionalProperties')
         } else if (typeApplicable('object') && !hasSubValidation) {
           enforceValidation('additionalProperties rule must be specified')
         }
