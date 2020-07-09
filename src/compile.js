@@ -531,13 +531,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const key = gensym('key')
       forObjectKeys(key, name, (sub) => {
         fun.block('if (%s) {', [condition(key)], '}', () => {
-          if (ruleValue === false) {
-            if (removeAdditional) {
-              fun.write('delete %s[%s]', name, key)
-            } else {
-              error({ path: [rulePath], prop: currPropVar(key) })
-            }
-          } else rule(sub, ruleValue, subPath(rulePath))
+          if (ruleValue === false && removeAdditional) fun.write('delete %s[%s]', name, key)
+          else rule(sub, ruleValue, subPath(rulePath))
         })
       })
       consume(rulePath, 'object', 'boolean')
