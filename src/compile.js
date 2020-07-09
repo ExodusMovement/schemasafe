@@ -510,6 +510,24 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       fun.write('if (%s) { %s.push(...%s) } else %s = %s', errors, errors, suberr, errors, suberr)
     }
 
+    // Extracted single additional(Items/Properties) rules, for reuse with unevaluated(Items/Properties)
+    const additionalItems = (limit, ruleValue, rulePath) => {
+      if (ruleValue === false) {
+        if (removeAdditional) {
+          fun.write('if (%s.length > %s) %s.length = %s', name, limit, name, limit)
+        } else {
+          errorIf('%s.length > %s', [name, limit], { path: [rulePath] })
+        }
+      } else if (ruleValue) {
+        const i = genloop()
+        fun.block('for (let %s = %s; %s < %s.length; %s++) {', [i, limit, i, name, i], '}', () => {
+          const prop = currPropVar(i, unmodifiedPrototypes, true) // own property in Array if proto not mangled
+          rule(prop, ruleValue, subPath(rulePath))
+        })
+      }
+      consume(rulePath, 'object', 'boolean')
+    }
+
     /* Checks inside blocks are independent, they are happening on the same code depth */
 
     const checkNumbers = () => {
@@ -643,22 +661,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         // additionalItems is allowed, but ignored per some spec tests in this case!
         // We do nothing and let it throw except for in allowUnusedKeywords mode
         // As a result, this is not allowed by default, only in allowUnusedKeywords mode
-      } else if (node.additionalItems === false) {
-        const limit = node.items.length
-        if (removeAdditional) {
-          fun.write('if (%s.length > %d) %s.length = %d', name, limit, name, limit)
-        } else {
-          errorIf('%s.length > %d', [name, limit], { path: ['additionalItems'] })
-        }
-        consume('additionalItems', 'boolean')
-      } else if (node.additionalItems) {
-        const i = genloop()
-        const offset = node.items.length
-        fun.block('for (let %s = %d; %s < %s.length; %s++) {', [i, offset, i, name, i], '}', () => {
-          const prop = currPropVar(i, unmodifiedPrototypes, true) // own property in Array if proto not mangled
-          rule(prop, node.additionalItems, subPath('additionalItems'))
-        })
-        consume('additionalItems', 'object', 'boolean')
+      } else if (node.additionalItems || node.additionalItems === false) {
+        additionalItems(format('%d', node.items.length), node.additionalItems, 'additionalItems')
       } else if (node.items.length === node.maxItems) {
         // No additional items are possible
       } else {
