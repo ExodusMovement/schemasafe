@@ -18,6 +18,7 @@ const unsafe = new Set([
   'if-then-else.json/ignore then without if',
   'if-then-else.json/ignore else without if',
   'if-then-else.json/non-interference across combined schemas',
+  'unevaluatedProperties.json/unevaluatedProperties with nested unevaluatedProperties',
 
   // draft3 only
   'draft3/additionalItems.json/additionalItems should not look in applicators',
@@ -60,9 +61,12 @@ const unsupported = new Set([
   'draft3/optional/ecmascript-regex.json/ECMA 262 regex dialect recognition', // broken assumption in test
 
   //  draft2019-09 is not supported yet
-  'draft2019-09/unevaluatedProperties.json',
-  'draft2019-09/unevaluatedItems.json',
-  'draft2019-09/ref.json/ref creates new scope when adjacent to keywords',
+  'draft2019-09/unevaluatedItems.json/unevaluatedItems with anyOf',
+  'draft2019-09/unevaluatedItems.json/unevaluatedItems with if/then/else',
+  'draft2019-09/unevaluatedProperties.json/unevaluatedProperties with anyOf',
+  'draft2019-09/unevaluatedProperties.json/unevaluatedProperties with oneOf',
+  'draft2019-09/unevaluatedProperties.json/unevaluatedProperties with if/then/else',
+  'draft2019-09/unevaluatedProperties.json/unevaluatedProperties with dependentSchemas',
 
   // ajv specific non-standard tests
   'rules/format.json/whitelisted unknown format is valid',
