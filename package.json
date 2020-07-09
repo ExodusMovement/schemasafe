@@ -13,6 +13,7 @@
   },
   "homepage": "https://github.com/ExodusMovement/schemasafe",
   "files": [
+    "src/compile.js",
     "src/formats.js",
     "src/generate-function.js",
     "src/index.js",
