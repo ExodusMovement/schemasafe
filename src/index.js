@@ -448,9 +448,17 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(target.maxLength !== undefined, 'maxLength should be specified for:', source)
     }
 
+    const patternTest = (pattern, key) => format('%s.test(%s)', patterns(pattern), key)
+
     const maybeWrap = (shouldWrap, fmt, args, close, writeBody) => {
       if (!shouldWrap) return writeBody()
       fun.block(fmt, args, close, writeBody)
+    }
+
+    const forObjectKeys = (key, obj, writeBody) => {
+      fun.block('for (const %s of Object.keys(%s)) {', [key, obj], '}', () => {
+        writeBody(currPropVar(key, true)) // always own property here
+      })
     }
 
     // Those checks will need to be skipped if another error is set in this block before those ones
@@ -573,8 +581,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (node.pattern) {
           enforceRegex(node.pattern)
           if (!noopRegExps.has(node.pattern)) {
-            const p = patterns(node.pattern)
-            errorIf('!%s.test(%s)', [p, name], { path: ['pattern'] })
+            errorIf('!%s', [patternTest(node.pattern, name)], { path: ['pattern'] })
           }
           consume('pattern', 'string')
         }
@@ -718,10 +725,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (typeof node.propertyNames === 'object' || typeof node.propertyNames === 'boolean') {
         const key = gensym('key')
-        fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
+        forObjectKeys(key, name, (sub) => {
           const names = node.propertyNames
           const nameSchema = typeof names === 'object' ? { type: 'string', ...names } : names
-          const sub = currPropVar(key, true) // always own property, from Object.keys
           rule({ name: key, errorParent: sub }, nameSchema, subPath('propertyNames'))
         })
         consume('propertyNames', 'object', 'boolean')
@@ -777,11 +783,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       prevWrap(node.patternProperties, () => {
         if (node.patternProperties) {
           const key = gensym('key')
-          fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
+          forObjectKeys(key, name, (sub) => {
             for (const p of Object.keys(node.patternProperties)) {
               enforceRegex(p, node.propertyNames || {})
-              fun.block('if (%s.test(%s)) {', [patterns(p), key], '}', () => {
-                const sub = currPropVar(key, true) // always own property, from Object.keys
+              fun.block('if (%s) {', [patternTest(p, key)], '}', () => {
                 rule(sub, node.patternProperties[p], subPath('patternProperties', p))
               })
             }
@@ -792,12 +797,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (node.additionalProperties || node.additionalProperties === false) {
           const key = gensym('key')
           const toCompare = (p) => format('%s !== %j', key, p)
-          const toTest = (p) => format('!%s.test(%s)', patterns(p), key)
+          const toTest = (p) => format('!%s', patternTest(p, key))
           const additionalProp = safeand(
             ...Object.keys(node.properties || {}).map(toCompare),
             ...Object.keys(node.patternProperties || {}).map(toTest)
           )
-          fun.block('for (const %s of Object.keys(%s)) {', [key, name], '}', () => {
+          forObjectKeys(key, name, (sub) => {
             fun.block('if (%s) {', [additionalProp], '}', () => {
               if (node.additionalProperties === false) {
                 if (removeAdditional) {
@@ -805,10 +810,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
                 } else {
                   error({ path: ['additionalProperties'], prop: currPropVar(key) })
                 }
-              } else {
-                const sub = currPropVar(key, true) // always own property, from Object.keys
-                rule(sub, node.additionalProperties, subPath('additionalProperties'))
-              }
+              } else rule(sub, node.additionalProperties, subPath('additionalProperties'))
             })
           })
           consume('additionalProperties', 'object', 'boolean')
