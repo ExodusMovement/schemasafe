@@ -395,12 +395,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const typeApplicable = (...possibleTypes) =>
       typeArray === null || typeArray.some((x) => possibleTypes.includes(x))
 
-    const makeCompare = (variableName, complex) => {
-      if (complex) {
+    const compare = (variableName, value) => {
+      if (value && typeof value === 'object') {
         scope.deepEqual = functions.deepEqual
-        return (e) => format('deepEqual(%s, %j)', variableName, e)
+        return format('deepEqual(%s, %j)', variableName, value)
       }
-      return (e) => format('(%s === %j)', variableName, e)
+      return format('(%s === %j)', variableName, value)
     }
 
     const enforceRegex = (source, target = node) => {
@@ -476,9 +476,17 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       const multipleOf = node.multipleOf === undefined ? 'divisibleBy' : 'multipleOf' // draft3 support
       if (node[multipleOf] !== undefined) {
-        enforce(Number.isFinite(node[multipleOf]), `Invalid ${multipleOf}:`, node[multipleOf])
-        scope.isMultipleOf = functions.isMultipleOf
-        errorIf('!isMultipleOf(%s, %d)', [name, node[multipleOf]], { path: ['isMultipleOf'] })
+        const value = node[multipleOf]
+        enforce(Number.isFinite(value) && value > 0, `Invalid ${multipleOf}:`, value)
+        if (Number.isInteger(value)) {
+          errorIf('%s %% %d !== 0', [name, value], { path: ['isMultipleOf'] })
+        } else {
+          scope.isMultipleOf = functions.isMultipleOf
+          const [last, exp] = `${value}`.replace(/.*\./, '').split('e-')
+          const e = last.length + (exp ? Number(exp) : 0)
+          const args = [name, value, e, Math.round(value * Math.pow(10, e))] // precompute for performance
+          errorIf('!isMultipleOf(%s, %d, 1e%d, %d)', args, { path: ['isMultipleOf'] })
+        }
         consume(multipleOf, 'finite')
       }
     }
@@ -487,14 +495,16 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.maxLength !== undefined) {
         enforce(Number.isFinite(node.maxLength), 'Invalid maxLength:', node.maxLength)
         scope.stringLength = functions.stringLength
-        errorIf('stringLength(%s) > %d', [name, node.maxLength], { path: ['maxLength'] })
+        const args = [name, node.maxLength, name, node.maxLength]
+        errorIf('%s.length > %d && stringLength(%s) > %d', args, { path: ['maxLength'] })
         consume('maxLength', 'natural')
       }
 
       if (node.minLength !== undefined) {
         enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
         scope.stringLength = functions.stringLength
-        errorIf('stringLength(%s) < %d', [name, node.minLength], { path: ['minLength'] })
+        const args = [name, node.minLength, name, node.minLength]
+        errorIf('%s.length < %d || stringLength(%s) < %d', args, { path: ['minLength'] })
         consume('minLength', 'natural')
       }
 
@@ -773,16 +783,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const checkConst = () => {
       if (node.const !== undefined) {
-        const complex = typeof node.const === 'object'
-        const compare = makeCompare(name, complex)
-        errorIf('!%s', [compare(node.const)], { path: ['const'] })
+        errorIf('!%s', [compare(name, node.const)], { path: ['const'] })
         consume('const', 'jsonval')
         return true
       } else if (node.enum) {
         enforce(Array.isArray(node.enum), 'Invalid enum')
-        const complex = node.enum.some((e) => typeof e === 'object')
-        const compare = makeCompare(name, complex)
-        errorIf('!(%s)', [safeor(...node.enum.map(compare))], { path: ['enum'] })
+        const objects = node.enum.filter((value) => value && typeof value === 'object')
+        const primitive = node.enum.filter((value) => !(value && typeof value === 'object'))
+        const condition = safeor(...[...primitive, ...objects].map((value) => compare(name, value)))
+        errorIf('!(%s)', [condition], { path: ['enum'] })
         consume('enum', 'array')
         return true
       }
