@@ -136,7 +136,7 @@ const buildSchemas = (input) => {
       }
     }
   }
-  throw new Error("Unexpected value of 'schemas' option")
+  throw new Error("Unexpected value for 'schemas' option")
 }
 
 module.exports = { get, joinPath, resolveReference, buildSchemas }

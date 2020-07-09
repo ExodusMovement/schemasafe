@@ -53,6 +53,9 @@ tape('Invalid options throw', (t) => {
   throws({ mode: 'stong' }, /Invalid mode/)
   throws({ mode: 'strong', requireValidation: false }, /Strong mode/)
 
+  passes({ schemas: [] })
+  throws({ schemas: 'not-a-valid-schemas' }, /Unexpected value for 'schemas' option/)
+
   t.end()
 })
 
