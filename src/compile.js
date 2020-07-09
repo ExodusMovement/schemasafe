@@ -623,9 +623,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
         if (node.pattern) {
           enforceRegex(node.pattern)
-          if (!noopRegExps.has(node.pattern)) {
+          if (!noopRegExps.has(node.pattern))
             errorIf('!%s', [patternTest(node.pattern, name)], { path: ['pattern'] })
-          }
           consume('pattern', 'string')
         }
       })
@@ -735,19 +734,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const checkObjects = () => {
+      const propertiesCount = format('Object.keys(%s).length', name)
       if (node.maxProperties !== undefined) {
         enforce(Number.isFinite(node.maxProperties), 'Invalid maxProperties:', node.maxProperties)
-        errorIf('Object.keys(%s).length > %d', [name, node.maxProperties], {
-          path: ['maxProperties'],
-        })
+        errorIf('%s > %d', [propertiesCount, node.maxProperties], { path: ['maxProperties'] })
         consume('maxProperties', 'natural')
       }
-
       if (node.minProperties !== undefined) {
         enforce(Number.isFinite(node.minProperties), 'Invalid minProperties:', node.minProperties)
-        errorIf('Object.keys(%s).length < %d', [name, node.minProperties], {
-          path: ['minProperties'],
-        })
+        errorIf('%s < %d', [propertiesCount, node.minProperties], { path: ['minProperties'] })
         consume('minProperties', 'natural')
       }
 
@@ -760,9 +755,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         })
         consume('propertyNames', 'object', 'boolean')
       }
-      if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object') {
+      if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object')
         enforceValidation('wild-card additionalProperties requires propertyNames')
-      }
 
       if (Array.isArray(node.required)) {
         for (const req of node.required) {
