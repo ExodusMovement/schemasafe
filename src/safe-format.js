@@ -9,7 +9,14 @@ const escapeCode = (code) => `\\u${code.toString(16).padStart(4, '0')}`
 // Converts a variable to be safe for inclusion in JS context
 // This works on top of JSON.stringify with minor fixes to negate the JS/JSON parsing differences
 const jsval = (val) => {
-  if ([Infinity, -Infinity, NaN, undefined].includes(val)) return `${val}`
+  if ([Infinity, -Infinity, NaN, undefined, null].includes(val)) return `${val}`
+  const primitive = ['string', 'boolean', 'number'].includes(typeof val)
+  if (!primitive) {
+    if (typeof val !== 'object') throw new Error('Unexpected value type')
+    const proto = Object.getPrototypeOf(val)
+    const ok = (proto === Array.prototype && Array.isArray(val)) || proto === Object.prototype
+    if (!ok) throw new Error('Unexpected object given as value')
+  }
   return (
     JSON.stringify(val)
       // JSON context and JS eval context have different handling of __proto__ property name
