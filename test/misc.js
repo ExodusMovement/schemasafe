@@ -522,12 +522,17 @@ tape('jsonCheck option', function(t) {
     }
   }
 
-  t.ok(validator(schema)(new Foo()), 'non-JSON is OK without jsonCheck')
+  for (const includeErrors of [false, true]) {
+    t.ok(validator(schema, { includeErrors })(new Foo()), 'non-JSON is OK without jsonCheck')
 
-  const validate = validator(schema, { jsonCheck: true, includeErrors: true })
-  t.notOk(validate(new Foo()), 'non-JSON fails with jsonCheck')
-  const [error] = validate.errors
-  t.is(error.message, 'not JSON compatible', 'correct error message')
+    const validate = validator(schema, { jsonCheck: true, includeErrors })
+    t.notOk(validate(new Foo()), 'non-JSON fails with jsonCheck')
+
+    if (includeErrors) {
+      const [error] = validate.errors
+      t.is(error.message, 'not JSON compatible', 'correct error message')
+    }
+  }
 
   t.end()
 })
