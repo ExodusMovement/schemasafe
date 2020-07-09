@@ -416,9 +416,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           scope[n] = fn
         }
         applyRef(n, { path: ['$ref'] })
-      } else {
-        fail('failed to resolve $ref:', node.$ref)
-      }
+      } else fail('failed to resolve $ref:', node.$ref)
       consume('$ref', 'string')
 
       if (getMeta().exclusiveRefs) {
@@ -589,9 +587,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             } else {
               errorIf('!%s(%s)', [n, name], { path: ['format'] })
             }
-          } else {
-            fail('Unrecognized format used:', node.format)
-          }
+          } else fail('Unrecognized format used:', node.format)
           consume('format', 'string')
         } else {
           enforce(!node.format, 'Unrecognized format used:', node.format)
@@ -607,9 +603,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       })
 
       const stringValidated = node.format || node.pattern || hasSubValidation
-      if (typeApplicable('string') && requireStringValidation && !stringValidated) {
+      if (typeApplicable('string') && requireStringValidation && !stringValidated)
         fail('pattern or format must be specified for strings, use pattern: ^[\\s\\S]*$ to opt-out')
-      }
     }
 
     const checkArrays = () => {
@@ -782,9 +777,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
               fun.block('if (%s) {', [present(item)], '}', () => {
                 rule(current, deps, subPath(dependencies, key))
               })
-            } else {
-              fail(`Unexpected ${dependencies} entry`)
-            }
+            } else fail(`Unexpected ${dependencies} entry`)
           }
           consume(dependencies, 'object')
         }
