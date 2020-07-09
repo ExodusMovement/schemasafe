@@ -20,3 +20,16 @@ tape('$ref throws on invalid refs', (t) => {
 
   t.end()
 })
+
+tape('Invalid format throws', (t) => {
+  const throws = (schema, message = /Unrecognized format used/) =>
+    t.throws(() => validator(schema), message)
+  const passes = (schema) => t.doesNotThrow(() => validator(schema))
+
+  throws({ format: 'whatever' })
+  throws({ format: ['email'] }, /Type not expected/)
+
+  passes({ format: 'email' })
+
+  t.end()
+})
