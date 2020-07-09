@@ -3,7 +3,7 @@
 const tape = require('tape')
 const fs = require('fs')
 const path = require('path')
-const { validator } = require('../')
+const { validator, parser } = require('../')
 
 // these tests require lax mode
 const unsafe = new Set([
@@ -134,9 +134,11 @@ function processTest(main, id, file, shouldIngore, requiresLax) {
         for (const includeErrors of [false, true]) {
           const opts = { schemas, mode, $schemaDefault, extraFormats, includeErrors }
           const validate = validator(block.schema, opts)
+          const parse = parser(block.schema, opts)
           for (const test of block.tests) {
             if (shouldIngore(`${id}/${block.description}/${test.description}`)) continue
             t.same(validate(test.data), test.valid, test.description)
+            t.same(parse(JSON.stringify(test.data)).valid, test.valid, test.description)
           }
         }
       } catch (e) {

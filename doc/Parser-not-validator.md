@@ -22,15 +22,32 @@ been parsed from JSON. It will return either `true` or `false` and errors would 
 property of `validate` function: `validate.errors` (if `includeErrors` option is enabled).
 
 `parser(schema, options)` creates a similar `parse(string)` function, which accepts a raw string
-containing JSON-encoded input, with a few differences:
+containing JSON-encoded input, and returns a parse result as an object
+`{ valid, message, errors, value }`.
 
- 1. If validation succeeds, it returns the parsed object itself, like `JSON.parse(string)` does.
+ 1. `valid` is a boolean flag indicating if parsing and validation succeeded (`true`) or not
+    (`false`).
 
- 2. If validation fails, it will throw instead of returning `false`.
- 
- 3. Validation errors (if enabled) are available as `errors` property of the thrown `err` object: `err.errors`.
- 
- 4. Parser operates in [strong mode](./Strong-mode.md) by default. To override it, use
-    `mode: 'default'` option.
+ 2. `message` is the first error message in a human-readable form. Included if `includeErrors`
+    option is enabled.
+
+ 3. `errors` is a list of the original validation errors, included only if `includeErrors` option is
+    enabled.
+    Will be undefined if validation succeeded (even if `JSON.parse` failed).
+    
+    Has the same form as errors produced by the `validator(schema, options)` API.
+    
+    Will be limited to at most one error unless `allErrors` option is enabled (in addition to
+    `includeErrors`).
+
+ 4. `value` is the result of parsing and validation. If either parsing or validation failed,
+    `value` is undefined.
+    
+    It is affected by the post-processing via `removeAdditional` and `useDefaults` options, if
+    enabled (both disabled by default).
+
+
+ Parser operates in [strong mode](./Strong-mode.md) by default. To override it, use
+ `mode: 'default'` option.
 
 Parsers can be likewise exported to js code by using `parser.toModule()`.

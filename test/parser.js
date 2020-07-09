@@ -26,17 +26,23 @@ tape('default is strong mode', (t) => {
 })
 
 tape('parser works correctly', (t) => {
-  let parsed
-
   t.strictEqual(typeof parser({ type: 'string', format: 'date' }), 'function', 'returns a function')
 
-  t.throws(() => {
-    parser({ type: 'integer' })('{}')
-  }, /validation failed$/)
-
-  t.doesNotThrow(() => {
-    parsed = parser({ type: 'integer' })('10')
-  })
+  {
+    const result = parser({ type: 'integer' })('x')
+    t.strictEqual(result.valid, false, 'Parse failed')
+    t.strictEqual(result.value, undefined, 'No value is returned')
+  }
+  {
+    const result = parser({ type: 'integer' })('{}')
+    t.strictEqual(result.valid, false, 'Validation failed')
+    t.strictEqual(result.value, undefined, 'No value is returned')
+  }
+  {
+    const result = parser({ type: 'integer' })('10')
+    t.strictEqual(result.valid, true, 'Validation succeded')
+    t.strictEqual(result.value, 10, 'Corect value is returned')
+  }
 
   const schema = {
     type: 'object',
@@ -45,23 +51,23 @@ tape('parser works correctly', (t) => {
     additionalProperties: false,
   }
   const check = (data, message) => {
-    t.throws(
-      () => parser(schema)(data),
-      /validation failed$/,
-      'Error location is not included if not enabled'
-    )
-    t.throws(
-      () => parser(schema, { includeErrors: true })(data),
-      message,
-      `Error includes first failed location for ${data}`
-    )
-  }
-  check('42', /validation failed for type at #$/)
-  check('{}', /validation failed for required at #\/foo$/)
-  check('{"foo":"bar"}', /validation failed for const at #\/foo$/)
-  check('{"foo":42,"abc":24}', /validation failed for additionalProperties at #\/abc$/)
+    const resultA = parser(schema)(data)
+    t.strictEqual(resultA.valid, false, 'Validation failed')
+    t.strictEqual(resultA.value, undefined, 'No value is returned')
+    t.strictEqual(resultA.message, undefined, 'No message is returned')
+    t.strictEqual(resultA.errors, undefined, 'No errors are returned')
 
-  t.strictEqual(parsed, 10, 'result returned correctly')
+    const resultB = parser(schema, { includeErrors: true })(data)
+    t.strictEqual(resultB.valid, false, 'Validation failed')
+    t.strictEqual(resultB.value, undefined, 'No value is returned')
+    t.strictEqual(resultB.message, message, 'An expected message is returned')
+    t.ok(Array.isArray(resultB.errors), 'Errors are returned as an array')
+    t.strictEqual(resultB.errors.length, 1, 'Exactly one error is returned')
+  }
+  check('42', 'JSON validation failed for type at #')
+  check('{}', 'JSON validation failed for required at #/foo')
+  check('{"foo":"bar"}', 'JSON validation failed for const at #/foo')
+  check('{"foo":42,"abc":24}', 'JSON validation failed for additionalProperties at #/abc')
 
   t.end()
 })

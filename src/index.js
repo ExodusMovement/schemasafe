@@ -41,17 +41,32 @@ const parser = function(schema, opts = {}) {
   if (functions.hasOwn(opts, 'jsonCheck') || functions.hasOwn(opts, 'isJSON'))
     throw new Error('jsonCheck and isJSON options are not applicable in parser mode')
   const validate = validator(schema, { mode: 'strong', ...opts, jsonCheck: false, isJSON: true })
-  const parse = (src) => {
-    if (typeof src !== 'string') throw new Error('Invalid type!')
-    const data = JSON.parse(src)
-    if (validate(data)) return data
-    const reason = validate.errors ? validate.errors[0] : null
-    const keyword = reason && reason.schemaPath ? reason.schemaPath.replace(/.*\//, '') : '??'
-    const explanation = reason ? ` for ${keyword} at ${reason.dataPath}` : ''
-    const error = new Error(`JSON validation failed${explanation}`)
-    if (validate.errors) error.errors = validate.errors
-    throw error
-  }
+  const parse = opts.includeErrors
+    ? (src) => {
+        if (typeof src !== 'string') return { valid: false, message: 'Input is not a string' }
+        try {
+          const value = JSON.parse(src)
+          if (!validate(value)) {
+            const { schemaPath, dataPath } = validate.errors[0]
+            const keyword = schemaPath.slice(schemaPath.lastIndexOf('/') + 1)
+            const message = `JSON validation failed for ${keyword} at ${dataPath}`
+            return { valid: false, message, errors: validate.errors }
+          }
+          return { valid: true, value }
+        } catch ({ message }) {
+          return { valid: false, message }
+        }
+      }
+    : (src) => {
+        if (typeof src !== 'string') return { valid: false }
+        try {
+          const value = JSON.parse(src)
+          if (!validate(value)) return { valid: false }
+          return { valid: true, value }
+        } catch (e) {
+          return { valid: false }
+        }
+      }
   parse.toModule = () =>
     [
       '(function(src) {',
