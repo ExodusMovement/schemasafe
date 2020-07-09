@@ -13,14 +13,14 @@
   },
   "homepage": "https://github.com/ExodusMovement/schemasafe",
   "files": [
-    "src/generate-function.js",
-    "src/safe-format.js",
-    "src/jaystring.js",
     "src/formats.js",
-    "src/scope-functions.js",
+    "src/generate-function.js",
+    "src/index.js",
+    "src/jaystring.js",
     "src/known-keywords.js",
     "src/pointer.js",
-    "src/index.js"
+    "src/safe-format.js",
+    "src/scope-functions.js"
   ],
   "scripts": {
     "lint": "prettier --list-different '**/*.js'&& eslint .",
