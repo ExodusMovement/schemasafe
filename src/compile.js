@@ -223,9 +223,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const args = [source, schemaP, dataP]
         if (allErrors) {
           fun.write('if (validate.errors === null) validate.errors = []')
-          fun.write('validate.errors.push(...%s.errors.map(e => errorMerge(e, %j, %s)))', ...args)
+          fun.write('validate.errors.push(...%s.map(e => errorMerge(e, %j, %s)))', ...args)
         } else {
-          fun.write('validate.errors = [errorMerge(%s.errors[0], %j, %s)]', ...args)
+          fun.write('validate.errors = [errorMerge(%s[0], %j, %s)]', ...args)
         }
       } else if (includeErrors === true && errors) {
         const schemaP = functions.toPointer([...schemaPath, ...path])
@@ -387,10 +387,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         // Save and restore errors in case of recursion
         const res = gensym('res')
         const err = gensym('err')
+        const suberr = gensym('suberr')
         fun.write('const %s = validate.errors', err)
         fun.write('const %s = %s(%s, %s)', res, n, name, recursive)
+        fun.write('const %s = %s.errors', suberr, n)
         fun.write('validate.errors = %s', err)
-        errorIf('!%s', [res], { ...errorArgs, source: n })
+        errorIf('!%s', [res], { ...errorArgs, source: suberr })
       } else {
         errorIf('!%s(%s, %s)', [n, name, recursive], errorArgs)
       }
@@ -404,7 +406,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           n = gensym('ref')
           cache.ref.set(sub, n)
           let fn = null // resolve cyclic dependencies
-          scope[n] = (...args) => fn(...args)
+          const wrap = (...args) => {
+            const res = fn(...args)
+            wrap.errors = fn.errors
+            return res
+          }
+          scope[n] = wrap
           fn = compile(sub, subRoot, opts, scope, path)
           scope[n] = fn
         }
