@@ -41,7 +41,7 @@ const schemas = [
 ]
 
 tape('$ref does not break error path', (t) => {
-  const test = (dataPath, schemaPath, wrappedData, wrappedSchema) => {
+  const test = (instanceLocation, keywordLocation, wrappedData, wrappedSchema) => {
     for (const allErrors of [true, false]) {
       const validate = validator(wrappedSchema, { includeErrors: true, allErrors, schemas })
 
@@ -49,15 +49,21 @@ tape('$ref does not break error path', (t) => {
       t.ok(Array.isArray(validate.errors), 'errors are an array')
       t.strictEqual(validate.errors.length, allErrors ? 3 : 1, 'errors number is correct')
 
-      t.strictEqual(validate.errors[0].dataPath, `#${dataPath}/bar`)
-      t.strictEqual(validate.errors[0].schemaPath, `#${schemaPath}/required`)
+      t.strictEqual(validate.errors[0].instanceLocation, `#${instanceLocation}/bar`)
+      t.strictEqual(validate.errors[0].keywordLocation, `#${keywordLocation}/required`)
 
       if (allErrors) {
-        t.strictEqual(validate.errors[1].dataPath, `#${dataPath}/hello`)
-        t.strictEqual(validate.errors[1].schemaPath, `#${schemaPath}/properties/hello/type`)
+        t.strictEqual(validate.errors[1].instanceLocation, `#${instanceLocation}/hello`)
+        t.strictEqual(
+          validate.errors[1].keywordLocation,
+          `#${keywordLocation}/properties/hello/type`
+        )
 
-        t.strictEqual(validate.errors[2].dataPath, `#${dataPath}/boo`)
-        t.strictEqual(validate.errors[2].schemaPath, `#${schemaPath}/additionalProperties`)
+        t.strictEqual(validate.errors[2].instanceLocation, `#${instanceLocation}/boo`)
+        t.strictEqual(
+          validate.errors[2].keywordLocation,
+          `#${keywordLocation}/additionalProperties`
+        )
       }
     }
   }

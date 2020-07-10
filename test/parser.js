@@ -54,13 +54,13 @@ tape('parser works correctly', (t) => {
     const resultA = parser(schema)(data)
     t.strictEqual(resultA.valid, false, 'Validation failed')
     t.strictEqual(resultA.value, undefined, 'No value is returned')
-    t.strictEqual(resultA.message, undefined, 'No message is returned')
+    t.strictEqual(resultA.error, undefined, 'No message is returned')
     t.strictEqual(resultA.errors, undefined, 'No errors are returned')
 
     const resultB = parser(schema, { includeErrors: true })(data)
     t.strictEqual(resultB.valid, false, 'Validation failed')
     t.strictEqual(resultB.value, undefined, 'No value is returned')
-    t.strictEqual(resultB.message, message, 'An expected message is returned')
+    t.strictEqual(resultB.error, message, 'An expected message is returned')
     t.ok(Array.isArray(resultB.errors), 'Errors are returned as an array')
     t.strictEqual(resultB.errors.length, 1, 'Exactly one error is returned')
   }

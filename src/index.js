@@ -19,7 +19,7 @@ const validator = (schema, { jsonCheck = false, isJSON = false, schemas, ...opts
   fun.write('function validate(data) {')
   if (opts.includeErrors) {
     fun.write('if (!deepEqual(data, JSON.parse(JSON.stringify(data)))) {')
-    fun.write('validate.errors = [{schemaPath:"#",dataPath:"#",message:"not JSON compatible"}]')
+    fun.write('validate.errors = [{instanceLocation:"#",error:"not JSON compatible"}]')
     fun.write('return false')
     fun.write('}')
     fun.write('const res = actualValidate(data)')
@@ -43,14 +43,14 @@ const parser = function(schema, opts = {}) {
   const validate = validator(schema, { mode: 'strong', ...opts, jsonCheck: false, isJSON: true })
   const parse = opts.includeErrors
     ? (src) => {
-        if (typeof src !== 'string') return { valid: false, message: 'Input is not a string' }
+        if (typeof src !== 'string') return { valid: false, error: 'Input is not a string' }
         try {
           const value = JSON.parse(src)
           if (!validate(value)) {
-            const { schemaPath, dataPath } = validate.errors[0]
-            const keyword = schemaPath.slice(schemaPath.lastIndexOf('/') + 1)
-            const message = `JSON validation failed for ${keyword} at ${dataPath}`
-            return { valid: false, message, errors: validate.errors }
+            const { keywordLocation, instanceLocation } = validate.errors[0]
+            const keyword = keywordLocation.slice(keywordLocation.lastIndexOf('/') + 1)
+            const error = `JSON validation failed for ${keyword} at ${instanceLocation}`
+            return { valid: false, error, errors: validate.errors }
           }
           return { valid: true, value }
         } catch ({ message }) {

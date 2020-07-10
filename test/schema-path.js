@@ -3,7 +3,7 @@
 const tape = require('tape')
 const { validator } = require('../')
 
-tape('schemaPath', function(t) {
+tape('keywordLocation', function(t) {
   const schema = {
     type: 'object',
     properties: {
@@ -71,7 +71,7 @@ tape('schemaPath', function(t) {
     if (validate(data)) {
       return t.fail(`should have failed: ${message}`)
     }
-    t.deepEqual(validate.errors[0].schemaPath, path, message)
+    t.deepEqual(validate.errors[0].keywordLocation, path, message)
   }
 
   // Top level errors
@@ -178,7 +178,7 @@ tape('schemaPath', function(t) {
   t.end()
 })
 
-tape('schemaPath - nested selectors', function(t) {
+tape('keywordLocation - nested selectors', function(t) {
   const schema = {
     anyOf: [
       {

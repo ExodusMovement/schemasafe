@@ -44,15 +44,19 @@ All of those are opt-ins (i.e. `false` by default).
 
 ### Properties
 
-  - `schemaPath`: a JSON pointer string as an URI fragment indicating which sub-schema failed, e.g.
+  - `keywordLocation`: a JSON pointer string as an URI fragment indicating which sub-schema failed, e.g.
   `#/properties/item/type`
 
-  - `dataPath`: a JSON pointer string as an URI fragment indicating which property of the object
+  - `instanceLocation`: a JSON pointer string as an URI fragment indicating which property of the object
   failed validation, e.g. `#/item`
+
+  - `error`: can be present for certain generic validation errors, e.g. failed `jsonCheck`.
+  Absent for most errors, as the exact keyword which failed validation can be deduced from
+  `keywordLocation`, and an additional error message would have just duplicated that information.
 
   - `value`: the _unvalidated_ data value that caused the error. Enabled only when
   `reflectErrorsValue` is set to true. Use with care.
 
-  - `message`: can be present for certain generic validation errors, e.g. failed `jsonCheck`.
-  Absent for most errors, as the exact keyword which failed validation can be deduced from
-  `schemaPath`, and an additional error message would have just duplicated that information.
+This naming is designed to be compatible with
+[upstream spec conventions](https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.2)
+for equivalent properties.

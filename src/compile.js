@@ -238,7 +238,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const dataP = buildPath(prop)
       if (includeErrors === true && errors && source) {
         const schemaP = functions.toPointer([...schemaPath, ...path])
-        // we can include resolvedPath for resolved schema path later, perhaps
+        // we can include absoluteKeywordLocation later, perhaps
         scope.errorMerge = functions.errorMerge
         const args = [source, schemaP, dataP]
         if (allErrors) {
@@ -250,8 +250,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       } else if (includeErrors === true && errors) {
         const schemaP = functions.toPointer([...schemaPath, ...path])
         const errorJS = reflectErrorsValue
-          ? format('{ schemaPath: %j, dataPath: %s, value: %s }', schemaP, dataP, buildName(prop))
-          : format('{ schemaPath: %j, dataPath: %s }', schemaP, dataP)
+          ? format(
+              '{ keywordLocation: %j, instanceLocation: %s, value: %s }',
+              schemaP,
+              dataP,
+              buildName(prop)
+            )
+          : format('{ keywordLocation: %j, instanceLocation: %s }', schemaP, dataP)
         if (allErrors) {
           fun.write('if (%s === null) %s = []', errors, errors)
           fun.write('%s.push(%s)', errors, errorJS)

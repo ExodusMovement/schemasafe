@@ -14,7 +14,11 @@ for (const allErrors of [true, false]) {
     t.notOk(validate([1, 0]), 'invalid contains')
     t.ok(validate.errors.length >= 1, 'at least one error')
     if (!allErrors) t.strictEqual(validate.errors.length, 1, 'exactly one error')
-    t.strictEqual(validate.errors[0].schemaPath, '#/contains', 'first error is from #/contains')
+    t.strictEqual(
+      validate.errors[0].keywordLocation,
+      '#/contains',
+      'first error is from #/contains'
+    )
 
     t.end()
   })

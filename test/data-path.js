@@ -3,7 +3,7 @@
 const tape = require('tape')
 const { validator } = require('../')
 
-tape('dataPath', (t) => {
+tape('instanceLocation', (t) => {
   const schema = {
     properties: {
       arr: {
@@ -16,10 +16,18 @@ tape('dataPath', (t) => {
   }
   const validate = validator(schema, { includeErrors: true })
 
-  const checkError = (data, schemaPath, dataPath, message) => {
+  const checkError = (data, keywordLocation, instanceLocation, message) => {
     t.deepEqual(validate(data), false, `should have failed: ${message}`)
-    t.deepEqual(validate.errors[0].schemaPath, schemaPath, `schemaPath for ${message}`)
-    t.deepEqual(validate.errors[0].dataPath, dataPath, `dataPath for ${message}`)
+    t.deepEqual(
+      validate.errors[0].keywordLocation,
+      keywordLocation,
+      `keywordLocation for ${message}`
+    )
+    t.deepEqual(
+      validate.errors[0].instanceLocation,
+      instanceLocation,
+      `instanceLocation for ${message}`
+    )
   }
 
   t.ok(validate({ arr: [] }), 'valid empty array passes')

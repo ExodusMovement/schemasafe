@@ -78,9 +78,9 @@ console.log(validate(42)) // false
 
 When the `includeErrors` option is set to `true`, `@exodus/schemasafe` also outputs:
 
-- `schemaPath`: a JSON pointer string as an URI fragment indicating which sub-schema failed, e.g.
+- `keywordLocation`: a JSON pointer string as an URI fragment indicating which sub-schema failed, e.g.
   `#/properties/item/type`
-- `dataPath`: a JSON pointer string as an URI fragment indicating which property of the object
+- `instanceLocation`: a JSON pointer string as an URI fragment indicating which property of the object
   failed validation, e.g. `#/item`
 
 ```js
@@ -97,9 +97,11 @@ const validate = validator(schema, { includeErrors: true })
 
 validate({ hello: 100 });
 console.log(validate.errors)
-// [ { schemaPath: '#/properties/hello/type',
-//     dataPath: '#/hello' } ]
+// [ { keywordLocation: '#/properties/hello/type', instanceLocation: '#/hello' } ]
 ```
+
+Only the first error is reported by default unless `allErrors` option is also set to `true` in
+addition to `includeErrors`.
 
 See [Error handling](./doc/Error-handling.md) for more information.
 
