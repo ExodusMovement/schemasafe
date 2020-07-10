@@ -17,22 +17,25 @@ const initTracing = () => ({
   unknown: false,
 })
 
+const wrap = (A) => ({ ...initTracing(), ...A }) // sets default empty values
+const wrapFun = (f) => (...args) => f(...args.map(wrap))
+
 // Result means that both sets A and B are correct
-const andDelta = (A, B) => ({
-  items: Math.max(A.items || 0, B.items || 0),
-  properties: [...(A.properties || []), ...(B.properties || [])],
-  patterns: [...(A.patterns || []), ...(B.patterns || [])],
+const andDelta = wrapFun((A, B) => ({
+  items: Math.max(A.items, B.items),
+  properties: [...A.properties, ...B.properties],
+  patterns: [...A.patterns, ...B.patterns],
   dyn: {
-    items: Math.max((A.dyn || {}).items || 0, (B.dyn || {}).items || 0),
-    properties: [...((A.dyn || {}).properties || []), ...((B.dyn || {}).properties || [])],
-    patterns: [...((A.dyn || {}).patterns || []), ...((B.dyn || {}).patterns || [])],
+    items: Math.max(A.dyn.items, B.dyn.items),
+    properties: [...A.dyn.properties, ...B.dyn.properties],
+    patterns: [...A.dyn.patterns, ...B.dyn.patterns],
   },
   unknown: A.unknown || B.unknown,
-})
+}))
 
 const regtest = (pattern, value) => new RegExp(pattern, 'u').test(value)
 
-const orProperties = (a, rega, b, regb) => {
+const orProperties = ({ properties: a, patterns: rega }, { properties: b, patterns: regb }) => {
   if (a.includes(true)) return b
   if (b.includes(true)) return a
   const afiltered = a.filter((x) => b.includes(x) || regb.some((p) => regtest(p, x)))
@@ -40,27 +43,23 @@ const orProperties = (a, rega, b, regb) => {
   return [...afiltered, ...bfiltered]
 }
 
-const inProperties = (a, rega, b, regb) =>
+const inProperties = ({ properties: a, patterns: rega }, { properties: b, patterns: regb }) =>
   a.includes(true) ||
   (regb.every((x) => rega.includes(x)) &&
     b.every((x) => a.includes(x) || rega.some((p) => regtest(p, x))))
 
 // Result means that at least one of sets A and B is correct
-const orDelta = (A, B) => {
-  const { items: aItems = 0, properties: aProp = [], patterns: aPattern = [] } = A
-  const { items: bItems = 0, properties: bProp = [], patterns: bPattern = [] } = B
-  const items = Math.min(aItems, bItems)
-  const properties = orProperties(aProp, aPattern, bProp, bPattern)
-  const patterns = aPattern.filter((x) => bPattern.includes(x))
-  const aDyn = A.dyn || { items: 0, properties: [], patterns: [] }
-  const bDyn = A.dyn || { items: 0, properties: [], patterns: [] }
-  const dyn = {
-    items: Math.max(aItems, bItems, aDyn.items || 0, bDyn.items || 0),
-    properties: [...aProp, ...bProp, ...aDyn.properties, ...bDyn.properties],
-    patterns: [...aPattern, ...bPattern, ...aDyn.patterns, ...bDyn.patterns],
-  }
-  return { items, properties, patterns, dyn, unknown: A.unknown || B.unknown }
-}
+const orDelta = wrapFun((A, B) => ({
+  items: Math.min(A.items, B.items),
+  properties: orProperties(A, B),
+  patterns: A.patterns.filter((x) => B.patterns.includes(x)),
+  dyn: {
+    items: Math.max(A.items, B.items, A.dyn.items, B.dyn.items),
+    properties: [...A.properties, ...B.properties, ...A.dyn.properties, ...B.dyn.properties],
+    patterns: [...A.patterns, ...B.patterns, ...A.dyn.patterns, ...B.dyn.patterns],
+  },
+  unknown: A.unknown || B.unknown,
+}))
 
 const applyDelta = (stat, delta) => {
   if (delta.items) stat.items = Math.max(stat.items, delta.items)
@@ -72,9 +71,9 @@ const applyDelta = (stat, delta) => {
   if (delta.unknown) stat.unknown = true
 }
 
-const isDynamic = ({ dyn, items = 0, properties = [], patterns = [], unknown }) => ({
+const isDynamic = wrapFun(({ unknown, items, dyn, ...stat }) => ({
   items: unknown || dyn.items > items,
-  properties: unknown || !inProperties(properties, patterns, dyn.properties, dyn.patterns),
-})
+  properties: unknown || !inProperties(stat, dyn),
+}))
 
 module.exports = { initTracing, andDelta, orDelta, applyDelta, isDynamic }
