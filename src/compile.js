@@ -956,9 +956,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('let %s = 0', passes)
         const suberr = suberror()
         let delta
+        let i = 0
         for (const [key, sch] of Object.entries(node.oneOf)) {
           const { sub, delta: deltaVariant } = subrule(suberr, current, sch, subPath('oneOf', key))
           fun.write('if (%s) %s++', sub, passes)
+          if (!includeErrors && i++ > 0) errorIf('%s > 1', [passes], { path: ['oneOf'] })
           delta = delta ? orDelta(delta, deltaVariant) : deltaVariant
         }
         if (node.oneOf.length > 0) evaluateDelta(delta)
