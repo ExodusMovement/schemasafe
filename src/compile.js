@@ -172,8 +172,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (errors, history, current, node, schemaPath) => {
     // e.g. top-level data and property names, OR already checked by present() in history, OR in keys and not undefined
+    const queryCurrent = () => history.filter((h) => h.prop === current)
     const definitelyPresent =
-      !current.parent || history.includes(current) || current.checked || (current.inKeys && isJSON)
+      !current.parent || current.checked || (current.inKeys && isJSON) || queryCurrent().length > 0
 
     const name = buildName(current)
     const currPropVar = (...args) => propvar(current, ...args)
@@ -425,8 +426,22 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (typeArray === null && node.const === undefined && !node.enum && !hasSubValidation)
       enforceValidation('type is required')
 
-    const typeApplicable = (...possibleTypes) =>
-      typeArray === null || typeArray.some((x) => possibleTypes.includes(x))
+    // This is used for typechecks, null means * here
+    const allIn = (arr, valid) => {
+      /* c8 ignore next */
+      if (!Array.isArray(valid) || valid.length === 0) throw new Error('Unreachable')
+      return arr && arr.every((s) => valid.includes(s)) // all arr entries are in valid
+    }
+    const someIn = (arr, possible) => {
+      /* c8 ignore next */
+      if (!Array.isArray(possible) || possible.length === 0) throw new Error('Unreachable')
+      return arr === null || arr.some((x) => possible.includes(x)) // at least one arr entry is in possible
+    }
+
+    const parentCheckedType = (...valid) => queryCurrent().some((h) => allIn(h.typeArray, valid))
+    const definitelyType = (...valid) => allIn(typeArray, valid) || parentCheckedType(...valid)
+    const typeApplicable = (...possible) =>
+      someIn(typeArray, possible) && queryCurrent().every((h) => someIn(h.typeArray, possible))
 
     const compare = (variableName, value) => {
       if (value && typeof value === 'object') {
@@ -466,12 +481,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       maybeWrap(prev !== null && shouldWrap, 'if (errorCount === %s) {', [prev], '}', writeBody)
 
     // Can not be used before undefined check above! The one performed by present()
-    const rule = (...args) => visit(errors, [...history, current], ...args)
+    const rule = (...args) =>
+      visit(errors, [...history, { stat, prop: current, typeArray }], ...args)
     const subrule = (suberr, ...args) => {
       const sub = gensym('sub')
       fun.write('const %s = (() => {', sub)
       if (allErrors) fun.write('let errorCount = 0') // scoped error counter
-      const delta = visit(suberr, [...history, current], ...args)
+      const delta = visit(suberr, [...history, { stat, prop: current, typeArray }], ...args)
       if (allErrors) {
         fun.write('return errorCount === 0')
       } else fun.write('return true')
@@ -742,15 +758,22 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         forObjectKeys(key, name, (sub) => {
           const names = node.propertyNames
           const nameSchema = typeof names === 'object' ? { type: 'string', ...names } : names
-          rule({ name: key, errorParent: sub }, nameSchema, subPath('propertyNames'))
+          const nameprop = Object.freeze({ name: key, errorParent: sub, type: 'string' })
+          rule(nameprop, nameSchema, subPath('propertyNames'))
         })
         consume('propertyNames', 'object', 'boolean')
       }
       if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object')
         enforceValidation('wild-card additionalProperties requires propertyNames')
 
+      // if allErrors is false, we can skip present check for required properties validated before
+      const checked = (p) =>
+        !allErrors &&
+        (stat.required.includes(p) || queryCurrent().some((h) => h.stat.required.includes(p)))
+
       if (Array.isArray(node.required)) {
         for (const req of node.required) {
+          if (checked(req)) continue
           const prop = currPropImm(req)
           errorIf('!(%s)', [present(prop)], { path: ['required'], prop })
         }
@@ -763,22 +786,28 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           for (const key of Object.keys(node[dependencies])) {
             let deps = node[dependencies][key]
             if (typeof deps === 'string') deps = [deps]
-
-            const exists = (k) => present(currPropImm(k))
-            const item = currPropImm(key)
-
+            const item = currPropImm(key, checked(key))
             if (Array.isArray(deps) && dependencies !== 'dependentSchemas') {
-              const condition = safeand(...deps.map(exists))
-              errorIf('%s && !(%s)', [present(item), condition], { path: [dependencies, key] })
+              const clauses = deps.filter((k) => !checked(k)).map((k) => present(currPropImm(k)))
+              const condition = safeand(...clauses)
+              if (clauses.length === 0) {
+                // nothing to do
+              } else if (item.checked) {
+                errorIf('!(%s)', [condition], { path: [dependencies, key] })
+                evaluateDelta({ required: deps })
+              } else {
+                errorIf('%s && !(%s)', [present(item), condition], { path: [dependencies, key] })
+              }
             } else if (
               ((typeof deps === 'object' && !Array.isArray(deps)) || typeof deps === 'boolean') &&
               dependencies !== 'dependentRequired'
             ) {
-              // TODO: check required/present context and remove if if we can
-              fun.block('if (%s) {', [present(item)], '}', () => {
+              const body = () => {
                 const delta = rule(current, deps, subPath(dependencies, key))
                 evaluateDelta(orDelta({}, delta))
-              })
+              }
+              if (item.checked) body()
+              else fun.block('if (%s) {', [present(item)], '}', body)
             } else fail(`Unexpected ${dependencies} entry`)
           }
           consume(dependencies, 'object')
@@ -786,11 +815,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
 
       if (typeof node.properties === 'object') {
-        for (const p of Object.keys(node.properties)) {
-          // if allErrors is false, we can skip present check for required properties validated above
-          const checked = !allErrors && stat.required.includes(p)
-          rule(currPropImm(p, checked), node.properties[p], subPath('properties', p))
-        }
+        for (const p of Object.keys(node.properties))
+          rule(currPropImm(p, checked(p)), node.properties[p], subPath('properties', p))
         evaluateDelta({ properties: Object.keys(node.properties || {}) })
         consume('properties', 'object')
       }
@@ -908,8 +934,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const typeWrap = (checkBlock, validTypes, queryType) => {
       const [funSize, unusedSize] = [fun.size(), unused.size]
-      const alwaysValidType = typeArray && typeArray.every((type) => validTypes.includes(type))
-      maybeWrap(!alwaysValidType, 'if (%s) {', [queryType], '}', checkBlock)
+      maybeWrap(!definitelyType(...validTypes), 'if (%s) {', [queryType], '}', checkBlock)
       // enforce check that non-applicable blocks are empty and no rules were applied
       if (funSize !== fun.size() || unusedSize !== unused.size)
         enforce(typeApplicable(...validTypes), `Unexpected rules in type`, node.type)
@@ -941,15 +966,20 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     /* Actual post-$ref validation happens here */
 
-    const needTypeValidation = typeArray !== null
-    if (needTypeValidation) {
-      const typeValidate = safeor(...typeArray.map((t) => types.get(t)(name)))
+    const typeExact = (type) => typeArray && typeArray.length === 1 && typeArray[0] === type
+    if (current.type)
+      enforce(typeExact(current.type), 'Only one type is allowed here:', current.type)
+    const needTypeValidate = !current.type && typeArray !== null && !parentCheckedType(...typeArray)
+    if (needTypeValidate) {
+      const filteredTypes = typeArray.filter((t) => typeApplicable(t))
+      if (filteredTypes.length === 0) fail('No valid types possible')
+      const typeValidate = safeor(...filteredTypes.map((t) => types.get(t)(name)))
       errorIf('!(%s)', [typeValidate], { path: ['type'] })
     }
     if (node.type !== undefined) consume('type', 'string', 'array')
 
     // If type validation was needed and did not return early, wrap this inside an else clause.
-    maybeWrap(needTypeValidation && allErrors, 'else {', [], '}', () => {
+    maybeWrap(needTypeValidate && allErrors, 'else {', [], '}', () => {
       if (prev !== null) fun.write('let %s = errorCount', prev)
       if (checkConst()) {
         // const/enum shouldn't have any other validation rules except for already checked type/$ref
