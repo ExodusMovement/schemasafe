@@ -116,10 +116,10 @@ function processTest(main, id, file, shouldIngore, requiresLax) {
           ...(block.schemas || []),
         ]
         for (const schema of blockSchemas) {
-          for (const includeErrors of [false, true]) {
+          for (const [includeErrors, allErrors] of [[false, false], [true, false], [true, true]]) {
             // ajv sometimes specifies just the schema id as "schema"
             const wrapped = typeof schema === 'string' ? { $ref: schema } : schema
-            const opts = { schemas, mode, $schemaDefault, extraFormats, includeErrors }
+            const opts = { schemas, mode, $schemaDefault, extraFormats, includeErrors, allErrors }
             const validate = validator(wrapped, opts)
             const parse = parser(wrapped, opts)
             for (const test of block.tests) {
