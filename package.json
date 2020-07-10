@@ -21,7 +21,8 @@
     "src/known-keywords.js",
     "src/pointer.js",
     "src/safe-format.js",
-    "src/scope-functions.js"
+    "src/scope-functions.js",
+    "src/types.js"
   ],
   "scripts": {
     "lint": "prettier --list-different '**/*.js'&& eslint .",
