@@ -486,7 +486,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
     const mergeerror = (suberr) => {
       if (!suberr) return
-      fun.write('if (%s) { %s.push(...%s) } else %s = %s', errors, errors, suberr, errors, suberr)
+      // suberror can be null e.g. on failed empty contains
+      const args = [errors, suberr, errors, suberr, suberr, errors, suberr]
+      fun.write('if (%s && %s) { %s.push(...%s) } else if (%s) %s = %s', ...args)
     }
 
     // Extracted single additional(Items/Properties) rules, for reuse with unevaluated(Items/Properties)
