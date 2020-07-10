@@ -5,7 +5,7 @@ const genfun = require('./generate-function')
 const { resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
 const functions = require('./scope-functions')
-const KNOWN_KEYWORDS = require('./known-keywords')
+const { knownKeywords, schemaVersions, knownVocabularies } = require('./known-keywords')
 
 // for building into the validation function
 const types = new Map(
@@ -35,18 +35,6 @@ const schemaTypes = new Map(
 )
 
 const scopeCache = Symbol('cache')
-
-// Order is important, newer at the top!
-const schemaVersions = [
-  'https://json-schema.org/draft/2019-09/schema',
-  'https://json-schema.org/draft-07/schema',
-  'https://json-schema.org/draft-06/schema',
-  'https://json-schema.org/draft-04/schema',
-  'https://json-schema.org/draft-03/schema',
-]
-
-const vocab2019 = ['core', 'applicator', 'validation', 'meta-data', 'format', 'content']
-const knownVocabularies = vocab2019.map((v) => `https://json-schema.org/draft/2019-09/vocab/${v}`)
 
 const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
 
@@ -325,7 +313,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     enforce(node && Object.getPrototypeOf(node) === Object.prototype, 'Schema is not an object')
     for (const key of Object.keys(node))
-      enforce(KNOWN_KEYWORDS.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
+      enforce(knownKeywords.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
     if (Object.keys(node).length === 0) {
       enforceValidation('empty rules node encountered')
