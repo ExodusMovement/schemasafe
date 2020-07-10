@@ -4,6 +4,7 @@ const tape = require('tape')
 const fs = require('fs')
 const path = require('path')
 const { validator, parser } = require('../')
+const schemas = require('./util/schemas')
 
 // these tests require lax mode
 const unsafe = new Set([
@@ -74,46 +75,6 @@ const unsupported = new Set([
   'rules/format.json/validation of JSON-pointer URI fragment strings',
   'issues/33_json_schema_latest.json/use latest json schema as v4 (#33)',
 ])
-
-const schemas = [
-  // standard
-  require('./schemas/json-schema-draft-2019-09/meta/core.json'),
-  require('./schemas/json-schema-draft-2019-09/meta/applicator.json'),
-  require('./schemas/json-schema-draft-2019-09/meta/validation.json'),
-  require('./schemas/json-schema-draft-2019-09/meta/meta-data.json'),
-  require('./schemas/json-schema-draft-2019-09/meta/format.json'),
-  require('./schemas/json-schema-draft-2019-09/meta/content.json'),
-  require('./schemas/json-schema-draft-2019-09/schema.json'),
-  require('./schemas/json-schema-draft-07.json'),
-  require('./schemas/json-schema-draft-06.json'),
-  require('./schemas/json-schema-draft-04.json'),
-  require('./schemas/json-schema-draft-03.json'),
-  // remote
-  {
-    $id: 'http://localhost:1234/integer.json',
-    ...require('./JSON-Schema-Test-Suite/remotes/integer.json'),
-  },
-  {
-    $id: 'http://localhost:1234/subSchemas.json',
-    ...require('./JSON-Schema-Test-Suite/remotes/subSchemas.json'),
-  },
-  {
-    $id: 'http://localhost:1234/subSchemas-defs.json',
-    ...require('./JSON-Schema-Test-Suite/remotes/subSchemas-defs.json'),
-  },
-  {
-    $id: 'http://localhost:1234/folder/folderInteger.json',
-    ...require('./JSON-Schema-Test-Suite/remotes/folder/folderInteger.json'),
-  },
-  {
-    $id: 'http://localhost:1234/name.json',
-    ...require('./JSON-Schema-Test-Suite/remotes/name.json'),
-  },
-  {
-    $id: 'http://localhost:1234/name-defs.json',
-    ...require('./JSON-Schema-Test-Suite/remotes/name-defs.json'),
-  },
-]
 
 function processTestDir(schemaDir, main, subdir = '') {
   const dir = path.join(__dirname, schemaDir, main, subdir)
