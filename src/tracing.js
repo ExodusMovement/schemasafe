@@ -12,7 +12,7 @@
  */
 
 const initTracing = () => ({
-  ...{ properties: [], patterns: [], items: 0 },
+  ...{ properties: [], patterns: [], required: [], items: 0 },
   dyn: { properties: [], patterns: [], items: 0 },
   unknown: false,
 })
@@ -25,6 +25,7 @@ const andDelta = wrapFun((A, B) => ({
   items: Math.max(A.items, B.items),
   properties: [...A.properties, ...B.properties],
   patterns: [...A.patterns, ...B.patterns],
+  required: [...A.required, ...B.required],
   dyn: {
     items: Math.max(A.dyn.items, B.dyn.items),
     properties: [...A.dyn.properties, ...B.dyn.properties],
@@ -53,6 +54,7 @@ const orDelta = wrapFun((A, B) => ({
   items: Math.min(A.items, B.items),
   properties: orProperties(A, B),
   patterns: A.patterns.filter((x) => B.patterns.includes(x)),
+  required: A.required.filter((x) => B.required.includes(x)),
   dyn: {
     items: Math.max(A.items, B.items, A.dyn.items, B.dyn.items),
     properties: [...A.properties, ...B.properties, ...A.dyn.properties, ...B.dyn.properties],
@@ -65,6 +67,7 @@ const applyDelta = (stat, delta) => {
   if (delta.items) stat.items = Math.max(stat.items, delta.items)
   if (delta.properties) stat.properties.push(...delta.properties)
   if (delta.patterns) stat.patterns.push(...delta.patterns)
+  if (delta.required) stat.required.push(...delta.required)
   if (delta.dyn) stat.dyn.items = Math.max(stat.dyn.items, delta.dyn.items)
   if (delta.dyn) stat.dyn.properties.push(...delta.dyn.properties)
   if (delta.dyn) stat.dyn.patterns.push(...delta.dyn.patterns)

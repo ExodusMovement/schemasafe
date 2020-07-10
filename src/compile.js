@@ -752,6 +752,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           const prop = currPropImm(req)
           errorIf('!(%s)', [present(prop)], { path: ['required'], prop })
         }
+        evaluateDelta({ required: node.required })
         consume('required', 'array')
       }
 
@@ -785,7 +786,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (typeof node.properties === 'object') {
         for (const p of Object.keys(node.properties)) {
           // if allErrors is false, we can skip present check for required properties validated above
-          const checked = !allErrors && Array.isArray(node.required) && node.required.includes(p)
+          const checked = !allErrors && stat.required.includes(p)
           rule(currPropImm(p, checked), node.properties[p], subPath('properties', p))
         }
         evaluateDelta({ properties: Object.keys(node.properties || {}) })
