@@ -7,7 +7,7 @@ const formats = require('./formats')
 const functions = require('./scope-functions')
 const { types, schemaTypes } = require('./types')
 const { knownKeywords, schemaVersions, knownVocabularies } = require('./known-keywords')
-const { initTracing, andDelta, orDelta, applyDelta } = require('./tracing')
+const { initTracing, andDelta, orDelta, applyDelta, isDynamic } = require('./tracing')
 
 const scopeCache = Symbol('cache')
 
@@ -374,7 +374,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
       // evaluated: propagate static from ref to current, skips cyclic
       if (scope[n] && scope[n][evaluatedStatic]) evaluateDelta(scope[n][evaluatedStatic])
-      else evaluateDelta({ dynamic: true }) // assume dynamic if ref is cyclic
+      else evaluateDelta({ unknown: true }) // assume unknown if ref is cyclic
     }
     if (node.$ref) {
       const resolved = resolveReference(root, schemas, node.$ref, basePath())
@@ -520,8 +520,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
     const additionalCondition = (key, properties, patternProperties) =>
       safeand(
-        ...properties.map((p) => format('%s !== %j', key, p)),
-        ...patternProperties.map((p) => format('!%s', patternTest(p, key)))
+        ...[...new Set(properties)].map((p) => format('%s !== %j', key, p)),
+        ...[...new Set(patternProperties)].map((p) => format('!%s', patternTest(p, key)))
       )
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
@@ -676,7 +676,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           const prop = currPropVar(i, unmodifiedPrototypes, true) // own property in Array if proto not mangled
           const { sub } = subrule(suberr, prop, node.contains, subPath('contains'))
           fun.write('if (%s) %s++', sub, passes)
-          // evaluateDelta({ dynamic: true }) // draft2020: contains counts towards evaluatedItems
+          // evaluateDelta({ unknown: true }) // draft2020: contains counts towards evaluatedItems
         })
 
         if (Number.isFinite(node.minContains)) {
@@ -918,7 +918,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         // Everything is statically evaluated, so this check is unreachable. Allow only 'false' rule here.
         if (node.unevaluatedItems === false) consume('unevaluatedItems', 'boolean')
       } else if (node.unevaluatedItems || node.unevaluatedItems === false) {
-        if (stat.dynamic) throw new Error('Dynamic unevaluated validation is not yet implemented')
+        if (isDynamic(stat).items) throw new Error('Dynamic unevaluated is not implemented')
         const limit = format('%d', stat.items)
         additionalItems(limit, node.unevaluatedItems, 'unevaluatedItems')
       }
@@ -929,7 +929,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           // Everything is statically evaluated, so this check is unreachable. Allow only 'false' rule here.
           if (node.unevaluatedProperties === false) consume('unevaluatedProperties', 'boolean')
         } else if (node.unevaluatedProperties || node.unevaluatedProperties === false) {
-          if (stat.dynamic) throw new Error('Dynamic unevaluated validation is not yet implemented')
+          if (isDynamic(stat).properties) throw new Error('Dynamic unevaluated is not implemented')
           const sawStatic = (key) => additionalCondition(key, stat.properties, stat.patterns)
           additionalProperties(sawStatic, node.unevaluatedProperties, 'unevaluatedProperties')
         }
