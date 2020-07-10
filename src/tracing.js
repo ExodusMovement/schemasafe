@@ -30,16 +30,16 @@ const inProperties = (a, rega, b, regb) =>
     b.every((x) => a.includes(x) || rega.some((p) => regtest(p, x))))
 
 const orDelta = (A, B) => {
-  const { items: aItems = 0, properties: aProp = [], patternProperties: aPattern = [] } = A
-  const { items: bItems = 0, properties: bProp = [], patternProperties: bPattern = [] } = B
+  const { items: aItems = 0, properties: aProp = [], patterns: aPattern = [] } = A
+  const { items: bItems = 0, properties: bProp = [], patterns: bPattern = [] } = B
   const items = Math.min(aItems, bItems)
   const properties = orProperties(aProp, aPattern, bProp, bPattern)
-  const patternProperties = aPattern.filter((x) => bPattern.includes(x))
-  const dynamic =
-    aItems !== bItems ||
-    !inProperties(properties, patternProperties, aProp, aPattern) ||
-    !inProperties(properties, patternProperties, bProp, bPattern)
-  return { items, properties, patternProperties, dynamic }
+  const patterns = aPattern.filter((x) => bPattern.includes(x))
+  const propertiesMismatch =
+    !inProperties(properties, patterns, aProp, aPattern) ||
+    !inProperties(properties, patterns, bProp, bPattern)
+  const dynamic = A.dynamic || B.dynamic || aItems !== bItems || propertiesMismatch
+  return { items, properties, patterns, dynamic }
 }
 
 const applyDelta = (stat, delta) => {
