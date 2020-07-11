@@ -10,6 +10,7 @@ const knownKeywords = [
   ...['items', 'maxItems', 'minItems', 'additionalItems'], // arrays, basic
   ...['contains', 'minContains', 'maxContains', 'uniqueItems'], // arrays, complex
   ...['maxLength', 'minLength', 'format', 'pattern'], // strings
+  ...['contentEncoding', 'contentMediaType', 'contentSchema'], // strings content
   ...['properties', 'maxProperties', 'minProperties', 'additionalProperties', 'patternProperties'], // objects
   ...['propertyNames', 'dependencies', 'dependentRequired', 'dependentSchemas'], // objects
   ...['unevaluatedProperties', 'unevaluatedItems'], // see-through

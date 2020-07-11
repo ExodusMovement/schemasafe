@@ -313,6 +313,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (typeof node.$comment === 'string') consume('$comment', 'string') // unused, meta-only
     if (Array.isArray(node.examples)) consume('examples', 'array') // unused, meta-only
 
+    if (node.contentEncoding || node.contentMediaType || node.contentSchema)
+      ensure('content(MediaType/Encoding/Schema) are unsupported yet') // fail even in allowUnusedKeywords mode
+
     // defining defs are allowed, those are validated on usage
     if (typeof node.$defs === 'object') {
       consume('$defs', 'object')
