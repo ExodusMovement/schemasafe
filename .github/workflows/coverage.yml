@@ -12,6 +12,7 @@ jobs:
         with:
           node-version: '14'
       - run: yarn --frozen-lockfile
+      - run: git submodule update --init --recursive
       - run: yarn run coverage:lcov
       - uses: codecov/codecov-action@v1
         with:

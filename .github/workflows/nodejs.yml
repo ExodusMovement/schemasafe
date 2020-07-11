@@ -16,10 +16,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: test
-        run: |
-          yarn --frozen-lockfile
-          yarn lint
-          yarn run test
-        env:
-          CI: true
+      - run: yarn --frozen-lockfile
+      - run: yarn lint
+      - run: git submodule update --init --recursive
+      - run: yarn run test
