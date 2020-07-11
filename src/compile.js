@@ -603,7 +603,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
 
       prevWrap(true, () => {
-        const checkFormat = (fmtname, target, formatsObj = fmts) => {
+        const checkFormat = (fmtname, target, path, formatsObj = fmts) => {
           const known = typeof fmtname === 'string' && functions.hasOwn(formatsObj, fmtname)
           enforce(known, 'Unrecognized format used:', fmtname)
           const formatImpl = formatsObj[fmtname]
@@ -618,13 +618,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           if (formatImpl instanceof RegExp) {
             // built-in formats are fine, check only ones from options
             if (functions.hasOwn(optFormats, fmtname)) enforceRegex(formatImpl.source)
-            errorIf('!%s.test(%s)', [n, target], { path: ['format'] })
+            errorIf('!%s.test(%s)', [n, target], { path: [path] })
           } else {
-            errorIf('!%s(%s)', [n, target], { path: ['format'] })
+            errorIf('!%s(%s)', [n, target], { path: [path] })
           }
         }
         if (node.format) {
-          checkFormat(node.format, name)
+          checkFormat(node.format, name, 'format')
           consume('format', 'string')
         }
 
@@ -635,22 +635,52 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           consume('pattern', 'string')
         }
 
+        enforce(node.contentSchema !== false, 'contentSchema cannot be set to false')
         if (node.contentEncoding || node.contentMediaType || node.contentSchema) {
+          const dec = gensym('dec')
+          if (node.contentMediaType) fun.write('let %s = %s', dec, name)
+
           if (node.contentEncoding === 'base64') {
-            checkFormat('base64', name, formats.extra)
-            enforce(!node.contentMediaType, 'contentEncoding + contentMediaType is not ready yet')
+            checkFormat('base64', name, 'contentEncoding', formats.extra)
+            if (node.contentMediaType) {
+              scope.deBase64 = functions.deBase64
+              fun.write('try {')
+              fun.write('%s = deBase64(%s)', dec, dec)
+            }
             consume('contentEncoding', 'string')
-          } else {
-            enforce(!node.contentEncoding, 'Unrecognized contentEncoding:', node.contentEncoding)
+          } else enforce(!node.contentEncoding, 'Unknown contentEncoding:', node.contentEncoding)
+
+          let json = false
+          if (node.contentMediaType === 'application/json') {
+            fun.write('try {')
+            fun.write('%s = JSON.parse(%s)', dec, dec)
+            json = true
+            consume('contentMediaType', 'string')
+          } else enforce(!node.contentMediaType, 'Unknown contentMediaType:', node.contentMediaType)
+
+          if (node.contentSchema) {
+            enforce(json, 'contentSchema requires contentMediaType application/json')
+            const decprop = Object.freeze({ name: dec, errorParent: current })
+            rule(decprop, node.contentSchema, subPath('contentSchema')) // TODO: isJSON true for speed?
+            consume('contentSchema', 'object', 'array')
           }
-          if (node.contentMediaType || node.contentSchema)
-            fail('content(MediaType/Encoding/Schema) are unsupported yet')
+          if (node.contentMediaType) {
+            fun.write('} catch (e) {')
+            error({ path: ['contentMediaType'] })
+            fun.write('}')
+            if (node.contentEncoding) {
+              fun.write('} catch (e) {')
+              error({ path: ['contentEncoding'] })
+              fun.write('}')
+            }
+          }
         }
       })
 
-      const stringValidated = node.format || node.pattern || hasSubValidation
+      const stringValidated = node.format || node.pattern || node.contentSchema || hasSubValidation
+      const stringWarning = 'pattern, format or contentSchema must be specified for strings'
       if (typeApplicable('string') && requireStringValidation && !stringValidated)
-        fail('pattern or format must be specified for strings, use pattern: ^[\\s\\S]*$ to opt-out')
+        fail(`[requireStringValidation] ${stringWarning}, use pattern: ^[\\s\\S]*$ to opt-out`)
     }
 
     const checkArrays = () => {

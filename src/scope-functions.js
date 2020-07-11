@@ -55,6 +55,26 @@ const unique = (array) => {
   return true
 }
 
+// Fast in Node.js, awful in browsers, no reason to optimize now. Work-around: polyfill Buffer
+const deBase64 = (string) => {
+  if (typeof Buffer !== 'undefined') return Buffer.from(string, 'base64').toString('utf-8')
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+  const map = Array(256)
+  chars.split('').forEach((c, i) => (map[c.charCodeAt(0)] = i.toString(4).padStart(3, 0)))
+  let tmp = ''
+  const bytes = new Uint8Array(Math.ceil((string.length * 3) / 4))
+  let filled = 0
+  for (let i = 0; i < string.length; i++) {
+    tmp += map[string.charCodeAt(i)] || ''
+    if (tmp.length >= 4) {
+      bytes[filled++] = parseInt(tmp.slice(0, 4), 4)
+      tmp = tmp.slice(4)
+    }
+  }
+  const view = new Uint8Array(bytes.buffer, bytes.byteOffset, Math.min(filled, bytes.length))
+  return new TextDecoder('utf-8').decode(view)
+}
+
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty)
 // special handling for stringification
 hasOwn[Symbol.for('toJayString')] = 'Function.prototype.call.bind(Object.prototype.hasOwnProperty)'
@@ -70,4 +90,4 @@ const errorMerge = ({ keywordLocation, instanceLocation, ...more }, schemaBase, 
 })
 
 const errorUtils = { toPointer, pointerPart, errorMerge }
-module.exports = { stringLength, isMultipleOf, deepEqual, unique, hasOwn, ...errorUtils }
+module.exports = { stringLength, isMultipleOf, deepEqual, unique, deBase64, hasOwn, ...errorUtils }
