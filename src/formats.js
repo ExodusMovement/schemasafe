@@ -66,15 +66,15 @@ const core = {
   uuid: /^(?:urn:uuid:)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
 
   // length restriction is an arbitrary safeguard
-  // first regex verifies structure
-  // second regex verifies no more than one fraction, and that at least 1 block is present
+  // first regex checks if this a week duration (can't be combined with others)
+  // second regex verifies symbols, no more than one fraction, at least 1 block is present, and T is not last
+  // third regex verifies structure
   duration: (input) =>
     input.length > 1 &&
     input.length < 80 &&
-    /^P(?:[.,\d]+Y)?(?:[.,\d]+M)?(?:[.,\d]+W)?(?:[.,\d]+D)?(?:T(?:[.,\d]+H)?(?:[.,\d]+M)?(?:[.,\d]+S)?)?$/.test(
-      input
-    ) &&
-    /^P[\dYMWDTHMS]*(?:\d[.,]\d+)?[YMWDTHMS]$/.test(input),
+    (/^P\d+([.,]\d+)?W$/.test(input) ||
+      (/^P[\dYMDTHMS]*(\d[.,]\d+)?[YMDHMS]$/.test(input) &&
+        /^P([.,\d]+Y)?([.,\d]+M)?([.,\d]+D)?(T([.,\d]+H)?([.,\d]+M)?([.,\d]+S)?)?$/.test(input))),
 
   // TODO: iri, iri-reference, idn-email, idn-hostname
 }
