@@ -27,13 +27,13 @@ tape('Invalid format throws', (t) => {
   const passes = (schema) => t.doesNotThrow(() => validator(schema))
 
   throws({ format: 'whatever' })
-  throws({ format: ['email'] }, /Type not expected/)
+  throws({ format: ['email'] })
 
   passes({ format: 'email' })
 
   t.throws(
     () => validator({ format: 'whatever' }, { formats: { whatever: 'foo' } }),
-    /Unrecognized format used/
+    /Invalid format used/
   )
   t.ok(() => validator({ format: 'whatever' }, { formats: { whatever: /^x$/ } }))
   t.ok(() => validator({ format: 'whatever' }, { formats: { whatever: () => false } }))

@@ -314,7 +314,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (Array.isArray(node.examples)) consume('examples', 'array') // unused, meta-only
 
     if (node.contentEncoding || node.contentMediaType || node.contentSchema)
-      ensure('content(MediaType/Encoding/Schema) are unsupported yet') // fail even in allowUnusedKeywords mode
+      fail('content(MediaType/Encoding/Schema) are unsupported yet') // fail even in allowUnusedKeywords mode
 
     // defining defs are allowed, those are validated on usage
     if (typeof node.$defs === 'object') {
@@ -606,26 +606,26 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
 
       prevWrap(true, () => {
-        if (node.format && functions.hasOwn(fmts, node.format)) {
+        if (node.format) {
+          const known = typeof node.format === 'string' && functions.hasOwn(fmts, node.format)
+          enforce(known, 'Unrecognized format used:', node.format)
           const formatImpl = fmts[node.format]
-          if (formatImpl instanceof RegExp || typeof formatImpl === 'function') {
-            let n = cache.format.get(formatImpl)
-            if (!n) {
-              n = gensym('format')
-              scope[n] = formatImpl
-              cache.format.set(formatImpl, n)
-            }
-            if (formatImpl instanceof RegExp) {
-              // built-in formats are fine, check only ones from options
-              if (functions.hasOwn(optFormats, node.format)) enforceRegex(formatImpl.source)
-              errorIf('!%s.test(%s)', [n, name], { path: ['format'] })
-            } else {
-              errorIf('!%s(%s)', [n, name], { path: ['format'] })
-            }
-          } else fail('Unrecognized format used:', node.format)
+          const valid = formatImpl instanceof RegExp || typeof formatImpl === 'function'
+          enforce(valid, 'Invalid format used:', node.format)
+          let n = cache.format.get(formatImpl)
+          if (!n) {
+            n = gensym('format')
+            scope[n] = formatImpl
+            cache.format.set(formatImpl, n)
+          }
+          if (formatImpl instanceof RegExp) {
+            // built-in formats are fine, check only ones from options
+            if (functions.hasOwn(optFormats, node.format)) enforceRegex(formatImpl.source)
+            errorIf('!%s.test(%s)', [n, name], { path: ['format'] })
+          } else {
+            errorIf('!%s(%s)', [n, name], { path: ['format'] })
+          }
           consume('format', 'string')
-        } else {
-          enforce(!node.format, 'Unrecognized format used:', node.format)
         }
 
         if (node.pattern) {
