@@ -14,7 +14,7 @@
 'use strict'
 
 return (function validate(data, recursive) {
-  if (!((data === 1) || (data === 2) || (data === 3))) return false
+  if (!(data === 1 || data === 2 || data === 3)) return false
   return true
 })
 ```
@@ -52,7 +52,7 @@ const deepEqual = (obj, obj2) => {
   return false
 };
 return (function validate(data, recursive) {
-  if (!((data === 6) || (data === "foo") || (data === true) || deepEqual(data, []) || deepEqual(data, {"foo":12}))) return false
+  if (!(data === 6 || data === "foo" || data === true || deepEqual(data, []) || deepEqual(data, {"foo":12}))) return false
   return true
 })
 ```
@@ -72,7 +72,7 @@ return (function validate(data, recursive) {
 'use strict'
 
 return (function validate(data, recursive) {
-  if (!((data === 6) || (data === null))) return false
+  if (!(data === 6 || data === null)) return false
   return true
 })
 ```
@@ -125,7 +125,7 @@ return (function validate(data, recursive) {
 'use strict'
 
 return (function validate(data, recursive) {
-  if (!((data === "foo\nbar") || (data === "foo\rbar"))) return false
+  if (!(data === "foo\nbar" || data === "foo\rbar")) return false
   return true
 })
 ```

@@ -362,7 +362,7 @@ const ref7 = function validate(data, recursive) {
   return true
 };
 const ref8 = function validate(data, recursive) {
-  if (!((data === "array") || (data === "boolean") || (data === "integer") || (data === "null") || (data === "number") || (data === "object") || (data === "string"))) return false
+  if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) return false
   return true
 };
 const ref9 = function validate(data, recursive) {
@@ -786,7 +786,7 @@ const ref7 = function validate(data, recursive) {
   return true
 };
 const ref8 = function validate(data, recursive) {
-  if (!((data === "array") || (data === "boolean") || (data === "integer") || (data === "null") || (data === "number") || (data === "object") || (data === "string"))) return false
+  if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) return false
   return true
 };
 const ref9 = function validate(data, recursive) {
@@ -1210,7 +1210,7 @@ const ref7 = function validate(data, recursive) {
   return true
 };
 const ref8 = function validate(data, recursive) {
-  if (!((data === "array") || (data === "boolean") || (data === "integer") || (data === "null") || (data === "number") || (data === "object") || (data === "string"))) return false
+  if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) return false
   return true
 };
 const ref9 = function validate(data, recursive) {

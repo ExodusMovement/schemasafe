@@ -438,7 +438,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         scope.deepEqual = functions.deepEqual
         return format('deepEqual(%s, %j)', variableName, value)
       }
-      return format('(%s === %j)', variableName, value)
+      return format('%s === %j', variableName, value)
     }
 
     const enforceRegex = (source, target = node) => {
@@ -912,7 +912,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if ((node.if || node.if === false) && thenOrElse) {
         const { sub, delta: deltaIf } = subrule(null, current, node.if, subPath('if'))
         let deltaElse, deltaThen
-        fun.write('if (!%s) {', sub)
+        fun.write('if (%s) {', safenot(sub))
         if (node.else || node.else === false) {
           deltaElse = rule(current, node.else, subPath('else'))
           consume('else', 'object', 'boolean')
@@ -940,7 +940,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         let delta
         for (const [key, sch] of Object.entries(node.anyOf)) {
           const { sub, delta: deltaVariant } = subrule(suberr, current, sch, subPath('anyOf', key))
-          fun.write('if (!%s) {', sub)
+          fun.write('if (%s) {', safenot(sub))
           delta = delta ? orDelta(delta, deltaVariant) : deltaVariant
         }
         if (node.anyOf.length > 0) evaluateDelta(delta)
