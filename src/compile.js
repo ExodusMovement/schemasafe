@@ -313,9 +313,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (typeof node.$comment === 'string') consume('$comment', 'string') // unused, meta-only
     if (Array.isArray(node.examples)) consume('examples', 'array') // unused, meta-only
 
-    if (node.contentEncoding || node.contentMediaType || node.contentSchema)
-      fail('content(MediaType/Encoding/Schema) are unsupported yet') // fail even in allowUnusedKeywords mode
-
     // defining defs are allowed, those are validated on usage
     if (typeof node.$defs === 'object') {
       consume('$defs', 'object')
@@ -606,12 +603,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
 
       prevWrap(true, () => {
-        if (node.format) {
-          const known = typeof node.format === 'string' && functions.hasOwn(fmts, node.format)
-          enforce(known, 'Unrecognized format used:', node.format)
-          const formatImpl = fmts[node.format]
+        const checkFormat = (fmtname, target, formatsObj = fmts) => {
+          const known = typeof fmtname === 'string' && functions.hasOwn(formatsObj, fmtname)
+          enforce(known, 'Unrecognized format used:', fmtname)
+          const formatImpl = formatsObj[fmtname]
           const valid = formatImpl instanceof RegExp || typeof formatImpl === 'function'
-          enforce(valid, 'Invalid format used:', node.format)
+          enforce(valid, 'Invalid format used:', fmtname)
           let n = cache.format.get(formatImpl)
           if (!n) {
             n = gensym('format')
@@ -620,11 +617,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           }
           if (formatImpl instanceof RegExp) {
             // built-in formats are fine, check only ones from options
-            if (functions.hasOwn(optFormats, node.format)) enforceRegex(formatImpl.source)
-            errorIf('!%s.test(%s)', [n, name], { path: ['format'] })
+            if (functions.hasOwn(optFormats, fmtname)) enforceRegex(formatImpl.source)
+            errorIf('!%s.test(%s)', [n, target], { path: ['format'] })
           } else {
-            errorIf('!%s(%s)', [n, name], { path: ['format'] })
+            errorIf('!%s(%s)', [n, target], { path: ['format'] })
           }
+        }
+        if (node.format) {
+          checkFormat(node.format, name)
           consume('format', 'string')
         }
 
@@ -633,6 +633,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           if (!noopRegExps.has(node.pattern))
             errorIf('!%s', [patternTest(node.pattern, name)], { path: ['pattern'] })
           consume('pattern', 'string')
+        }
+
+        if (node.contentEncoding || node.contentMediaType || node.contentSchema) {
+          if (node.contentEncoding === 'base64') {
+            checkFormat('base64', name, formats.extra)
+            enforce(!node.contentMediaType, 'contentEncoding + contentMediaType is not ready yet')
+            consume('contentEncoding', 'string')
+          } else {
+            enforce(!node.contentEncoding, 'Unrecognized contentEncoding:', node.contentEncoding)
+          }
+          if (node.contentMediaType || node.contentSchema)
+            fail('content(MediaType/Encoding/Schema) are unsupported yet')
         }
       })
 
