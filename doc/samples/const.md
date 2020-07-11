@@ -52,7 +52,7 @@ const deepEqual = (obj, obj2) => {
   return false
 };
 return (function validate(data, recursive) {
-  if (!deepEqual(data, {"foo":"bar","baz":"bax"})) return false
+  if (!(deepEqual(data, {"foo":"bar","baz":"bax"}))) return false
   return true
 })
 ```
@@ -90,7 +90,7 @@ const deepEqual = (obj, obj2) => {
   return false
 };
 return (function validate(data, recursive) {
-  if (!deepEqual(data, [{"foo":"bar"}])) return false
+  if (!(deepEqual(data, [{"foo":"bar"}]))) return false
   return true
 })
 ```

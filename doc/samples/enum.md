@@ -99,9 +99,9 @@ return (function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
   if (data.foo !== undefined && hasOwn(data, "foo")) {
-    if (!((data.foo === "foo"))) return false
+    if (!(data.foo === "foo")) return false
   }
-  if (!((data.bar === "bar"))) return false
+  if (!(data.bar === "bar")) return false
   return true
 })
 ```
@@ -145,7 +145,7 @@ return (function validate(data, recursive) {
 'use strict'
 
 return (function validate(data, recursive) {
-  if (!((data === false))) return false
+  if (!(data === false)) return false
   return true
 })
 ```
@@ -165,7 +165,7 @@ return (function validate(data, recursive) {
 'use strict'
 
 return (function validate(data, recursive) {
-  if (!((data === true))) return false
+  if (!(data === true)) return false
   return true
 })
 ```
@@ -185,7 +185,7 @@ return (function validate(data, recursive) {
 'use strict'
 
 return (function validate(data, recursive) {
-  if (!((data === 0))) return false
+  if (!(data === 0)) return false
   return true
 })
 ```
@@ -205,7 +205,7 @@ return (function validate(data, recursive) {
 'use strict'
 
 return (function validate(data, recursive) {
-  if (!((data === 1))) return false
+  if (!(data === 1)) return false
   return true
 })
 ```
@@ -225,7 +225,7 @@ return (function validate(data, recursive) {
 'use strict'
 
 return (function validate(data, recursive) {
-  if (!((data === "hello\u0000there"))) return false
+  if (!(data === "hello\u0000there")) return false
   return true
 })
 ```

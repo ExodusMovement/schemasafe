@@ -13,7 +13,7 @@
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {
@@ -36,7 +36,7 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {
@@ -63,7 +63,7 @@ const ref0 = function validate(data, recursive) {
   return true
 };
 const ref1 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {
@@ -90,7 +90,7 @@ return (function validate(data, recursive) {
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {
@@ -141,7 +141,7 @@ return (function validate(data, recursive) {
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
-  if (!(Array.isArray(data))) return false
+  if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
     if (data[i] !== undefined && hasOwn(data, i)) {
       if (!ref1(data[i], recursive)) return false
@@ -150,7 +150,7 @@ const ref0 = function validate(data, recursive) {
   return true
 };
 const ref1 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {
@@ -193,7 +193,7 @@ return (function validate(data, recursive) {
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
-  if (!(Array.isArray(data))) return false
+  if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
     if (data[i] !== undefined && hasOwn(data, i)) {
       if (!ref1(data[i], recursive)) return false
@@ -202,7 +202,7 @@ const ref0 = function validate(data, recursive) {
   return true
 };
 const ref1 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {

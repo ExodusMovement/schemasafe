@@ -1,6 +1,6 @@
 'use strict'
 
-const { format, safe, safeand, safeor } = require('./safe-format')
+const { format, safe, safeand, safeor, safenot } = require('./safe-format')
 const genfun = require('./generate-function')
 const { resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
@@ -241,7 +241,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         error({})
       } else {
         // node === false
-        errorIf(format('%s', present(current)), {})
+        errorIf(present(current), {})
       }
       evaluateDelta({ properties: [true], items: Infinity }) // everything is evaluated for false
       return stat
@@ -329,7 +329,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node.required === true || node.required === false)
         fail('Can not apply boolean required here (e.g. at root)')
     } else if (defaultIsPresent || booleanRequired) {
-      fun.write('if (!(%s)) {', present(current))
+      fun.write('if (%s) {', safenot(present(current)))
       if (defaultIsPresent) {
         fun.write('%s = %j', name, node.default)
         consume('default', 'jsonval')
@@ -359,7 +359,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('const %s = %s(%s, %s)', res, n, name, recursive)
         fun.write('const %s = %s.errors', suberr, n)
         fun.write('validate.errors = %s', err)
-        errorIf(format('!%s', res), { ...errorArgs, source: suberr })
+        errorIf(safenot(res), { ...errorArgs, source: suberr })
       } else {
         errorIf(format('!%s(%s, %s)', n, name, recursive), errorArgs)
       }
@@ -529,7 +529,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const additionalCondition = (key, properties, patternProperties) =>
       safeand(
         ...[...new Set(properties)].map((p) => format('%s !== %j', key, p)),
-        ...[...new Set(patternProperties)].map((p) => format('!%s', patternTest(p, key)))
+        ...[...new Set(patternProperties)].map((p) => safenot(patternTest(p, key)))
       )
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
@@ -621,7 +621,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (node.pattern) {
           enforceRegex(node.pattern)
           if (!noopRegExps.has(node.pattern))
-            errorIf(format('!%s', patternTest(node.pattern, name)), { path: ['pattern'] })
+            errorIf(safenot(patternTest(node.pattern, name)), { path: ['pattern'] })
           consume('pattern', 'string')
         }
 
@@ -812,7 +812,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         for (const req of node.required) {
           if (checked(req)) continue
           const prop = currPropImm(req)
-          errorIf(format('!(%s)', present(prop)), { path: ['required'], prop })
+          errorIf(safenot(present(prop)), { path: ['required'], prop })
         }
         evaluateDelta({ required: node.required })
         consume('required', 'array')
@@ -826,15 +826,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             const item = currPropImm(key, checked(key))
             if (Array.isArray(deps) && dependencies !== 'dependentSchemas') {
               const clauses = deps.filter((k) => !checked(k)).map((k) => present(currPropImm(k)))
-              const condition = safeand(...clauses)
+              const condition = safenot(safeand(...clauses))
               const errorArgs = { path: [dependencies, key] }
               if (clauses.length === 0) {
                 // nothing to do
               } else if (item.checked) {
-                errorIf(format('!(%s)', condition), errorArgs)
+                errorIf(condition, errorArgs)
                 evaluateDelta({ required: deps })
               } else {
-                errorIf(format('%s && !(%s)', present(item), condition), errorArgs)
+                errorIf(safeand(present(item), condition), errorArgs)
               }
             } else if (
               ((typeof deps === 'object' && !Array.isArray(deps)) || typeof deps === 'boolean') &&
@@ -886,7 +886,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const checkConst = () => {
       if (node.const !== undefined) {
-        errorIf(format('!%s', compare(name, node.const)), { path: ['const'] })
+        errorIf(safenot(compare(name, node.const)), { path: ['const'] })
         consume('const', 'jsonval')
         return true
       } else if (node.enum) {
@@ -894,7 +894,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const objects = node.enum.filter((value) => value && typeof value === 'object')
         const primitive = node.enum.filter((value) => !(value && typeof value === 'object'))
         const condition = safeor(...[...primitive, ...objects].map((value) => compare(name, value)))
-        errorIf(format('!(%s)', condition), { path: ['enum'] })
+        errorIf(safenot(condition), { path: ['enum'] })
         consume('enum', 'array')
         return true
       }
@@ -904,7 +904,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const checkGeneric = () => {
       if (node.not || node.not === false) {
         const { sub } = subrule(null, current, node.not, subPath('not'))
-        errorIf(format('%s', sub), { path: ['not'] })
+        errorIf(sub, { path: ['not'] })
         consume('not', 'object', 'boolean')
       }
 
@@ -1011,8 +1011,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (needTypeValidate) {
       const filteredTypes = typeArray.filter((t) => typeApplicable(t))
       if (filteredTypes.length === 0) fail('No valid types possible')
-      const typeValidate = safeor(...filteredTypes.map((t) => types.get(t)(name)))
-      errorIf(format('!(%s)', typeValidate), { path: ['type'] })
+      const typeInvalid = safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
+      errorIf(typeInvalid, { path: ['type'] })
     }
     if (node.type !== undefined) consume('type', 'string', 'array')
 

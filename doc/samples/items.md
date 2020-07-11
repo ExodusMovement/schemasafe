@@ -168,7 +168,7 @@ return (function validate(data, recursive) {
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
-  if (!(Array.isArray(data))) return false
+  if (!Array.isArray(data)) return false
   if (data[0] !== undefined && hasOwn(data, 0)) {
     if (!ref1(data[0], recursive)) return false
   }
@@ -184,7 +184,7 @@ const ref1 = function validate(data, recursive) {
   return true
 };
 return (function validate(data, recursive) {
-  if (!(Array.isArray(data))) return false
+  if (!Array.isArray(data)) return false
   if (data[0] !== undefined && hasOwn(data, 0)) {
     if (!ref0(data[0], recursive)) return false
   }
@@ -227,7 +227,7 @@ return (function validate(data, recursive) {
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 return (function validate(data, recursive) {
-  if (!(Array.isArray(data))) return false
+  if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
     if (data[i] !== undefined && hasOwn(data, i)) {
       if (!(Array.isArray(data[i]))) return false

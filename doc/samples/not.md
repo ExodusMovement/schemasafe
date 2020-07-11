@@ -15,7 +15,7 @@
 
 return (function validate(data, recursive) {
   const sub0 = (() => {
-    if (!(Number.isInteger(data))) return false
+    if (!Number.isInteger(data)) return false
     return true
   })()
   if (sub0) return false

@@ -15,7 +15,7 @@
 
 return (function validate(data, recursive) {
   const sub0 = (() => {
-    if (!(Number.isInteger(data))) return false
+    if (!Number.isInteger(data)) return false
     return true
   })()
   if (!sub0) {
@@ -199,7 +199,7 @@ return (function validate(data, recursive) {
   const sub0 = (() => {
     if (typeof data === "object" && data && !Array.isArray(data)) {
       if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
-      if (!(Number.isInteger(data.bar))) return false
+      if (!Number.isInteger(data.bar)) return false
     }
     return true
   })()

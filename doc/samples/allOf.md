@@ -21,7 +21,7 @@ const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 return (function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
-    if (!(Number.isInteger(data.bar))) return false
+    if (!Number.isInteger(data.bar)) return false
   }
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (!(data.foo !== undefined && hasOwn(data, "foo"))) return false
@@ -59,7 +59,7 @@ const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 return (function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
-    if (!(Number.isInteger(data.bar))) return false
+    if (!Number.isInteger(data.bar)) return false
   }
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (!(data.foo !== undefined && hasOwn(data, "foo"))) return false

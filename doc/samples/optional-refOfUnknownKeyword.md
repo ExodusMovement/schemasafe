@@ -17,7 +17,7 @@
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {
@@ -54,7 +54,7 @@ return (function validate(data, recursive) {
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {

@@ -27,10 +27,10 @@ return (function validate(data, recursive) {
     if (data.bar !== undefined && hasOwn(data, "bar")) {
       if (typeof data === "object" && data && !Array.isArray(data)) {
         if (data.foo !== undefined && hasOwn(data, "foo")) {
-          if (!(Number.isInteger(data.foo))) return false
+          if (!Number.isInteger(data.foo)) return false
         }
         if (data.bar !== undefined && hasOwn(data, "bar")) {
-          if (!(Number.isInteger(data.bar))) return false
+          if (!Number.isInteger(data.bar)) return false
         }
       }
     }

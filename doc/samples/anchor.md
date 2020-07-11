@@ -13,7 +13,7 @@
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {
@@ -45,7 +45,7 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {
@@ -77,7 +77,7 @@ return (function validate(data, recursive) {
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 };
 return (function validate(data, recursive) {

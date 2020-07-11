@@ -14,7 +14,7 @@
 'use strict'
 
 return (function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 })
 ```
@@ -54,7 +54,7 @@ return (function validate(data, recursive) {
 'use strict'
 
 return (function validate(data, recursive) {
-  if (!(Number.isInteger(data))) return false
+  if (!Number.isInteger(data)) return false
   return true
 })
 ```

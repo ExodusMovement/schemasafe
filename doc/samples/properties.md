@@ -16,7 +16,7 @@ const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 return (function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
-      if (!(Number.isInteger(data.foo))) return false
+      if (!Number.isInteger(data.foo)) return false
     }
     if (data.bar !== undefined && hasOwn(data, "bar")) {
       if (!(typeof data.bar === "string")) return false
@@ -55,11 +55,11 @@ const pattern0 = new RegExp("f.o", "u");
 return (function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
-      if (!(Array.isArray(data.foo))) return false
+      if (!Array.isArray(data.foo)) return false
       if (data.foo.length > 3) return false
     }
     if (data.bar !== undefined && hasOwn(data, "bar")) {
-      if (!(Array.isArray(data.bar))) return false
+      if (!Array.isArray(data.bar)) return false
     }
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {
