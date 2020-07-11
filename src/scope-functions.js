@@ -59,10 +59,10 @@ const unique = (array) => {
 const deBase64 = (string) => {
   if (typeof Buffer !== 'undefined') return Buffer.from(string, 'base64').toString('utf-8')
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-  const map = Array(256)
+  const map = Array(128)
   chars.split('').forEach((c, i) => (map[c.charCodeAt(0)] = i.toString(4).padStart(3, 0)))
   let tmp = ''
-  const bytes = new Uint8Array(Math.ceil((string.length * 3) / 4))
+  const bytes = new Uint8Array(Math.floor((string.length * 3) / 4))
   let filled = 0
   for (let i = 0; i < string.length; i++) {
     tmp += map[string.charCodeAt(i)] || ''
