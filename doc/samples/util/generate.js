@@ -3,11 +3,11 @@
 const { readdirSync, readFileSync, writeFileSync } = require('fs')
 const path = require('path')
 const { format: prettify } = require('prettier')
-const { validator } = require('../../')
-const schemas = require('../../test/util/schemas')
+const { validator } = require('../../../')
+const schemas = require('../../../test/util/schemas')
 
 const version = 'draft2019-09'
-const dir = path.join(__dirname, '../../test/JSON-Schema-Test-Suite/tests', version)
+const dir = path.join(__dirname, '../../../test/JSON-Schema-Test-Suite/tests', version)
 
 function processSchema(block) {
   const errors = new Set()
