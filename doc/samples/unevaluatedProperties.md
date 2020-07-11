@@ -44,11 +44,9 @@ const stringLength = (string) =>
 return (function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   for (const key0 of Object.keys(data)) {
-    if (true) {
-      if (data[key0] !== undefined) {
-        if (!(typeof data[key0] === "string")) return false
-        if (data[key0].length < 3 || stringLength(data[key0]) < 3) return false
-      }
+    if (data[key0] !== undefined) {
+      if (!(typeof data[key0] === "string")) return false
+      if (data[key0].length < 3 || stringLength(data[key0]) < 3) return false
     }
   }
   return true
@@ -76,9 +74,7 @@ return (function validate(data, recursive) {
 return (function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   for (const key0 of Object.keys(data)) {
-    if (true) {
-      if (data[key0] !== undefined) return false
-    }
+    if (data[key0] !== undefined) return false
   }
   return true
 })
@@ -604,9 +600,7 @@ return (function validate(data, recursive) {
 return (function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
-      if (true) {
-        if (data[key0] !== undefined) return false
-      }
+      if (data[key0] !== undefined) return false
     }
   }
   return true

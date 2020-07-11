@@ -54,6 +54,11 @@ module.exports = () => {
       this.write(close)
     },
 
+    if(condition, writeBody) {
+      if (`${condition}` === 'true') return writeBody()
+      this.block('if (%s) {', [condition], '}', writeBody)
+    },
+
     makeModule(scope = {}) {
       const scopeDefs = processScope(scope).map(
         ([key, val]) => `const ${safe(key)} = ${jaystring(val)};`

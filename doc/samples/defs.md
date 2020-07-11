@@ -18,30 +18,26 @@ const ref0 = function validate(data, recursive) {
     if (data.definitions !== undefined && hasOwn(data, "definitions")) {
       if (!(typeof data.definitions === "object" && data.definitions && !Array.isArray(data.definitions))) return false
       for (const key0 of Object.keys(data.definitions)) {
-        if (true) {
-          if (data.definitions[key0] !== undefined) {
-            if (!(recursive || validate)(data.definitions[key0], recursive || validate)) return false
-          }
+        if (data.definitions[key0] !== undefined) {
+          if (!(recursive || validate)(data.definitions[key0], recursive || validate)) return false
         }
       }
     }
     if (data.dependencies !== undefined && hasOwn(data, "dependencies")) {
       if (!(typeof data.dependencies === "object" && data.dependencies && !Array.isArray(data.dependencies))) return false
       for (const key1 of Object.keys(data.dependencies)) {
-        if (true) {
-          if (data.dependencies[key1] !== undefined) {
-            const sub0 = (() => {
-              if (!(recursive || validate)(data.dependencies[key1], recursive || validate)) return false
+        if (data.dependencies[key1] !== undefined) {
+          const sub0 = (() => {
+            if (!(recursive || validate)(data.dependencies[key1], recursive || validate)) return false
+            return true
+          })()
+          if (!sub0) {
+            const sub1 = (() => {
+              if (!ref1(data.dependencies[key1], recursive || validate)) return false
               return true
             })()
-            if (!sub0) {
-              const sub1 = (() => {
-                if (!ref1(data.dependencies[key1], recursive || validate)) return false
-                return true
-              })()
-              if (!sub1) {
-                return false
-              }
+            if (!sub1) {
+              return false
             }
           }
         }
@@ -137,10 +133,8 @@ const ref2 = function validate(data, recursive) {
         if (!format1.test(key2)) return false
       }
       for (const key3 of Object.keys(data["$vocabulary"])) {
-        if (true) {
-          if (data["$vocabulary"][key3] !== undefined) {
-            if (!(typeof data["$vocabulary"][key3] === "boolean")) return false
-          }
+        if (data["$vocabulary"][key3] !== undefined) {
+          if (!(typeof data["$vocabulary"][key3] === "boolean")) return false
         }
       }
     }
@@ -150,10 +144,8 @@ const ref2 = function validate(data, recursive) {
     if (data["$defs"] !== undefined && hasOwn(data, "$defs")) {
       if (!(typeof data["$defs"] === "object" && data["$defs"] && !Array.isArray(data["$defs"]))) return false
       for (const key4 of Object.keys(data["$defs"])) {
-        if (true) {
-          if (data["$defs"][key4] !== undefined) {
-            if (!(recursive || validate)(data["$defs"][key4], recursive || validate)) return false
-          }
+        if (data["$defs"][key4] !== undefined) {
+          if (!(recursive || validate)(data["$defs"][key4], recursive || validate)) return false
         }
       }
     }
@@ -199,10 +191,8 @@ const ref3 = function validate(data, recursive) {
     if (data.properties !== undefined && hasOwn(data, "properties")) {
       if (!(typeof data.properties === "object" && data.properties && !Array.isArray(data.properties))) return false
       for (const key5 of Object.keys(data.properties)) {
-        if (true) {
-          if (data.properties[key5] !== undefined) {
-            if (!(recursive || validate)(data.properties[key5], recursive || validate)) return false
-          }
+        if (data.properties[key5] !== undefined) {
+          if (!(recursive || validate)(data.properties[key5], recursive || validate)) return false
         }
       }
     }
@@ -212,20 +202,16 @@ const ref3 = function validate(data, recursive) {
         if (!format2(key6)) return false
       }
       for (const key7 of Object.keys(data.patternProperties)) {
-        if (true) {
-          if (data.patternProperties[key7] !== undefined) {
-            if (!(recursive || validate)(data.patternProperties[key7], recursive || validate)) return false
-          }
+        if (data.patternProperties[key7] !== undefined) {
+          if (!(recursive || validate)(data.patternProperties[key7], recursive || validate)) return false
         }
       }
     }
     if (data.dependentSchemas !== undefined && hasOwn(data, "dependentSchemas")) {
       if (!(typeof data.dependentSchemas === "object" && data.dependentSchemas && !Array.isArray(data.dependentSchemas))) return false
       for (const key8 of Object.keys(data.dependentSchemas)) {
-        if (true) {
-          if (data.dependentSchemas[key8] !== undefined) {
-            if (!(recursive || validate)(data.dependentSchemas[key8], recursive || validate)) return false
-          }
+        if (data.dependentSchemas[key8] !== undefined) {
+          if (!(recursive || validate)(data.dependentSchemas[key8], recursive || validate)) return false
         }
       }
     }
@@ -333,10 +319,8 @@ const ref5 = function validate(data, recursive) {
     if (data.dependentRequired !== undefined && hasOwn(data, "dependentRequired")) {
       if (!(typeof data.dependentRequired === "object" && data.dependentRequired && !Array.isArray(data.dependentRequired))) return false
       for (const key9 of Object.keys(data.dependentRequired)) {
-        if (true) {
-          if (data.dependentRequired[key9] !== undefined) {
-            if (!ref1(data.dependentRequired[key9], recursive || validate)) return false
-          }
+        if (data.dependentRequired[key9] !== undefined) {
+          if (!ref1(data.dependentRequired[key9], recursive || validate)) return false
         }
       }
     }
@@ -458,30 +442,26 @@ const ref0 = function validate(data, recursive) {
     if (data.definitions !== undefined && hasOwn(data, "definitions")) {
       if (!(typeof data.definitions === "object" && data.definitions && !Array.isArray(data.definitions))) return false
       for (const key0 of Object.keys(data.definitions)) {
-        if (true) {
-          if (data.definitions[key0] !== undefined) {
-            if (!(recursive || validate)(data.definitions[key0], recursive || validate)) return false
-          }
+        if (data.definitions[key0] !== undefined) {
+          if (!(recursive || validate)(data.definitions[key0], recursive || validate)) return false
         }
       }
     }
     if (data.dependencies !== undefined && hasOwn(data, "dependencies")) {
       if (!(typeof data.dependencies === "object" && data.dependencies && !Array.isArray(data.dependencies))) return false
       for (const key1 of Object.keys(data.dependencies)) {
-        if (true) {
-          if (data.dependencies[key1] !== undefined) {
-            const sub0 = (() => {
-              if (!(recursive || validate)(data.dependencies[key1], recursive || validate)) return false
+        if (data.dependencies[key1] !== undefined) {
+          const sub0 = (() => {
+            if (!(recursive || validate)(data.dependencies[key1], recursive || validate)) return false
+            return true
+          })()
+          if (!sub0) {
+            const sub1 = (() => {
+              if (!ref1(data.dependencies[key1], recursive || validate)) return false
               return true
             })()
-            if (!sub0) {
-              const sub1 = (() => {
-                if (!ref1(data.dependencies[key1], recursive || validate)) return false
-                return true
-              })()
-              if (!sub1) {
-                return false
-              }
+            if (!sub1) {
+              return false
             }
           }
         }
@@ -577,10 +557,8 @@ const ref2 = function validate(data, recursive) {
         if (!format1.test(key2)) return false
       }
       for (const key3 of Object.keys(data["$vocabulary"])) {
-        if (true) {
-          if (data["$vocabulary"][key3] !== undefined) {
-            if (!(typeof data["$vocabulary"][key3] === "boolean")) return false
-          }
+        if (data["$vocabulary"][key3] !== undefined) {
+          if (!(typeof data["$vocabulary"][key3] === "boolean")) return false
         }
       }
     }
@@ -590,10 +568,8 @@ const ref2 = function validate(data, recursive) {
     if (data["$defs"] !== undefined && hasOwn(data, "$defs")) {
       if (!(typeof data["$defs"] === "object" && data["$defs"] && !Array.isArray(data["$defs"]))) return false
       for (const key4 of Object.keys(data["$defs"])) {
-        if (true) {
-          if (data["$defs"][key4] !== undefined) {
-            if (!(recursive || validate)(data["$defs"][key4], recursive || validate)) return false
-          }
+        if (data["$defs"][key4] !== undefined) {
+          if (!(recursive || validate)(data["$defs"][key4], recursive || validate)) return false
         }
       }
     }
@@ -639,10 +615,8 @@ const ref3 = function validate(data, recursive) {
     if (data.properties !== undefined && hasOwn(data, "properties")) {
       if (!(typeof data.properties === "object" && data.properties && !Array.isArray(data.properties))) return false
       for (const key5 of Object.keys(data.properties)) {
-        if (true) {
-          if (data.properties[key5] !== undefined) {
-            if (!(recursive || validate)(data.properties[key5], recursive || validate)) return false
-          }
+        if (data.properties[key5] !== undefined) {
+          if (!(recursive || validate)(data.properties[key5], recursive || validate)) return false
         }
       }
     }
@@ -652,20 +626,16 @@ const ref3 = function validate(data, recursive) {
         if (!format2(key6)) return false
       }
       for (const key7 of Object.keys(data.patternProperties)) {
-        if (true) {
-          if (data.patternProperties[key7] !== undefined) {
-            if (!(recursive || validate)(data.patternProperties[key7], recursive || validate)) return false
-          }
+        if (data.patternProperties[key7] !== undefined) {
+          if (!(recursive || validate)(data.patternProperties[key7], recursive || validate)) return false
         }
       }
     }
     if (data.dependentSchemas !== undefined && hasOwn(data, "dependentSchemas")) {
       if (!(typeof data.dependentSchemas === "object" && data.dependentSchemas && !Array.isArray(data.dependentSchemas))) return false
       for (const key8 of Object.keys(data.dependentSchemas)) {
-        if (true) {
-          if (data.dependentSchemas[key8] !== undefined) {
-            if (!(recursive || validate)(data.dependentSchemas[key8], recursive || validate)) return false
-          }
+        if (data.dependentSchemas[key8] !== undefined) {
+          if (!(recursive || validate)(data.dependentSchemas[key8], recursive || validate)) return false
         }
       }
     }
@@ -773,10 +743,8 @@ const ref5 = function validate(data, recursive) {
     if (data.dependentRequired !== undefined && hasOwn(data, "dependentRequired")) {
       if (!(typeof data.dependentRequired === "object" && data.dependentRequired && !Array.isArray(data.dependentRequired))) return false
       for (const key9 of Object.keys(data.dependentRequired)) {
-        if (true) {
-          if (data.dependentRequired[key9] !== undefined) {
-            if (!ref1(data.dependentRequired[key9], recursive || validate)) return false
-          }
+        if (data.dependentRequired[key9] !== undefined) {
+          if (!ref1(data.dependentRequired[key9], recursive || validate)) return false
         }
       }
     }

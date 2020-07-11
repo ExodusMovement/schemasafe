@@ -211,22 +211,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           fun.write('%s = [%s]', errors, errorJS)
         }
       }
-      if (allErrors) {
-        fun.write('errorCount++')
-      } else {
-        fun.write('return false')
-      }
+      if (allErrors) fun.write('errorCount++')
+      else fun.write('return false')
     }
     const errorIf = (fmt, args, errorArgs) => {
       const condition = format(fmt, ...args)
-      if (includeErrors === true && errors) {
-        fun.write('if (%s) {', condition)
-        error(errorArgs)
-        fun.write('}')
-      } else {
-        // in this case, we can fast-track and inline this to generate more readable code
-        fun.write('if (%s) return false', condition)
-      }
+      if (includeErrors === true && errors) fun.if(condition, () => error(errorArgs))
+      else fun.write('if (%s) return false', condition) // fast-track and inline for more readable code
     }
 
     const fail = (msg, value) => {
@@ -528,7 +519,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const additionalProperties = (condition, ruleValue, rulePath) => {
       const key = gensym('key')
       forObjectKeys(key, name, (sub) => {
-        fun.block('if (%s) {', [condition(key)], '}', () => {
+        fun.if(condition(key), () => {
           if (ruleValue === false && removeAdditional) fun.write('delete %s[%s]', name, key)
           else rule(sub, ruleValue, subPath(rulePath))
         })
@@ -852,7 +843,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
                 evaluateDelta(orDelta({}, delta))
               }
               if (item.checked) body()
-              else fun.block('if (%s) {', [present(item)], '}', body)
+              else fun.if(present(item), body)
             } else fail(`Unexpected ${dependencies} entry`)
           }
           consume(dependencies, 'object')
@@ -872,7 +863,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           forObjectKeys(key, name, (sub) => {
             for (const p of Object.keys(node.patternProperties)) {
               enforceRegex(p, node.propertyNames || {})
-              fun.block('if (%s) {', [patternTest(p, key)], '}', () => {
+              fun.if(patternTest(p, key), () => {
                 rule(sub, node.patternProperties[p], subPath('patternProperties', p))
               })
             }
