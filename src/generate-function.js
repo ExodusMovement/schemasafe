@@ -55,6 +55,8 @@ module.exports = () => {
     },
 
     if(condition, writeBody) {
+      /* c8 ignore next */
+      if (`${condition}` === 'false') throw new Error('Unexpected: false if condition')
       if (`${condition}` === 'true') return writeBody()
       this.block('if (%s) {', [condition], '}', writeBody)
     },
