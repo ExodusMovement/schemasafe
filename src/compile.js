@@ -214,8 +214,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (allErrors) fun.write('errorCount++')
       else fun.write('return false')
     }
-    const errorIf = (fmt, args, errorArgs) => {
-      const condition = format(fmt, ...args)
+    const errorIf = (condition, errorArgs) => {
       if (includeErrors === true && errors) fun.if(condition, () => error(errorArgs))
       else fun.write('if (%s) return false', condition) // fast-track and inline for more readable code
     }
@@ -242,7 +241,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         error({})
       } else {
         // node === false
-        errorIf('%s', [present(current)], {})
+        errorIf(format('%s', present(current)), {})
       }
       evaluateDelta({ properties: [true], items: Infinity }) // everything is evaluated for false
       return stat
@@ -360,9 +359,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('const %s = %s(%s, %s)', res, n, name, recursive)
         fun.write('const %s = %s.errors', suberr, n)
         fun.write('validate.errors = %s', err)
-        errorIf('!%s', [res], { ...errorArgs, source: suberr })
+        errorIf(format('!%s', res), { ...errorArgs, source: suberr })
       } else {
-        errorIf('!%s(%s, %s)', [n, name, recursive], errorArgs)
+        errorIf(format('!%s(%s, %s)', n, name, recursive), errorArgs)
       }
       // evaluated: propagate static from ref to current, skips cyclic
       if (scope[n] && scope[n][evaluatedStatic]) evaluateDelta(scope[n][evaluatedStatic])
@@ -504,7 +503,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (removeAdditional) {
           fun.write('if (%s.length > %s) %s.length = %s', name, limit, name, limit)
         } else {
-          errorIf('%s.length > %s', [name, limit], { path: [rulePath] })
+          errorIf(format('%s.length > %s', name, limit), { path: [rulePath] })
         }
       } else if (ruleValue) {
         const i = genloop()
@@ -538,7 +537,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const checkNumbers = () => {
       const applyMinMax = (value, operator, errorArgs) => {
         enforce(Number.isFinite(value), 'Invalid minimum or maximum:', value)
-        errorIf('!(%d %c %s)', [value, operator, name], errorArgs)
+        errorIf(format('!(%d %c %s)', value, operator, name), errorArgs)
       }
 
       if (Number.isFinite(node.exclusiveMinimum)) {
@@ -564,13 +563,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const value = node[multipleOf]
         enforce(Number.isFinite(value) && value > 0, `Invalid ${multipleOf}:`, value)
         if (Number.isInteger(value)) {
-          errorIf('%s %% %d !== 0', [name, value], { path: ['isMultipleOf'] })
+          errorIf(format('%s %% %d !== 0', name, value), { path: ['isMultipleOf'] })
         } else {
           scope.isMultipleOf = functions.isMultipleOf
           const [last, exp] = `${value}`.replace(/.*\./, '').split('e-')
           const e = last.length + (exp ? Number(exp) : 0)
           const args = [name, value, e, Math.round(value * Math.pow(10, e))] // precompute for performance
-          errorIf('!isMultipleOf(%s, %d, 1e%d, %d)', args, { path: ['isMultipleOf'] })
+          errorIf(format('!isMultipleOf(%s, %d, 1e%d, %d)', ...args), { path: ['isMultipleOf'] })
         }
         consume(multipleOf, 'finite')
       }
@@ -581,7 +580,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Number.isFinite(node.maxLength), 'Invalid maxLength:', node.maxLength)
         scope.stringLength = functions.stringLength
         const args = [name, node.maxLength, name, node.maxLength]
-        errorIf('%s.length > %d && stringLength(%s) > %d', args, { path: ['maxLength'] })
+        errorIf(format('%s.length > %d && stringLength(%s) > %d', ...args), { path: ['maxLength'] })
         consume('maxLength', 'natural')
       }
 
@@ -589,7 +588,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
         scope.stringLength = functions.stringLength
         const args = [name, node.minLength, name, node.minLength]
-        errorIf('%s.length < %d || stringLength(%s) < %d', args, { path: ['minLength'] })
+        errorIf(format('%s.length < %d || stringLength(%s) < %d', ...args), { path: ['minLength'] })
         consume('minLength', 'natural')
       }
 
@@ -609,9 +608,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           if (formatImpl instanceof RegExp) {
             // built-in formats are fine, check only ones from options
             if (functions.hasOwn(optFormats, fmtname)) enforceRegex(formatImpl.source)
-            errorIf('!%s.test(%s)', [n, target], { path: [path] })
+            errorIf(format('!%s.test(%s)', n, target), { path: [path] })
           } else {
-            errorIf('!%s(%s)', [n, target], { path: [path] })
+            errorIf(format('!%s(%s)', n, target), { path: [path] })
           }
         }
         if (node.format) {
@@ -622,7 +621,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (node.pattern) {
           enforceRegex(node.pattern)
           if (!noopRegExps.has(node.pattern))
-            errorIf('!%s', [patternTest(node.pattern, name)], { path: ['pattern'] })
+            errorIf(format('!%s', patternTest(node.pattern, name)), { path: ['pattern'] })
           consume('pattern', 'string')
         }
 
@@ -679,14 +678,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(Number.isFinite(node.maxItems), 'Invalid maxItems:', node.maxItems)
         if (Array.isArray(node.items) && node.items.length > node.maxItems)
           fail(`Invalid maxItems: ${node.maxItems} is less than items array length`)
-        errorIf('%s.length > %d', [name, node.maxItems], { path: ['maxItems'] })
+        errorIf(format('%s.length > %d', name, node.maxItems), { path: ['maxItems'] })
         consume('maxItems', 'natural')
       }
 
       if (node.minItems !== undefined) {
         enforce(Number.isFinite(node.minItems), 'Invalid minItems:', node.minItems)
         // can be higher that .items length with additionalItems
-        errorIf('%s.length < %d', [name, node.minItems], { path: ['minItems'] })
+        errorIf(format('%s.length < %d', name, node.minItems), { path: ['minItems'] })
         consume('minItems', 'natural')
       }
 
@@ -734,16 +733,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         })
 
         if (Number.isFinite(node.minContains)) {
-          errorIf('%s < %d', [passes, node.minContains], { path: ['minContains'] })
+          const condition = format('%s < %d', passes, node.minContains) // fast, reusable
+          errorIf(condition, { path: ['minContains'] })
           consume('minContains', 'natural')
-          fun.block('if (%s < %d) {', [passes, node.minContains], '}', () => mergeerror(suberr))
+          fun.if(condition, () => mergeerror(suberr))
         } else {
-          errorIf('%s < 1', [passes], { path: ['contains'] })
-          fun.block('if (%s < 1) {', [passes], '}', () => mergeerror(suberr))
+          const condition = format('%s < 1', passes) // fast, reusable
+          errorIf(condition, { path: ['contains'] })
+          fun.if(condition, () => mergeerror(suberr))
         }
 
         if (Number.isFinite(node.maxContains)) {
-          errorIf('%s > %d', [passes, node.maxContains], { path: ['maxContains'] })
+          errorIf(format('%s > %d', passes, node.maxContains), { path: ['maxContains'] })
           consume('maxContains', 'natural')
         }
 
@@ -768,7 +769,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             enforce(uniqueIsSimple(), 'maxItems should be specified for non-primitive uniqueItems')
           scope.unique = functions.unique
           scope.deepEqual = functions.deepEqual
-          errorIf('!unique(%s)', [name], { path: ['uniqueItems'] })
+          errorIf(format('!unique(%s)', name), { path: ['uniqueItems'] })
           consume('uniqueItems', 'boolean')
         } else if (node.uniqueItems === false) {
           consume('uniqueItems', 'boolean')
@@ -780,12 +781,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const propertiesCount = format('Object.keys(%s).length', name)
       if (node.maxProperties !== undefined) {
         enforce(Number.isFinite(node.maxProperties), 'Invalid maxProperties:', node.maxProperties)
-        errorIf('%s > %d', [propertiesCount, node.maxProperties], { path: ['maxProperties'] })
+        errorIf(format('%s > %d', propertiesCount, node.maxProperties), { path: ['maxProperties'] })
         consume('maxProperties', 'natural')
       }
       if (node.minProperties !== undefined) {
         enforce(Number.isFinite(node.minProperties), 'Invalid minProperties:', node.minProperties)
-        errorIf('%s < %d', [propertiesCount, node.minProperties], { path: ['minProperties'] })
+        errorIf(format('%s < %d', propertiesCount, node.minProperties), { path: ['minProperties'] })
         consume('minProperties', 'natural')
       }
 
@@ -811,7 +812,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         for (const req of node.required) {
           if (checked(req)) continue
           const prop = currPropImm(req)
-          errorIf('!(%s)', [present(prop)], { path: ['required'], prop })
+          errorIf(format('!(%s)', present(prop)), { path: ['required'], prop })
         }
         evaluateDelta({ required: node.required })
         consume('required', 'array')
@@ -826,13 +827,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             if (Array.isArray(deps) && dependencies !== 'dependentSchemas') {
               const clauses = deps.filter((k) => !checked(k)).map((k) => present(currPropImm(k)))
               const condition = safeand(...clauses)
+              const errorArgs = { path: [dependencies, key] }
               if (clauses.length === 0) {
                 // nothing to do
               } else if (item.checked) {
-                errorIf('!(%s)', [condition], { path: [dependencies, key] })
+                errorIf(format('!(%s)', condition), errorArgs)
                 evaluateDelta({ required: deps })
               } else {
-                errorIf('%s && !(%s)', [present(item), condition], { path: [dependencies, key] })
+                errorIf(format('%s && !(%s)', present(item), condition), errorArgs)
               }
             } else if (
               ((typeof deps === 'object' && !Array.isArray(deps)) || typeof deps === 'boolean') &&
@@ -884,7 +886,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const checkConst = () => {
       if (node.const !== undefined) {
-        errorIf('!%s', [compare(name, node.const)], { path: ['const'] })
+        errorIf(format('!%s', compare(name, node.const)), { path: ['const'] })
         consume('const', 'jsonval')
         return true
       } else if (node.enum) {
@@ -892,7 +894,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         const objects = node.enum.filter((value) => value && typeof value === 'object')
         const primitive = node.enum.filter((value) => !(value && typeof value === 'object'))
         const condition = safeor(...[...primitive, ...objects].map((value) => compare(name, value)))
-        errorIf('!(%s)', [condition], { path: ['enum'] })
+        errorIf(format('!(%s)', condition), { path: ['enum'] })
         consume('enum', 'array')
         return true
       }
@@ -902,7 +904,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const checkGeneric = () => {
       if (node.not || node.not === false) {
         const { sub } = subrule(null, current, node.not, subPath('not'))
-        errorIf('%s', [sub], { path: ['not'] })
+        errorIf(format('%s', sub), { path: ['not'] })
         consume('not', 'object', 'boolean')
       }
 
@@ -958,12 +960,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         for (const [key, sch] of Object.entries(node.oneOf)) {
           const { sub, delta: deltaVariant } = subrule(suberr, current, sch, subPath('oneOf', key))
           fun.write('if (%s) %s++', sub, passes)
-          if (!includeErrors && i++ > 0) errorIf('%s > 1', [passes], { path: ['oneOf'] })
+          if (!includeErrors && i++ > 0) errorIf(format('%s > 1', passes), { path: ['oneOf'] })
           delta = delta ? orDelta(delta, deltaVariant) : deltaVariant
         }
         if (node.oneOf.length > 0) evaluateDelta(delta)
-        errorIf('%s !== 1', [passes], { path: ['oneOf'] })
-        fun.block('if (%s === 0) {', [passes], '}', () => mergeerror(suberr)) // if none matched, dump all errors
+        errorIf(format('%s !== 1', passes), { path: ['oneOf'] })
+        fun.if(format('%s === 0', passes), () => mergeerror(suberr)) // if none matched, dump all errors
         consume('oneOf', 'array')
       }
     }
@@ -1010,7 +1012,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const filteredTypes = typeArray.filter((t) => typeApplicable(t))
       if (filteredTypes.length === 0) fail('No valid types possible')
       const typeValidate = safeor(...filteredTypes.map((t) => types.get(t)(name)))
-      errorIf('!(%s)', [typeValidate], { path: ['type'] })
+      errorIf(format('!(%s)', typeValidate), { path: ['type'] })
     }
     if (node.type !== undefined) consume('type', 'string', 'array')
 
