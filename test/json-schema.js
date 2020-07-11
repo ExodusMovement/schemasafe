@@ -50,10 +50,8 @@ const unsupported = new Set([
   'optional/format/idn-email.json',
   'optional/format/idn-hostname.json',
 
-  // Optional
-  'optional/content.json', // draft7+
+  //  draft4/draft3, optional
   'optional/zeroTerminatedFloats.json', // makes no sense in js
-
   //  draft3 is deprecated and not fully supported
   'draft3/extends.json',
   'draft3/disallow.json',
