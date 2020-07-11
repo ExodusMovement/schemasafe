@@ -465,3 +465,34 @@ return (function validate(data, recursive) {
 
  * `[requireValidation] type is required at #`
 
+
+## validation of durations
+
+### Schema
+
+```json
+{ "format": "duration" }
+```
+
+### Code
+
+```js
+'use strict'
+const format0 = (input) =>
+    input.length > 1 &&
+    input.length < 80 &&
+    (/^P\d+([.,]\d+)?W$/.test(input) ||
+      (/^P[\dYMDTHMS]*(\d[.,]\d+)?[YMDHMS]$/.test(input) &&
+        /^P([.,\d]+Y)?([.,\d]+M)?([.,\d]+D)?(T([.,\d]+H)?([.,\d]+M)?([.,\d]+S)?)?$/.test(input)));
+return (function validate(data, recursive) {
+  if (typeof data === "string") {
+    if (!format0(data)) return false
+  }
+  return true
+})
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type is required at #`
+
