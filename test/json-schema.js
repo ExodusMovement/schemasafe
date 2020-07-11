@@ -13,6 +13,7 @@ const unsafe = new Set([
   'additionalItems.json/additionalItems should not look in applicators, valid case',
   'maxContains.json/maxContains without contains is ignored',
   'minContains.json/minContains without contains is ignored',
+  'minContains.json/maxContains < minContains',
   'ref.json/escaped pointer ref',
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
   'if-then-else.json/ignore if without then or else',

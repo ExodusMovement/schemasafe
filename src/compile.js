@@ -224,6 +224,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       throw new Error(`${msg}${comment} at ${functions.toPointer(schemaPath)}`)
     }
     const enforce = (ok, ...args) => ok || fail(...args)
+    const laxMode = (ok, ...args) => enforce(mode === 'lax' || ok, ...args)
+    const enforceMinMax = (a, b) => laxMode(!(node[b] < node[a]), `Invalid ${a} / ${b} combination`)
     const enforceValidation = (msg) => enforce(!requireValidation, `[requireValidation] ${msg}`)
     const subPath = (...args) => [...schemaPath, ...args]
 
@@ -551,9 +553,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (Number.isFinite(node.exclusiveMaximum)) {
         applyMinMax(node.exclusiveMaximum, '>', { path: ['exclusiveMaximum'] })
+        enforceMinMax('minimum', 'exclusiveMaximum')
+        enforceMinMax('exclusiveMinimum', 'exclusiveMaximum')
         consume('exclusiveMaximum', 'finite')
       } else if (node.maximum !== undefined) {
         applyMinMax(node.maximum, node.exclusiveMaximum ? '>' : '>=', { path: ['maximum'] })
+        enforceMinMax('minimum', 'maximum')
+        enforceMinMax('exclusiveMinimum', 'maximum')
         consume('maximum', 'finite')
         if (typeof node.exclusiveMaximum === 'boolean') consume('exclusiveMaximum', 'boolean')
       }
@@ -586,6 +592,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.minLength !== undefined) {
         enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
+        enforceMinMax('minLength', 'maxLength')
         scope.stringLength = functions.stringLength
         const args = [name, node.minLength, name, node.minLength]
         errorIf(format('%s.length < %d || stringLength(%s) < %d', ...args), { path: ['minLength'] })
@@ -684,6 +691,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       if (node.minItems !== undefined) {
         enforce(Number.isFinite(node.minItems), 'Invalid minItems:', node.minItems)
+        enforceMinMax('minItems', 'maxItems')
         // can be higher that .items length with additionalItems
         errorIf(format('%s.length < %d', name, node.minItems), { path: ['minItems'] })
         consume('minItems', 'natural')
@@ -745,6 +753,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
         if (Number.isFinite(node.maxContains)) {
           errorIf(format('%s > %d', passes, node.maxContains), { path: ['maxContains'] })
+          enforceMinMax('minContains', 'maxContains')
           consume('maxContains', 'natural')
         }
 
@@ -786,6 +795,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
       if (node.minProperties !== undefined) {
         enforce(Number.isFinite(node.minProperties), 'Invalid minProperties:', node.minProperties)
+        enforceMinMax('minProperties', 'maxProperties')
         errorIf(format('%s < %d', propertiesCount, node.minProperties), { path: ['minProperties'] })
         consume('minProperties', 'natural')
       }

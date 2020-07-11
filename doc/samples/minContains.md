@@ -164,9 +164,9 @@ return (function validate(data, recursive) {
 })
 ```
 
-##### Strong mode notices
+### Warnings
 
- * `[requireValidation] type is required at #`
+ * `Invalid minContains / maxContains combination at #`
 
 
 ## minContains = 0

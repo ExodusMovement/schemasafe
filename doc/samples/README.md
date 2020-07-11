@@ -44,7 +44,7 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [maxLength](./maxLength.md)                                       | 1     | -                 | -        | -             |
 | [maxProperties](./maxProperties.md)                               | 2     | -                 | -        | -             |
 | [maximum](./maximum.md)                                           | 2     | -                 | -        | -             |
-| [minContains](./minContains.md)                                   | 6     | -                 | 1        | -             |
+| [minContains](./minContains.md)                                   | 6     | -                 | 2        | -             |
 | [minItems](./minItems.md)                                         | 1     | -                 | -        | -             |
 | [minLength](./minLength.md)                                       | 1     | -                 | -        | -             |
 | [minProperties](./minProperties.md)                               | 1     | -                 | -        | -             |
