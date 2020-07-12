@@ -28,20 +28,22 @@ tape('default is strong mode', (t) => {
 tape('parser works correctly', (t) => {
   t.strictEqual(typeof parser({ type: 'string', format: 'date' }), 'function', 'returns a function')
 
-  {
-    const result = parser({ type: 'integer' })('x')
-    t.strictEqual(result.valid, false, 'Parse failed')
-    t.strictEqual(result.value, undefined, 'No value is returned')
-  }
-  {
-    const result = parser({ type: 'integer' })('{}')
-    t.strictEqual(result.valid, false, 'Validation failed')
-    t.strictEqual(result.value, undefined, 'No value is returned')
-  }
-  {
-    const result = parser({ type: 'integer' })('10')
-    t.strictEqual(result.valid, true, 'Validation succeded')
-    t.strictEqual(result.value, 10, 'Corect value is returned')
+  for (const includeErrors of [false, true]) {
+    {
+      const result = parser({ type: 'integer' }, { includeErrors })('x')
+      t.strictEqual(result.valid, false, 'Parse failed')
+      t.strictEqual(result.value, undefined, 'No value is returned')
+    }
+    {
+      const result = parser({ type: 'integer' }, { includeErrors })('{}')
+      t.strictEqual(result.valid, false, 'Validation failed')
+      t.strictEqual(result.value, undefined, 'No value is returned')
+    }
+    {
+      const result = parser({ type: 'integer' }, { includeErrors })('10')
+      t.strictEqual(result.valid, true, 'Validation succeded')
+      t.strictEqual(result.value, 10, 'Corect value is returned')
+    }
   }
 
   const schema = {
