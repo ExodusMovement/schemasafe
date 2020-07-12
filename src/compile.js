@@ -5,11 +5,10 @@ const genfun = require('./generate-function')
 const { resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
 const functions = require('./scope-functions')
+const { scopeMethods } = require('./scope-utils')
 const { types, schemaTypes } = require('./types')
 const { knownKeywords, schemaVersions, knownVocabularies } = require('./known-keywords')
 const { initTracing, andDelta, orDelta, applyDelta, isDynamic } = require('./tracing')
-
-const scopeCache = Symbol('cache')
 
 const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
 
@@ -84,31 +83,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (!includeErrors && (allErrors || reflectErrorsValue))
     throw new Error('allErrors and reflectErrorsValue are not available if includeErrors = false')
 
-  if (!scope[scopeCache])
-    scope[scopeCache] = { sym: new Map(), ref: new Map(), format: new Map(), pattern: new Map() }
-  const cache = scope[scopeCache] // cache meta info for known scope variables, per meta type
-
-  const gensym = (name) => {
-    if (!cache.sym.get(name)) cache.sym.set(name, 0)
-    const index = cache.sym.get(name)
-    cache.sym.set(name, index + 1)
-    return safe(`${name}${index}`)
-  }
-
-  const patterns = (p) => {
-    if (cache.pattern.has(p)) return cache.pattern.get(p)
-    const n = gensym('pattern')
-    scope[n] = new RegExp(p, 'u')
-    cache.pattern.set(p, n)
-    return n
-  }
-
-  const vars = 'ijklmnopqrstuvxyz'.split('')
-  const genloop = () => {
-    const v = vars.shift()
-    vars.push(v + v[0])
-    return safe(v)
-  }
+  const { gensym, genpattern, genloop, genref, genformat } = scopeMethods(scope)
 
   const buildPath = (prop) => {
     const path = []
@@ -373,10 +348,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const resolved = resolveReference(root, schemas, node.$ref, basePath())
       const [sub, subRoot, path] = resolved[0] || []
       if (sub || sub === false) {
-        let n = cache.ref.get(sub)
+        let n = genref(sub)
         if (!n) {
-          n = gensym('ref')
-          cache.ref.set(sub, n)
+          n = genref(sub, true)
           let fn = null // resolve cyclic dependencies
           const wrap = (...args) => {
             const res = fn(...args)
@@ -451,7 +425,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(target.maxLength !== undefined, 'maxLength should be specified for:', source)
     }
 
-    const patternTest = (pattern, key) => format('%s.test(%s)', patterns(pattern), key)
+    const patternTest = (pattern, key) => format('%s.test(%s)', genpattern(pattern), key)
 
     const maybeWrap = (shouldWrap, fmt, args, close, writeBody) => {
       if (!shouldWrap) return writeBody()
@@ -606,12 +580,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           const formatImpl = formatsObj[fmtname]
           const valid = formatImpl instanceof RegExp || typeof formatImpl === 'function'
           enforce(valid, 'Invalid format used:', fmtname)
-          let n = cache.format.get(formatImpl)
-          if (!n) {
-            n = gensym('format')
-            scope[n] = formatImpl
-            cache.format.set(formatImpl, n)
-          }
+          const n = genformat(formatImpl)
           if (formatImpl instanceof RegExp) {
             // built-in formats are fine, check only ones from options
             if (functions.hasOwn(optFormats, fmtname)) enforceRegex(formatImpl.source)

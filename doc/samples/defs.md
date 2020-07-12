@@ -245,9 +245,9 @@ const ref3 = function validate(data, recursive) {
 const ref4 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   if (data.length < 1) return false
-  for (let i = 0; i < data.length; i++) {
-    if (data[i] !== undefined && hasOwn(data, i)) {
-      if (!validate(data[i], recursive)) return false
+  for (let j = 0; j < data.length; j++) {
+    if (data[j] !== undefined && hasOwn(data, j)) {
+      if (!validate(data[j], recursive)) return false
     }
   }
   return true
@@ -336,9 +336,9 @@ const ref5 = function validate(data, recursive) {
         const sub5 = (() => {
           if (!Array.isArray(data.type)) return false
           if (data.type.length < 1) return false
-          for (let j = 0; j < data.type.length; j++) {
-            if (data.type[j] !== undefined && hasOwn(data.type, j)) {
-              if (!ref8(data.type[j], recursive || validate)) return false
+          for (let l = 0; l < data.type.length; l++) {
+            if (data.type[l] !== undefined && hasOwn(data.type, l)) {
+              if (!ref8(data.type[l], recursive || validate)) return false
             }
           }
           if (!unique(data.type)) return false
@@ -669,9 +669,9 @@ const ref3 = function validate(data, recursive) {
 const ref4 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   if (data.length < 1) return false
-  for (let i = 0; i < data.length; i++) {
-    if (data[i] !== undefined && hasOwn(data, i)) {
-      if (!validate(data[i], recursive)) return false
+  for (let j = 0; j < data.length; j++) {
+    if (data[j] !== undefined && hasOwn(data, j)) {
+      if (!validate(data[j], recursive)) return false
     }
   }
   return true
@@ -760,9 +760,9 @@ const ref5 = function validate(data, recursive) {
         const sub5 = (() => {
           if (!Array.isArray(data.type)) return false
           if (data.type.length < 1) return false
-          for (let j = 0; j < data.type.length; j++) {
-            if (data.type[j] !== undefined && hasOwn(data.type, j)) {
-              if (!ref8(data.type[j], recursive || validate)) return false
+          for (let l = 0; l < data.type.length; l++) {
+            if (data.type[l] !== undefined && hasOwn(data.type, l)) {
+              if (!ref8(data.type[l], recursive || validate)) return false
             }
           }
           if (!unique(data.type)) return false

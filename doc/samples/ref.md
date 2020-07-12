@@ -499,9 +499,9 @@ const ref3 = function validate(data, recursive) {
 const ref4 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   if (data.length < 1) return false
-  for (let i = 0; i < data.length; i++) {
-    if (data[i] !== undefined && hasOwn(data, i)) {
-      if (!validate(data[i], recursive)) return false
+  for (let j = 0; j < data.length; j++) {
+    if (data[j] !== undefined && hasOwn(data, j)) {
+      if (!validate(data[j], recursive)) return false
     }
   }
   return true
@@ -590,9 +590,9 @@ const ref5 = function validate(data, recursive) {
         const sub5 = (() => {
           if (!Array.isArray(data.type)) return false
           if (data.type.length < 1) return false
-          for (let j = 0; j < data.type.length; j++) {
-            if (data.type[j] !== undefined && hasOwn(data.type, j)) {
-              if (!ref8(data.type[j], recursive || validate)) return false
+          for (let l = 0; l < data.type.length; l++) {
+            if (data.type[l] !== undefined && hasOwn(data.type, l)) {
+              if (!ref8(data.type[l], recursive || validate)) return false
             }
           }
           if (!unique(data.type)) return false
@@ -839,9 +839,9 @@ const ref1 = function validate(data, recursive) {
   if (!(data.nodes !== undefined && hasOwn(data, "nodes"))) return false
   if (!(typeof data.meta === "string")) return false
   if (!Array.isArray(data.nodes)) return false
-  for (let i = 0; i < data.nodes.length; i++) {
-    if (data.nodes[i] !== undefined && hasOwn(data.nodes, i)) {
-      if (!ref0(data.nodes[i], recursive)) return false
+  for (let j = 0; j < data.nodes.length; j++) {
+    if (data.nodes[j] !== undefined && hasOwn(data.nodes, j)) {
+      if (!ref0(data.nodes[j], recursive)) return false
     }
   }
   return true

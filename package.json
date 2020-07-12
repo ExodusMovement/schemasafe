@@ -22,6 +22,7 @@
     "src/pointer.js",
     "src/safe-format.js",
     "src/scope-functions.js",
+    "src/scope-utils.js",
     "src/tracing.js",
     "src/types.js"
   ],
