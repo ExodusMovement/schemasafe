@@ -482,7 +482,7 @@ const format0 = (input) =>
     input.length > 1 &&
     input.length < 80 &&
     (/^P\d+([.,]\d+)?W$/.test(input) ||
-      (/^P[\dYMDTHMS]*(\d[.,]\d+)?[YMDHMS]$/.test(input) &&
+      (/^P[\dYMDTHS]*(\d[.,]\d+)?[YMDHS]$/.test(input) &&
         /^P([.,\d]+Y)?([.,\d]+M)?([.,\d]+D)?(T([.,\d]+H)?([.,\d]+M)?([.,\d]+S)?)?$/.test(input)));
 return (function validate(data, recursive) {
   if (typeof data === "string") {
