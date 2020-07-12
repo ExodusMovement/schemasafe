@@ -73,7 +73,7 @@ const core = {
     input.length > 1 &&
     input.length < 80 &&
     (/^P\d+([.,]\d+)?W$/.test(input) ||
-      (/^P[\dYMDTHMS]*(\d[.,]\d+)?[YMDHMS]$/.test(input) &&
+      (/^P[\dYMDTHS]*(\d[.,]\d+)?[YMDHS]$/.test(input) &&
         /^P([.,\d]+Y)?([.,\d]+M)?([.,\d]+D)?(T([.,\d]+H)?([.,\d]+M)?([.,\d]+S)?)?$/.test(input))),
 
   // TODO: iri, iri-reference, idn-email, idn-hostname
