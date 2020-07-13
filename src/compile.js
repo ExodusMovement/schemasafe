@@ -44,7 +44,7 @@ const jsonProtoKeys = new Set(
 const evaluatedStatic = Symbol('evaluated')
 
 const rootMeta = new WeakMap()
-const compile = (schema, root, opts, scope, basePathRoot) => {
+const compile = (funname, schema, root, opts, scope, basePathRoot) => {
   const {
     mode = 'default',
     useDefaults = false,
@@ -136,6 +136,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     /* c8 ignore next */
     throw new Error('Unreachable: present() check without parent')
   }
+
+  let validate = null // resolve cyclic dependencies
+  const wrap = (...args) => {
+    const res = validate(...args)
+    wrap.errors = validate.errors
+    return res
+  }
+  scope[funname] = wrap
 
   const fun = genfun()
   fun.write('function validate(data, recursive) {')
@@ -351,15 +359,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         let n = genref(sub)
         if (!n) {
           n = genref(sub, true)
-          let fn = null // resolve cyclic dependencies
-          const wrap = (...args) => {
-            const res = fn(...args)
-            wrap.errors = fn.errors
-            return res
-          }
-          scope[n] = wrap
-          fn = compile(sub, subRoot, opts, scope, path)
-          scope[n] = fn
+          compile(n, sub, subRoot, opts, scope, path)
         }
         applyRef(n, { path: ['$ref'] })
       } else fail('failed to resolve $ref:', node.$ref)
@@ -1028,8 +1028,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
   if (dryRun) return
 
-  const validate = fun.makeFunction(scope)
+  validate = fun.makeFunction(scope)
   validate[evaluatedStatic] = stat
+  delete scope[funname] // more logical key order
+  scope[funname] = validate
   return validate
 }
 

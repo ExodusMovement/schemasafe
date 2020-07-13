@@ -60,12 +60,12 @@ return validate
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
-  if (!ref1(data, recursive)) return false
-  return true
-};
 const ref1 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
+  return true
+};
+const ref0 = function validate(data, recursive) {
+  if (!ref1(data, recursive)) return false
   return true
 };
 const validate = function validate(data, recursive) {
@@ -144,6 +144,10 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref1 = function validate(data, recursive) {
+  if (!Number.isInteger(data)) return false
+  return true
+};
 const ref0 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
@@ -151,10 +155,6 @@ const ref0 = function validate(data, recursive) {
       if (!ref1(data[i], recursive)) return false
     }
   }
-  return true
-};
-const ref1 = function validate(data, recursive) {
-  if (!Number.isInteger(data)) return false
   return true
 };
 const validate = function validate(data, recursive) {
@@ -197,6 +197,10 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref1 = function validate(data, recursive) {
+  if (!Number.isInteger(data)) return false
+  return true
+};
 const ref0 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
@@ -204,10 +208,6 @@ const ref0 = function validate(data, recursive) {
       if (!ref1(data[i], recursive)) return false
     }
   }
-  return true
-};
-const ref1 = function validate(data, recursive) {
-  if (!Number.isInteger(data)) return false
   return true
 };
 const validate = function validate(data, recursive) {
@@ -242,6 +242,10 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref1 = function validate(data, recursive) {
+  if (!(typeof data === "string")) return false
+  return true
+};
 const ref0 = function validate(data, recursive) {
   const sub0 = (() => {
     if (!(data === null)) return false
@@ -256,10 +260,6 @@ const ref0 = function validate(data, recursive) {
       return false
     }
   }
-  return true
-};
-const ref1 = function validate(data, recursive) {
-  if (!(typeof data === "string")) return false
   return true
 };
 const validate = function validate(data, recursive) {

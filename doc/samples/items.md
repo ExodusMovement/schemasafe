@@ -171,6 +171,11 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref1 = function validate(data, recursive) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (!(data.foo !== undefined && hasOwn(data, "foo"))) return false
+  return true
+};
 const ref0 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   if (data[0] !== undefined && hasOwn(data, 0)) {
@@ -180,11 +185,6 @@ const ref0 = function validate(data, recursive) {
     if (!ref1(data[1], recursive)) return false
   }
   if (data.length > 2) return false
-  return true
-};
-const ref1 = function validate(data, recursive) {
-  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-  if (!(data.foo !== undefined && hasOwn(data, "foo"))) return false
   return true
 };
 const validate = function validate(data, recursive) {

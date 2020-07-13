@@ -201,16 +201,16 @@ return validate
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
-  if (!ref1(data, recursive)) return false
+const ref2 = function validate(data, recursive) {
+  if (!Number.isInteger(data)) return false
   return true
 };
 const ref1 = function validate(data, recursive) {
   if (!ref2(data, recursive)) return false
   return true
 };
-const ref2 = function validate(data, recursive) {
-  if (!Number.isInteger(data)) return false
+const ref0 = function validate(data, recursive) {
+  if (!ref1(data, recursive)) return false
   return true
 };
 const validate = function validate(data, recursive) {
@@ -272,57 +272,7 @@ return validate
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
-  if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
-  if (typeof data === "object" && data && !Array.isArray(data)) {
-    if (data.definitions !== undefined && hasOwn(data, "definitions")) {
-      if (!(typeof data.definitions === "object" && data.definitions && !Array.isArray(data.definitions))) return false
-      for (const key0 of Object.keys(data.definitions)) {
-        if (data.definitions[key0] !== undefined) {
-          if (!(recursive || validate)(data.definitions[key0], recursive || validate)) return false
-        }
-      }
-    }
-    if (data.dependencies !== undefined && hasOwn(data, "dependencies")) {
-      if (!(typeof data.dependencies === "object" && data.dependencies && !Array.isArray(data.dependencies))) return false
-      for (const key1 of Object.keys(data.dependencies)) {
-        if (data.dependencies[key1] !== undefined) {
-          const sub0 = (() => {
-            if (!(recursive || validate)(data.dependencies[key1], recursive || validate)) return false
-            return true
-          })()
-          if (!sub0) {
-            const sub1 = (() => {
-              if (!ref1(data.dependencies[key1], recursive || validate)) return false
-              return true
-            })()
-            if (!sub1) {
-              return false
-            }
-          }
-        }
-      }
-    }
-  }
-  if (!ref2(data, recursive || validate)) return false
-  if (!ref3(data, recursive || validate)) return false
-  if (!ref5(data, recursive || validate)) return false
-  if (!ref9(data, recursive || validate)) return false
-  if (!ref10(data, recursive || validate)) return false
-  if (!ref11(data, recursive || validate)) return false
-  return true
-};
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
-  if (!Array.isArray(data)) return false
-  for (let i = 0; i < data.length; i++) {
-    if (data[i] !== undefined && hasOwn(data, i)) {
-      if (!(typeof data[i] === "string")) return false
-    }
-  }
-  if (!unique(data)) return false
-  return true
-};
 const unique = (array) => {
   const objects = []
   const primitives = new Set()
@@ -358,7 +308,21 @@ const deepEqual = (obj, obj2) => {
   }
   return false
 };
+const ref1 = function validate(data, recursive) {
+  if (!Array.isArray(data)) return false
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] !== undefined && hasOwn(data, i)) {
+      if (!(typeof data[i] === "string")) return false
+    }
+  }
+  if (!unique(data)) return false
+  return true
+};
 const pointerPart = (s) => (/~\//.test(s) ? `${s}`.replace(/~/g, '~0').replace(/\//g, '~1') : s);
+const format0 = new RegExp("^(?:|(?:|[a-z][a-z0-9+-.]*:)\\/?\\/)(?:|[^\\\\\\s#][^\\s#]*)(?:|#[^\\\\\\s]*)$", "i");
+const pattern0 = new RegExp("^[^#]*#?$", "u");
+const format1 = new RegExp("^[a-z][a-z0-9+-.]*:[^\\s]*$", "i");
+const pattern1 = new RegExp("^[A-Za-z][-A-Za-z0-9.:_]*$", "u");
 const ref2 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
@@ -412,10 +376,27 @@ const ref2 = function validate(data, recursive) {
   }
   return true
 };
-const format0 = new RegExp("^(?:|(?:|[a-z][a-z0-9+-.]*:)\\/?\\/)(?:|[^\\\\\\s#][^\\s#]*)(?:|#[^\\\\\\s]*)$", "i");
-const pattern0 = new RegExp("^[^#]*#?$", "u");
-const format1 = new RegExp("^[a-z][a-z0-9+-.]*:[^\\s]*$", "i");
-const pattern1 = new RegExp("^[A-Za-z][-A-Za-z0-9.:_]*$", "u");
+const ref4 = function validate(data, recursive) {
+  if (!Array.isArray(data)) return false
+  if (data.length < 1) return false
+  for (let j = 0; j < data.length; j++) {
+    if (data[j] !== undefined && hasOwn(data, j)) {
+      if (!validate(data[j], recursive)) return false
+    }
+  }
+  return true
+};
+const format2 = (str) => {
+    if (str.length > 1e5) return false
+    const Z_ANCHOR = /[^\\]\\Z/
+    if (Z_ANCHOR.test(str)) return false
+    try {
+      new RegExp(str)
+      return true
+    } catch (e) {
+      return false
+    }
+  };
 const ref3 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.additionalItems !== undefined && hasOwn(data, "additionalItems")) {
@@ -502,27 +483,19 @@ const ref3 = function validate(data, recursive) {
   }
   return true
 };
-const ref4 = function validate(data, recursive) {
-  if (!Array.isArray(data)) return false
-  if (data.length < 1) return false
-  for (let j = 0; j < data.length; j++) {
-    if (data[j] !== undefined && hasOwn(data, j)) {
-      if (!validate(data[j], recursive)) return false
-    }
-  }
+const ref6 = function validate(data, recursive) {
+  if (!Number.isInteger(data)) return false
+  if (!(0 <= data)) return false
   return true
 };
-const format2 = (str) => {
-    if (str.length > 1e5) return false
-    const Z_ANCHOR = /[^\\]\\Z/
-    if (Z_ANCHOR.test(str)) return false
-    try {
-      new RegExp(str)
-      return true
-    } catch (e) {
-      return false
-    }
-  };
+const ref7 = function validate(data, recursive) {
+  if (!ref6(data, recursive)) return false
+  return true
+};
+const ref8 = function validate(data, recursive) {
+  if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) return false
+  return true
+};
 const ref5 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
@@ -612,19 +585,6 @@ const ref5 = function validate(data, recursive) {
   }
   return true
 };
-const ref6 = function validate(data, recursive) {
-  if (!Number.isInteger(data)) return false
-  if (!(0 <= data)) return false
-  return true
-};
-const ref7 = function validate(data, recursive) {
-  if (!ref6(data, recursive)) return false
-  return true
-};
-const ref8 = function validate(data, recursive) {
-  if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) return false
-  return true
-};
 const ref9 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
@@ -671,6 +631,46 @@ const ref11 = function validate(data, recursive) {
       if (!(recursive || validate)(data.contentSchema, recursive || validate)) return false
     }
   }
+  return true
+};
+const ref0 = function validate(data, recursive) {
+  if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.definitions !== undefined && hasOwn(data, "definitions")) {
+      if (!(typeof data.definitions === "object" && data.definitions && !Array.isArray(data.definitions))) return false
+      for (const key0 of Object.keys(data.definitions)) {
+        if (data.definitions[key0] !== undefined) {
+          if (!(recursive || validate)(data.definitions[key0], recursive || validate)) return false
+        }
+      }
+    }
+    if (data.dependencies !== undefined && hasOwn(data, "dependencies")) {
+      if (!(typeof data.dependencies === "object" && data.dependencies && !Array.isArray(data.dependencies))) return false
+      for (const key1 of Object.keys(data.dependencies)) {
+        if (data.dependencies[key1] !== undefined) {
+          const sub0 = (() => {
+            if (!(recursive || validate)(data.dependencies[key1], recursive || validate)) return false
+            return true
+          })()
+          if (!sub0) {
+            const sub1 = (() => {
+              if (!ref1(data.dependencies[key1], recursive || validate)) return false
+              return true
+            })()
+            if (!sub1) {
+              return false
+            }
+          }
+        }
+      }
+    }
+  }
+  if (!ref2(data, recursive || validate)) return false
+  if (!ref3(data, recursive || validate)) return false
+  if (!ref5(data, recursive || validate)) return false
+  if (!ref9(data, recursive || validate)) return false
+  if (!ref10(data, recursive || validate)) return false
+  if (!ref11(data, recursive || validate)) return false
   return true
 };
 const validate = function validate(data, recursive) {
@@ -835,15 +835,6 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
-  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-  if (!(data.value !== undefined && hasOwn(data, "value"))) return false
-  if (!(typeof data.value === "number")) return false
-  if (data.subtree !== undefined && hasOwn(data, "subtree")) {
-    if (!ref1(data.subtree, recursive)) return false
-  }
-  return true
-};
 const ref1 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (!(data.meta !== undefined && hasOwn(data, "meta"))) return false
@@ -854,6 +845,15 @@ const ref1 = function validate(data, recursive) {
     if (data.nodes[j] !== undefined && hasOwn(data.nodes, j)) {
       if (!ref0(data.nodes[j], recursive)) return false
     }
+  }
+  return true
+};
+const ref0 = function validate(data, recursive) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (!(data.value !== undefined && hasOwn(data, "value"))) return false
+  if (!(typeof data.value === "number")) return false
+  if (data.subtree !== undefined && hasOwn(data, "subtree")) {
+    if (!ref1(data.subtree, recursive)) return false
   }
   return true
 };

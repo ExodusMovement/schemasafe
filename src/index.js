@@ -3,13 +3,14 @@
 const genfun = require('./generate-function')
 const { buildSchemas } = require('./pointer')
 const { compile } = require('./compile')
+const { safe } = require('./safe-format')
 const functions = require('./scope-functions')
 
 const validator = (schema, { jsonCheck = false, isJSON = false, schemas, ...opts } = {}) => {
   if (jsonCheck && isJSON) throw new Error('Can not specify both isJSON and jsonCheck options')
   const options = { ...opts, schemas: buildSchemas(schemas || []), isJSON: isJSON || jsonCheck }
   const scope = Object.create(null)
-  scope.validate = compile(schema, schema, options, scope)
+  compile(safe('validate'), schema, schema, options, scope)
   if (opts.dryRun) return
   const fun = genfun()
   if (!jsonCheck || opts.dryRun) {
