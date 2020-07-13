@@ -165,9 +165,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const currPropImm = (...args) => propimm(current, ...args)
 
     const error = ({ path = [], prop = current, source }) => {
-      const dataP = buildPath(prop)
+      const schemaP = functions.toPointer([...schemaPath, ...path])
+      const dataP = includeErrors ? buildPath(prop) : null
       if (includeErrors === true && errors && source) {
-        const schemaP = functions.toPointer([...schemaPath, ...path])
         // we can include absoluteKeywordLocation later, perhaps
         scope.errorMerge = functions.errorMerge
         const args = [source, schemaP, dataP]
@@ -178,7 +178,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           fun.write('validate.errors = [errorMerge(%s[0], %j, %s)]', ...args)
         }
       } else if (includeErrors === true && errors) {
-        const schemaP = functions.toPointer([...schemaPath, ...path])
         const errorJS = reflectErrorsValue
           ? format(
               '{ keywordLocation: %j, instanceLocation: %s, value: %s }',

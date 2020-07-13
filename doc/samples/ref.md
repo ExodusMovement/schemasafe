@@ -307,7 +307,6 @@ const ref2 = function validate(data, recursive) {
   if (!unique(data)) return false
   return true
 };
-const pointerPart = (s) => (/~\//.test(s) ? `${s}`.replace(/~/g, '~0').replace(/\//g, '~1') : s);
 const format0 = new RegExp("^(?:|(?:|[a-z][a-z0-9+-.]*:)\\/?\\/)(?:|[^\\\\\\s#][^\\s#]*)(?:|#[^\\\\\\s]*)$", "i");
 const pattern0 = new RegExp("^[^#]*#?$", "u");
 const format1 = new RegExp("^[a-z][a-z0-9+-.]*:[^\\s]*$", "i");
