@@ -16,11 +16,10 @@
 
 ```js
 'use strict'
-const pattern0 = new RegExp("^v", "u");
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key1 of Object.keys(data)) {
-      if (key1 !== "foo" && key1 !== "bar" && !pattern0.test(key1)) {
+      if (key1 !== "foo" && key1 !== "bar" && !(key1.startsWith("v"))) {
         if (data[key1] !== undefined) return false
       }
     }
@@ -47,11 +46,10 @@ return ref0
 
 ```js
 'use strict'
-const pattern0 = new RegExp("^á", "u");
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key1 of Object.keys(data)) {
-      if (!pattern0.test(key1)) {
+      if (!(key1.startsWith("á"))) {
         if (data[key1] !== undefined) return false
       }
     }

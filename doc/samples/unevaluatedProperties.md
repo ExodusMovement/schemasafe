@@ -139,18 +139,17 @@ return ref0
 
 ```js
 'use strict'
-const pattern0 = new RegExp("^foo", "u");
 const ref0 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   for (const key0 of Object.keys(data)) {
-    if (pattern0.test(key0)) {
+    if (key0.startsWith("foo")) {
       if (data[key0] !== undefined) {
         if (!(typeof data[key0] === "string")) return false
       }
     }
   }
   for (const key1 of Object.keys(data)) {
-    if (!pattern0.test(key1)) {
+    if (!(key1.startsWith("foo"))) {
       if (data[key1] !== undefined) return false
     }
   }
@@ -256,21 +255,20 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const pattern0 = new RegExp("^bar", "u");
 const ref0 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.foo !== undefined && hasOwn(data, "foo")) {
     if (!(typeof data.foo === "string")) return false
   }
   for (const key0 of Object.keys(data)) {
-    if (pattern0.test(key0)) {
+    if (key0.startsWith("bar")) {
       if (data[key0] !== undefined) {
         if (!(typeof data[key0] === "string")) return false
       }
     }
   }
   for (const key1 of Object.keys(data)) {
-    if (key1 !== "foo" && !pattern0.test(key1)) {
+    if (key1 !== "foo" && !(key1.startsWith("bar"))) {
       if (data[key1] !== undefined) return false
     }
   }

@@ -10,7 +10,7 @@ const { types, schemaTypes } = require('./types')
 const { knownKeywords, schemaVersions, knownVocabularies } = require('./known-keywords')
 const { initTracing, andDelta, orDelta, applyDelta, isDynamic } = require('./tracing')
 
-const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*'])
+const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*', '^', '$'])
 
 // Helper methods for semi-structured paths
 const propvar = (parent, keyname, inKeys = false, number = false) =>
@@ -423,7 +423,27 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforce(target.maxLength !== undefined, 'maxLength should be specified for:', source)
     }
 
-    const patternTest = (pattern, key) => format('%s.test(%s)', genpattern(pattern), key)
+    const patternTest = (pat, key) => {
+      // Convert common patterns to string checks, makes generated code easier to read (and a tiny perf bump)
+      const r = pat.replace(/[.^$|*+?(){}[\]\\]/gu, '') // Special symbols: .^$|*+?(){}[]\
+      if (pat === `^${r}$`) return format('(%s === %j)', key, pat.slice(1, -1)) // ^abc$ -> === abc
+      if (noopRegExps.has(pat)) return format('true') // known noop
+
+      // All of the below will cause warnings in enforced string validation mode, but let's make what they actually do more visible
+      // note that /^.*$/u.test('\n') is false, so don't combine .* with anchors here!
+      if ([r, `${r}+`, `${r}.*`, `.*${r}.*`].includes(pat)) return format('%s.includes(%j)', key, r)
+      if ([`^${r}`, `^${r}+`, `^${r}.*`].includes(pat)) return format('%s.startsWith(%j)', key, r)
+      if ([`${r}$`, `.*${r}$`].includes(pat)) return format('%s.endsWith(%j)', key, r)
+
+      const subr = [...r].slice(0, -1).join('') // without the last symbol, astral plane aware
+      if ([`${r}*`, `${r}?`].includes(pat))
+        return subr.length === 0 ? format('true') : format('%s.includes(%j)', key, subr) // abc*, abc? -> includes(ab)
+      if ([`^${r}*`, `^${r}?`].includes(pat))
+        return subr.length === 0 ? format('true') : format('%s.startsWith(%j)', key, subr) // ^abc*, ^abc? -> startsWith(ab)
+
+      // A normal reg-exp test
+      return format('%s.test(%s)', genpattern(pat), key)
+    }
 
     const maybeWrap = (shouldWrap, fmt, args, close, writeBody) => {
       if (!shouldWrap) return writeBody()

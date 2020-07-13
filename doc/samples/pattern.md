@@ -39,10 +39,9 @@ return ref0
 
 ```js
 'use strict'
-const pattern0 = new RegExp("a+", "u");
 const ref0 = function validate(data, recursive) {
   if (typeof data === "string") {
-    if (!pattern0.test(data)) return false
+    if (!(data.includes("a"))) return false
   }
   return true
 };

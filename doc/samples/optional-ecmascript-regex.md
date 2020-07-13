@@ -49,10 +49,9 @@ return ref0
 
 ```js
 'use strict'
-const pattern0 = new RegExp("^abc$", "u");
 const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
-  if (!pattern0.test(data)) return false
+  if (!(data === "abc")) return false
   return true
 };
 return ref0
