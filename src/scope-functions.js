@@ -40,15 +40,19 @@ const deepEqual = (obj, obj2) => {
 
 const unique = (array) => {
   const objects = []
-  const primitives = new Set()
+  const primitives = array.length > 20 ? new Set() : null
   let primitivesCount = 0
+  let pos = 0
   for (const item of array) {
     if (typeof item === 'object') {
       objects.push(item)
-    } else {
+    } else if (primitives) {
       primitives.add(item)
       if (primitives.size !== ++primitivesCount) return false
+    } else {
+      if (array.indexOf(item, pos + 1) !== -1) return false
     }
+    pos++
   }
   for (let i = 1; i < objects.length; i++)
     for (let j = 0; j < i; j++) if (deepEqual(objects[i], objects[j])) return false
