@@ -137,6 +137,51 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     throw new Error('Unreachable: present() check without parent')
   }
 
+  const forObjectKeys = (obj, writeBody) => {
+    const key = gensym('key')
+    fun.block('for (const %s of Object.keys(%s)) {', [key, buildName(obj)], '}', () => {
+      writeBody(propvar(obj, key, true), key) // always own property here
+    })
+  }
+
+  const forArray = (obj, start, writeBody) => {
+    const i = genloop()
+    const name = buildName(obj)
+    fun.block('for (let %s = %s; %s < %s.length; %s++) {', [i, start, i, name, i], '}', () => {
+      writeBody(propvar(obj, i, unmodifiedPrototypes, true), i) // own property in Array if proto not mangled
+    })
+  }
+
+  const patternTest = (pat, key) => {
+    // Convert common patterns to string checks, makes generated code easier to read (and a tiny perf bump)
+    const r = pat.replace(/[.^$|*+?(){}[\]\\]/gu, '') // Special symbols: .^$|*+?(){}[]\
+    if (pat === `^${r}$`) return format('(%s === %j)', key, pat.slice(1, -1)) // ^abc$ -> === abc
+    if (noopRegExps.has(pat)) return format('true') // known noop
+
+    // All of the below will cause warnings in enforced string validation mode, but let's make what they actually do more visible
+    // note that /^.*$/u.test('\n') is false, so don't combine .* with anchors here!
+    if ([r, `${r}+`, `${r}.*`, `.*${r}.*`].includes(pat)) return format('%s.includes(%j)', key, r)
+    if ([`^${r}`, `^${r}+`, `^${r}.*`].includes(pat)) return format('%s.startsWith(%j)', key, r)
+    if ([`${r}$`, `.*${r}$`].includes(pat)) return format('%s.endsWith(%j)', key, r)
+
+    const subr = [...r].slice(0, -1).join('') // without the last symbol, astral plane aware
+    if ([`${r}*`, `${r}?`].includes(pat))
+      return subr.length === 0 ? format('true') : format('%s.includes(%j)', key, subr) // abc*, abc? -> includes(ab)
+    if ([`^${r}*`, `^${r}?`].includes(pat))
+      return subr.length === 0 ? format('true') : format('%s.startsWith(%j)', key, subr) // ^abc*, ^abc? -> startsWith(ab)
+
+    // A normal reg-exp test
+    return format('%s.test(%s)', genpattern(pat), key)
+  }
+
+  const compare = (variableName, value) => {
+    if (value && typeof value === 'object') {
+      scope.deepEqual = functions.deepEqual
+      return format('deepEqual(%s, %j)', variableName, value)
+    }
+    return format('%s === %j', variableName, value)
+  }
+
   const funname = genref(schema)
   let validate = null // resolve cyclic dependencies
   const wrap = (...args) => {
@@ -405,57 +450,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const typeApplicable = (...possible) =>
       someIn(stat.type, possible) && queryCurrent().every((h) => someIn(h.stat.type, possible))
 
-    const compare = (variableName, value) => {
-      if (value && typeof value === 'object') {
-        scope.deepEqual = functions.deepEqual
-        return format('deepEqual(%s, %j)', variableName, value)
-      }
-      return format('%s === %j', variableName, value)
-    }
-
     const enforceRegex = (source, target = node) => {
       enforce(typeof source === 'string', 'Invalid pattern:', source)
       if (requireValidation || requireStringValidation)
         enforce(/^\^.*\$$/.test(source), 'Should start with ^ and end with $:', source)
       if (complexityChecks && ((source.match(/[{+*]/g) || []).length > 1 || /\)[{+*]/.test(source)))
         enforce(target.maxLength !== undefined, 'maxLength should be specified for:', source)
-    }
-
-    const patternTest = (pat, key) => {
-      // Convert common patterns to string checks, makes generated code easier to read (and a tiny perf bump)
-      const r = pat.replace(/[.^$|*+?(){}[\]\\]/gu, '') // Special symbols: .^$|*+?(){}[]\
-      if (pat === `^${r}$`) return format('(%s === %j)', key, pat.slice(1, -1)) // ^abc$ -> === abc
-      if (noopRegExps.has(pat)) return format('true') // known noop
-
-      // All of the below will cause warnings in enforced string validation mode, but let's make what they actually do more visible
-      // note that /^.*$/u.test('\n') is false, so don't combine .* with anchors here!
-      if ([r, `${r}+`, `${r}.*`, `.*${r}.*`].includes(pat)) return format('%s.includes(%j)', key, r)
-      if ([`^${r}`, `^${r}+`, `^${r}.*`].includes(pat)) return format('%s.startsWith(%j)', key, r)
-      if ([`${r}$`, `.*${r}$`].includes(pat)) return format('%s.endsWith(%j)', key, r)
-
-      const subr = [...r].slice(0, -1).join('') // without the last symbol, astral plane aware
-      if ([`${r}*`, `${r}?`].includes(pat))
-        return subr.length === 0 ? format('true') : format('%s.includes(%j)', key, subr) // abc*, abc? -> includes(ab)
-      if ([`^${r}*`, `^${r}?`].includes(pat))
-        return subr.length === 0 ? format('true') : format('%s.startsWith(%j)', key, subr) // ^abc*, ^abc? -> startsWith(ab)
-
-      // A normal reg-exp test
-      return format('%s.test(%s)', genpattern(pat), key)
-    }
-
-    const forObjectKeys = (obj, writeBody) => {
-      const key = gensym('key')
-      fun.block('for (const %s of Object.keys(%s)) {', [key, buildName(obj)], '}', () => {
-        writeBody(propvar(obj, key, true), key) // always own property here
-      })
-    }
-
-    const forArray = (obj, start, writeBody) => {
-      const i = genloop()
-      const args = [i, start, i, buildName(obj), i]
-      fun.block('for (let %s = %s; %s < %s.length; %s++) {', args, '}', () => {
-        writeBody(propvar(obj, i, unmodifiedPrototypes, true), i) // own property in Array if proto not mangled
-      })
     }
 
     // Those checks will need to be skipped if another error is set in this block before those ones
