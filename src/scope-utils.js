@@ -32,12 +32,11 @@ const scopeMethods = (scope) => {
     return safe(v)
   }
 
-  const genref = (sub, create = false) => {
-    if (create) {
-      const n = gensym('ref')
-      cache.ref.set(sub, n)
-    }
-    return cache.ref.get(sub)
+  const getref = (sub) => cache.ref.get(sub)
+  const genref = (sub) => {
+    const n = gensym('ref')
+    cache.ref.set(sub, n)
+    return n
   }
 
   const genformat = (impl) => {
@@ -50,7 +49,7 @@ const scopeMethods = (scope) => {
     return n
   }
 
-  return { gensym, genpattern, genloop, genref, genformat }
+  return { gensym, genpattern, genloop, getref, genref, genformat }
 }
 
 module.exports = { scopeMethods }

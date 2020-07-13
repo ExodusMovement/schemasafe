@@ -13,7 +13,7 @@
 ```js
 'use strict'
 const pattern0 = new RegExp("f.*o", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {
@@ -25,7 +25,7 @@ const validate = function validate(data, recursive) {
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -52,7 +52,7 @@ return validate
 'use strict'
 const pattern0 = new RegExp("a*", "u");
 const pattern1 = new RegExp("aaa*", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {
@@ -71,7 +71,7 @@ const validate = function validate(data, recursive) {
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -98,7 +98,7 @@ return validate
 'use strict'
 const pattern0 = new RegExp("[0-9]{2,}", "u");
 const pattern1 = new RegExp("X_", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {
@@ -115,7 +115,7 @@ const validate = function validate(data, recursive) {
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -137,7 +137,7 @@ return validate
 'use strict'
 const pattern0 = new RegExp("f.*", "u");
 const pattern1 = new RegExp("b.*", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (pattern1.test(key0)) {
@@ -147,7 +147,7 @@ const validate = function validate(data, recursive) {
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices

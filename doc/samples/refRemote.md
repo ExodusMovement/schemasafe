@@ -12,15 +12,15 @@
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref1 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const validate = function validate(data, recursive) {
-  if (!ref0(data, recursive)) return false
+const ref0 = function validate(data, recursive) {
+  if (!ref1(data, recursive)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -36,15 +36,15 @@ return validate
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref1 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const validate = function validate(data, recursive) {
-  if (!ref0(data, recursive)) return false
+const ref0 = function validate(data, recursive) {
+  if (!ref1(data, recursive)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -60,19 +60,19 @@ return validate
 
 ```js
 'use strict'
-const ref1 = function validate(data, recursive) {
+const ref2 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
+  return true
+};
+const ref1 = function validate(data, recursive) {
+  if (!ref2(data, recursive)) return false
   return true
 };
 const ref0 = function validate(data, recursive) {
   if (!ref1(data, recursive)) return false
   return true
 };
-const validate = function validate(data, recursive) {
-  if (!ref0(data, recursive)) return false
-  return true
-};
-return validate
+return ref0
 ```
 
 
@@ -92,18 +92,18 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref1 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (Array.isArray(data)) {
     for (let i = 0; i < data.length; i++) {
       if (data[i] !== undefined && hasOwn(data, i)) {
         if (Array.isArray(data[i])) {
           for (let j = 0; j < data[i].length; j++) {
             if (data[i][j] !== undefined && hasOwn(data[i], j)) {
-              if (!ref0(data[i][j], recursive)) return false
+              if (!ref1(data[i][j], recursive)) return false
             }
           }
         }
@@ -112,7 +112,7 @@ const validate = function validate(data, recursive) {
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -144,27 +144,27 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
+const ref2 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref1 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
     if (data[i] !== undefined && hasOwn(data, i)) {
-      if (!ref1(data[i], recursive)) return false
+      if (!ref2(data[i], recursive)) return false
     }
   }
   return true
 };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.list !== undefined && hasOwn(data, "list")) {
-    if (!ref0(data.list, recursive)) return false
+    if (!ref1(data.list, recursive)) return false
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -197,27 +197,27 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
+const ref2 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref1 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
     if (data[i] !== undefined && hasOwn(data, i)) {
-      if (!ref1(data[i], recursive)) return false
+      if (!ref2(data[i], recursive)) return false
     }
   }
   return true
 };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.list !== undefined && hasOwn(data, "list")) {
-    if (!ref0(data.list, recursive)) return false
+    if (!ref1(data.list, recursive)) return false
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -242,18 +242,18 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
+const ref2 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref1 = function validate(data, recursive) {
   const sub0 = (() => {
     if (!(data === null)) return false
     return true
   })()
   if (!sub0) {
     const sub1 = (() => {
-      if (!ref1(data, recursive)) return false
+      if (!ref2(data, recursive)) return false
       return true
     })()
     if (!sub1) {
@@ -262,14 +262,14 @@ const ref0 = function validate(data, recursive) {
   }
   return true
 };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.name !== undefined && hasOwn(data, "name")) {
-    if (!ref0(data.name, recursive)) return false
+    if (!ref1(data.name, recursive)) return false
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices

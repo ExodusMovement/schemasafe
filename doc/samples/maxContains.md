@@ -12,10 +12,10 @@
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   return true
 };
-return validate
+return ref0
 ```
 
 ### Warnings
@@ -36,7 +36,7 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
@@ -53,7 +53,7 @@ const validate = function validate(data, recursive) {
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -74,7 +74,7 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
@@ -91,7 +91,7 @@ const validate = function validate(data, recursive) {
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices

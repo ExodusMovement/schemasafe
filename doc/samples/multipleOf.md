@@ -12,13 +12,13 @@
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "number") {
     if (data % 2 !== 0) return false
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -45,13 +45,13 @@ const isMultipleOf = (value, divisor, factor, factorMultiple) => {
   const normal = Math.floor(multiple + 0.5)
   return normal / factor === value && normal % factorMultiple === 0
 };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "number") {
     if (!isMultipleOf(data, 1.5, 1e1, 15)) return false
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -78,13 +78,13 @@ const isMultipleOf = (value, divisor, factor, factorMultiple) => {
   const normal = Math.floor(multiple + 0.5)
   return normal / factor === value && normal % factorMultiple === 0
 };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "number") {
     if (!isMultipleOf(data, 0.0001, 1e4, 1)) return false
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices

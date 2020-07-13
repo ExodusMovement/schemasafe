@@ -12,11 +12,11 @@
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(data === 2)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -51,11 +51,11 @@ const deepEqual = (obj, obj2) => {
   }
   return false
 };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(deepEqual(data, {"foo":"bar","baz":"bax"}))) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -90,11 +90,11 @@ const deepEqual = (obj, obj2) => {
   }
   return false
 };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(deepEqual(data, [{"foo":"bar"}]))) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -110,11 +110,11 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(data === null)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -130,11 +130,11 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(data === false)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -150,11 +150,11 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(data === true)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -170,11 +170,11 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(data === 0)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -190,11 +190,11 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(data === 1)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -210,11 +210,11 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(data === -2)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -230,11 +230,11 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(data === 9007199254740992)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -250,10 +250,10 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(data === "hello\u0000there")) return false
   return true
 };
-return validate
+return ref0
 ```
 

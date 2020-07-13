@@ -12,7 +12,7 @@
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   let passes0 = 0
   const sub0 = (() => {
     if (!Number.isInteger(data)) return false
@@ -30,7 +30,7 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -52,7 +52,7 @@ return validate
 'use strict'
 const stringLength = (string) =>
   /[\uD800-\uDFFF]/.test(string) ? [...string].length : string.length;
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   let passes0 = 0
   const sub0 = (() => {
@@ -69,7 +69,7 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -89,7 +89,7 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   let passes0 = 0
   const sub0 = (() => {
     return true
@@ -108,7 +108,7 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -128,7 +128,7 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   let passes0 = 0
   const sub0 = (() => {
     return true
@@ -149,7 +149,7 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -169,7 +169,7 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   let passes0 = 0
   const sub0 = (() => {
     return true
@@ -189,7 +189,7 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -209,7 +209,7 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   let passes0 = 0
   const sub0 = (() => {
     return false
@@ -231,7 +231,7 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -253,7 +253,7 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   let passes0 = 0
   const sub0 = (() => {
     if (typeof data === "object" && data && !Array.isArray(data)) {
@@ -275,7 +275,7 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -295,7 +295,7 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   let passes0 = 0
   const sub0 = (() => {
     if (!(typeof data === "number")) return false
@@ -310,7 +310,7 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -334,7 +334,7 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   let passes0 = 0
   const sub0 = (() => {
@@ -353,7 +353,7 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -379,7 +379,7 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   let passes0 = 0
   const sub0 = (() => {
     if (typeof data === "object" && data && !Array.isArray(data)) {
@@ -399,7 +399,7 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -419,7 +419,7 @@ return validate
 
 ```js
 'use strict'
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   let passes0 = 0
   const sub0 = (() => {
     let passes1 = 0
@@ -435,6 +435,6 @@ const validate = function validate(data, recursive) {
   if (passes0 !== 1) return false
   return true
 };
-return validate
+return ref0
 ```
 

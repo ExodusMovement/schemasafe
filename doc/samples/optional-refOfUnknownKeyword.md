@@ -16,19 +16,19 @@
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref1 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.bar !== undefined && hasOwn(data, "bar")) {
-      if (!ref0(data.bar, recursive)) return false
+      if (!ref1(data.bar, recursive)) return false
     }
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ### Warnings
@@ -54,21 +54,21 @@ return validate
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref1 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
     }
     if (data.bar !== undefined && hasOwn(data, "bar")) {
-      if (!ref0(data.bar, recursive)) return false
+      if (!ref1(data.bar, recursive)) return false
     }
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ### Warnings

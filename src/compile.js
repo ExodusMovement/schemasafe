@@ -44,7 +44,7 @@ const jsonProtoKeys = new Set(
 const evaluatedStatic = Symbol('evaluated')
 
 const rootMeta = new WeakMap()
-const compile = (funname, schema, root, opts, scope, basePathRoot) => {
+const compile = (schema, root, opts, scope, basePathRoot) => {
   const {
     mode = 'default',
     useDefaults = false,
@@ -83,7 +83,7 @@ const compile = (funname, schema, root, opts, scope, basePathRoot) => {
   if (!includeErrors && (allErrors || reflectErrorsValue))
     throw new Error('allErrors and reflectErrorsValue are not available if includeErrors = false')
 
-  const { gensym, genpattern, genloop, genref, genformat } = scopeMethods(scope)
+  const { gensym, genpattern, genloop, getref, genref, genformat } = scopeMethods(scope)
 
   const buildPath = (prop) => {
     const path = []
@@ -137,6 +137,7 @@ const compile = (funname, schema, root, opts, scope, basePathRoot) => {
     throw new Error('Unreachable: present() check without parent')
   }
 
+  const funname = genref(schema)
   let validate = null // resolve cyclic dependencies
   const wrap = (...args) => {
     const res = validate(...args)
@@ -356,11 +357,8 @@ const compile = (funname, schema, root, opts, scope, basePathRoot) => {
       const resolved = resolveReference(root, schemas, node.$ref, basePath())
       const [sub, subRoot, path] = resolved[0] || []
       if (sub || sub === false) {
-        let n = genref(sub)
-        if (!n) {
-          n = genref(sub, true)
-          compile(n, sub, subRoot, opts, scope, path)
-        }
+        let n = getref(sub)
+        if (!n) n = compile(sub, subRoot, opts, scope, path)
         applyRef(n, { path: ['$ref'] })
       } else fail('failed to resolve $ref:', node.$ref)
       consume('$ref', 'string')
@@ -1032,7 +1030,7 @@ const compile = (funname, schema, root, opts, scope, basePathRoot) => {
   validate[evaluatedStatic] = stat
   delete scope[funname] // more logical key order
   scope[funname] = validate
-  return validate
+  return funname
 }
 
 module.exports = { compile }

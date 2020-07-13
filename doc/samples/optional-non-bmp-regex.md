@@ -13,13 +13,13 @@
 ```js
 'use strict'
 const pattern0 = new RegExp("^🐲*$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!pattern0.test(data)) return false
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -40,7 +40,7 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^🐲*$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {
@@ -52,7 +52,7 @@ const validate = function validate(data, recursive) {
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices

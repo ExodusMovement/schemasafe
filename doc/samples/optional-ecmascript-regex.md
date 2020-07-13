@@ -23,13 +23,13 @@ const format0 = (str) => {
       return false
     }
   };
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (typeof data === "string") {
     if (!format0(data)) return false
   }
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -50,12 +50,12 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^abc$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -72,12 +72,12 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\t$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -94,12 +94,12 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\cC$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -116,12 +116,12 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\cc$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -138,12 +138,12 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\d$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -160,12 +160,12 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\D$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -182,12 +182,12 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\w$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -204,12 +204,12 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\W$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -226,12 +226,12 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\s$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 
@@ -248,11 +248,11 @@ return validate
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\S$", "u");
-const validate = function validate(data, recursive) {
+const ref0 = function validate(data, recursive) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
-return validate
+return ref0
 ```
 

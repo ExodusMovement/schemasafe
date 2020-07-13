@@ -48,7 +48,7 @@ const deepEqual = (obj, obj2) => {
   }
   return false
 };
-const ref1 = function validate(data, recursive) {
+const ref2 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
     if (data[i] !== undefined && hasOwn(data, i)) {
@@ -63,7 +63,7 @@ const format0 = new RegExp("^(?:|(?:|[a-z][a-z0-9+-.]*:)\\/?\\/)(?:|[^\\\\\\s#][
 const pattern0 = new RegExp("^[^#]*#?$", "u");
 const format1 = new RegExp("^[a-z][a-z0-9+-.]*:[^\\s]*$", "i");
 const pattern1 = new RegExp("^[A-Za-z][-A-Za-z0-9.:_]*$", "u");
-const ref2 = function validate(data, recursive) {
+const ref3 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data["$id"] !== undefined && hasOwn(data, "$id")) {
@@ -116,7 +116,7 @@ const ref2 = function validate(data, recursive) {
   }
   return true
 };
-const ref4 = function validate(data, recursive) {
+const ref5 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   if (data.length < 1) return false
   for (let j = 0; j < data.length; j++) {
@@ -137,7 +137,7 @@ const format2 = (str) => {
       return false
     }
   };
-const ref3 = function validate(data, recursive) {
+const ref4 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.additionalItems !== undefined && hasOwn(data, "additionalItems")) {
       if (!(recursive || validate)(data.additionalItems, recursive || validate)) return false
@@ -152,7 +152,7 @@ const ref3 = function validate(data, recursive) {
       })()
       if (!sub2) {
         const sub3 = (() => {
-          if (!ref4(data.items, recursive || validate)) return false
+          if (!ref5(data.items, recursive || validate)) return false
           return true
         })()
         if (!sub3) {
@@ -209,13 +209,13 @@ const ref3 = function validate(data, recursive) {
       if (!(recursive || validate)(data.else, recursive || validate)) return false
     }
     if (data.allOf !== undefined && hasOwn(data, "allOf")) {
-      if (!ref4(data.allOf, recursive || validate)) return false
+      if (!ref5(data.allOf, recursive || validate)) return false
     }
     if (data.anyOf !== undefined && hasOwn(data, "anyOf")) {
-      if (!ref4(data.anyOf, recursive || validate)) return false
+      if (!ref5(data.anyOf, recursive || validate)) return false
     }
     if (data.oneOf !== undefined && hasOwn(data, "oneOf")) {
-      if (!ref4(data.oneOf, recursive || validate)) return false
+      if (!ref5(data.oneOf, recursive || validate)) return false
     }
     if (data.not !== undefined && hasOwn(data, "not")) {
       if (!(recursive || validate)(data.not, recursive || validate)) return false
@@ -223,20 +223,20 @@ const ref3 = function validate(data, recursive) {
   }
   return true
 };
-const ref6 = function validate(data, recursive) {
+const ref7 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   if (!(0 <= data)) return false
   return true
 };
-const ref7 = function validate(data, recursive) {
-  if (!ref6(data, recursive)) return false
+const ref8 = function validate(data, recursive) {
+  if (!ref7(data, recursive)) return false
   return true
 };
-const ref8 = function validate(data, recursive) {
+const ref9 = function validate(data, recursive) {
   if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) return false
   return true
 };
-const ref5 = function validate(data, recursive) {
+const ref6 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.multipleOf !== undefined && hasOwn(data, "multipleOf")) {
@@ -256,44 +256,44 @@ const ref5 = function validate(data, recursive) {
       if (!(typeof data.exclusiveMinimum === "number")) return false
     }
     if (data.maxLength !== undefined && hasOwn(data, "maxLength")) {
-      if (!ref6(data.maxLength, recursive || validate)) return false
+      if (!ref7(data.maxLength, recursive || validate)) return false
     }
     if (data.minLength !== undefined && hasOwn(data, "minLength")) {
-      if (!ref7(data.minLength, recursive || validate)) return false
+      if (!ref8(data.minLength, recursive || validate)) return false
     }
     if (data.pattern !== undefined && hasOwn(data, "pattern")) {
       if (!(typeof data.pattern === "string")) return false
       if (!format2(data.pattern)) return false
     }
     if (data.maxItems !== undefined && hasOwn(data, "maxItems")) {
-      if (!ref6(data.maxItems, recursive || validate)) return false
+      if (!ref7(data.maxItems, recursive || validate)) return false
     }
     if (data.minItems !== undefined && hasOwn(data, "minItems")) {
-      if (!ref7(data.minItems, recursive || validate)) return false
+      if (!ref8(data.minItems, recursive || validate)) return false
     }
     if (data.uniqueItems !== undefined && hasOwn(data, "uniqueItems")) {
       if (!(typeof data.uniqueItems === "boolean")) return false
     }
     if (data.maxContains !== undefined && hasOwn(data, "maxContains")) {
-      if (!ref6(data.maxContains, recursive || validate)) return false
+      if (!ref7(data.maxContains, recursive || validate)) return false
     }
     if (data.minContains !== undefined && hasOwn(data, "minContains")) {
-      if (!ref6(data.minContains, recursive || validate)) return false
+      if (!ref7(data.minContains, recursive || validate)) return false
     }
     if (data.maxProperties !== undefined && hasOwn(data, "maxProperties")) {
-      if (!ref6(data.maxProperties, recursive || validate)) return false
+      if (!ref7(data.maxProperties, recursive || validate)) return false
     }
     if (data.minProperties !== undefined && hasOwn(data, "minProperties")) {
-      if (!ref7(data.minProperties, recursive || validate)) return false
+      if (!ref8(data.minProperties, recursive || validate)) return false
     }
     if (data.required !== undefined && hasOwn(data, "required")) {
-      if (!ref1(data.required, recursive || validate)) return false
+      if (!ref2(data.required, recursive || validate)) return false
     }
     if (data.dependentRequired !== undefined && hasOwn(data, "dependentRequired")) {
       if (!(typeof data.dependentRequired === "object" && data.dependentRequired && !Array.isArray(data.dependentRequired))) return false
       for (const key9 of Object.keys(data.dependentRequired)) {
         if (data.dependentRequired[key9] !== undefined) {
-          if (!ref1(data.dependentRequired[key9], recursive || validate)) return false
+          if (!ref2(data.dependentRequired[key9], recursive || validate)) return false
         }
       }
     }
@@ -302,7 +302,7 @@ const ref5 = function validate(data, recursive) {
     }
     if (data.type !== undefined && hasOwn(data, "type")) {
       const sub4 = (() => {
-        if (!ref8(data.type, recursive || validate)) return false
+        if (!ref9(data.type, recursive || validate)) return false
         return true
       })()
       if (!sub4) {
@@ -311,7 +311,7 @@ const ref5 = function validate(data, recursive) {
           if (data.type.length < 1) return false
           for (let l = 0; l < data.type.length; l++) {
             if (data.type[l] !== undefined && hasOwn(data.type, l)) {
-              if (!ref8(data.type[l], recursive || validate)) return false
+              if (!ref9(data.type[l], recursive || validate)) return false
             }
           }
           if (!unique(data.type)) return false
@@ -325,7 +325,7 @@ const ref5 = function validate(data, recursive) {
   }
   return true
 };
-const ref9 = function validate(data, recursive) {
+const ref10 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.title !== undefined && hasOwn(data, "title")) {
@@ -349,7 +349,7 @@ const ref9 = function validate(data, recursive) {
   }
   return true
 };
-const ref10 = function validate(data, recursive) {
+const ref11 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.format !== undefined && hasOwn(data, "format")) {
@@ -358,7 +358,7 @@ const ref10 = function validate(data, recursive) {
   }
   return true
 };
-const ref11 = function validate(data, recursive) {
+const ref12 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.contentMediaType !== undefined && hasOwn(data, "contentMediaType")) {
@@ -373,7 +373,7 @@ const ref11 = function validate(data, recursive) {
   }
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref1 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.definitions !== undefined && hasOwn(data, "definitions")) {
@@ -394,7 +394,7 @@ const ref0 = function validate(data, recursive) {
           })()
           if (!sub0) {
             const sub1 = (() => {
-              if (!ref1(data.dependencies[key1], recursive || validate)) return false
+              if (!ref2(data.dependencies[key1], recursive || validate)) return false
               return true
             })()
             if (!sub1) {
@@ -405,19 +405,19 @@ const ref0 = function validate(data, recursive) {
       }
     }
   }
-  if (!ref2(data, recursive || validate)) return false
   if (!ref3(data, recursive || validate)) return false
-  if (!ref5(data, recursive || validate)) return false
-  if (!ref9(data, recursive || validate)) return false
+  if (!ref4(data, recursive || validate)) return false
+  if (!ref6(data, recursive || validate)) return false
   if (!ref10(data, recursive || validate)) return false
   if (!ref11(data, recursive || validate)) return false
+  if (!ref12(data, recursive || validate)) return false
   return true
 };
-const validate = function validate(data, recursive) {
-  if (!ref0(data, recursive)) return false
+const ref0 = function validate(data, recursive) {
+  if (!ref1(data, recursive)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
@@ -473,7 +473,7 @@ const deepEqual = (obj, obj2) => {
   }
   return false
 };
-const ref1 = function validate(data, recursive) {
+const ref2 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
     if (data[i] !== undefined && hasOwn(data, i)) {
@@ -488,7 +488,7 @@ const format0 = new RegExp("^(?:|(?:|[a-z][a-z0-9+-.]*:)\\/?\\/)(?:|[^\\\\\\s#][
 const pattern0 = new RegExp("^[^#]*#?$", "u");
 const format1 = new RegExp("^[a-z][a-z0-9+-.]*:[^\\s]*$", "i");
 const pattern1 = new RegExp("^[A-Za-z][-A-Za-z0-9.:_]*$", "u");
-const ref2 = function validate(data, recursive) {
+const ref3 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data["$id"] !== undefined && hasOwn(data, "$id")) {
@@ -541,7 +541,7 @@ const ref2 = function validate(data, recursive) {
   }
   return true
 };
-const ref4 = function validate(data, recursive) {
+const ref5 = function validate(data, recursive) {
   if (!Array.isArray(data)) return false
   if (data.length < 1) return false
   for (let j = 0; j < data.length; j++) {
@@ -562,7 +562,7 @@ const format2 = (str) => {
       return false
     }
   };
-const ref3 = function validate(data, recursive) {
+const ref4 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.additionalItems !== undefined && hasOwn(data, "additionalItems")) {
       if (!(recursive || validate)(data.additionalItems, recursive || validate)) return false
@@ -577,7 +577,7 @@ const ref3 = function validate(data, recursive) {
       })()
       if (!sub2) {
         const sub3 = (() => {
-          if (!ref4(data.items, recursive || validate)) return false
+          if (!ref5(data.items, recursive || validate)) return false
           return true
         })()
         if (!sub3) {
@@ -634,13 +634,13 @@ const ref3 = function validate(data, recursive) {
       if (!(recursive || validate)(data.else, recursive || validate)) return false
     }
     if (data.allOf !== undefined && hasOwn(data, "allOf")) {
-      if (!ref4(data.allOf, recursive || validate)) return false
+      if (!ref5(data.allOf, recursive || validate)) return false
     }
     if (data.anyOf !== undefined && hasOwn(data, "anyOf")) {
-      if (!ref4(data.anyOf, recursive || validate)) return false
+      if (!ref5(data.anyOf, recursive || validate)) return false
     }
     if (data.oneOf !== undefined && hasOwn(data, "oneOf")) {
-      if (!ref4(data.oneOf, recursive || validate)) return false
+      if (!ref5(data.oneOf, recursive || validate)) return false
     }
     if (data.not !== undefined && hasOwn(data, "not")) {
       if (!(recursive || validate)(data.not, recursive || validate)) return false
@@ -648,20 +648,20 @@ const ref3 = function validate(data, recursive) {
   }
   return true
 };
-const ref6 = function validate(data, recursive) {
+const ref7 = function validate(data, recursive) {
   if (!Number.isInteger(data)) return false
   if (!(0 <= data)) return false
   return true
 };
-const ref7 = function validate(data, recursive) {
-  if (!ref6(data, recursive)) return false
+const ref8 = function validate(data, recursive) {
+  if (!ref7(data, recursive)) return false
   return true
 };
-const ref8 = function validate(data, recursive) {
+const ref9 = function validate(data, recursive) {
   if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) return false
   return true
 };
-const ref5 = function validate(data, recursive) {
+const ref6 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.multipleOf !== undefined && hasOwn(data, "multipleOf")) {
@@ -681,44 +681,44 @@ const ref5 = function validate(data, recursive) {
       if (!(typeof data.exclusiveMinimum === "number")) return false
     }
     if (data.maxLength !== undefined && hasOwn(data, "maxLength")) {
-      if (!ref6(data.maxLength, recursive || validate)) return false
+      if (!ref7(data.maxLength, recursive || validate)) return false
     }
     if (data.minLength !== undefined && hasOwn(data, "minLength")) {
-      if (!ref7(data.minLength, recursive || validate)) return false
+      if (!ref8(data.minLength, recursive || validate)) return false
     }
     if (data.pattern !== undefined && hasOwn(data, "pattern")) {
       if (!(typeof data.pattern === "string")) return false
       if (!format2(data.pattern)) return false
     }
     if (data.maxItems !== undefined && hasOwn(data, "maxItems")) {
-      if (!ref6(data.maxItems, recursive || validate)) return false
+      if (!ref7(data.maxItems, recursive || validate)) return false
     }
     if (data.minItems !== undefined && hasOwn(data, "minItems")) {
-      if (!ref7(data.minItems, recursive || validate)) return false
+      if (!ref8(data.minItems, recursive || validate)) return false
     }
     if (data.uniqueItems !== undefined && hasOwn(data, "uniqueItems")) {
       if (!(typeof data.uniqueItems === "boolean")) return false
     }
     if (data.maxContains !== undefined && hasOwn(data, "maxContains")) {
-      if (!ref6(data.maxContains, recursive || validate)) return false
+      if (!ref7(data.maxContains, recursive || validate)) return false
     }
     if (data.minContains !== undefined && hasOwn(data, "minContains")) {
-      if (!ref6(data.minContains, recursive || validate)) return false
+      if (!ref7(data.minContains, recursive || validate)) return false
     }
     if (data.maxProperties !== undefined && hasOwn(data, "maxProperties")) {
-      if (!ref6(data.maxProperties, recursive || validate)) return false
+      if (!ref7(data.maxProperties, recursive || validate)) return false
     }
     if (data.minProperties !== undefined && hasOwn(data, "minProperties")) {
-      if (!ref7(data.minProperties, recursive || validate)) return false
+      if (!ref8(data.minProperties, recursive || validate)) return false
     }
     if (data.required !== undefined && hasOwn(data, "required")) {
-      if (!ref1(data.required, recursive || validate)) return false
+      if (!ref2(data.required, recursive || validate)) return false
     }
     if (data.dependentRequired !== undefined && hasOwn(data, "dependentRequired")) {
       if (!(typeof data.dependentRequired === "object" && data.dependentRequired && !Array.isArray(data.dependentRequired))) return false
       for (const key9 of Object.keys(data.dependentRequired)) {
         if (data.dependentRequired[key9] !== undefined) {
-          if (!ref1(data.dependentRequired[key9], recursive || validate)) return false
+          if (!ref2(data.dependentRequired[key9], recursive || validate)) return false
         }
       }
     }
@@ -727,7 +727,7 @@ const ref5 = function validate(data, recursive) {
     }
     if (data.type !== undefined && hasOwn(data, "type")) {
       const sub4 = (() => {
-        if (!ref8(data.type, recursive || validate)) return false
+        if (!ref9(data.type, recursive || validate)) return false
         return true
       })()
       if (!sub4) {
@@ -736,7 +736,7 @@ const ref5 = function validate(data, recursive) {
           if (data.type.length < 1) return false
           for (let l = 0; l < data.type.length; l++) {
             if (data.type[l] !== undefined && hasOwn(data.type, l)) {
-              if (!ref8(data.type[l], recursive || validate)) return false
+              if (!ref9(data.type[l], recursive || validate)) return false
             }
           }
           if (!unique(data.type)) return false
@@ -750,7 +750,7 @@ const ref5 = function validate(data, recursive) {
   }
   return true
 };
-const ref9 = function validate(data, recursive) {
+const ref10 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.title !== undefined && hasOwn(data, "title")) {
@@ -774,7 +774,7 @@ const ref9 = function validate(data, recursive) {
   }
   return true
 };
-const ref10 = function validate(data, recursive) {
+const ref11 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.format !== undefined && hasOwn(data, "format")) {
@@ -783,7 +783,7 @@ const ref10 = function validate(data, recursive) {
   }
   return true
 };
-const ref11 = function validate(data, recursive) {
+const ref12 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.contentMediaType !== undefined && hasOwn(data, "contentMediaType")) {
@@ -798,7 +798,7 @@ const ref11 = function validate(data, recursive) {
   }
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref1 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.definitions !== undefined && hasOwn(data, "definitions")) {
@@ -819,7 +819,7 @@ const ref0 = function validate(data, recursive) {
           })()
           if (!sub0) {
             const sub1 = (() => {
-              if (!ref1(data.dependencies[key1], recursive || validate)) return false
+              if (!ref2(data.dependencies[key1], recursive || validate)) return false
               return true
             })()
             if (!sub1) {
@@ -830,19 +830,19 @@ const ref0 = function validate(data, recursive) {
       }
     }
   }
-  if (!ref2(data, recursive || validate)) return false
   if (!ref3(data, recursive || validate)) return false
-  if (!ref5(data, recursive || validate)) return false
-  if (!ref9(data, recursive || validate)) return false
+  if (!ref4(data, recursive || validate)) return false
+  if (!ref6(data, recursive || validate)) return false
   if (!ref10(data, recursive || validate)) return false
   if (!ref11(data, recursive || validate)) return false
+  if (!ref12(data, recursive || validate)) return false
   return true
 };
-const validate = function validate(data, recursive) {
-  if (!ref0(data, recursive)) return false
+const ref0 = function validate(data, recursive) {
+  if (!ref1(data, recursive)) return false
   return true
 };
-return validate
+return ref0
 ```
 
 ##### Strong mode notices
