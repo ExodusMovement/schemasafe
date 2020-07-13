@@ -24,16 +24,12 @@
         "message": "Only literals or 'fmt' / 'close' identifiers are allowed as first format(), .write() and .block() argument (fmt)"
       },
       {
-        "selector": "CallExpression[callee.name='maybeWrap']:not([arguments.1.type='Literal'][arguments.3.type='Literal'])",
-        "message": "Only literals are allowed as second and fourth maybeWrap() argument (fmt, close)"
-      },
-      {
         "selector": "CallExpression[callee.property.name='block']:not(:matches([arguments.2.type='Literal'], [arguments.2.name='close']))",
         "message": "Only literals or 'close' are allowed as third .block() argument (close)"
       },
       {
-        "selector": ":not(:matches([id.name='format'], [key.name='write'], [key.name='block'], [id.name='maybeWrap'])) > [params] > Identifier:matches([name='fmt'], [name='close'])",
-        "message": "Identifiers 'fmt' / 'close' can be only defined as format(), .write(), .block(), and maybeWrap() arguments"
+        "selector": ":not(:matches([id.name='format'], [key.name='write'], [key.name='block'])) > [params] > Identifier:matches([name='fmt'], [name='close'])",
+        "message": "Identifiers 'fmt' / 'close' can be only defined as format(), .write() and .block() arguments"
       },
       {
         "selector": "VariableDeclarator > .id:matches([name='fmt'], [name='close'])",

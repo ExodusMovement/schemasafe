@@ -444,11 +444,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       return format('%s.test(%s)', genpattern(pat), key)
     }
 
-    const maybeWrap = (shouldWrap, fmt, args, close, writeBody) => {
-      if (!shouldWrap) return writeBody()
-      fun.block(fmt, args, close, writeBody)
-    }
-
     const forObjectKeys = (key, obj, writeBody) => {
       fun.block('for (const %s of Object.keys(%s)) {', [key, obj], '}', () => {
         writeBody(currPropVar(key, true)) // always own property here
@@ -460,8 +455,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       allErrors && (node.uniqueItems || node.pattern || node.patternProperties || node.format)
         ? gensym('prev')
         : null
-    const prevWrap = (shouldWrap, writeBody) =>
-      maybeWrap(prev !== null && shouldWrap, 'if (errorCount === %s) {', [prev], '}', writeBody)
+    const prevWrap = (shouldWrap, writeBody) => {
+      if (prev === null || !shouldWrap) writeBody()
+      else fun.if(format('errorCount === %s', prev), writeBody)
+    }
 
     // Can not be used before undefined check above! The one performed by present()
     const rule = (...args) => visit(errors, [...history, { stat, prop: current }], ...args)
@@ -967,7 +964,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     const typeWrap = (checkBlock, validTypes, queryType) => {
       const [funSize, unusedSize] = [fun.size(), unused.size]
-      maybeWrap(!definitelyType(...validTypes), 'if (%s) {', [queryType], '}', checkBlock)
+      if (definitelyType(...validTypes)) checkBlock()
+      else fun.if(queryType, checkBlock)
       // enforce check that non-applicable blocks are empty and no rules were applied
       if (funSize !== fun.size() || unusedSize !== unused.size)
         enforce(typeApplicable(...validTypes), `Unexpected rules in type`, node.type)
@@ -1012,8 +1010,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     evaluateDelta({ type: typeArray })
     if (node.type !== undefined) consume('type', 'string', 'array')
 
-    // If type validation was needed and did not return early, wrap this inside an else clause.
-    maybeWrap(needTypeValidate && allErrors, 'else {', [], '}', () => {
+    const performValidation = () => {
       if (prev !== null) fun.write('let %s = errorCount', prev)
       if (checkConst()) {
         // const/enum shouldn't have any other validation rules except for already checked type/$ref
@@ -1030,7 +1027,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       typeWrap(checkArraysFinal, ['array'], types.get('array')(name))
       typeWrap(checkObjectsFinal, ['object'], types.get('object')(name))
-    })
+    }
+
+    // If type validation was needed and did not return early, wrap this inside an else clause.
+    if (needTypeValidate && allErrors) fun.block('else {', [], '}', performValidation)
+    else performValidation()
 
     finish()
     return stat // return statically evaluated
