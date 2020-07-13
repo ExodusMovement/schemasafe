@@ -7,6 +7,7 @@ Supports [draft-04/06/07](doc/Specification-support.md).
 [![Node CI Status](https://github.com/ExodusMovement/schemasafe/workflows/Node%20CI/badge.svg)](https://github.com/ExodusMovement/schemasafe/actions)
 [![npm](https://img.shields.io/npm/v/@exodus/schemasafe.svg)](https://www.npmjs.com/package/@exodus/schemasafe)
 [![codecov](https://codecov.io/gh/ExodusMovement/schemasafe/branch/master/graph/badge.svg)](https://codecov.io/gh/ExodusMovement/schemasafe)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/ExodusMovement/schemasafe.svg?logo=github)](https://lgtm.com/projects/g/ExodusMovement/schemasafe/alerts/)
 
 ## Installation
 

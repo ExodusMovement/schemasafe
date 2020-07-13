@@ -46,8 +46,8 @@ const deepEqual = (obj, obj2) => {
   } else if (proto === Object.prototype) {
     const [keys, keys2] = [Object.keys(obj), Object.keys(obj2)]
     if (keys.length !== keys2.length) return false
-    const keyset2 = new Set(keys2)
-    return keys.every((key) => keyset2.has(key) && deepEqual(obj[key], obj2[key]))
+    const keyset2 = new Set([...keys, ...keys2])
+    return keyset2.size === keys.length && keys.every((key) => deepEqual(obj[key], obj2[key]))
   }
   return false
 };
