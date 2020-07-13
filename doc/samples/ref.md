@@ -232,9 +232,7 @@ const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
       if (!ref1(data.foo, recursive)) return false
-      if (Array.isArray(data.foo)) {
-        if (data.foo.length > 2) return false
-      }
+      if (data.foo.length > 2) return false
     }
   }
   return true

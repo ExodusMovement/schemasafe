@@ -386,8 +386,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       node.type === undefined ? null : Array.isArray(node.type) ? node.type : [node.type]
     for (const t of typeArray || [])
       enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
-    // typeArray === null means no type validation, which is required if we don't have const or enum
-    if (typeArray === null && node.const === undefined && !node.enum && !hasSubValidation)
+    // typeArray === null and stat.type === null means no type validation, which is required if we don't have const or enum
+    if (!typeArray && !stat.type && node.const === undefined && !node.enum && !hasSubValidation)
       enforceValidation('type is required')
 
     // This is used for typechecks, null means * here
@@ -402,10 +402,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       return arr === null || arr.some((x) => possible.includes(x)) // at least one arr entry is in possible
     }
 
-    const parentCheckedType = (...valid) => queryCurrent().some((h) => allIn(h.typeArray, valid))
-    const definitelyType = (...valid) => allIn(typeArray, valid) || parentCheckedType(...valid)
+    const parentCheckedType = (...valid) => queryCurrent().some((h) => allIn(h.stat.type, valid))
+    const definitelyType = (...valid) => allIn(stat.type, valid) || parentCheckedType(...valid)
     const typeApplicable = (...possible) =>
-      someIn(typeArray, possible) && queryCurrent().every((h) => someIn(h.typeArray, possible))
+      someIn(stat.type, possible) && queryCurrent().every((h) => someIn(h.stat.type, possible))
 
     const compare = (variableName, value) => {
       if (value && typeof value === 'object') {
@@ -465,13 +465,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       maybeWrap(prev !== null && shouldWrap, 'if (errorCount === %s) {', [prev], '}', writeBody)
 
     // Can not be used before undefined check above! The one performed by present()
-    const rule = (...args) =>
-      visit(errors, [...history, { stat, prop: current, typeArray }], ...args)
+    const rule = (...args) => visit(errors, [...history, { stat, prop: current }], ...args)
     const subrule = (suberr, ...args) => {
       const sub = gensym('sub')
       fun.write('const %s = (() => {', sub)
       if (allErrors) fun.write('let errorCount = 0') // scoped error counter
-      const delta = visit(suberr, [...history, { stat, prop: current, typeArray }], ...args)
+      const delta = visit(suberr, [...history, { stat, prop: current }], ...args)
       if (allErrors) {
         fun.write('return errorCount === 0')
       } else fun.write('return true')
@@ -1011,6 +1010,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const typeInvalid = safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
       errorIf(typeInvalid, { path: ['type'] })
     }
+    evaluateDelta({ type: typeArray })
     if (node.type !== undefined) consume('type', 'string', 'array')
 
     // If type validation was needed and did not return early, wrap this inside an else clause.

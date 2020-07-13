@@ -12,7 +12,7 @@
  */
 
 const initTracing = () => ({
-  ...{ properties: [], patterns: [], required: [], items: 0 },
+  ...{ properties: [], patterns: [], required: [], items: 0, type: null },
   dyn: { properties: [], patterns: [], items: 0 },
   unknown: false,
 })
@@ -26,6 +26,7 @@ const andDelta = wrapFun((A, B) => ({
   properties: [...A.properties, ...B.properties],
   patterns: [...A.patterns, ...B.patterns],
   required: [...A.required, ...B.required],
+  type: A.type && B.type ? [...new Set([...A.type, ...B.type])] : null,
   dyn: {
     items: Math.max(A.dyn.items, B.dyn.items),
     properties: [...A.dyn.properties, ...B.dyn.properties],
@@ -55,6 +56,7 @@ const orDelta = wrapFun((A, B) => ({
   properties: orProperties(A, B),
   patterns: A.patterns.filter((x) => B.patterns.includes(x)),
   required: A.required.filter((x) => B.required.includes(x)),
+  type: A.type && B.type ? A.type.filter((x) => B.type.includes(x)) : null,
   dyn: {
     items: Math.max(A.items, B.items, A.dyn.items, B.dyn.items),
     properties: [...A.properties, ...B.properties, ...A.dyn.properties, ...B.dyn.properties],
@@ -68,6 +70,8 @@ const applyDelta = (stat, delta) => {
   if (delta.properties) stat.properties.push(...delta.properties)
   if (delta.patterns) stat.patterns.push(...delta.patterns)
   if (delta.required) stat.required.push(...delta.required)
+  if (delta.type)
+    stat.type = stat.type ? stat.type.filter((x) => delta.type.includes(x)) : delta.type
   if (delta.dyn) stat.dyn.items = Math.max(stat.dyn.items, delta.dyn.items)
   if (delta.dyn) stat.dyn.properties.push(...delta.dyn.properties)
   if (delta.dyn) stat.dyn.patterns.push(...delta.dyn.patterns)
