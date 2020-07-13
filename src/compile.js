@@ -995,20 +995,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       })
     }
 
-    /* Actual post-$ref validation happens here */
-
-    const typeExact = (type) => typeArray && typeArray.length === 1 && typeArray[0] === type
-    if (current.type)
-      enforce(typeExact(current.type), 'Only one type is allowed here:', current.type)
-    const needTypeValidate = !current.type && typeArray !== null && !parentCheckedType(...typeArray)
-    if (needTypeValidate) {
-      const filteredTypes = typeArray.filter((t) => typeApplicable(t))
-      if (filteredTypes.length === 0) fail('No valid types possible')
-      const typeInvalid = safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
-      errorIf(typeInvalid, { path: ['type'] })
-    }
-    evaluateDelta({ type: typeArray })
-    if (node.type !== undefined) consume('type', 'string', 'array')
+    /* Actual post-$ref validation happens below */
 
     const performValidation = () => {
       if (prev !== null) fun.write('let %s = errorCount', prev)
@@ -1028,6 +1015,19 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       typeWrap(checkArraysFinal, ['array'], types.get('array')(name))
       typeWrap(checkObjectsFinal, ['object'], types.get('object')(name))
     }
+
+    const typeExact = (type) => typeArray && typeArray.length === 1 && typeArray[0] === type
+    if (current.type)
+      enforce(typeExact(current.type), 'Only one type is allowed here:', current.type)
+    const needTypeValidate = !current.type && typeArray !== null && !parentCheckedType(...typeArray)
+    if (needTypeValidate) {
+      const filteredTypes = typeArray.filter((t) => typeApplicable(t))
+      if (filteredTypes.length === 0) fail('No valid types possible')
+      const typeInvalid = safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
+      errorIf(typeInvalid, { path: ['type'] })
+    }
+    evaluateDelta({ type: typeArray })
+    if (node.type !== undefined) consume('type', 'string', 'array')
 
     // If type validation was needed and did not return early, wrap this inside an else clause.
     if (needTypeValidate && allErrors) fun.block('else {', [], '}', performValidation)
