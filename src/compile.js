@@ -451,10 +451,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     // Those checks will need to be skipped if another error is set in this block before those ones
-    const prev =
-      allErrors && (node.uniqueItems || node.pattern || node.patternProperties || node.format)
-        ? gensym('prev')
-        : null
+    const haveComplex = node.uniqueItems || node.pattern || node.patternProperties || node.format
+    const prev = allErrors && haveComplex ? gensym('prev') : null
     const prevWrap = (shouldWrap, writeBody) => {
       if (prev === null || !shouldWrap) writeBody()
       else fun.if(format('errorCount === %s', prev), writeBody)
