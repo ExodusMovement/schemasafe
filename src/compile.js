@@ -161,7 +161,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       !current.parent || current.checked || (current.inKeys && isJSON) || queryCurrent().length > 0
 
     const name = buildName(current)
-    const currPropVar = (...args) => propvar(current, ...args)
     const currPropImm = (...args) => propimm(current, ...args)
 
     const error = ({ path = [], prop = current, source }) => {
@@ -444,9 +443,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       return format('%s.test(%s)', genpattern(pat), key)
     }
 
-    const forObjectKeys = (key, obj, writeBody) => {
-      fun.block('for (const %s of Object.keys(%s)) {', [key, obj], '}', () => {
-        writeBody(currPropVar(key, true)) // always own property here
+    const forObjectKeys = (obj, writeBody) => {
+      const key = gensym('key')
+      fun.block('for (const %s of Object.keys(%s)) {', [key, buildName(obj)], '}', () => {
+        writeBody(propvar(obj, key, true), key) // always own property here
+      })
+    }
+
+    const forArray = (obj, start, writeBody) => {
+      const i = genloop()
+      const args = [i, start, i, buildName(obj), i]
+      fun.block('for (let %s = %s; %s < %s.length; %s++) {', args, '}', () => {
+        writeBody(propvar(obj, i, unmodifiedPrototypes, true), i) // own property in Array if proto not mangled
       })
     }
 
@@ -493,18 +501,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           errorIf(format('%s.length > %s', name, limit), { path: [rulePath] })
         }
       } else if (ruleValue) {
-        const i = genloop()
-        fun.block('for (let %s = %s; %s < %s.length; %s++) {', [i, limit, i, name, i], '}', () => {
-          const prop = currPropVar(i, unmodifiedPrototypes, true) // own property in Array if proto not mangled
-          rule(prop, ruleValue, subPath(rulePath))
-        })
+        forArray(current, limit, (prop) => rule(prop, ruleValue, subPath(rulePath)))
       }
       consume(rulePath, 'object', 'boolean')
       evaluateDelta({ items: Infinity })
     }
     const additionalProperties = (condition, ruleValue, rulePath) => {
-      const key = gensym('key')
-      forObjectKeys(key, name, (sub) => {
+      forObjectKeys(current, (sub, key) => {
         fun.if(condition(key), () => {
           if (ruleValue === false && removeAdditional) fun.write('delete %s[%s]', name, key)
           else rule(sub, ruleValue, subPath(rulePath))
@@ -683,11 +686,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             rule(currPropImm(p), node.items[p], subPath(`${p}`))
           evaluateDelta({ items: node.items.length })
         } else {
-          const i = genloop()
-          fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
-            const prop = currPropVar(i, unmodifiedPrototypes, true) // own property in Array if proto not mangled
-            rule(prop, node.items, subPath('items'))
-          })
+          forArray(current, format('0'), (prop) => rule(prop, node.items, subPath('items')))
           stat.items = Infinity
         }
         consume('items', 'object', 'array', 'boolean')
@@ -712,9 +711,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         fun.write('let %s = 0', passes)
 
         const suberr = suberror()
-        const i = genloop()
-        fun.block('for (let %s = 0; %s < %s.length; %s++) {', [i, i, name, i], '}', () => {
-          const prop = currPropVar(i, unmodifiedPrototypes, true) // own property in Array if proto not mangled
+        forArray(current, format('0'), (prop) => {
           const { sub } = subrule(suberr, prop, node.contains, subPath('contains'))
           fun.write('if (%s) %s++', sub, passes)
           // evaluateDelta({ unknown: true }) // draft2020: contains counts towards evaluatedItems
@@ -781,8 +778,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
 
       if (typeof node.propertyNames === 'object' || typeof node.propertyNames === 'boolean') {
-        const key = gensym('key')
-        forObjectKeys(key, name, (sub) => {
+        forObjectKeys(current, (sub, key) => {
           const names = node.propertyNames
           const nameSchema = typeof names === 'object' ? { type: 'string', ...names } : names
           const nameprop = Object.freeze({ name: key, errorParent: sub, type: 'string' })
@@ -851,8 +847,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
       prevWrap(node.patternProperties, () => {
         if (node.patternProperties) {
-          const key = gensym('key')
-          forObjectKeys(key, name, (sub) => {
+          forObjectKeys(current, (sub, key) => {
             for (const p of Object.keys(node.patternProperties)) {
               enforceRegex(p, node.propertyNames || {})
               fun.if(patternTest(p, key), () => {
