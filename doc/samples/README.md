@@ -68,3 +68,9 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [optional/ecmascript-regex](./optional-ecmascript-regex.md)       | 11    | -                 | -        | -             |
 | [optional/non-bmp-regex](./optional-non-bmp-regex.md)             | 2     | -                 | -        | -             |
 | [optional/refOfUnknownKeyword](./optional-refOfUnknownKeyword.md) | 2     | -                 | 2        | -             |
+
+### Notes
+
+`{ isJSON: true }` option is used for better clarity, and that also corresponds to the main
+expected usage pattern of this module. Without it, there would be additional checks for
+`!== undefined`, which can be fast-tracked if we know that the input came from `JSON.parse()`.

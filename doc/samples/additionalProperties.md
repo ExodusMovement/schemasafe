@@ -20,7 +20,7 @@ const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key1 of Object.keys(data)) {
       if (key1 !== "foo" && key1 !== "bar" && !(key1.startsWith("v"))) {
-        if (data[key1] !== undefined) return false
+        return false
       }
     }
   }
@@ -50,7 +50,7 @@ const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key1 of Object.keys(data)) {
       if (!(key1.startsWith("á"))) {
-        if (data[key1] !== undefined) return false
+        return false
       }
     }
   }
@@ -83,9 +83,7 @@ const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (key0 !== "foo" && key0 !== "bar") {
-        if (data[key0] !== undefined) {
-          if (!(typeof data[key0] === "boolean")) return false
-        }
+        if (!(typeof data[key0] === "boolean")) return false
       }
     }
   }
@@ -114,9 +112,7 @@ return ref0
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
-      if (data[key0] !== undefined) {
-        if (!(typeof data[key0] === "boolean")) return false
-      }
+      if (!(typeof data[key0] === "boolean")) return false
     }
   }
   return true
@@ -170,9 +166,7 @@ return ref0
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
-      if (data[key0] !== undefined) {
-        if (!(typeof data[key0] === "boolean")) return false
-      }
+      if (!(typeof data[key0] === "boolean")) return false
     }
   }
   return true

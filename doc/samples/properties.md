@@ -64,18 +64,14 @@ const ref0 = function validate(data, recursive) {
     }
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {
-        if (data[key0] !== undefined) {
-          if (Array.isArray(data[key0])) {
-            if (data[key0].length < 2) return false
-          }
+        if (Array.isArray(data[key0])) {
+          if (data[key0].length < 2) return false
         }
       }
     }
     for (const key1 of Object.keys(data)) {
       if (key1 !== "foo" && key1 !== "bar" && !pattern0.test(key1)) {
-        if (data[key1] !== undefined) {
-          if (!(Number.isInteger(data[key1]))) return false
-        }
+        if (!(Number.isInteger(data[key1]))) return false
       }
     }
   }

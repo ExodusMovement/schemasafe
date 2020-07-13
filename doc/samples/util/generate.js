@@ -16,7 +16,8 @@ function processSchema(block) {
   const { description, comment } = block
   for (const mode of ['strong', 'default', 'lax']) {
     try {
-      const opts = { schemas, mode, $schemaDefault: 'http://json-schema.org/draft/2019-09/schema#' }
+      const $schemaDefault = 'http://json-schema.org/draft/2019-09/schema#'
+      const opts = { schemas, mode, isJSON: true, $schemaDefault }
       const validate = validator(block.schema, opts)
       const mistakes = block.tests.filter((test) => validate(test.data) !== test.valid).length
       const ok = mistakes === 0
@@ -133,6 +134,12 @@ indexContents.push(wrapRow(head))
 indexContents.push(wrapRow([...columns].fill(''), '-'))
 for (const row of results) indexContents.push(wrapRow(row))
 
-indexContents.push('')
+indexContents.push(`
+### Notes
+
+\`{ isJSON: true }\` option is used for better clarity, and that also corresponds to the main
+expected usage pattern of this module. Without it, there would be additional checks for
+\`!== undefined\`, which can be fast-tracked if we know that the input came from \`JSON.parse()\`.
+`)
 
 writeFileSync(`README.md`, indexContents.join('\n'))

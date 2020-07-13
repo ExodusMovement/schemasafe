@@ -44,10 +44,8 @@ const stringLength = (string) =>
 const ref0 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   for (const key0 of Object.keys(data)) {
-    if (data[key0] !== undefined) {
-      if (!(typeof data[key0] === "string")) return false
-      if (data[key0].length < 3 || stringLength(data[key0]) < 3) return false
-    }
+    if (!(typeof data[key0] === "string")) return false
+    if (data[key0].length < 3 || stringLength(data[key0]) < 3) return false
   }
   return true
 };
@@ -74,7 +72,7 @@ return ref0
 const ref0 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   for (const key0 of Object.keys(data)) {
-    if (data[key0] !== undefined) return false
+    return false
   }
   return true
 };
@@ -110,7 +108,7 @@ const ref0 = function validate(data, recursive) {
   }
   for (const key0 of Object.keys(data)) {
     if (key0 !== "foo") {
-      if (data[key0] !== undefined) return false
+      return false
     }
   }
   return true
@@ -143,14 +141,12 @@ const ref0 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   for (const key0 of Object.keys(data)) {
     if (key0.startsWith("foo")) {
-      if (data[key0] !== undefined) {
-        if (!(typeof data[key0] === "string")) return false
-      }
+      if (!(typeof data[key0] === "string")) return false
     }
   }
   for (const key1 of Object.keys(data)) {
     if (!(key1.startsWith("foo"))) {
-      if (data[key1] !== undefined) return false
+      return false
     }
   }
   return true
@@ -224,7 +220,7 @@ const ref0 = function validate(data, recursive) {
   }
   for (const key0 of Object.keys(data)) {
     if (key0 !== "foo" && key0 !== "bar") {
-      if (data[key0] !== undefined) return false
+      return false
     }
   }
   return true
@@ -262,14 +258,12 @@ const ref0 = function validate(data, recursive) {
   }
   for (const key0 of Object.keys(data)) {
     if (key0.startsWith("bar")) {
-      if (data[key0] !== undefined) {
-        if (!(typeof data[key0] === "string")) return false
-      }
+      if (!(typeof data[key0] === "string")) return false
     }
   }
   for (const key1 of Object.keys(data)) {
     if (key1 !== "foo" && !(key1.startsWith("bar"))) {
-      if (data[key1] !== undefined) return false
+      return false
     }
   }
   return true
@@ -436,7 +430,7 @@ const ref0 = function validate(data, recursive) {
   if (sub0) return false
   for (const key0 of Object.keys(data)) {
     if (key0 !== "foo") {
-      if (data[key0] !== undefined) return false
+      return false
     }
   }
   return true
@@ -527,7 +521,7 @@ const ref0 = function validate(data, recursive) {
   }
   for (const key0 of Object.keys(data)) {
     if (key0 !== "foo") {
-      if (data[key0] !== undefined) return false
+      return false
     }
   }
   return true
@@ -575,7 +569,7 @@ const ref0 = function validate(data, recursive) {
   }
   for (const key0 of Object.keys(data)) {
     if (key0 !== "bar" && key0 !== "foo") {
-      if (data[key0] !== undefined) return false
+      return false
     }
   }
   return true
@@ -608,7 +602,7 @@ return ref0
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
-      if (data[key0] !== undefined) return false
+      return false
     }
   }
   return true

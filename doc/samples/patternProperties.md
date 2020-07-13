@@ -17,9 +17,7 @@ const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {
-        if (data[key0] !== undefined) {
-          if (!(Number.isInteger(data[key0]))) return false
-        }
+        if (!(Number.isInteger(data[key0]))) return false
       }
     }
   }
@@ -53,14 +51,10 @@ return ref0
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
-      if (data[key0] !== undefined) {
-        if (!(Number.isInteger(data[key0]))) return false
-      }
+      if (!(Number.isInteger(data[key0]))) return false
       if (key0.includes("aa")) {
-        if (data[key0] !== undefined) {
-          if (typeof data[key0] === "number") {
-            if (!(20 >= data[key0])) return false
-          }
+        if (typeof data[key0] === "number") {
+          if (!(20 >= data[key0])) return false
         }
       }
     }
@@ -97,14 +91,10 @@ const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {
-        if (data[key0] !== undefined) {
-          if (!(typeof data[key0] === "boolean")) return false
-        }
+        if (!(typeof data[key0] === "boolean")) return false
       }
       if (key0.includes("X_")) {
-        if (data[key0] !== undefined) {
-          if (!(typeof data[key0] === "string")) return false
-        }
+        if (!(typeof data[key0] === "string")) return false
       }
     }
   }
@@ -134,7 +124,7 @@ const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (key0.includes("b")) {
-        if (data[key0] !== undefined) return false
+        return false
       }
     }
   }
