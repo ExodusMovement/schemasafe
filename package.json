@@ -17,14 +17,13 @@
     "src/formats.js",
     "src/generate-function.js",
     "src/index.js",
-    "src/jaystring.js",
+    "src/javascript.js",
     "src/known-keywords.js",
     "src/pointer.js",
     "src/safe-format.js",
     "src/scope-functions.js",
     "src/scope-utils.js",
-    "src/tracing.js",
-    "src/types.js"
+    "src/tracing.js"
   ],
   "scripts": {
     "lint": "prettier --list-different '**/*.js'&& eslint .",

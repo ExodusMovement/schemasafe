@@ -1,7 +1,7 @@
 'use strict'
 
 const { format, safe } = require('./safe-format')
-const jaystring = require('./jaystring')
+const { jaystring } = require('./javascript')
 
 const INDENT_START = /[{[]/
 const INDENT_END = /[}\]]/

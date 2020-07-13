@@ -6,40 +6,30 @@ const { resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
 const functions = require('./scope-functions')
 const { scopeMethods } = require('./scope-utils')
-const { types, schemaTypes } = require('./types')
+const { buildName, types, jsHelpers } = require('./javascript')
 const { knownKeywords, schemaVersions, knownVocabularies } = require('./known-keywords')
 const { initTracing, andDelta, orDelta, applyDelta, isDynamic } = require('./tracing')
 
 const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*', '^', '$'])
 
+// for checking schema parts in consume()
+const schemaTypes = new Map(
+  Object.entries({
+    boolean: (arg) => typeof arg === 'boolean',
+    array: (arg) => Array.isArray(arg),
+    object: (arg) => typeof arg === 'object' && arg && !Array.isArray(arg),
+    finite: (arg) => Number.isFinite(arg),
+    integer: (arg) => Number.isInteger(arg),
+    natural: (arg) => Number.isInteger(arg) && arg >= 0,
+    string: (arg) => typeof arg === 'string',
+    jsonval: (arg) => functions.deepEqual(arg, JSON.parse(JSON.stringify(arg))),
+  })
+)
+
 // Helper methods for semi-structured paths
 const propvar = (parent, keyname, inKeys = false, number = false) =>
   Object.freeze({ parent, keyname, inKeys, number }) // property by variable
 const propimm = (parent, keyval, checked = false) => Object.freeze({ parent, keyval, checked }) // property by immediate value
-const buildName = ({ name, parent, keyval, keyname }) => {
-  if (name) {
-    if (parent || keyval || keyname) throw new Error('name can be used only stand-alone')
-    return name // top-level
-  }
-  if (!parent) throw new Error('Can not use property of undefined parent!')
-  const parentName = buildName(parent)
-  if (keyval !== undefined) {
-    if (keyname) throw new Error('Can not use key value and name together')
-    if (!['string', 'number'].includes(typeof keyval)) throw new Error('Invalid property path')
-    if (/^[a-z][a-z0-9_]*$/i.test(keyval)) return format('%s.%s', parentName, safe(keyval))
-    return format('%s[%j]', parentName, keyval)
-  } else if (keyname) {
-    return format('%s[%s]', parentName, keyname)
-  }
-  /* c8 ignore next */
-  throw new Error('Unreachable')
-}
-
-const jsonProtoKeys = new Set(
-  [].concat(
-    ...[Object, Array, String, Number, Boolean].map((c) => Object.getOwnPropertyNames(c.prototype))
-  )
-)
 
 const evaluatedStatic = Symbol('evaluated')
 
@@ -83,7 +73,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   if (!includeErrors && (allErrors || reflectErrorsValue))
     throw new Error('allErrors and reflectErrorsValue are not available if includeErrors = false')
 
-  const { gensym, genpattern, genloop, getref, genref, genformat } = scopeMethods(scope)
+  const { gensym, getref, genref, genformat } = scopeMethods(scope)
 
   const buildPath = (prop) => {
     const path = []
@@ -117,71 +107,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     return stringParts.length > 0 ? format('%s+%j', res, `/${stringJoined()}`) : res
   }
 
-  const present = (location) => {
-    const name = buildName(location) // also checks for sanity, do not remove
-    const { parent, keyval, keyname, inKeys, checked } = location
-    /* c8 ignore next */
-    if (checked || (inKeys && isJSON)) throw new Error('Unreachable: useless check for undefined')
-    if (inKeys) return format('%s !== undefined', name)
-    if (parent && keyname) {
-      scope.hasOwn = functions.hasOwn
-      return format('%s !== undefined && hasOwn(%s, %s)', name, buildName(parent), keyname)
-    } else if (parent && keyval !== undefined) {
-      // numbers must be converted to strings for this check, hence `${keyval}` in check below
-      if (unmodifiedPrototypes && isJSON && !jsonProtoKeys.has(`${keyval}`))
-        return format('%s !== undefined', name)
-      scope.hasOwn = functions.hasOwn
-      return format('%s !== undefined && hasOwn(%s, %j)', name, buildName(parent), keyval)
-    }
-    /* c8 ignore next */
-    throw new Error('Unreachable: present() check without parent')
-  }
-
-  const forObjectKeys = (obj, writeBody) => {
-    const key = gensym('key')
-    fun.block('for (const %s of Object.keys(%s)) {', [key, buildName(obj)], '}', () => {
-      writeBody(propvar(obj, key, true), key) // always own property here
-    })
-  }
-
-  const forArray = (obj, start, writeBody) => {
-    const i = genloop()
-    const name = buildName(obj)
-    fun.block('for (let %s = %s; %s < %s.length; %s++) {', [i, start, i, name, i], '}', () => {
-      writeBody(propvar(obj, i, unmodifiedPrototypes, true), i) // own property in Array if proto not mangled
-    })
-  }
-
-  const patternTest = (pat, key) => {
-    // Convert common patterns to string checks, makes generated code easier to read (and a tiny perf bump)
-    const r = pat.replace(/[.^$|*+?(){}[\]\\]/gu, '') // Special symbols: .^$|*+?(){}[]\
-    if (pat === `^${r}$`) return format('(%s === %j)', key, pat.slice(1, -1)) // ^abc$ -> === abc
-    if (noopRegExps.has(pat)) return format('true') // known noop
-
-    // All of the below will cause warnings in enforced string validation mode, but let's make what they actually do more visible
-    // note that /^.*$/u.test('\n') is false, so don't combine .* with anchors here!
-    if ([r, `${r}+`, `${r}.*`, `.*${r}.*`].includes(pat)) return format('%s.includes(%j)', key, r)
-    if ([`^${r}`, `^${r}+`, `^${r}.*`].includes(pat)) return format('%s.startsWith(%j)', key, r)
-    if ([`${r}$`, `.*${r}$`].includes(pat)) return format('%s.endsWith(%j)', key, r)
-
-    const subr = [...r].slice(0, -1).join('') // without the last symbol, astral plane aware
-    if ([`${r}*`, `${r}?`].includes(pat))
-      return subr.length === 0 ? format('true') : format('%s.includes(%j)', key, subr) // abc*, abc? -> includes(ab)
-    if ([`^${r}*`, `^${r}?`].includes(pat))
-      return subr.length === 0 ? format('true') : format('%s.startsWith(%j)', key, subr) // ^abc*, ^abc? -> startsWith(ab)
-
-    // A normal reg-exp test
-    return format('%s.test(%s)', genpattern(pat), key)
-  }
-
-  const compare = (variableName, value) => {
-    if (value && typeof value === 'object') {
-      scope.deepEqual = functions.deepEqual
-      return format('deepEqual(%s, %j)', variableName, value)
-    }
-    return format('%s === %j', variableName, value)
-  }
-
   const funname = genref(schema)
   let validate = null // resolve cyclic dependencies
   const wrap = (...args) => {
@@ -195,6 +120,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   fun.write('function validate(data, recursive) {')
   if (includeErrors) fun.write('validate.errors = null')
   if (allErrors) fun.write('let errorCount = 0')
+
+  const helpers = jsHelpers(fun, scope, propvar, { unmodifiedPrototypes, isJSON }, noopRegExps)
+  const { present, forObjectKeys, forArray, patternTest, compare } = helpers
 
   const recursiveAnchor = schema && schema.$recursiveAnchor === true
   const getMeta = () => rootMeta.get(root) || {}

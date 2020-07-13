@@ -2,7 +2,7 @@
 
 const tape = require('tape')
 const { inspect } = require('util')
-const jaystring = require('../src/jaystring')
+const { jaystring } = require('../src/javascript')
 
 function foo(bar) {
   return bar
