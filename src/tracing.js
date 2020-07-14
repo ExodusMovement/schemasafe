@@ -83,8 +83,8 @@ const applyDelta = (stat, delta) => {
 }
 
 const isDynamic = wrapFun(({ unknown, items, dyn, ...stat }) => ({
-  items: unknown || dyn.items > items,
-  properties: unknown || !inProperties(stat, dyn),
+  items: items !== Infinity && (unknown || dyn.items > items),
+  properties: !stat.properties.includes(true) && (unknown || !inProperties(stat, dyn)),
 }))
 
 module.exports = { initTracing, andDelta, orDelta, applyDelta, isDynamic }
