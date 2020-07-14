@@ -434,7 +434,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
 
     // Extracted single additional(Items/Properties) rules, for reuse with unevaluated(Items/Properties)
     const additionalItems = (rulePath, limit) => {
-      handle(rulePath, ['object', 'boolean'], (ruleValue) => {
+      const handled = handle(rulePath, ['object', 'boolean'], (ruleValue) => {
         if (ruleValue === false) {
           if (!removeAdditional) return format('%s.length > %s', name, limit)
           fun.write('if (%s.length > %s) %s.length = %s', name, limit, name, limit)
@@ -443,10 +443,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
         forArray(current, limit, (prop) => rule(prop, ruleValue, subPath(rulePath)))
         return null
       })
-      evaluateDelta({ items: Infinity })
+      if (handled) evaluateDelta({ items: Infinity })
     }
     const additionalProperties = (rulePath, condition) => {
-      handle(rulePath, ['object', 'boolean'], (ruleValue) => {
+      const handled = handle(rulePath, ['object', 'boolean'], (ruleValue) => {
         forObjectKeys(current, (sub, key) => {
           fun.if(condition(key), () => {
             if (ruleValue === false && removeAdditional) fun.write('delete %s[%s]', name, key)
@@ -455,7 +455,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
         })
         return null
       })
-      evaluateDelta({ properties: [true] })
+      if (handled) evaluateDelta({ properties: [true] })
     }
     const additionalCondition = (key, properties, patternProperties) =>
       safeand(
