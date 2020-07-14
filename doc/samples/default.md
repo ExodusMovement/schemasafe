@@ -26,7 +26,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## invalid string value for default
@@ -62,5 +62,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 

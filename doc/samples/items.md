@@ -28,7 +28,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## an array of schemas for items
@@ -60,7 +60,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## items with boolean schema (true)
@@ -83,7 +83,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## items with boolean schema (false)
@@ -112,7 +112,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## items with boolean schemas
@@ -139,7 +139,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## items and subitems

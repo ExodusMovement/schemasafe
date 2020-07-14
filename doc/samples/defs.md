@@ -409,7 +409,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/properties/definitions/additionalProperties`
+ * `[requireValidation] type must be specified at #/properties/definitions/additionalProperties`
 
 
 ## invalid definition
@@ -821,5 +821,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/properties/definitions/additionalProperties`
+ * `[requireValidation] type must be specified at #/properties/definitions/additionalProperties`
 

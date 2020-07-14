@@ -23,7 +23,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## by number
@@ -56,7 +56,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## by small number
@@ -89,5 +89,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 

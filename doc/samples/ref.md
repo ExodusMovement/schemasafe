@@ -31,7 +31,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## relative pointer ref to object
@@ -72,7 +72,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## relative pointer ref to array
@@ -108,7 +108,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## escaped pointer ref
@@ -166,7 +166,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## nested refs
@@ -242,7 +242,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## remote ref, containing refs itself
@@ -654,7 +654,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/properties/definitions/additionalProperties`
+ * `[requireValidation] type must be specified at #/properties/definitions/additionalProperties`
 
 
 ## property named $ref that is not a reference
@@ -683,7 +683,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## property named $ref, containing an actual $ref
@@ -719,7 +719,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## $ref to boolean schema true
@@ -870,7 +870,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## ref creates new scope when adjacent to keywords
@@ -912,5 +912,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 

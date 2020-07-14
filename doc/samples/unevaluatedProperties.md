@@ -575,7 +575,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## unevaluatedProperties can't see inside cousins
@@ -608,5 +608,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/allOf/0`
+ * `[requireValidation] type must be specified at #/allOf/0`
 

@@ -28,7 +28,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## items is schema, no additionalItems
@@ -77,7 +77,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## additionalItems as false without items
@@ -129,7 +129,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## additionalItems should not look in applicators, valid case
@@ -207,5 +207,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/allOf/0`
+ * `[requireValidation] type must be specified at #/allOf/0`
 

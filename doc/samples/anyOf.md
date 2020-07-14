@@ -35,7 +35,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/anyOf/1`
+ * `[requireValidation] type must be specified at #/anyOf/1`
 
 
 ## anyOf with base schema
@@ -74,7 +74,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/anyOf/0`
+ * `[requireValidation] type must be specified at #/anyOf/0`
 
 
 ## anyOf with boolean schemas, all true
@@ -223,7 +223,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/anyOf/0`
+ * `[requireValidation] type must be specified at #/anyOf/0`
 
 
 ## anyOf with one empty schema

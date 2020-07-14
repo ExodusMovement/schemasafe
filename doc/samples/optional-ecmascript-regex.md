@@ -34,7 +34,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## ECMA 262 regex $ does not match trailing newline

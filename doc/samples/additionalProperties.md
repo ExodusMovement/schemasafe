@@ -31,7 +31,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## non-ASCII pattern with additionalProperties
@@ -61,7 +61,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## additionalProperties allows a schema which should validate
@@ -94,7 +94,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## additionalProperties can exist by itself
@@ -122,7 +122,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## additionalProperties are allowed by default
@@ -145,7 +145,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## additionalProperties should not look in applicators
@@ -176,5 +176,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/allOf/0`
+ * `[requireValidation] type must be specified at #/allOf/0`
 

@@ -173,7 +173,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const enforce = (ok, ...args) => ok || fail(...args)
     const laxMode = (ok, ...args) => enforce(mode === 'lax' || ok, ...args)
     const enforceMinMax = (a, b) => laxMode(!(node[b] < node[a]), `Invalid ${a} / ${b} combination`)
-    const enforceValidation = (msg) => enforce(!requireValidation, `[requireValidation] ${msg}`)
+    const enforceValidation = (msg, suffix = 'must be specified') =>
+      enforce(!requireValidation, `[requireValidation] ${msg} ${suffix}`)
     const subPath = (...args) => [...schemaPath, ...args]
 
     // evaluated tracing
@@ -183,7 +184,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (typeof node === 'boolean') {
       if (node === true) {
         // any is valid
-        enforceValidation('schema = true is not allowed')
+        enforceValidation('schema = true', 'is not allowed')
         return stat // nothing is evaluated for true
       } else if (definitelyPresent) {
         // node === false always fails in this case
@@ -201,7 +202,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       enforce(knownKeywords.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
     if (Object.keys(node).length === 0) {
-      enforceValidation('empty rules node encountered')
+      enforceValidation('empty rules node', 'encountered')
       return stat // nothing to validate here, basically the same as node === true
     }
 
@@ -330,7 +331,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
     // typeArray === null and stat.type === null means no type validation, which is required if we don't have const or enum
     if (!typeArray && !stat.type && node.const === undefined && !node.enum && !hasSubValidation)
-      enforceValidation('type is required')
+      enforceValidation('type')
 
     // This is used for typechecks, null means * here
     const allIn = (arr, valid) => {
@@ -549,7 +550,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       handle('minItems', ['natural'], (min) => format('%s.length < %d', name, min)) // can be higher that .items length with additionalItems
       enforceMinMax('minItems', 'maxItems')
 
-      const itemsHandled = handle('items', ['object', 'array', 'boolean'], (items) => {
+      handle('items', ['object', 'array', 'boolean'], (items) => {
         if (Array.isArray(items)) {
           for (let p = 0; p < items.length; p++) rule(currPropImm(p), items[p], subPath(`${p}`))
           evaluateDelta({ items: items.length })
@@ -559,8 +560,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         }
         return null
       })
-      if (!itemsHandled && typeApplicable('array') && !hasSubValidation)
-        enforceValidation('items rule must be specified')
 
       if (!Array.isArray(node.items)) {
         // additionalItems is allowed, but ignored per some spec tests in this case!
@@ -850,14 +849,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (needTypeValidate && allErrors) fun.block('else {', [], '}', performValidation)
     else performValidation()
 
-    if (!stat.type) enforceValidation('type must be specified')
+    if (!stat.type) enforceValidation('type')
     if (typeApplicable('array') && stat.items !== Infinity)
-      enforceValidation('additionalItems or unevaluatedItems must be specified')
+      enforceValidation(node.items ? 'additionalItems or unevaluatedItems' : 'items rule')
     if (typeApplicable('object') && !stat.properties.includes(true))
-      enforceValidation('additionalProperties or unevaluatedProperties must be specified')
+      enforceValidation('additionalProperties or unevaluatedProperties')
     if (typeof node.propertyNames !== 'object')
       for (const sub of ['additionalProperties', 'unevaluatedProperties'])
-        if (node[sub]) enforceValidation(`wild-card ${sub} requires propertyNames`)
+        if (node[sub]) enforceValidation(`wild-card ${sub}`, 'requires propertyNames')
 
     return finish()
   }

@@ -34,7 +34,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/allOf/0`
+ * `[requireValidation] type must be specified at #/allOf/0`
 
 
 ## allOf with base schema
@@ -77,7 +77,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/allOf/0`
+ * `[requireValidation] type must be specified at #/allOf/0`
 
 
 ## allOf simple types
@@ -106,7 +106,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/allOf/0`
+ * `[requireValidation] type must be specified at #/allOf/0`
 
 
 ## allOf with boolean schemas, all true
@@ -336,5 +336,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/allOf/0`
+ * `[requireValidation] type must be specified at #/allOf/0`
 

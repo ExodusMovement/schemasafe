@@ -21,7 +21,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] items rule must be specified at #`
+ * `[requireValidation] schema = true is not allowed at #/unevaluatedItems`
 
 
 ## unevaluatedItems false
@@ -43,10 +43,6 @@ const ref0 = function validate(data, recursive) {
 };
 return ref0
 ```
-
-##### Strong mode notices
-
- * `[requireValidation] items rule must be specified at #`
 
 
 ## unevaluatedItems as schema
@@ -76,7 +72,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] items rule must be specified at #`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/unevaluatedItems`
 
 
 ## unevaluatedItems with uniform items
@@ -237,7 +233,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/allOf/0`
+ * `[requireValidation] type must be specified at #/allOf/0`
 
 
 ## unevaluatedItems with nested unevaluatedItems
@@ -269,7 +265,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/allOf/0`
+ * `[requireValidation] type must be specified at #/allOf/0`
 
 
 ## unevaluatedItems with anyOf
@@ -348,7 +344,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/oneOf/0`
+ * `[requireValidation] type must be specified at #/oneOf/0`
 
 
 ## unevaluatedItems with not
@@ -393,7 +389,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/not`
+ * `[requireValidation] type must be specified at #/not`
 
 
 ## unevaluatedItems with if/then/else
@@ -486,7 +482,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #`
+ * `[requireValidation] type must be specified at #`
 
 
 ## unevaluatedItems can't see inside cousins
@@ -512,5 +508,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/allOf/0`
+ * `[requireValidation] type must be specified at #/allOf/0`
 

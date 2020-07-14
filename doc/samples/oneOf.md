@@ -35,7 +35,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/oneOf/1`
+ * `[requireValidation] type must be specified at #/oneOf/1`
 
 
 ## oneOf with base schema
@@ -74,7 +74,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/oneOf/0`
+ * `[requireValidation] type must be specified at #/oneOf/0`
 
 
 ## oneOf with boolean schemas, all true
@@ -280,7 +280,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/oneOf/0`
+ * `[requireValidation] type must be specified at #/oneOf/0`
 
 
 ## oneOf with empty schema
@@ -358,7 +358,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/oneOf/0`
+ * `[requireValidation] type must be specified at #/oneOf/0`
 
 
 ## oneOf with missing optional property
@@ -404,7 +404,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type is required at #/oneOf/0`
+ * `[requireValidation] type must be specified at #/oneOf/0`
 
 
 ## nested oneOf, to check validation semantics
