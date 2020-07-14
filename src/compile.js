@@ -301,8 +301,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
         errorIf(format('!%s(%s, %s)', n, name, recursive), errorArgs)
       }
       // evaluated: propagate static from ref to current, skips cyclic
-      if (scope[n] && scope[n][evaluatedStatic]) evaluateDelta(scope[n][evaluatedStatic])
-      else evaluateDelta({ unknown: true }) // assume unknown if ref is cyclic
+      const delta = (scope[n] && scope[n][evaluatedStatic]) || { unknown: true } // assume unknown if ref is cyclic
+      evaluateDelta(delta)
     }
     handle('$ref', ['string'], ($ref) => {
       const resolved = resolveReference(root, schemas, node.$ref, basePath())
