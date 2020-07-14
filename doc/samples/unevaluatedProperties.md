@@ -21,7 +21,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalProperties rule must be specified at #`
+ * `[requireValidation] schema = true is not allowed at #/unevaluatedProperties`
 
 
 ## unevaluatedProperties schema
@@ -54,7 +54,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalProperties rule must be specified at #`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/unevaluatedProperties`
 
 
 ## unevaluatedProperties false
@@ -78,10 +78,6 @@ const ref0 = function validate(data, recursive) {
 };
 return ref0
 ```
-
-##### Strong mode notices
-
- * `[requireValidation] additionalProperties rule must be specified at #`
 
 
 ## unevaluatedProperties with adjacent properties

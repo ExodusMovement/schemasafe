@@ -570,8 +570,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         additionalItems('additionalItems', format('%d', node.items.length))
       } else if (node.items.length === node.maxItems) {
         // No additional items are possible
-      } else {
-        enforceValidation('additionalItems rule must be specified for fixed arrays')
+      } else if (node.unevaluatedItems === undefined) {
+        enforceValidation('additionalItems or unevaluatedItems must be specified for fixed arrays')
       }
 
       handle('contains', ['object', 'boolean'], () => {
@@ -704,13 +704,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           evaluateDelta({ patterns: Object.keys(patternProperties || {}) })
           return null
         })
+        const hasUnevaluated = node.unevaluatedProperties !== undefined
         if (node.additionalProperties || node.additionalProperties === false) {
           const properties = Object.keys(node.properties || {})
           const patternProperties = Object.keys(node.patternProperties || {})
           const condition = (key) => additionalCondition(key, properties, patternProperties)
           additionalProperties('additionalProperties', condition)
-        } else if (typeApplicable('object') && !hasSubValidation) {
-          enforceValidation('additionalProperties rule must be specified')
+        } else if (typeApplicable('object') && !hasSubValidation && !hasUnevaluated) {
+          enforceValidation('additionalProperties or unevaluatedProperties must be specified')
         }
       })
     }

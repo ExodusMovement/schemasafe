@@ -348,7 +348,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalItems rule must be specified for fixed arrays at #`
+ * `[requireValidation] type is required at #/oneOf/0`
 
 
 ## unevaluatedItems with not
@@ -393,7 +393,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalItems rule must be specified for fixed arrays at #`
+ * `[requireValidation] type is required at #/not`
 
 
 ## unevaluatedItems with if/then/else
