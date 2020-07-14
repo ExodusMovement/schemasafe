@@ -29,6 +29,8 @@ const unsafe = new Set([
   // draft2019-09 only
   'draft2019-09/optional/refOfUnknownKeyword.json/reference of a root arbitrary keyword ',
   'draft2019-09/optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
+  'draft2019-09/unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties outside',
+  'draft2019-09/unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties inside',
 
   // ajv tests
   'rules/if.json/then/else without if should be ignored',
