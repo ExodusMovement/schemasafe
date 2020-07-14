@@ -255,7 +255,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       })
     }
 
-    if (node === schema && recursiveAnchor) consume('$recursiveAnchor', 'boolean')
+    if (node === schema && recursiveAnchor) handle('$recursiveAnchor', ['boolean'], null) // already applied
 
     handle('description', ['string'], null) // unused, meta-only
     handle('title', ['string'], null) // unused, meta-only
@@ -425,31 +425,24 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     /* Checks inside blocks are independent, they are happening on the same code depth */
 
     const checkNumbers = () => {
-      const applyMinMax = (value, operator, errorArgs) => {
-        enforce(Number.isFinite(value), 'Invalid minimum or maximum:', value)
-        errorIf(format('!(%d %c %s)', value, operator, name), errorArgs) // don't remove negation, accounts for NaN
-      }
+      const minMax = (value, operator) => format('!(%d %c %s)', value, operator, name) // don't remove negation, accounts for NaN
 
       if (Number.isFinite(node.exclusiveMinimum)) {
-        applyMinMax(node.exclusiveMinimum, '<', { path: ['exclusiveMinimum'] })
-        consume('exclusiveMinimum', 'finite')
-      } else if (node.minimum !== undefined) {
-        applyMinMax(node.minimum, node.exclusiveMinimum ? '<' : '<=', { path: ['minimum'] })
-        consume('minimum', 'finite')
-        if (typeof node.exclusiveMinimum === 'boolean') consume('exclusiveMinimum', 'boolean')
+        handle('exclusiveMinimum', ['finite'], (min) => minMax(min, '<'))
+      } else {
+        handle('minimum', ['finite'], (min) => minMax(min, node.exclusiveMinimum ? '<' : '<='))
+        handle('exclusiveMinimum', ['boolean'], null) // handled above
       }
 
       if (Number.isFinite(node.exclusiveMaximum)) {
-        applyMinMax(node.exclusiveMaximum, '>', { path: ['exclusiveMaximum'] })
+        handle('exclusiveMaximum', ['finite'], (max) => minMax(max, '>'))
         enforceMinMax('minimum', 'exclusiveMaximum')
         enforceMinMax('exclusiveMinimum', 'exclusiveMaximum')
-        consume('exclusiveMaximum', 'finite')
       } else if (node.maximum !== undefined) {
-        applyMinMax(node.maximum, node.exclusiveMaximum ? '>' : '>=', { path: ['maximum'] })
+        handle('maximum', ['finite'], (max) => minMax(max, node.exclusiveMaximum ? '>' : '>='))
+        handle('exclusiveMaximum', ['boolean'], null) // handled above
         enforceMinMax('minimum', 'maximum')
         enforceMinMax('exclusiveMinimum', 'maximum')
-        consume('maximum', 'finite')
-        if (typeof node.exclusiveMaximum === 'boolean') consume('exclusiveMaximum', 'boolean')
       }
 
       const multipleOf = node.multipleOf === undefined ? 'divisibleBy' : 'multipleOf' // draft3 support
@@ -556,19 +549,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       handle('minItems', ['natural'], (min) => format('%s.length < %d', name, min)) // can be higher that .items length with additionalItems
       enforceMinMax('minItems', 'maxItems')
 
-      if (node.items || node.items === false) {
-        if (Array.isArray(node.items)) {
-          for (let p = 0; p < node.items.length; p++)
-            rule(currPropImm(p), node.items[p], subPath(`${p}`))
-          evaluateDelta({ items: node.items.length })
+      const itemsHandled = handle('items', ['object', 'array', 'boolean'], (items) => {
+        if (Array.isArray(items)) {
+          for (let p = 0; p < items.length; p++) rule(currPropImm(p), items[p], subPath(`${p}`))
+          evaluateDelta({ items: items.length })
         } else {
-          forArray(current, format('0'), (prop) => rule(prop, node.items, subPath('items')))
-          stat.items = Infinity
+          forArray(current, format('0'), (prop) => rule(prop, items, subPath('items')))
+          evaluateDelta({ items: Infinity })
         }
-        consume('items', 'object', 'array', 'boolean')
-      } else if (typeApplicable('array') && !hasSubValidation) {
+        return null
+      })
+      if (!itemsHandled && typeApplicable('array') && !hasSubValidation)
         enforceValidation('items rule must be specified')
-      }
 
       if (!Array.isArray(node.items)) {
         // additionalItems is allowed, but ignored per some spec tests in this case!
