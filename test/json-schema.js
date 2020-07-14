@@ -141,6 +141,9 @@ processTestDir(testsDir, 'draft7')
 processTestDir(testsDir, 'draft3')
 processTestDir(testsDir, 'draft2019-09')
 
+/** extra tests not (yet) merged upstream **/
+processTestDir('', 'extra-tests')
+
 /** ajv tests **/
 schemas.push(
   ...[
