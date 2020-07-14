@@ -8,8 +8,7 @@ const functions = require('./scope-functions')
 const validator = (schema, { jsonCheck = false, isJSON = false, schemas, ...opts } = {}) => {
   if (jsonCheck && isJSON) throw new Error('Can not specify both isJSON and jsonCheck options')
   const options = { ...opts, schemas: buildSchemas(schemas || []), isJSON: isJSON || jsonCheck }
-  const scope = Object.create(null)
-  const ref = compile(schema, schema, options, scope)
+  const { scope, ref } = compile(schema, options)
   if (opts.dryRun) return
   const fun = genfun()
   if (!jsonCheck || opts.dryRun) {

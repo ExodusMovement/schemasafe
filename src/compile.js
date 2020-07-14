@@ -34,7 +34,7 @@ const propimm = (parent, keyval, checked = false) => Object.freeze({ parent, key
 const evaluatedStatic = Symbol('evaluated')
 
 const rootMeta = new WeakMap()
-const compile = (schema, root, opts, scope, basePathRoot) => {
+const compileSchema = (schema, root, opts, scope, basePathRoot) => {
   const {
     mode = 'default',
     useDefaults = false,
@@ -308,7 +308,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       const resolved = resolveReference(root, schemas, node.$ref, basePath())
       const [sub, subRoot, path] = resolved[0] || []
       if (!sub && sub !== false) fail('failed to resolve $ref:', node.$ref)
-      const n = getref(sub) || compile(sub, subRoot, opts, scope, path)
+      const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
       applyRef(n, { path: ['$ref'] })
       return null
     })
@@ -883,6 +883,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   delete scope[funname] // more logical key order
   scope[funname] = validate
   return funname
+}
+
+const compile = (schema, opts) => {
+  const scope = Object.create(null)
+  return { scope, ref: compileSchema(schema, schema, opts, scope) }
 }
 
 module.exports = { compile }
