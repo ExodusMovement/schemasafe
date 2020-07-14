@@ -739,20 +739,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const checkConst = () => {
-      if (node.const !== undefined) {
-        errorIf(safenot(compare(name, node.const)), { path: ['const'] })
-        consume('const', 'jsonval')
-        return true
-      } else if (node.enum) {
-        enforce(Array.isArray(node.enum), 'Invalid enum')
-        const objects = node.enum.filter((value) => value && typeof value === 'object')
-        const primitive = node.enum.filter((value) => !(value && typeof value === 'object'))
-        const condition = safeor(...[...primitive, ...objects].map((value) => compare(name, value)))
-        errorIf(safenot(condition), { path: ['enum'] })
-        consume('enum', 'array')
-        return true
-      }
-      return false
+      if (handle('const', ['jsonval'], (val) => safenot(compare(name, val)))) return true
+      return handle('enum', ['array'], (vals) => {
+        const objects = vals.filter((value) => value && typeof value === 'object')
+        const primitive = vals.filter((value) => !(value && typeof value === 'object'))
+        return safenot(safeor(...[...primitive, ...objects].map((value) => compare(name, value))))
+      })
     }
 
     const checkGeneric = () => {
