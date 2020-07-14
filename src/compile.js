@@ -226,13 +226,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (node[prop] !== undefined) consume(prop, ...ruleTypes)
       return node[prop]
     }
-    const handle = (prop, ruleTypes, handler) => {
+    const handle = (prop, ruleTypes, handler, errorArgs = {}) => {
       if (node[prop] === undefined) return false
       // opt-out on null is explicit in both places here, don't set default
       consume(prop, ...ruleTypes)
       if (handler !== null) {
         const condition = handler(node[prop])
-        if (condition !== null) errorIf(condition, { path: [prop] })
+        if (condition !== null) errorIf(condition, { path: [prop], ...errorArgs })
       }
       return true
     }
@@ -608,12 +608,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           // evaluateDelta({ unknown: true }) // draft2020: contains counts towards evaluatedItems
         })
 
-        if (Number.isFinite(node.minContains)) {
-          errorIf(format('%s < %d', passes, node.minContains), { path: ['minContains'], suberr })
-          consume('minContains', 'natural')
-        } else {
+        if (!handle('minContains', ['natural'], (mn) => format('%s < %d', passes, mn), { suberr }))
           errorIf(format('%s < 1', passes), { path: ['contains'], suberr })
-        }
 
         handle('maxContains', ['natural'], (max) => format('%s > %d', passes, max))
         enforceMinMax('minContains', 'maxContains')
