@@ -26,7 +26,6 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub1) passes0++
-  if (passes0 > 1) return false
   if (passes0 !== 1) return false
   return true
 };
@@ -65,7 +64,6 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub1) passes0++
-  if (passes0 > 1) return false
   if (passes0 !== 1) return false
   return true
 };
@@ -104,7 +102,6 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub2) passes0++
-  if (passes0 > 1) return false
   if (passes0 !== 1) return false
   return true
 };
@@ -145,7 +142,6 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub2) passes0++
-  if (passes0 > 1) return false
   if (passes0 !== 1) return false
   return true
 };
@@ -185,7 +181,6 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub2) passes0++
-  if (passes0 > 1) return false
   if (passes0 !== 1) return false
   return true
 };
@@ -227,7 +222,6 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub2) passes0++
-  if (passes0 > 1) return false
   if (passes0 !== 1) return false
   return true
 };
@@ -271,7 +265,6 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub1) passes0++
-  if (passes0 > 1) return false
   if (passes0 !== 1) return false
   return true
 };
@@ -306,7 +299,6 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub1) passes0++
-  if (passes0 > 1) return false
   if (passes0 !== 1) return false
   return true
 };
@@ -349,7 +341,6 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub1) passes0++
-  if (passes0 > 1) return false
   if (passes0 !== 1) return false
   return true
 };
@@ -395,7 +386,6 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub1) passes0++
-  if (passes0 > 1) return false
   if (passes0 !== 1) return false
   return true
 };

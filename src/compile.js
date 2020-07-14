@@ -761,9 +761,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
         let delta
         let i = 0
         for (const [key, sch] of Object.entries(oneOf)) {
+          if (!includeErrors && i++ > 1) errorIf(format('%s > 1', passes), { path: ['oneOf'] })
           const { sub, delta: deltaVariant } = subrule(suberr, current, sch, subPath('oneOf', key))
           fun.write('if (%s) %s++', sub, passes)
-          if (!includeErrors && i++ > 0) errorIf(format('%s > 1', passes), { path: ['oneOf'] })
           delta = delta ? orDelta(delta, deltaVariant) : deltaVariant
         }
         if (oneOf.length > 0) evaluateDelta(delta)
