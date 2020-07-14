@@ -406,27 +406,28 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     // Extracted single additional(Items/Properties) rules, for reuse with unevaluated(Items/Properties)
-    const additionalItems = (limit, ruleValue, rulePath) => {
-      if (ruleValue === false) {
-        if (removeAdditional) {
+    const additionalItems = (rulePath, limit) => {
+      handle(rulePath, ['object', 'boolean'], (ruleValue) => {
+        if (ruleValue === false) {
+          if (!removeAdditional) return format('%s.length > %s', name, limit)
           fun.write('if (%s.length > %s) %s.length = %s', name, limit, name, limit)
-        } else {
-          errorIf(format('%s.length > %s', name, limit), { path: [rulePath] })
+          return null
         }
-      } else if (ruleValue) {
         forArray(current, limit, (prop) => rule(prop, ruleValue, subPath(rulePath)))
-      }
-      consume(rulePath, 'object', 'boolean')
+        return null
+      })
       evaluateDelta({ items: Infinity })
     }
-    const additionalProperties = (condition, ruleValue, rulePath) => {
-      forObjectKeys(current, (sub, key) => {
-        fun.if(condition(key), () => {
-          if (ruleValue === false && removeAdditional) fun.write('delete %s[%s]', name, key)
-          else rule(sub, ruleValue, subPath(rulePath))
+    const additionalProperties = (rulePath, condition) => {
+      handle(rulePath, ['object', 'boolean'], (ruleValue) => {
+        forObjectKeys(current, (sub, key) => {
+          fun.if(condition(key), () => {
+            if (ruleValue === false && removeAdditional) fun.write('delete %s[%s]', name, key)
+            else rule(sub, ruleValue, subPath(rulePath))
+          })
         })
+        return null
       })
-      consume(rulePath, 'object', 'boolean')
       evaluateDelta({ properties: [true] })
     }
     const additionalCondition = (key, properties, patternProperties) =>
@@ -588,7 +589,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         // We do nothing and let it throw except for in allowUnusedKeywords mode
         // As a result, this is not allowed by default, only in allowUnusedKeywords mode
       } else if (node.additionalItems || node.additionalItems === false) {
-        additionalItems(format('%d', node.items.length), node.additionalItems, 'additionalItems')
+        additionalItems('additionalItems', format('%d', node.items.length))
       } else if (node.items.length === node.maxItems) {
         // No additional items are possible
       } else {
@@ -737,7 +738,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           const properties = Object.keys(node.properties || {})
           const patternProperties = Object.keys(node.patternProperties || {})
           const condition = (key) => additionalCondition(key, properties, patternProperties)
-          additionalProperties(condition, node.additionalProperties, 'additionalProperties')
+          additionalProperties('additionalProperties', condition)
         } else if (typeApplicable('object') && !hasSubValidation) {
           enforceValidation('additionalProperties rule must be specified')
         }
@@ -839,8 +840,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         if (node.unevaluatedItems === false) consume('unevaluatedItems', 'boolean')
       } else if (node.unevaluatedItems || node.unevaluatedItems === false) {
         if (isDynamic(stat).items) throw new Error('Dynamic unevaluated is not implemented')
-        const limit = format('%d', stat.items)
-        additionalItems(limit, node.unevaluatedItems, 'unevaluatedItems')
+        additionalItems('unevaluatedItems', format('%d', stat.items))
       }
     }
     const checkObjectsFinal = () => {
@@ -851,7 +851,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         } else if (node.unevaluatedProperties || node.unevaluatedProperties === false) {
           if (isDynamic(stat).properties) throw new Error('Dynamic unevaluated is not implemented')
           const sawStatic = (key) => additionalCondition(key, stat.properties, stat.patterns)
-          additionalProperties(sawStatic, node.unevaluatedProperties, 'unevaluatedProperties')
+          additionalProperties('unevaluatedProperties', sawStatic)
         }
       })
     }
