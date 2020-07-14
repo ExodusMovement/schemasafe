@@ -684,8 +684,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       for (const dependencies of ['dependencies', 'dependentRequired', 'dependentSchemas']) {
         handle(dependencies, ['object'], (value) => {
           for (const key of Object.keys(value)) {
-            let deps = value[key]
-            if (typeof deps === 'string') deps = [deps]
+            const deps = typeof value[key] === 'string' ? [value[key]] : value[key]
             const item = currPropImm(key, checked(key))
             if (Array.isArray(deps) && dependencies !== 'dependentSchemas') {
               const clauses = deps.filter((k) => !checked(k)).map((k) => present(currPropImm(k)))
@@ -859,17 +858,16 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
           // Everything is statically evaluated, so this check is unreachable. Allow only 'false' rule here.
           if (node.unevaluatedProperties === false) consume('unevaluatedProperties', 'boolean')
         } else if (node.unevaluatedProperties || node.unevaluatedProperties === false) {
-          const sawStatic = (key) => additionalCondition(key, stat.properties, stat.patterns)
+          const notStatic = (key) => additionalCondition(key, stat.properties, stat.patterns)
           if (isDynamic(stat).properties) {
             if (!opts[optDynamic]) throw new Error('Dynamic unevaluated tracing is not enabled')
             scope.propertyIn = functions.propertyIn
-            const condition = (key) => {
-              const args = [sawStatic(key), key, dyn.properties, dyn.patterns]
-              return format('%s && !propertyIn(%s, %s, %s)', ...args)
-            }
+            const notDynamic = (key) =>
+              format('!propertyIn(%s, %s, %s)', key, dyn.properties, dyn.patterns)
+            const condition = (key) => safeand(notStatic(key), notDynamic(key))
             additionalProperties('unevaluatedProperties', condition)
           } else {
-            additionalProperties('unevaluatedProperties', sawStatic)
+            additionalProperties('unevaluatedProperties', notStatic)
           }
         }
       })
@@ -878,7 +876,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
     /* Actual post-$ref validation happens below */
 
     const performValidation = () => {
-      if (prev !== null) fun.write('let %s = errorCount', prev)
+      if (prev !== null) fun.write('const %s = errorCount', prev)
       if (checkConst()) {
         // const/enum shouldn't have any other validation rules except for already checked type/$ref
         enforce(unused.size === 0, 'Unexpected keywords mixed with const or enum:', [...unused])
