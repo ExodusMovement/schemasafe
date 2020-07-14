@@ -30,16 +30,6 @@ The options relevant to error reporting are:
     will be skipped if the parent data object (containing the property) failed other restrictions.\
     That does not affect the result of validation, just the list of reported errors in those cases.
 
-  * `reflectErrorsValue` — include `value` property in errors with the data that failed validation.
-    Requires `includeErrors`.
-
-    Warning: `reflectErrorsValue` reflects the original _unvalidated_ value as the `value` property
-    of each error, which is a _reference_ to the part of the orignal unvalidated object which failed
-    validation.
-
-    If the input was untrusted, then `value` property also should be treated as untrusted, e.g.
-    when manipulating it and/or reflecting it back to the user.
-
 All of those are opt-ins (i.e. `false` by default).
 
 ### Properties
@@ -53,9 +43,6 @@ All of those are opt-ins (i.e. `false` by default).
   - `error`: can be present for certain generic validation errors, e.g. failed `jsonCheck`.
   Absent for most errors, as the exact keyword which failed validation can be deduced from
   `keywordLocation`, and an additional error message would have just duplicated that information.
-
-  - `value`: the _unvalidated_ data value that caused the error. Enabled only when
-  `reflectErrorsValue` is set to true. Use with care.
 
 This naming is designed to be compatible with
 [upstream spec conventions](https://json-schema.org/draft/2019-09/json-schema-core.html#rfc.section.10.4.2)

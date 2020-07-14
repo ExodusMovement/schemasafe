@@ -41,7 +41,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     removeAdditional = false, // supports additionalProperties: false and additionalItems: false
     includeErrors = false,
     allErrors = false,
-    reflectErrorsValue = false,
     dryRun = false,
     allowUnusedKeywords = opts.mode === 'lax',
     requireValidation = opts.mode === 'strong',
@@ -70,8 +69,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     throw new Error('Strong mode demands require(String)Validation and complexityChecks')
   if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
     throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
-  if (!includeErrors && (allErrors || reflectErrorsValue))
-    throw new Error('allErrors and reflectErrorsValue are not available if includeErrors = false')
+  if (!includeErrors && allErrors) throw new Error('allErrors requires includeErrors to be enabled')
 
   const { gensym, getref, genref, genformat } = scopeMethods(scope)
 
@@ -150,14 +148,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           fun.write('validate.errors = [errorMerge(%s[0], %j, %s)]', ...args)
         }
       } else if (includeErrors === true && errors) {
-        const errorJS = reflectErrorsValue
-          ? format(
-              '{ keywordLocation: %j, instanceLocation: %s, value: %s }',
-              schemaP,
-              dataP,
-              buildName(prop)
-            )
-          : format('{ keywordLocation: %j, instanceLocation: %s }', schemaP, dataP)
+        const errorJS = format('{ keywordLocation: %j, instanceLocation: %s }', schemaP, dataP)
         if (allErrors) {
           fun.write('if (%s === null) %s = []', errors, errors)
           fun.write('%s.push(%s)', errors, errorJS)

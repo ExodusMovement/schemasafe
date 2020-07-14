@@ -14,7 +14,7 @@ DoS issues in the schema (i.e. `complexityChecks` option, enabled automatically 
 
 Several options that have a nagative effect on performance:
 
-* `includeErrors`, `allErrors`, `reflectErrorsValue` (all off by default) -- see
+* `includeErrors`, `allErrors` (all off by default) -- see
   [Error handling](./Error-handling.md#options).
 
 * `jsonCheck` (off by default) — using [parser mode](./Parser-not-validator.md) instead is advised.

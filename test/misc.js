@@ -104,12 +104,15 @@ tape('additional props', function(t) {
       type: 'object',
       additionalProperties: false,
     },
-    { includeErrors: true, reflectErrorsValue: true }
+    { includeErrors: true }
   )
 
   t.ok(validate({}))
   t.notOk(validate({ foo: 'bar' }))
-  t.ok(validate.errors[0].value === 'bar', 'should output the property not allowed in verbose mode')
+  t.ok(
+    validate.errors[0].instanceLocation === '#/foo',
+    'should output the property not allowed in verbose mode'
+  )
   t.end()
 })
 
@@ -428,11 +431,15 @@ tape('verbose mode', function(t) {
     },
   }
 
-  const validate = validator(schema, { includeErrors: true, reflectErrorsValue: true })
+  const validate = validator(schema, { includeErrors: true })
 
   t.ok(validate({ hello: 'string' }), 'should be valid')
   t.notOk(validate({ hello: 100 }), 'should not be valid')
-  t.strictEqual(validate.errors[0].value, 100, 'error object should contain the invalid value')
+  t.strictEqual(
+    validate.errors[0].instanceLocation,
+    '#/hello',
+    'error object should contain the invalid value'
+  )
   t.end()
 })
 
@@ -457,13 +464,13 @@ tape('additional props in verbose mode', function(t) {
     },
   }
 
-  const validate = validator(schema, { includeErrors: true, reflectErrorsValue: true })
+  const validate = validator(schema, { includeErrors: true })
 
   validate({ 'hello world': { bar: 'string' } })
 
   t.strictEqual(
-    validate.errors[0].value,
-    'string',
+    validate.errors[0].instanceLocation,
+    '#/hello world/bar',
     'should output the value of the additional prop in the error'
   )
   t.end()
@@ -493,7 +500,7 @@ tape('field shows item index in arrays', function(t) {
     },
   }
 
-  const validate = validator(schema, { includeErrors: true, reflectErrorsValue: true })
+  const validate = validator(schema, { includeErrors: true })
 
   validate([[{ foo: 'test' }, { foo: 'test' }], [{ foo: 'test' }, { baz: 'test' }]])
 
