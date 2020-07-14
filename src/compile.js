@@ -228,11 +228,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const handle = (prop, ruleTypes, handler) => {
       if (node[prop] === undefined) return false
       // opt-out on null is explicit in both places here, don't set default
+      consume(prop, ...ruleTypes)
       if (handler !== null) {
         const condition = handler(node[prop])
         if (condition !== null) errorIf(condition, { path: [prop] })
       }
-      consume(prop, ...ruleTypes)
       return true
     }
 

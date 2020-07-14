@@ -27,7 +27,7 @@ tape('Invalid format throws', (t) => {
   const passes = (schema) => t.doesNotThrow(() => validator(schema))
 
   throws({ format: 'whatever' })
-  throws({ format: ['email'] })
+  throws({ format: ['email'] }, /Unexpected type for "?format"? at #/)
 
   passes({ format: 'email' })
 
