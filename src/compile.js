@@ -251,7 +251,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           schemaVersions.indexOf(`https://json-schema.org/${ver}/schema`)
         rootMeta.set(root, {
           exclusiveRefs: schemaIsOlderThan('draft/2019-09'),
-          booleanRequired: schemaIsOlderThan('draft-04'),
         })
       }
       handle('$vocabulary', ['object'], ($vocabulary) => {
@@ -280,30 +279,14 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     handle('$id', ['string'], setId) || handle('id', ['string'], setId)
     handle('$anchor', ['string'], null) // $anchor is used only for ref resolution, on usage
 
-    const booleanRequired = getMeta().booleanRequired && typeof node.required === 'boolean'
-    if (node.default !== undefined && !useDefaults) consume('default', 'jsonval') // unused in this case
-    const defaultIsPresent = node.default !== undefined && useDefaults // will consume on use
-    if (definitelyPresent) {
-      if (defaultIsPresent) fail('Can not apply default value here (e.g. at root)')
-      if (node.required === true || node.required === false)
-        fail('Can not apply boolean required here (e.g. at root)')
-    } else if (defaultIsPresent || booleanRequired) {
+    if (node.default !== undefined && useDefaults) {
+      if (definitelyPresent) fail('Can not apply default value here (e.g. at root)')
       fun.write('if (%s) {', safenot(present(current)))
-      if (defaultIsPresent) {
-        fun.write('%s = %j', name, node.default)
-        consume('default', 'jsonval')
-      }
-      if (booleanRequired) {
-        if (node.required === true) {
-          if (!defaultIsPresent) error({ path: ['required'] })
-          consume('required', 'boolean')
-        } else if (node.required === false) {
-          consume('required', 'boolean')
-        }
-      }
+      fun.write('%s = %j', name, get('default', 'jsonval'))
       fun.write('} else {')
     } else {
-      fun.write('if (%s) {', present(current))
+      handle('default', ['jsonval'], null) // unused
+      if (!definitelyPresent) fun.write('if (%s) {', present(current))
     }
 
     const applyRef = (n, errorArgs) => {
@@ -686,15 +669,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         !allErrors &&
         (stat.required.includes(p) || queryCurrent().some((h) => h.stat.required.includes(p)))
 
-      if (Array.isArray(node.required)) {
-        for (const req of node.required) {
+      handle('required', ['array'], (required) => {
+        for (const req of required) {
           if (checked(req)) continue
           const prop = currPropImm(req)
           errorIf(safenot(present(prop)), { path: ['required'], prop })
         }
-        evaluateDelta({ required: node.required })
-        consume('required', 'array')
-      }
+        evaluateDelta({ required })
+        return null
+      })
 
       for (const dependencies of ['dependencies', 'dependentRequired', 'dependentSchemas']) {
         if (node[dependencies]) {
