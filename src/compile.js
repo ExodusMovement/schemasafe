@@ -136,7 +136,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const name = buildName(current)
     const currPropImm = (...args) => propimm(current, ...args)
 
-    const error = ({ path = [], prop = current, source }) => {
+    const error = ({ path = [], prop = current, source, suberr }) => {
       const schemaP = functions.toPointer([...schemaPath, ...path])
       const dataP = includeErrors ? buildPath(prop) : null
       if (includeErrors === true && errors && source) {
@@ -168,6 +168,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
       if (allErrors) fun.write('errorCount++')
       else fun.write('return false')
+      if (suberr) mergeerror(suberr)
     }
     const errorIf = (condition, errorArgs) => {
       if (includeErrors === true && errors) fun.if(condition, () => error(errorArgs))
@@ -608,14 +609,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         })
 
         if (Number.isFinite(node.minContains)) {
-          const condition = format('%s < %d', passes, node.minContains) // fast, reusable
-          errorIf(condition, { path: ['minContains'] })
+          errorIf(format('%s < %d', passes, node.minContains), { path: ['minContains'], suberr })
           consume('minContains', 'natural')
-          fun.if(condition, () => mergeerror(suberr))
         } else {
-          const condition = format('%s < 1', passes) // fast, reusable
-          errorIf(condition, { path: ['contains'] })
-          fun.if(condition, () => mergeerror(suberr))
+          errorIf(format('%s < 1', passes), { path: ['contains'], suberr })
         }
 
         handle('maxContains', ['natural'], (max) => format('%s > %d', passes, max))
@@ -799,8 +796,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           delta = delta ? orDelta(delta, deltaVariant) : deltaVariant
         }
         if (anyOf.length > 0) evaluateDelta(delta)
-        error({ path: ['anyOf'] })
-        mergeerror(suberr)
+        error({ path: ['anyOf'], suberr })
         anyOf.forEach(() => fun.write('}'))
         return null
       })
