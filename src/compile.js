@@ -192,7 +192,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         // node === false
         errorIf(present(current), {})
       }
-      evaluateDelta({ properties: [true], items: Infinity }) // everything is evaluated for false
+      evaluateDelta({ properties: [true], items: Infinity, type: [] }) // everything is evaluated for false
       return stat
     }
 
@@ -570,8 +570,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         additionalItems('additionalItems', format('%d', node.items.length))
       } else if (node.items.length === node.maxItems) {
         // No additional items are possible
-      } else if (node.unevaluatedItems === undefined) {
-        enforceValidation('additionalItems or unevaluatedItems must be specified for fixed arrays')
       }
 
       handle('contains', ['object', 'boolean'], () => {
@@ -704,14 +702,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           evaluateDelta({ patterns: Object.keys(patternProperties || {}) })
           return null
         })
-        const hasUnevaluated = node.unevaluatedProperties !== undefined
         if (node.additionalProperties || node.additionalProperties === false) {
           const properties = Object.keys(node.properties || {})
           const patternProperties = Object.keys(node.patternProperties || {})
           const condition = (key) => additionalCondition(key, properties, patternProperties)
           additionalProperties('additionalProperties', condition)
-        } else if (typeApplicable('object') && !hasSubValidation && !hasUnevaluated) {
-          enforceValidation('additionalProperties or unevaluatedProperties must be specified')
         }
       })
     }
@@ -825,7 +820,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (checkConst()) {
         // const/enum shouldn't have any other validation rules except for already checked type/$ref
         enforce(unused.size === 0, 'Unexpected keywords mixed with const or enum:', [...unused])
-        evaluateDelta({ properties: [true], items: Infinity }) // everything is evaluated for const
+        const typeKeys = [...types.keys()] // we don't extract type from const/enum, it's enough that we know that it's present
+        evaluateDelta({ properties: [true], items: Infinity, type: typeKeys }) // everything is evaluated for const
         return
       }
 
@@ -855,6 +851,12 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     // If type validation was needed and did not return early, wrap this inside an else clause.
     if (needTypeValidate && allErrors) fun.block('else {', [], '}', performValidation)
     else performValidation()
+
+    if (!stat.type) enforceValidation('type must be specified')
+    if (typeApplicable('array') && stat.items !== Infinity)
+      enforceValidation('additionalItems or unevaluatedItems must be specified')
+    if (typeApplicable('object') && !stat.properties.includes(true))
+      enforceValidation('additionalProperties or unevaluatedProperties must be specified')
 
     return finish()
   }
