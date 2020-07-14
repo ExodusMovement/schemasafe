@@ -357,11 +357,59 @@ return ref0
 
 ### Code
 
-**FAILED TO COMPILE**
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const propertyIn = (key, properties, patterns) =>
+  properties.includes(true) ||
+  properties.some((prop) => prop === key) ||
+  patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
+const ref0 = function validate(data, recursive) {
+  validate.evaluatedDynamic = null
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!(typeof data.foo === "string")) return false
+  }
+  const sub0 = (() => {
+    if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
+    if (!(data.bar === "bar")) return false
+    return true
+  })()
+  const sub1 = (() => {
+    if (!(data.baz !== undefined && hasOwn(data, "baz"))) return false
+    if (!(data.baz === "baz")) return false
+    return true
+  })()
+  const sub2 = (() => {
+    if (!(data.quux !== undefined && hasOwn(data, "quux"))) return false
+    if (!(data.quux === "quux")) return false
+    return true
+  })()
+  if (!(sub0 || sub1 || sub2)) return false
+  if (sub0) {
+    evaluatedProps0.push(...["bar"])
+  }
+  if (sub1) {
+    evaluatedProps0.push(...["baz"])
+  }
+  if (sub2) {
+    evaluatedProps0.push(...["quux"])
+  }
+  for (const key0 of Object.keys(data)) {
+    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0, evaluatedPatterns0)) {
+      return false
+    }
+  }
+  return true
+};
+return ref0
+```
 
-### Errors
+##### Strong mode notices
 
- * `Dynamic unevaluated is not implemented`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/foo`
 
 
 ## unevaluatedProperties with oneOf
@@ -382,11 +430,54 @@ return ref0
 
 ### Code
 
-**FAILED TO COMPILE**
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const propertyIn = (key, properties, patterns) =>
+  properties.includes(true) ||
+  properties.some((prop) => prop === key) ||
+  patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
+const ref0 = function validate(data, recursive) {
+  validate.evaluatedDynamic = null
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!(typeof data.foo === "string")) return false
+  }
+  let passes0 = 0
+  const sub0 = (() => {
+    if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
+    if (!(data.bar === "bar")) return false
+    return true
+  })()
+  if (sub0) passes0++
+  const sub1 = (() => {
+    if (!(data.baz !== undefined && hasOwn(data, "baz"))) return false
+    if (!(data.baz === "baz")) return false
+    return true
+  })()
+  if (sub1) passes0++
+  if (passes0 !== 1) return false
+  if (sub0) {
+    evaluatedProps0.push(...["bar"])
+  }
+  if (sub1) {
+    evaluatedProps0.push(...["baz"])
+  }
+  for (const key0 of Object.keys(data)) {
+    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0, evaluatedPatterns0)) {
+      return false
+    }
+  }
+  return true
+};
+return ref0
+```
 
-### Errors
+##### Strong mode notices
 
- * `Dynamic unevaluated is not implemented`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/foo`
 
 
 ## unevaluatedProperties with not
@@ -461,11 +552,45 @@ return ref0
 
 ### Code
 
-**FAILED TO COMPILE**
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const propertyIn = (key, properties, patterns) =>
+  properties.includes(true) ||
+  properties.some((prop) => prop === key) ||
+  patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
+const ref0 = function validate(data, recursive) {
+  validate.evaluatedDynamic = null
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  const sub0 = (() => {
+    if (!(data.foo !== undefined && hasOwn(data, "foo"))) return false
+    if (!(data.foo === "then")) return false
+    return true
+  })()
+  if (!sub0) {
+    if (!(data.baz !== undefined && hasOwn(data, "baz"))) return false
+    if (!(typeof data.baz === "string")) return false
+    evaluatedProps0.push(...["baz"])
+  } else {
+    if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
+    if (!(typeof data.bar === "string")) return false
+    evaluatedProps0.push(...["foo","bar"])
+  }
+  for (const key0 of Object.keys(data)) {
+    if (true && !propertyIn(key0, evaluatedProps0, evaluatedPatterns0)) {
+      return false
+    }
+  }
+  return true
+};
+return ref0
+```
 
-### Errors
+##### Strong mode notices
 
- * `Dynamic unevaluated is not implemented`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/else/properties/baz`
 
 
 ## unevaluatedProperties with dependentSchemas
@@ -485,11 +610,39 @@ return ref0
 
 ### Code
 
-**FAILED TO COMPILE**
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const propertyIn = (key, properties, patterns) =>
+  properties.includes(true) ||
+  properties.some((prop) => prop === key) ||
+  patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
+const ref0 = function validate(data, recursive) {
+  validate.evaluatedDynamic = null
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
+    if (!(data.bar === "bar")) return false
+    evaluatedProps0.push(...["bar"])
+  }
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!(typeof data.foo === "string")) return false
+  }
+  for (const key0 of Object.keys(data)) {
+    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0, evaluatedPatterns0)) {
+      return false
+    }
+  }
+  return true
+};
+return ref0
+```
 
-### Errors
+##### Strong mode notices
 
- * `Dynamic unevaluated is not implemented`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/foo`
 
 
 ## unevaluatedProperties with boolean schemas

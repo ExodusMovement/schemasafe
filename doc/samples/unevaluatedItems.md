@@ -286,11 +286,45 @@ return ref0
 
 ### Code
 
-**FAILED TO COMPILE**
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data, recursive) {
+  validate.evaluatedDynamic = null
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  if (!Array.isArray(data)) return false
+  if (data[0] !== undefined && hasOwn(data, 0)) {
+    if (!(data[0] === "foo")) return false
+  }
+  const sub0 = (() => {
+    if (data[1] !== undefined && hasOwn(data, 1)) {
+      if (!(data[1] === "bar")) return false
+    }
+    return true
+  })()
+  const sub1 = (() => {
+    if (data[2] !== undefined && hasOwn(data, 2)) {
+      if (!(data[2] === "baz")) return false
+    }
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
+  if (sub0) {
+    evaluatedItems0.push(2)
+  }
+  if (sub1) {
+    evaluatedItems0.push(3)
+  }
+  if (data.length > Math.max(1, ...evaluatedItems0)) return false
+  return true
+};
+return ref0
+```
 
-### Errors
+##### Strong mode notices
 
- * `Dynamic unevaluated is not implemented`
+ * `[requireValidation] schema = true is not allowed at #/anyOf/0/0`
 
 
 ## unevaluatedItems with oneOf
@@ -408,11 +442,43 @@ return ref0
 
 ### Code
 
-**FAILED TO COMPILE**
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data, recursive) {
+  validate.evaluatedDynamic = null
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  if (!Array.isArray(data)) return false
+  if (data[0] !== undefined && hasOwn(data, 0)) {
+    if (!(data[0] === "foo")) return false
+  }
+  const sub0 = (() => {
+    if (data[1] !== undefined && hasOwn(data, 1)) {
+      if (!(data[1] === "bar")) return false
+    }
+    return true
+  })()
+  if (!sub0) {
+    if (data[3] !== undefined && hasOwn(data, 3)) {
+      if (!(data[3] === "else")) return false
+    }
+    evaluatedItems0.push(4)
+  } else {
+    if (data[2] !== undefined && hasOwn(data, 2)) {
+      if (!(data[2] === "then")) return false
+    }
+    evaluatedItems0.push(3)
+  }
+  if (data.length > Math.max(3, ...evaluatedItems0)) return false
+  return true
+};
+return ref0
+```
 
-### Errors
+##### Strong mode notices
 
- * `Dynamic unevaluated is not implemented`
+ * `[requireValidation] schema = true is not allowed at #/if/0`
 
 
 ## unevaluatedItems with boolean schemas

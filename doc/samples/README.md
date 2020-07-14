@@ -60,8 +60,8 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [refRemote](./refRemote.md)                                       | 7     | -                 | -        | -             |
 | [required](./required.md)                                         | 4     | -                 | -        | -             |
 | [type](./type.md)                                                 | 11    | -                 | -        | -             |
-| [unevaluatedItems](./unevaluatedItems.md)                         | 16    | 2                 | -        | -             |
-| [unevaluatedProperties](./unevaluatedProperties.md)               | 18    | 4                 | 1        | -             |
+| [unevaluatedItems](./unevaluatedItems.md)                         | 16    | -                 | -        | -             |
+| [unevaluatedProperties](./unevaluatedProperties.md)               | 18    | -                 | 1        | -             |
 | [uniqueItems](./uniqueItems.md)                                   | 6     | -                 | -        | -             |
 | [optional/bignum](./optional-bignum.md)                           | 9     | -                 | -        | -             |
 | [optional/content](./optional-content.md)                         | 3     | -                 | -        | -             |
