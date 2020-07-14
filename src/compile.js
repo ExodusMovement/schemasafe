@@ -854,7 +854,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       }
     }
     const checkObjectsFinal = () => {
-      prevWrap(node.patternProperties, () => {
+      prevWrap(stat.patterns.length > 0 || stat.dyn.patterns.length > 0 || stat.unknown, () => {
         if (stat.properties.includes(true)) {
           // Everything is statically evaluated, so this check is unreachable. Allow only 'false' rule here.
           if (node.unevaluatedProperties === false) consume('unevaluatedProperties', 'boolean')
