@@ -486,11 +486,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           return format('!%s(%s)', n, target)
         }
 
-        handle('format', ['string'], (value) => checkFormat(value, name))
+        handle('format', ['string'], (value) => {
+          evaluateDelta({ fullstring: true })
+          return checkFormat(value, name)
+        })
 
         handle('pattern', ['string'], (pattern) => {
           enforceRegex(pattern)
           if (noopRegExps.has(pattern)) return null
+          evaluateDelta({ fullstring: true })
           return safenot(patternTest(pattern, name))
         })
 
@@ -522,6 +526,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
             const decprop = Object.freeze({ name: dec, errorParent: current })
             rule(decprop, node.contentSchema, subPath('contentSchema')) // TODO: isJSON true for speed?
             consume('contentSchema', 'object', 'array')
+            evaluateDelta({ fullstring: true })
           }
           if (node.contentMediaType) {
             fun.write('} catch (e) {')
@@ -535,11 +540,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           }
         }
       })
-
-      const stringValidated = node.format || node.pattern || node.contentSchema || hasSubValidation
-      const stringWarning = 'pattern, format or contentSchema must be specified for strings'
-      if (typeApplicable('string') && requireStringValidation && !stringValidated)
-        fail(`[requireStringValidation] ${stringWarning}, use pattern: ^[\\s\\S]*$ to opt-out`)
     }
 
     const checkArrays = () => {
@@ -819,7 +819,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         // const/enum shouldn't have any other validation rules except for already checked type/$ref
         enforce(unused.size === 0, 'Unexpected keywords mixed with const or enum:', [...unused])
         const typeKeys = [...types.keys()] // we don't extract type from const/enum, it's enough that we know that it's present
-        evaluateDelta({ properties: [true], items: Infinity, type: typeKeys }) // everything is evaluated for const
+        evaluateDelta({ properties: [true], items: Infinity, type: typeKeys, fullstring: true }) // everything is evaluated for const
         return
       }
 
@@ -859,6 +859,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (typeof node.propertyNames !== 'object')
         for (const sub of ['additionalProperties', 'unevaluatedProperties'])
           if (node[sub]) enforceValidation(`wild-card ${sub}`, 'requires propertyNames')
+      if (!stat.fullstring && requireStringValidation) {
+        const stringWarning = 'pattern, format or contentSchema must be specified for strings'
+        fail(`[requireStringValidation] ${stringWarning}, use pattern: ^[\\s\\S]*$ to opt-out`)
+      }
     } else {
       const n0 = schemaPath[schemaPath.length - 1]
       const n1 = schemaPath[schemaPath.length - 2]

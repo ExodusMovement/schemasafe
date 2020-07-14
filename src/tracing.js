@@ -12,13 +12,14 @@
  */
 
 const initTracing = () => ({
-  ...{ properties: [], patterns: [], required: [], items: 0, type: null },
+  ...{ properties: [], patterns: [], required: [], items: 0, type: null, fullstring: false },
   dyn: { properties: [], patterns: [], items: 0 },
   unknown: false,
 })
 
 const wrap = (A) => ({ ...initTracing(), ...A }) // sets default empty values
 const wrapFun = (f) => (...args) => f(...args.map(wrap))
+const stringValidated = (A) => A.fullstring || (A.type && !A.type.includes('string'))
 
 // Result means that both sets A and B are correct
 const andDelta = wrapFun((A, B) => ({
@@ -27,6 +28,7 @@ const andDelta = wrapFun((A, B) => ({
   patterns: [...A.patterns, ...B.patterns],
   required: [...A.required, ...B.required],
   type: A.type && B.type ? [...new Set([...A.type, ...B.type])] : null,
+  fullstring: stringValidated(A) || stringValidated(B),
   dyn: {
     items: Math.max(A.dyn.items, B.dyn.items),
     properties: [...A.dyn.properties, ...B.dyn.properties],
@@ -57,6 +59,7 @@ const orDelta = wrapFun((A, B) => ({
   patterns: A.patterns.filter((x) => B.patterns.includes(x)),
   required: A.required.filter((x) => B.required.includes(x)),
   type: A.type && B.type ? A.type.filter((x) => B.type.includes(x)) : null,
+  fullstring: stringValidated(A) && stringValidated(B),
   dyn: {
     items: Math.max(A.items, B.items, A.dyn.items, B.dyn.items),
     properties: [...A.properties, ...B.properties, ...A.dyn.properties, ...B.dyn.properties],
@@ -72,6 +75,7 @@ const applyDelta = (stat, delta) => {
   if (delta.required) stat.required.push(...delta.required)
   if (delta.type)
     stat.type = stat.type ? stat.type.filter((x) => delta.type.includes(x)) : delta.type
+  if (delta.fullstring || (stat.type && !stat.type.includes('string'))) stat.fullstring = true
   if (delta.dyn) stat.dyn.items = Math.max(stat.dyn.items, delta.dyn.items)
   if (delta.dyn) stat.dyn.properties.push(...delta.dyn.properties)
   if (delta.dyn) stat.dyn.patterns.push(...delta.dyn.patterns)
