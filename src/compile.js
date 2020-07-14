@@ -630,8 +630,6 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         })
         return null
       })
-      if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object')
-        enforceValidation('wild-card additionalProperties requires propertyNames')
 
       // if allErrors is false, we can skip present check for required properties validated before
       const checked = (p) =>
@@ -857,6 +855,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       enforceValidation('additionalItems or unevaluatedItems must be specified')
     if (typeApplicable('object') && !stat.properties.includes(true))
       enforceValidation('additionalProperties or unevaluatedProperties must be specified')
+    if (typeof node.propertyNames !== 'object')
+      for (const sub of ['additionalProperties', 'unevaluatedProperties'])
+        if (node[sub]) enforceValidation(`wild-card ${sub} requires propertyNames`)
 
     return finish()
   }

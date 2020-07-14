@@ -409,7 +409,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] wild-card additionalProperties requires propertyNames at #/properties/definitions`
+ * `[requireValidation] type is required at #/properties/definitions/additionalProperties`
 
 
 ## invalid definition
@@ -821,5 +821,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] wild-card additionalProperties requires propertyNames at #/properties/definitions`
+ * `[requireValidation] type is required at #/properties/definitions/additionalProperties`
 

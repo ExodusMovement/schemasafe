@@ -176,5 +176,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] wild-card additionalProperties requires propertyNames at #`
+ * `[requireValidation] type is required at #/allOf/0`
 
