@@ -12,7 +12,7 @@ tape('$ref throws on invalid refs', (t) => {
   throws({ $ref: '#foo' })
 
   throws({ $ref: '#/$ref' }, /Schema is not an object/)
-  throws({ $ref: '#/$defs', $defs: 'string' }, /Schema is not an object/)
+  throws({ $ref: '#/$defs', $defs: 'string' }, /Unexpected type for "?\$defs"? at #/)
   throws({ $ref: '#/$defs/a', $defs: { a: [] } }, /Schema is not an object/)
   throws({ $ref: '#/$defs/a', $defs: { a: 'string' } }, /Schema is not an object/)
 

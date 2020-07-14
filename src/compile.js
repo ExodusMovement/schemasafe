@@ -218,8 +218,22 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       enforce(unused.has(prop), 'Unexpected double consumption:', prop)
       enforce(functions.hasOwn(node, prop), 'Is not an own property:', prop)
       enforce(ruleTypes.every((t) => schemaTypes.has(t)), 'Invalid type used in consume')
-      enforce(ruleTypes.some((t) => schemaTypes.get(t)(node[prop])), 'Type not expected:', prop)
+      enforce(ruleTypes.some((t) => schemaTypes.get(t)(node[prop])), 'Unexpected type for', prop)
       unused.delete(prop)
+    }
+    const get = (prop, ...ruleTypes) => {
+      if (node[prop] !== undefined) consume(prop, ...ruleTypes)
+      return node[prop]
+    }
+    const handle = (prop, ruleTypes, handler) => {
+      if (node[prop] === undefined) return false
+      // opt-out on null is explicit in both places here, don't set default
+      if (handler !== null) {
+        const condition = handler(node[prop])
+        if (condition !== null) errorIf(condition, { path: [prop] })
+      }
+      consume(prop, ...ruleTypes)
+      return true
     }
 
     const finish = () => {
@@ -228,11 +242,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     if (node === root) {
-      const $schema = node.$schema || $schemaDefault
-      if (node.$schema) {
-        if (typeof node.$schema !== 'string') throw new Error('Unexpected $schema')
-        consume('$schema', 'string')
-      }
+      const $schema = get('$schema', 'string') || $schemaDefault
       if ($schema) {
         const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
         enforce(schemaVersions.includes(version), 'Unexpected schema version:', version)
@@ -244,39 +254,31 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           booleanRequired: schemaIsOlderThan('draft-04'),
         })
       }
-      if (node.$vocabulary) {
-        for (const [vocab, flag] of Object.entries(node.$vocabulary)) {
+      handle('$vocabulary', ['object'], ($vocabulary) => {
+        for (const [vocab, flag] of Object.entries($vocabulary)) {
           if (flag === false) continue
           enforce(flag === true && knownVocabularies.includes(vocab), 'Unknown vocabulary:', vocab)
         }
-        consume('$vocabulary', 'object')
-      }
+        return null
+      })
     }
 
     if (node === schema && recursiveAnchor) consume('$recursiveAnchor', 'boolean')
 
-    if (typeof node.description === 'string') consume('description', 'string') // unused, meta-only
-    if (typeof node.title === 'string') consume('title', 'string') // unused, meta-only
-    if (typeof node.$comment === 'string') consume('$comment', 'string') // unused, meta-only
-    if (Array.isArray(node.examples)) consume('examples', 'array') // unused, meta-only
+    handle('description', ['string'], null) // unused, meta-only
+    handle('title', ['string'], null) // unused, meta-only
+    handle('$comment', ['string'], null) // unused, meta-only
+    handle('examples', ['array'], null) // unused, meta-only
 
-    // defining defs are allowed, those are validated on usage
-    if (typeof node.$defs === 'object') {
-      consume('$defs', 'object')
-    } else if (typeof node.definitions === 'object') {
-      consume('definitions', 'object')
-    }
+    handle('$defs', ['object'], null) || handle('definitions', ['object'], null) // defs are allowed, those are validated on usage
 
     const basePath = () => (basePathStack.length > 0 ? basePathStack[basePathStack.length - 1] : '')
-    if (typeof node.$id === 'string') {
-      basePathStack.push(joinPath(basePath(), node.$id))
-      consume('$id', 'string')
-    } else if (typeof node.id === 'string') {
-      basePathStack.push(joinPath(basePath(), node.id))
-      consume('id', 'string')
+    const setId = ($id) => {
+      basePathStack.push(joinPath(basePath(), $id))
+      return null
     }
-    // $anchor is used only for ref resolution, on usage
-    if (typeof node.$anchor === 'string') consume('$anchor', 'string')
+    handle('$id', ['string'], setId) || handle('id', ['string'], setId)
+    handle('$anchor', ['string'], null) // $anchor is used only for ref resolution, on usage
 
     const booleanRequired = getMeta().booleanRequired && typeof node.required === 'boolean'
     if (node.default !== undefined && !useDefaults) consume('default', 'jsonval') // unused in this case
@@ -340,13 +342,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         return stat
       }
     }
-    if (node.$recursiveRef) {
-      enforce(node.$recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
+    handle('$recursiveRef', ['string'], ($recursiveRef) => {
+      enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
       // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
       const n = recursiveAnchor ? format('(recursive || validate)') : format('validate')
       applyRef(n, { path: ['$recursiveRef'] })
-      consume('$recursiveRef', 'string')
-    }
+      return null
+    })
 
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
 
@@ -481,42 +483,30 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       }
 
       const multipleOf = node.multipleOf === undefined ? 'divisibleBy' : 'multipleOf' // draft3 support
-      if (node[multipleOf] !== undefined) {
-        const value = node[multipleOf]
-        enforce(Number.isFinite(value) && value > 0, `Invalid ${multipleOf}:`, value)
-        if (Number.isInteger(value)) {
-          errorIf(format('%s %% %d !== 0', name, value), { path: ['isMultipleOf'] })
-        } else {
-          scope.isMultipleOf = functions.isMultipleOf
-          const [last, exp] = `${value}`.replace(/.*\./, '').split('e-')
-          const e = last.length + (exp ? Number(exp) : 0)
-          const args = [name, value, e, Math.round(value * Math.pow(10, e))] // precompute for performance
-          errorIf(format('!isMultipleOf(%s, %d, 1e%d, %d)', ...args), { path: ['isMultipleOf'] })
-        }
-        consume(multipleOf, 'finite')
-      }
+      handle(multipleOf, ['finite'], (value) => {
+        enforce(value > 0, `Invalid ${multipleOf}:`, value)
+        if (Number.isInteger(value)) return format('%s %% %d !== 0', name, value)
+        scope.isMultipleOf = functions.isMultipleOf
+        const [last, exp] = `${value}`.replace(/.*\./, '').split('e-')
+        const e = last.length + (exp ? Number(exp) : 0)
+        const args = [name, value, e, Math.round(value * Math.pow(10, e))] // precompute for performance
+        return format('!isMultipleOf(%s, %d, 1e%d, %d)', ...args)
+      })
     }
 
     const checkStrings = () => {
-      if (node.maxLength !== undefined) {
-        enforce(Number.isFinite(node.maxLength), 'Invalid maxLength:', node.maxLength)
+      handle('maxLength', ['natural'], (max) => {
         scope.stringLength = functions.stringLength
-        const args = [name, node.maxLength, name, node.maxLength]
-        errorIf(format('%s.length > %d && stringLength(%s) > %d', ...args), { path: ['maxLength'] })
-        consume('maxLength', 'natural')
-      }
-
-      if (node.minLength !== undefined) {
-        enforce(Number.isFinite(node.minLength), 'Invalid minLength:', node.minLength)
-        enforceMinMax('minLength', 'maxLength')
+        return format('%s.length > %d && stringLength(%s) > %d', name, max, name, max)
+      })
+      handle('minLength', ['natural'], (min) => {
         scope.stringLength = functions.stringLength
-        const args = [name, node.minLength, name, node.minLength]
-        errorIf(format('%s.length < %d || stringLength(%s) < %d', ...args), { path: ['minLength'] })
-        consume('minLength', 'natural')
-      }
+        return format('%s.length < %d || stringLength(%s) < %d', name, min, name, min)
+      })
+      enforceMinMax('minLength', 'maxLength')
 
       prevWrap(true, () => {
-        const checkFormat = (fmtname, target, path, formatsObj = fmts) => {
+        const checkFormat = (fmtname, target, formatsObj = fmts) => {
           const known = typeof fmtname === 'string' && functions.hasOwn(formatsObj, fmtname)
           enforce(known, 'Unrecognized format used:', fmtname)
           const formatImpl = formatsObj[fmtname]
@@ -526,22 +516,18 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           if (formatImpl instanceof RegExp) {
             // built-in formats are fine, check only ones from options
             if (functions.hasOwn(optFormats, fmtname)) enforceRegex(formatImpl.source)
-            errorIf(format('!%s.test(%s)', n, target), { path: [path] })
-          } else {
-            errorIf(format('!%s(%s)', n, target), { path: [path] })
+            return format('!%s.test(%s)', n, target)
           }
-        }
-        if (node.format) {
-          checkFormat(node.format, name, 'format')
-          consume('format', 'string')
+          return format('!%s(%s)', n, target)
         }
 
-        if (node.pattern) {
-          enforceRegex(node.pattern)
-          if (!noopRegExps.has(node.pattern))
-            errorIf(safenot(patternTest(node.pattern, name)), { path: ['pattern'] })
-          consume('pattern', 'string')
-        }
+        handle('format', ['string'], (value) => checkFormat(value, name))
+
+        handle('pattern', ['string'], (pattern) => {
+          enforceRegex(pattern)
+          if (noopRegExps.has(pattern)) return null
+          return safenot(patternTest(pattern, name))
+        })
 
         enforce(node.contentSchema !== false, 'contentSchema cannot be set to false')
         if (node.contentEncoding || node.contentMediaType || node.contentSchema) {
@@ -549,7 +535,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           if (node.contentMediaType) fun.write('let %s = %s', dec, name)
 
           if (node.contentEncoding === 'base64') {
-            checkFormat('base64', name, 'contentEncoding', formats.extra)
+            errorIf(checkFormat('base64', name, formats.extra), { path: ['contentEncoding'] })
             if (node.contentMediaType) {
               scope.deBase64 = functions.deBase64
               fun.write('try {')
@@ -592,21 +578,13 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const checkArrays = () => {
-      if (node.maxItems !== undefined) {
-        enforce(Number.isFinite(node.maxItems), 'Invalid maxItems:', node.maxItems)
-        if (Array.isArray(node.items) && node.items.length > node.maxItems)
-          fail(`Invalid maxItems: ${node.maxItems} is less than items array length`)
-        errorIf(format('%s.length > %d', name, node.maxItems), { path: ['maxItems'] })
-        consume('maxItems', 'natural')
-      }
-
-      if (node.minItems !== undefined) {
-        enforce(Number.isFinite(node.minItems), 'Invalid minItems:', node.minItems)
-        enforceMinMax('minItems', 'maxItems')
-        // can be higher that .items length with additionalItems
-        errorIf(format('%s.length < %d', name, node.minItems), { path: ['minItems'] })
-        consume('minItems', 'natural')
-      }
+      handle('maxItems', ['natural'], (max) => {
+        if (Array.isArray(node.items) && node.items.length > max)
+          fail(`Invalid maxItems: ${max} is less than items array length`)
+        return format('%s.length > %d', name, max)
+      })
+      handle('minItems', ['natural'], (min) => format('%s.length < %d', name, min)) // can be higher that .items length with additionalItems
+      enforceMinMax('minItems', 'maxItems')
 
       if (node.items || node.items === false) {
         if (Array.isArray(node.items)) {
@@ -634,7 +612,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         enforceValidation('additionalItems rule must be specified for fixed arrays')
       }
 
-      if (node.contains || node.contains === false) {
+      handle('contains', ['object', 'boolean'], () => {
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
 
@@ -656,14 +634,11 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
           fun.if(condition, () => mergeerror(suberr))
         }
 
-        if (Number.isFinite(node.maxContains)) {
-          errorIf(format('%s > %d', passes, node.maxContains), { path: ['maxContains'] })
-          enforceMinMax('minContains', 'maxContains')
-          consume('maxContains', 'natural')
-        }
+        handle('maxContains', ['natural'], (max) => format('%s > %d', passes, max))
+        enforceMinMax('minContains', 'maxContains')
 
-        consume('contains', 'object', 'boolean')
-      }
+        return null
+      })
 
       const uniqueIsSimple = () => {
         if (node.maxItems !== undefined) return true
@@ -678,42 +653,31 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         return false
       }
       prevWrap(true, () => {
-        if (node.uniqueItems === true) {
+        handle('uniqueItems', ['boolean'], (uniqueItems) => {
+          if (uniqueItems === false) return null
           if (complexityChecks)
             enforce(uniqueIsSimple(), 'maxItems should be specified for non-primitive uniqueItems')
           scope.unique = functions.unique
           scope.deepEqual = functions.deepEqual
-          errorIf(format('!unique(%s)', name), { path: ['uniqueItems'] })
-          consume('uniqueItems', 'boolean')
-        } else if (node.uniqueItems === false) {
-          consume('uniqueItems', 'boolean')
-        }
+          return format('!unique(%s)', name)
+        })
       })
     }
 
     const checkObjects = () => {
       const propertiesCount = format('Object.keys(%s).length', name)
-      if (node.maxProperties !== undefined) {
-        enforce(Number.isFinite(node.maxProperties), 'Invalid maxProperties:', node.maxProperties)
-        errorIf(format('%s > %d', propertiesCount, node.maxProperties), { path: ['maxProperties'] })
-        consume('maxProperties', 'natural')
-      }
-      if (node.minProperties !== undefined) {
-        enforce(Number.isFinite(node.minProperties), 'Invalid minProperties:', node.minProperties)
-        enforceMinMax('minProperties', 'maxProperties')
-        errorIf(format('%s < %d', propertiesCount, node.minProperties), { path: ['minProperties'] })
-        consume('minProperties', 'natural')
-      }
+      handle('maxProperties', ['natural'], (max) => format('%s > %d', propertiesCount, max))
+      handle('minProperties', ['natural'], (min) => format('%s < %d', propertiesCount, min))
+      enforceMinMax('minProperties', 'maxProperties')
 
-      if (typeof node.propertyNames === 'object' || typeof node.propertyNames === 'boolean') {
+      handle('propertyNames', ['object', 'boolean'], (names) => {
         forObjectKeys(current, (sub, key) => {
-          const names = node.propertyNames
           const nameSchema = typeof names === 'object' ? { type: 'string', ...names } : names
           const nameprop = Object.freeze({ name: key, errorParent: sub, type: 'string' })
           rule(nameprop, nameSchema, subPath('propertyNames'))
         })
-        consume('propertyNames', 'object', 'boolean')
-      }
+        return null
+      })
       if (typeof node.additionalProperties === 'object' && typeof node.propertyNames !== 'object')
         enforceValidation('wild-card additionalProperties requires propertyNames')
 
@@ -766,26 +730,26 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         }
       }
 
-      if (typeof node.properties === 'object') {
-        for (const p of Object.keys(node.properties))
-          rule(currPropImm(p, checked(p)), node.properties[p], subPath('properties', p))
-        evaluateDelta({ properties: Object.keys(node.properties || {}) })
-        consume('properties', 'object')
-      }
+      handle('properties', ['object'], (properties) => {
+        for (const p of Object.keys(properties))
+          rule(currPropImm(p, checked(p)), properties[p], subPath('properties', p))
+        evaluateDelta({ properties: Object.keys(properties || {}) })
+        return null
+      })
 
       prevWrap(node.patternProperties, () => {
-        if (node.patternProperties) {
+        handle('patternProperties', ['object'], (patternProperties) => {
           forObjectKeys(current, (sub, key) => {
-            for (const p of Object.keys(node.patternProperties)) {
+            for (const p of Object.keys(patternProperties)) {
               enforceRegex(p, node.propertyNames || {})
               fun.if(patternTest(p, key), () => {
-                rule(sub, node.patternProperties[p], subPath('patternProperties', p))
+                rule(sub, patternProperties[p], subPath('patternProperties', p))
               })
             }
           })
-          evaluateDelta({ patterns: Object.keys(node.patternProperties || {}) })
-          consume('patternProperties', 'object')
-        }
+          evaluateDelta({ patterns: Object.keys(patternProperties || {}) })
+          return null
+        })
         if (node.additionalProperties || node.additionalProperties === false) {
           const properties = Object.keys(node.properties || {})
           const patternProperties = Object.keys(node.patternProperties || {})
@@ -815,11 +779,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const checkGeneric = () => {
-      if (node.not || node.not === false) {
-        const { sub } = subrule(null, current, node.not, subPath('not'))
-        errorIf(sub, { path: ['not'] })
-        consume('not', 'object', 'boolean')
-      }
+      handle('not', ['object', 'boolean'], (not) => subrule(null, current, not, subPath('not')).sub)
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
       if ((node.if || node.if === false) && thenOrElse) {
@@ -840,47 +800,44 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
         consume('if', 'object', 'boolean')
       }
 
-      if (node.allOf !== undefined) {
-        enforce(Array.isArray(node.allOf), 'Invalid allOf')
-        for (const [key, sch] of Object.entries(node.allOf))
+      handle('allOf', ['array'], (allOf) => {
+        for (const [key, sch] of Object.entries(allOf))
           evaluateDelta(rule(current, sch, subPath('allOf', key)))
-        consume('allOf', 'array')
-      }
+        return null
+      })
 
-      if (node.anyOf !== undefined) {
-        enforce(Array.isArray(node.anyOf), 'Invalid anyOf')
+      handle('anyOf', ['array'], (anyOf) => {
         const suberr = suberror()
         let delta
-        for (const [key, sch] of Object.entries(node.anyOf)) {
+        for (const [key, sch] of Object.entries(anyOf)) {
           const { sub, delta: deltaVariant } = subrule(suberr, current, sch, subPath('anyOf', key))
           fun.write('if (%s) {', safenot(sub))
           delta = delta ? orDelta(delta, deltaVariant) : deltaVariant
         }
-        if (node.anyOf.length > 0) evaluateDelta(delta)
+        if (anyOf.length > 0) evaluateDelta(delta)
         error({ path: ['anyOf'] })
         mergeerror(suberr)
-        node.anyOf.forEach(() => fun.write('}'))
-        consume('anyOf', 'array')
-      }
+        anyOf.forEach(() => fun.write('}'))
+        return null
+      })
 
-      if (node.oneOf !== undefined) {
-        enforce(Array.isArray(node.oneOf), 'Invalid oneOf')
+      handle('oneOf', ['array'], (oneOf) => {
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
         const suberr = suberror()
         let delta
         let i = 0
-        for (const [key, sch] of Object.entries(node.oneOf)) {
+        for (const [key, sch] of Object.entries(oneOf)) {
           const { sub, delta: deltaVariant } = subrule(suberr, current, sch, subPath('oneOf', key))
           fun.write('if (%s) %s++', sub, passes)
           if (!includeErrors && i++ > 0) errorIf(format('%s > 1', passes), { path: ['oneOf'] })
           delta = delta ? orDelta(delta, deltaVariant) : deltaVariant
         }
-        if (node.oneOf.length > 0) evaluateDelta(delta)
+        if (oneOf.length > 0) evaluateDelta(delta)
         errorIf(format('%s !== 1', passes), { path: ['oneOf'] })
         fun.if(format('%s === 0', passes), () => mergeerror(suberr)) // if none matched, dump all errors
-        consume('oneOf', 'array')
-      }
+        return null
+      })
     }
 
     const typeWrap = (checkBlock, validTypes, queryType) => {
