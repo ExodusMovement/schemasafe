@@ -15,6 +15,10 @@ tape('default is strong mode', (t) => {
   }, /\[requireValidation\]/)
 
   t.throws(() => {
+    parser({ type: 'string' })
+  }, /\[requireStringValidation\]/)
+
+  t.throws(() => {
     parser({}, { requireValidation: false })
   }, /Strong mode demands/)
 
