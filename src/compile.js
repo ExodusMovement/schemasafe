@@ -290,7 +290,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (includeErrors) {
         // Save and restore errors in case of recursion
         const res = gensym('res')
-        const err = gensym('err')
+        const err = gensym('err') // Save and restore errors in case of recursion (if needed)
         const suberr = gensym('suberr')
         fun.write('const %s = validate.errors', err)
         fun.write('const %s = %s(%s, %s)', res, n, name, recursive)
