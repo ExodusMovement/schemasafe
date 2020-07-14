@@ -763,3 +763,233 @@ return ref0
 
  * `[requireValidation] schema = true is not allowed at #/allOf/0/properties/foo`
 
+
+## nested unevaluatedProperties, outer false, inner true, properties outside
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "properties": { "foo": { "type": "string" } },
+  "allOf": [{ "unevaluatedProperties": true }],
+  "unevaluatedProperties": false
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data, recursive) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!(typeof data.foo === "string")) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/foo`
+
+
+## nested unevaluatedProperties, outer false, inner true, properties inside
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "allOf": [
+    {
+      "properties": { "foo": { "type": "string" } },
+      "unevaluatedProperties": true
+    }
+  ],
+  "unevaluatedProperties": false
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data, recursive) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!(typeof data.foo === "string")) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/allOf/0/properties/foo`
+
+
+## nested unevaluatedProperties, outer true, inner false, properties outside
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "properties": { "foo": { "type": "string" } },
+  "allOf": [{ "unevaluatedProperties": false }],
+  "unevaluatedProperties": true
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data, recursive) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!(typeof data.foo === "string")) return false
+  }
+  for (const key0 of Object.keys(data)) {
+    return false
+  }
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unprocessed keywords: ["unevaluatedProperties"] at #`
+
+
+## nested unevaluatedProperties, outer true, inner false, properties inside
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "allOf": [
+    {
+      "properties": { "foo": { "type": "string" } },
+      "unevaluatedProperties": false
+    }
+  ],
+  "unevaluatedProperties": true
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data, recursive) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!(typeof data.foo === "string")) return false
+  }
+  for (const key0 of Object.keys(data)) {
+    if (key0 !== "foo") {
+      return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unprocessed keywords: ["unevaluatedProperties"] at #`
+
+
+## cousin unevaluatedProperties, true and false, true with properties
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "allOf": [
+    {
+      "properties": { "foo": { "type": "string" } },
+      "unevaluatedProperties": true
+    },
+    { "unevaluatedProperties": false }
+  ]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data, recursive) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!(typeof data.foo === "string")) return false
+  }
+  for (const key1 of Object.keys(data)) {
+    return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/allOf/0/properties/foo`
+
+
+## cousin unevaluatedProperties, true and false, false with properties
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "allOf": [
+    { "unevaluatedProperties": true },
+    {
+      "properties": { "foo": { "type": "string" } },
+      "unevaluatedProperties": false
+    }
+  ]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data, recursive) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!(typeof data.foo === "string")) return false
+  }
+  for (const key1 of Object.keys(data)) {
+    if (key1 !== "foo") {
+      return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] schema = true is not allowed at #/allOf/0/unevaluatedProperties`
+
