@@ -601,15 +601,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
         return null
       })
 
-      if (!Array.isArray(node.items)) {
-        // additionalItems is allowed, but ignored per some spec tests in this case!
-        // We do nothing and let it throw except for in allowUnusedKeywords mode
-        // As a result, this is not allowed by default, only in allowUnusedKeywords mode
-      } else if (node.additionalItems || node.additionalItems === false) {
+      if (Array.isArray(node.items))
         additionalItems('additionalItems', format('%d', node.items.length))
-      } else if (node.items.length === node.maxItems) {
-        // No additional items are possible
-      }
+      // Else additionalItems is allowed, but ignored per some spec tests!
+      // We do nothing and let it throw except for in allowUnusedKeywords mode
+      // As a result, omitting .items is not allowed by default, only in allowUnusedKeywords mode
 
       handle('contains', ['object', 'boolean'], () => {
         const passes = gensym('passes')
