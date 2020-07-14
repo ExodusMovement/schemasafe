@@ -186,7 +186,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       if (node === true) {
         // any is valid
         enforceValidation('schema = true', 'is not allowed')
-        return stat // nothing is evaluated for true
+        return { stat } // nothing is evaluated for true
       } else if (definitelyPresent) {
         // node === false always fails in this case
         error({})
@@ -195,7 +195,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
         errorIf(present(current), {})
       }
       evaluateDelta({ properties: [true], items: Infinity, type: [] }) // everything is evaluated for false
-      return stat
+      return { stat }
     }
 
     enforce(node && Object.getPrototypeOf(node) === Object.prototype, 'Schema is not an object')
@@ -204,7 +204,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
 
     if (Object.keys(node).length === 0) {
       enforceValidation('empty rules node', 'encountered')
-      return stat // nothing to validate here, basically the same as node === true
+      return { stat } // nothing to validate here, basically the same as node === true
     }
 
     const unused = new Set(Object.keys(node))
@@ -233,7 +233,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
     const finish = () => {
       if (!definitelyPresent) fun.write('}') // undefined check
       enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
-      return stat // return statically evaluated
+      return { stat } // return statically evaluated
     }
 
     if (node === root) {
@@ -362,12 +362,12 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
     }
 
     // Can not be used before undefined check above! The one performed by present()
-    const rule = (...args) => visit(errors, [...history, { stat, prop: current }], ...args)
+    const rule = (...args) => visit(errors, [...history, { stat, prop: current }], ...args).stat
     const subrule = (suberr, ...args) => {
       const sub = gensym('sub')
       fun.write('const %s = (() => {', sub)
       if (allErrors) fun.write('let errorCount = 0') // scoped error counter
-      const delta = visit(suberr, [...history, { stat, prop: current }], ...args)
+      const { stat: delta } = visit(suberr, [...history, { stat, prop: current }], ...args)
       if (allErrors) {
         fun.write('return errorCount === 0')
       } else fun.write('return true')
@@ -869,7 +869,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
     return finish()
   }
 
-  const stat = visit(format('validate.errors'), [], { name: safe('data') }, schema, [])
+  const { stat } = visit(format('validate.errors'), [], { name: safe('data') }, schema, [])
 
   if (allErrors) {
     fun.write('return errorCount === 0')
