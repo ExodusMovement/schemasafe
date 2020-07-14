@@ -323,16 +323,10 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
 
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
 
-    const hasSubValidation =
-      node.$ref || ['allOf', 'anyOf', 'oneOf'].some((key) => Array.isArray(node[key]))
-
     const typeArray =
       node.type === undefined ? null : Array.isArray(node.type) ? node.type : [node.type]
     for (const t of typeArray || [])
       enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
-    // typeArray === null and stat.type === null means no type validation, which is required if we don't have const or enum
-    if (!typeArray && !stat.type && node.const === undefined && !node.enum && !hasSubValidation)
-      enforceValidation('type')
 
     // This is used for typechecks, null means * here
     const allIn = (arr, valid) => {

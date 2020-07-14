@@ -31,7 +31,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type must be specified at #/properties/foo`
 
 
 ## relative pointer ref to object
@@ -242,7 +242,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] items rule must be specified at #`
 
 
 ## remote ref, containing refs itself
@@ -683,7 +683,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/$ref`
 
 
 ## property named $ref, containing an actual $ref
@@ -719,7 +719,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
 
 
 ## $ref to boolean schema true

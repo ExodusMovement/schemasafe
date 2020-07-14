@@ -28,7 +28,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `Should start with ^ and end with $: "f.*o" at #`
 
 
 ## multiple simultaneous patternProperties are validated
@@ -66,7 +66,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `Should start with ^ and end with $: "a*" at #`
 
 
 ## regexes are not anchored by default and are case sensitive
@@ -105,7 +105,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `Should start with ^ and end with $: "[0-9]{2,}" at #`
 
 
 ## patternProperties with boolean schemas
@@ -135,5 +135,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `Should start with ^ and end with $: "f.*" at #`
 

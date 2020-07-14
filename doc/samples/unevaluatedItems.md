@@ -233,7 +233,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/allOf/0`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/allOf/0/0`
 
 
 ## unevaluatedItems with nested unevaluatedItems
@@ -265,7 +265,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/allOf/0`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/allOf/0/0`
 
 
 ## unevaluatedItems with anyOf
@@ -344,7 +344,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/oneOf/0`
+ * `[requireValidation] schema = true is not allowed at #/oneOf/0/0`
 
 
 ## unevaluatedItems with not
@@ -389,7 +389,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/not`
+ * `[requireValidation] schema = true is not allowed at #/not/not/0`
 
 
 ## unevaluatedItems with if/then/else
@@ -482,7 +482,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] schema = true is not allowed at #/0`
 
 
 ## unevaluatedItems can't see inside cousins
@@ -508,5 +508,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/allOf/0`
+ * `[requireValidation] schema = true is not allowed at #/allOf/0/0`
 

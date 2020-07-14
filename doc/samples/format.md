@@ -85,7 +85,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `Unrecognized format used: "regex" at #`
 
 
 ## validation of IP addresses

@@ -62,7 +62,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `maxItems should be specified for non-primitive uniqueItems at #`
 
 
 ## uniqueItems with an array of items
@@ -134,7 +134,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `maxItems should be specified for non-primitive uniqueItems at #`
 
 
 ## uniqueItems with an array of items and additionalItems=false

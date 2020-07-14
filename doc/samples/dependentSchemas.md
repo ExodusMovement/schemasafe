@@ -71,7 +71,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] schema = true is not allowed at #/dependentSchemas/foo`
 
 
 ## dependencies with escaped characters

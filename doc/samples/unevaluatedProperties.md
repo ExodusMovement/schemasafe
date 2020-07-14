@@ -575,7 +575,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/bar`
 
 
 ## unevaluatedProperties can't see inside cousins
@@ -608,5 +608,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/allOf/0`
+ * `[requireValidation] schema = true is not allowed at #/allOf/0/properties/foo`
 

@@ -28,7 +28,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] empty rules node encountered at #/0`
 
 
 ## items is schema, no additionalItems
@@ -77,7 +77,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] empty rules node encountered at #/0`
 
 
 ## additionalItems as false without items
@@ -207,5 +207,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/allOf/0`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/allOf/0/1`
 

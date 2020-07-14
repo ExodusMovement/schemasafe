@@ -50,5 +50,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `Should start with ^ and end with $: "a+" at #`
 

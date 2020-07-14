@@ -31,7 +31,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] empty rules node encountered at #/properties/foo`
 
 
 ## non-ASCII pattern with additionalProperties
@@ -61,7 +61,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `Should start with ^ and end with $: "^á" at #`
 
 
 ## additionalProperties allows a schema which should validate
@@ -94,7 +94,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] empty rules node encountered at #/properties/foo`
 
 
 ## additionalProperties can exist by itself
@@ -145,7 +145,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] empty rules node encountered at #/properties/foo`
 
 
 ## additionalProperties should not look in applicators
@@ -176,5 +176,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/allOf/0`
+ * `[requireValidation] empty rules node encountered at #/allOf/0/properties/foo`
 

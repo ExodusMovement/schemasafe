@@ -27,7 +27,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/propertyNames`
 
 
 ## propertyNames with boolean schema true
@@ -50,7 +50,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] schema = true is not allowed at #/propertyNames`
 
 
 ## propertyNames with boolean schema false

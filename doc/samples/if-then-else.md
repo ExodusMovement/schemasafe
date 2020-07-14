@@ -237,7 +237,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] schema = true is not allowed at #/if`
 
 
 ## if with boolean schema false
@@ -266,8 +266,4 @@ const ref0 = function validate(data, recursive) {
 };
 return ref0
 ```
-
-##### Strong mode notices
-
- * `[requireValidation] type must be specified at #`
 

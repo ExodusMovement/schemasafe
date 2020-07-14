@@ -24,7 +24,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] empty rules node encountered at #/properties/foo`
 
 
 ## required default validation
@@ -47,7 +47,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] empty rules node encountered at #/properties/foo`
 
 
 ## required with empty array
@@ -70,7 +70,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] empty rules node encountered at #/properties/foo`
 
 
 ## required with escaped characters
