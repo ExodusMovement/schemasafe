@@ -127,6 +127,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (errors, history, current, node, schemaPath) => {
     // e.g. top-level data and property names, OR already checked by present() in history, OR in keys and not undefined
+    const isSub = history.length > 0 && history[history.length - 1].prop === current
     const queryCurrent = () => history.filter((h) => h.prop === current)
     const definitelyPresent =
       !current.parent || current.checked || (current.inKeys && isJSON) || queryCurrent().length > 0
@@ -849,14 +850,23 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (needTypeValidate && allErrors) fun.block('else {', [], '}', performValidation)
     else performValidation()
 
-    if (!stat.type) enforceValidation('type')
-    if (typeApplicable('array') && stat.items !== Infinity)
-      enforceValidation(node.items ? 'additionalItems or unevaluatedItems' : 'items rule')
-    if (typeApplicable('object') && !stat.properties.includes(true))
-      enforceValidation('additionalProperties or unevaluatedProperties')
-    if (typeof node.propertyNames !== 'object')
-      for (const sub of ['additionalProperties', 'unevaluatedProperties'])
-        if (node[sub]) enforceValidation(`wild-card ${sub}`, 'requires propertyNames')
+    if (!isSub) {
+      if (!stat.type) enforceValidation('type')
+      if (typeApplicable('array') && stat.items !== Infinity)
+        enforceValidation(node.items ? 'additionalItems or unevaluatedItems' : 'items rule')
+      if (typeApplicable('object') && !stat.properties.includes(true))
+        enforceValidation('additionalProperties or unevaluatedProperties')
+      if (typeof node.propertyNames !== 'object')
+        for (const sub of ['additionalProperties', 'unevaluatedProperties'])
+          if (node[sub]) enforceValidation(`wild-card ${sub}`, 'requires propertyNames')
+    } else {
+      const n0 = schemaPath[schemaPath.length - 1]
+      const n1 = schemaPath[schemaPath.length - 2]
+      const allowed0 = ['not', 'if', 'then', 'else']
+      const allowed1 = ['oneOf', 'anyOf', 'allOf', 'dependencies', 'dependentSchemas']
+      // Sanity check, unreachable, double-check that we came from expected path
+      enforce(allowed0.includes(n0) || allowed1.includes(n1), 'Unexpected')
+    }
 
     return finish()
   }
