@@ -240,6 +240,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const finish = () => {
       if (!definitelyPresent) fun.write('}') // undefined check
       enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
+      return stat // return statically evaluated
     }
 
     if (node === root) {
@@ -310,22 +311,15 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       if (scope[n] && scope[n][evaluatedStatic]) evaluateDelta(scope[n][evaluatedStatic])
       else evaluateDelta({ unknown: true }) // assume unknown if ref is cyclic
     }
-    if (node.$ref) {
+    handle('$ref', ['string'], ($ref) => {
       const resolved = resolveReference(root, schemas, node.$ref, basePath())
       const [sub, subRoot, path] = resolved[0] || []
-      if (sub || sub === false) {
-        let n = getref(sub)
-        if (!n) n = compile(sub, subRoot, opts, scope, path)
-        applyRef(n, { path: ['$ref'] })
-      } else fail('failed to resolve $ref:', node.$ref)
-      consume('$ref', 'string')
-
-      if (getMeta().exclusiveRefs) {
-        // ref overrides any sibling keywords for older schemas
-        finish()
-        return stat
-      }
-    }
+      if (!sub && sub !== false) fail('failed to resolve $ref:', node.$ref)
+      const n = getref(sub) || compile(sub, subRoot, opts, scope, path)
+      applyRef(n, { path: ['$ref'] })
+      return null
+    })
+    if (node.$ref && getMeta().exclusiveRefs) return finish() // ref overrides any sibling keywords for older schemas
     handle('$recursiveRef', ['string'], ($recursiveRef) => {
       enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
       // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
@@ -878,8 +872,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     if (needTypeValidate && allErrors) fun.block('else {', [], '}', performValidation)
     else performValidation()
 
-    finish()
-    return stat // return statically evaluated
+    return finish()
   }
 
   const stat = visit(format('validate.errors'), [], { name: safe('data') }, schema, [])
