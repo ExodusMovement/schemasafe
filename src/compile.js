@@ -368,11 +368,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
 
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
 
-    const typeArray =
-      node.type === undefined ? null : Array.isArray(node.type) ? node.type : [node.type]
-    for (const t of typeArray || [])
-      enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
-
     // This is used for typechecks, null means * here
     const allIn = (arr, valid) => {
       /* c8 ignore next */
@@ -907,21 +902,25 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       // evaluated: static to parent is merged via return value
     }
 
-    const typeExact = (type) => typeArray && typeArray.length === 1 && typeArray[0] === type
-    if (current.type)
-      enforce(typeExact(current.type), 'Only one type is allowed here:', current.type)
-    const needTypeValidate = !current.type && typeArray !== null && !parentCheckedType(...typeArray)
-    if (needTypeValidate) {
-      const filteredTypes = typeArray.filter((t) => typeApplicable(t))
+    let typeIfAdded = false
+    handle('type', ['string', 'array'], (type) => {
+      const typearr = Array.isArray(type) ? type : [type]
+      for (const t of typearr) enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
+      if (current.type) {
+        enforce(functions.deepEqual(typearr, [current.type]), 'One type is allowed:', current.type)
+        evaluateDelta({ type: [current.type] })
+        return null
+      }
+      if (parentCheckedType(...typearr)) return null
+      const filteredTypes = typearr.filter((t) => typeApplicable(t))
       if (filteredTypes.length === 0) fail('No valid types possible')
-      const typeInvalid = safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
-      errorIf(typeInvalid, { path: ['type'] })
-    }
-    evaluateDelta({ type: typeArray })
-    if (node.type !== undefined) consume('type', 'string', 'array')
+      evaluateDelta({ type: typearr }) // can be safely done here, filteredTypes already prepared
+      typeIfAdded = true
+      return safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
+    })
 
     // If type validation was needed and did not return early, wrap this inside an else clause.
-    if (needTypeValidate && allErrors) fun.block('else {', [], '}', performValidation)
+    if (typeIfAdded && allErrors) fun.block('else {', [], '}', performValidation)
     else performValidation()
 
     if (!isSub) {
