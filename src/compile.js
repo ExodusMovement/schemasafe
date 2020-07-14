@@ -455,7 +455,7 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
     const checkNumbers = () => {
       const applyMinMax = (value, operator, errorArgs) => {
         enforce(Number.isFinite(value), 'Invalid minimum or maximum:', value)
-        errorIf(format('!(%d %c %s)', value, operator, name), errorArgs)
+        errorIf(format('!(%d %c %s)', value, operator, name), errorArgs) // don't remove negation, accounts for NaN
       }
 
       if (Number.isFinite(node.exclusiveMinimum)) {
