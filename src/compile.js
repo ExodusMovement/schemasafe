@@ -681,9 +681,9 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
       })
 
       for (const dependencies of ['dependencies', 'dependentRequired', 'dependentSchemas']) {
-        if (node[dependencies]) {
-          for (const key of Object.keys(node[dependencies])) {
-            let deps = node[dependencies][key]
+        handle(dependencies, ['object'], (value) => {
+          for (const key of Object.keys(value)) {
+            let deps = value[key]
             if (typeof deps === 'string') deps = [deps]
             const item = currPropImm(key, checked(key))
             if (Array.isArray(deps) && dependencies !== 'dependentSchemas') {
@@ -710,8 +710,8 @@ const compile = (schema, root, opts, scope, basePathRoot) => {
               else fun.if(present(item), body)
             } else fail(`Unexpected ${dependencies} entry`)
           }
-          consume(dependencies, 'object')
-        }
+          return null
+        })
       }
 
       handle('properties', ['object'], (properties) => {
