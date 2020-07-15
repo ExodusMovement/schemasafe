@@ -524,8 +524,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
 
         handle('pattern', ['string'], (pattern) => {
           enforceRegex(pattern)
-          if (noopRegExps.has(pattern)) return null
           evaluateDelta({ fullstring: true })
+          if (noopRegExps.has(pattern)) return null
           return safenot(patternTest(pattern, name))
         })
 
