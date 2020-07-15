@@ -292,7 +292,7 @@ const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
   validate.evaluatedDynamic = null
   const evaluatedItems0 = [0]
-  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  const evaluatedProps0 = [[], []]
   if (!Array.isArray(data)) return false
   if (data[0] !== undefined && hasOwn(data, 0)) {
     if (!(data[0] === "foo")) return false
@@ -448,7 +448,7 @@ const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
   validate.evaluatedDynamic = null
   const evaluatedItems0 = [0]
-  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  const evaluatedProps0 = [[], []]
   if (!Array.isArray(data)) return false
   if (data[0] !== undefined && hasOwn(data, 0)) {
     if (!(data[0] === "foo")) return false

@@ -292,12 +292,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       opts[optDynamic] && (node[rule] || node[rule] === false || node === schema)
     const local = Object.freeze({
       items: needUnevaluated('unevaluatedItems') ? gensym('evaluatedItems') : null,
-      props: needUnevaluated('unevaluatedProperties')
-        ? Object.freeze([gensym('evaluatedProps'), gensym('evaluatedPatterns')])
-        : null,
+      props: needUnevaluated('unevaluatedProperties') ? gensym('evaluatedProps') : null,
     })
     if (local.items) fun.write('const %s = [0]', local.items)
-    if (local.props) fun.write('const %s = [], %s = []', local.props[0], local.props[1])
+    if (local.props) fun.write('const %s = [[], []]', local.props)
     const dyn = { items: local.items || trace.items, props: local.props || trace.props }
     const canSkipDynamic = () =>
       (!dyn.items || stat.items === Infinity) && (!dyn.props || stat.properties.includes(true))
@@ -309,10 +307,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
         const properties = delta.properties.filter((x) => !inStat([x], []))
         const patterns = delta.patterns.filter((x) => !inStat([], [x]))
         if (properties.includes(true)) {
-          fun.write('%s.push(true)', dyn.props[0])
+          fun.write('%s[0].push(true)', dyn.props)
         } else {
-          if (properties.length > 0) fun.write('%s.push(...%j)', dyn.props[0], properties)
-          if (patterns.length > 0) fun.write('%s.push(...%s)', dyn.props[1], patterns)
+          if (properties.length > 0) fun.write('%s[0].push(...%j)', dyn.props, properties)
+          if (patterns.length > 0) fun.write('%s[1].push(...%s)', dyn.props, patterns)
         }
       }
     }
@@ -338,8 +336,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
         if (dyn.items && isDynamic(stat).items && isDynamic(delta).items)
           fun.write('%s.push(...%s.evaluatedDynamic[0])', dyn.items, n)
         if (isDynamic(stat).properties && isDynamic(delta).properties && dyn.props) {
-          fun.write('%s.push(...%s.evaluatedDynamic[1])', dyn.props[0], n)
-          fun.write('%s.push(...%s.evaluatedDynamic[2])', dyn.props[1], n)
+          fun.write('%s[0].push(...%s.evaluatedDynamic[1][0])', dyn.props, n)
+          fun.write('%s[1].push(...%s.evaluatedDynamic[1][1])', dyn.props, n)
         }
       })
       return null
@@ -853,8 +851,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
           if (isDynamic(stat).properties) {
             if (!opts[optDynamic]) throw new Error('Dynamic unevaluated tracing is not enabled')
             scope.propertyIn = functions.propertyIn
-            const notDynamic = (key) =>
-              format('!propertyIn(%s, %s, %s)', key, dyn.props[0], dyn.props[1])
+            const notDynamic = (key) => format('!propertyIn(%s, %s)', key, dyn.props)
             const condition = (key) => safeand(notStatic(key), notDynamic(key))
             additionalProperties('unevaluatedProperties', condition)
           } else {
@@ -890,8 +887,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       if (isDynamic(stat).items && trace.items && local.items)
         fun.write('%s.push(...%s)', trace.items, local.items)
       if (isDynamic(stat).properties && trace.props && local.props) {
-        fun.write('%s.push(...%s)', trace.props[0], local.props[0])
-        fun.write('%s.push(...%s)', trace.props[1], local.props[1])
+        fun.write('%s[0].push(...%s[0])', trace.props, local.props)
+        fun.write('%s[1].push(...%s[1])', trace.props, local.props)
       }
       // evaluated: static to parent is merged via return value
     }
@@ -947,8 +944,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
   // evaluated: return dynamic for refs
   if (opts[optDynamic] && (isDynamic(stat).items || isDynamic(stat).properties)) {
     if (!local) throw new Error('Failed to trace dynamic properties') // Unreachable
-    const args = [local.items, local.props[0], local.props[1]]
-    fun.write('validate.evaluatedDynamic = [%s, %s, %s]', ...args)
+    fun.write('validate.evaluatedDynamic = [%s, %s]', local.items, local.props)
   }
 
   if (allErrors) {

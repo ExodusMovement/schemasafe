@@ -79,7 +79,7 @@ const errorMerge = ({ keywordLocation, instanceLocation, ...more }, schemaBase, 
   ...more,
 })
 
-const propertyIn = (key, properties, patterns) =>
+const propertyIn = (key, [properties, patterns]) =>
   properties.includes(true) ||
   properties.some((prop) => prop === key) ||
   patterns.some((pattern) => new RegExp(pattern, 'u').test(key))

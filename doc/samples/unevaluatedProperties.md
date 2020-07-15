@@ -360,14 +360,14 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const propertyIn = (key, properties, patterns) =>
+const propertyIn = (key, [properties, patterns]) =>
   properties.includes(true) ||
   properties.some((prop) => prop === key) ||
   patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
 const ref0 = function validate(data, recursive) {
   validate.evaluatedDynamic = null
   const evaluatedItems0 = [0]
-  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  const evaluatedProps0 = [[], []]
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.foo !== undefined && hasOwn(data, "foo")) {
     if (!(typeof data.foo === "string")) return false
@@ -389,16 +389,16 @@ const ref0 = function validate(data, recursive) {
   })()
   if (!(sub0 || sub1 || sub2)) return false
   if (sub0) {
-    evaluatedProps0.push(...["bar"])
+    evaluatedProps0[0].push(...["bar"])
   }
   if (sub1) {
-    evaluatedProps0.push(...["baz"])
+    evaluatedProps0[0].push(...["baz"])
   }
   if (sub2) {
-    evaluatedProps0.push(...["quux"])
+    evaluatedProps0[0].push(...["quux"])
   }
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0, evaluatedPatterns0)) {
+    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0)) {
       return false
     }
   }
@@ -433,14 +433,14 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const propertyIn = (key, properties, patterns) =>
+const propertyIn = (key, [properties, patterns]) =>
   properties.includes(true) ||
   properties.some((prop) => prop === key) ||
   patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
 const ref0 = function validate(data, recursive) {
   validate.evaluatedDynamic = null
   const evaluatedItems0 = [0]
-  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  const evaluatedProps0 = [[], []]
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.foo !== undefined && hasOwn(data, "foo")) {
     if (!(typeof data.foo === "string")) return false
@@ -460,13 +460,13 @@ const ref0 = function validate(data, recursive) {
   if (sub1) passes0++
   if (passes0 !== 1) return false
   if (sub0) {
-    evaluatedProps0.push(...["bar"])
+    evaluatedProps0[0].push(...["bar"])
   }
   if (sub1) {
-    evaluatedProps0.push(...["baz"])
+    evaluatedProps0[0].push(...["baz"])
   }
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0, evaluatedPatterns0)) {
+    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0)) {
       return false
     }
   }
@@ -555,14 +555,14 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const propertyIn = (key, properties, patterns) =>
+const propertyIn = (key, [properties, patterns]) =>
   properties.includes(true) ||
   properties.some((prop) => prop === key) ||
   patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
 const ref0 = function validate(data, recursive) {
   validate.evaluatedDynamic = null
   const evaluatedItems0 = [0]
-  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  const evaluatedProps0 = [[], []]
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   const sub0 = (() => {
     if (!(data.foo !== undefined && hasOwn(data, "foo"))) return false
@@ -572,14 +572,14 @@ const ref0 = function validate(data, recursive) {
   if (!sub0) {
     if (!(data.baz !== undefined && hasOwn(data, "baz"))) return false
     if (!(typeof data.baz === "string")) return false
-    evaluatedProps0.push(...["baz"])
+    evaluatedProps0[0].push(...["baz"])
   } else {
     if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
     if (!(typeof data.bar === "string")) return false
-    evaluatedProps0.push(...["foo","bar"])
+    evaluatedProps0[0].push(...["foo","bar"])
   }
   for (const key0 of Object.keys(data)) {
-    if (true && !propertyIn(key0, evaluatedProps0, evaluatedPatterns0)) {
+    if (true && !propertyIn(key0, evaluatedProps0)) {
       return false
     }
   }
@@ -613,25 +613,25 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const propertyIn = (key, properties, patterns) =>
+const propertyIn = (key, [properties, patterns]) =>
   properties.includes(true) ||
   properties.some((prop) => prop === key) ||
   patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
 const ref0 = function validate(data, recursive) {
   validate.evaluatedDynamic = null
   const evaluatedItems0 = [0]
-  const evaluatedProps0 = [], evaluatedPatterns0 = []
+  const evaluatedProps0 = [[], []]
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.foo !== undefined && hasOwn(data, "foo")) {
     if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
     if (!(data.bar === "bar")) return false
-    evaluatedProps0.push(...["bar"])
+    evaluatedProps0[0].push(...["bar"])
   }
   if (data.foo !== undefined && hasOwn(data, "foo")) {
     if (!(typeof data.foo === "string")) return false
   }
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0, evaluatedPatterns0)) {
+    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0)) {
       return false
     }
   }
