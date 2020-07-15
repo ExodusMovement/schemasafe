@@ -910,7 +910,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
 
     if (!isSub) {
       if (!stat.type) enforceValidation('type')
-      if (typeApplicable('array') && stat.items !== Infinity)
+      if (typeApplicable('array') && stat.items !== Infinity && !(node.maxItems <= stat.items))
         enforceValidation(node.items ? 'additionalItems or unevaluatedItems' : 'items rule')
       if (typeApplicable('object') && !stat.properties.includes(true))
         enforceValidation('additionalProperties or unevaluatedProperties')
