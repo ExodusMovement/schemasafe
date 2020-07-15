@@ -16,7 +16,7 @@ const knownKeywords = [
   ...['unevaluatedProperties', 'unevaluatedItems'], // see-through
   // Unused meta keywords not affecting validation (annotations and comments)
   // https://json-schema.org/understanding-json-schema/reference/generic.html
-  ...['description', 'title', 'examples', '$comment'], // unused
+  ...['deprecated', 'description', 'title', 'examples', '$comment'], // unused
 ]
 
 // Order is important, newer first!

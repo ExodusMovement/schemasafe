@@ -261,6 +261,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
 
     if (node === schema && recursiveAnchor) handle('$recursiveAnchor', ['boolean'], null) // already applied
 
+    handle('deprecated', ['boolean'], null) // unused, meta-only
     handle('description', ['string'], null) // unused, meta-only
     handle('title', ['string'], null) // unused, meta-only
     handle('$comment', ['string'], null) // unused, meta-only
