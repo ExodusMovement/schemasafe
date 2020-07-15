@@ -27,7 +27,7 @@ const andDelta = wrapFun((A, B) => ({
   properties: [...A.properties, ...B.properties],
   patterns: [...A.patterns, ...B.patterns],
   required: [...A.required, ...B.required],
-  type: A.type && B.type ? [...new Set([...A.type, ...B.type])] : null,
+  type: A.type && B.type ? A.type.filter((x) => B.type.includes(x)) : A.type || B.type || null,
   fullstring: stringValidated(A) || stringValidated(B),
   dyn: {
     items: Math.max(A.dyn.items, B.dyn.items),
@@ -58,7 +58,7 @@ const orDelta = wrapFun((A, B) => ({
   properties: orProperties(A, B),
   patterns: A.patterns.filter((x) => B.patterns.includes(x)),
   required: A.required.filter((x) => B.required.includes(x)),
-  type: A.type && B.type ? A.type.filter((x) => B.type.includes(x)) : null,
+  type: A.type && B.type ? [...new Set([...A.type, ...B.type])] : null,
   fullstring: stringValidated(A) && stringValidated(B),
   dyn: {
     items: Math.max(A.items, B.items, A.dyn.items, B.dyn.items),
