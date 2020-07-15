@@ -320,23 +320,21 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
     }
 
     const applyRef = (n, errorArgs) => {
-      // Allow recursion to here only if $recursiveAnchor is true, else skip from deep recursion
-      const recursive = recursiveAnchor ? format('recursive || validate') : format('recursive')
-      const res = gensym('res')
-      if (includeErrors || !canSkipDynamic()) {
-        const err = gensym('err') // Save and restore errors in case of recursion (if needed)
-        const suberr = gensym('suberr')
-        if (includeErrors) fun.write('const %s = validate.errors', err)
-        fun.write('const %s = %s(%s, %s)', res, n, name, recursive)
-        if (includeErrors) fun.write('const %s = %s.errors', suberr, n)
-        if (includeErrors) fun.write('validate.errors = %s', err)
-        errorIf(safenot(res), { ...errorArgs, source: suberr })
-      } else {
-        errorIf(format('!%s(%s, %s)', n, name, recursive), errorArgs)
-      }
-      // evaluated: propagate static from ref to current, skips cyclic
+      // evaluated: propagate static from ref to current, skips cyclic.
+      // Can do this before the call as the call is just a write
       const delta = (scope[n] && scope[n][evaluatedStatic]) || { unknown: true } // assume unknown if ref is cyclic
       evaluateDelta(delta)
+      // Allow recursion to here only if $recursiveAnchor is true, else skip from deep recursion
+      const recursive = recursiveAnchor ? format('recursive || validate') : format('recursive')
+      if (!includeErrors && canSkipDynamic()) return format('!%s(%s, %s)', n, name, recursive) // simple case
+      const res = gensym('res')
+      const err = gensym('err') // Save and restore errors in case of recursion (if needed)
+      const suberr = gensym('suberr')
+      if (includeErrors) fun.write('const %s = validate.errors', err)
+      fun.write('const %s = %s(%s, %s)', res, n, name, recursive)
+      if (includeErrors) fun.write('const %s = %s.errors', suberr, n)
+      if (includeErrors) fun.write('validate.errors = %s', err)
+      errorIf(safenot(res), { ...errorArgs, source: suberr })
       // evaluated: propagate dynamic from ref to current
       fun.if(res, () => {
         if (dyn.items && isDynamic(stat).items && isDynamic(delta).items)
@@ -346,14 +344,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
           if (dyn.patterns) fun.write('%s.push(...%s.evaluatedDynamic[2])', dyn.patterns, n)
         }
       })
+      return null
     }
     handle('$ref', ['string'], ($ref) => {
       const resolved = resolveReference(root, schemas, node.$ref, basePath())
       const [sub, subRoot, path] = resolved[0] || []
       if (!sub && sub !== false) fail('failed to resolve $ref:', node.$ref)
       const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
-      applyRef(n, { path: ['$ref'] })
-      return null
+      return applyRef(n, { path: ['$ref'] })
     })
     if (node.$ref && getMeta().exclusiveRefs) {
       enforce(!opts[optDynamic], 'unevaluated* is supported only on draft2019-09 schemas and above')
@@ -363,8 +361,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
       // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
       const n = recursiveAnchor ? format('(recursive || validate)') : format('validate')
-      applyRef(n, { path: ['$recursiveRef'] })
-      return null
+      return applyRef(n, { path: ['$recursiveRef'] })
     })
 
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
