@@ -34,14 +34,16 @@ tape('base64 decoding works', (t) => {
   } else {
     const GlobalBuffer = global.Buffer
     delete global.Buffer
+    global.atob = (str) => GlobalBuffer.from(str, 'base64').toString('binary')
     t.ok(typeof Buffer === 'undefined', 'Buffer was unset')
     const slow = measure(deBase64)
     global.Buffer = GlobalBuffer
+    delete global.atob
     t.ok(typeof Buffer !== 'undefined', 'Buffer was restored')
     t.ok(slow.passed, 'deBase64 custom passes')
 
-    t.ok(slow.time / native.time < 20, 'Custom speed is acceptable')
-    t.ok(slow.time / native.time > 4, 'Custom is not the same as fast')
+    t.ok(slow.time / native.time < 10, 'Custom speed is acceptable')
+    t.ok(slow.time / native.time > 1.5, 'Custom is not the same as fast')
   }
   t.ok(fast.time / native.time < 2, 'Fast works at native speed')
 
