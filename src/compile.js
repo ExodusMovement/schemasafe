@@ -314,6 +314,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
         }
       }
     }
+    const applyDynamicToDynamic = (target, items, props) => {
+      if (isDynamic(stat).items && target.items && items)
+        fun.write('%s.push(...%s)', target.items, items)
+      if (isDynamic(stat).properties && target.props && props) {
+        fun.write('%s[0].push(...%s[0])', target.props, props)
+        fun.write('%s[1].push(...%s[1])', target.props, props)
+      }
+    }
 
     const applyRef = (n, errorArgs) => {
       // evaluated: propagate static from ref to current, skips cyclic.
@@ -333,12 +341,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       errorIf(safenot(res), { ...errorArgs, source: suberr })
       // evaluated: propagate dynamic from ref to current
       fun.if(res, () => {
-        if (dyn.items && isDynamic(stat).items && isDynamic(delta).items)
-          fun.write('%s.push(...%s.evaluatedDynamic[0])', dyn.items, n)
-        if (isDynamic(stat).properties && isDynamic(delta).properties && dyn.props) {
-          fun.write('%s[0].push(...%s.evaluatedDynamic[1][0])', dyn.props, n)
-          fun.write('%s[1].push(...%s.evaluatedDynamic[1][1])', dyn.props, n)
-        }
+        const items = isDynamic(delta).items ? format('%s.evaluatedDynamic[0]', n) : null
+        const props = isDynamic(delta).properties ? format('%s.evaluatedDynamic[1]', n) : null
+        applyDynamicToDynamic(dyn, items, props)
       })
       return null
     }
@@ -884,13 +889,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       typeWrap(checkObjectsFinal, ['object'], types.get('object')(name))
 
       // evaluated: propagate dynamic to parent dynamic (aka trace)
-      if (isDynamic(stat).items && trace.items && local.items)
-        fun.write('%s.push(...%s)', trace.items, local.items)
-      if (isDynamic(stat).properties && trace.props && local.props) {
-        fun.write('%s[0].push(...%s[0])', trace.props, local.props)
-        fun.write('%s[1].push(...%s[1])', trace.props, local.props)
-      }
-      // evaluated: static to parent is merged via return value
+      // static to parent is merged via return value
+      applyDynamicToDynamic(trace, local.items, local.props)
     }
 
     let typeIfAdded = false
