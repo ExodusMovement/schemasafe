@@ -308,15 +308,17 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
     const evaluateDeltaDynamic = (delta) => {
       // Skips applying those that have already been proved statically
       if (dyn.items && delta.items > stat.items) fun.write('%s.push(%d)', dyn.items, delta.items)
-      const inStat = (properties, patterns) => inProperties(stat, { properties, patterns })
-      const properties = delta.properties.filter((x) => !inStat([x], []))
-      const patterns = delta.patterns.filter((x) => !inStat([], [x]))
-      if (dyn.properties && properties.length > 0) {
-        if (properties.includes(true)) fun.write('%s.push(true)', dyn.properties)
-        else fun.write('%s.push(...%j)', dyn.properties, properties)
+      if (dyn.properties) {
+        const inStat = (properties, patterns) => inProperties(stat, { properties, patterns })
+        const properties = delta.properties.filter((x) => !inStat([x], []))
+        const patterns = delta.patterns.filter((x) => !inStat([], [x]))
+        if (properties.includes(true)) {
+          fun.write('%s.push(true)', dyn.properties)
+        } else {
+          if (properties.length > 0) fun.write('%s.push(...%j)', dyn.properties, properties)
+          if (patterns.length > 0) fun.write('%s.push(...%s)', dyn.patterns, patterns)
+        }
       }
-      if (dyn.patterns && patterns.length > 0 && !properties.includes(true))
-        fun.write('%s.push(...%s)', dyn.patterns, patterns)
     }
 
     const applyRef = (n, errorArgs) => {
