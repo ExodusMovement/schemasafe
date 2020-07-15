@@ -395,10 +395,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
     // Those checks will need to be skipped if another error is set in this block before those ones
     const haveComplex = node.uniqueItems || node.pattern || node.patternProperties || node.format
     const prev = allErrors && haveComplex ? gensym('prev') : null
-    const prevWrap = (shouldWrap, writeBody) => {
-      if (prev === null || !shouldWrap) writeBody()
-      else fun.if(format('errorCount === %s', prev), writeBody)
-    }
+    const prevWrap = (shouldWrap, writeBody) =>
+      fun.if(shouldWrap && prev !== null ? format('errorCount === %s', prev) : true, writeBody)
 
     // Can not be used before undefined check above! The one performed by present()
     const rule = (...args) => visit(errors, [...history, { stat, prop: current }], ...args).stat
@@ -701,8 +699,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
                 evaluateDelta(orDelta({}, delta))
                 evaluateDeltaDynamic(delta)
               }
-              if (item.checked) body()
-              else fun.if(present(item), body)
+              fun.if(item.checked ? true : present(item), body)
             } else fail(`Unexpected ${dependencies} entry`)
           }
           return null
@@ -825,8 +822,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
 
     const typeWrap = (checkBlock, validTypes, queryType) => {
       const [funSize, unusedSize] = [fun.size(), unused.size]
-      if (definitelyType(...validTypes)) checkBlock()
-      else fun.if(queryType, checkBlock)
+      fun.if(definitelyType(...validTypes) ? true : queryType, checkBlock)
       // enforce check that non-applicable blocks are empty and no rules were applied
       if (funSize !== fun.size() || unusedSize !== unused.size)
         enforce(typeApplicable(...validTypes), `Unexpected rules in type`, node.type)
