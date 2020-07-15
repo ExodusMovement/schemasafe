@@ -479,10 +479,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       const multipleOf = node.multipleOf === undefined ? 'divisibleBy' : 'multipleOf' // draft3 support
       handle(multipleOf, ['finite'], (value) => {
         enforce(value > 0, `Invalid ${multipleOf}:`, value)
-        if (Number.isInteger(value)) return format('%s %% %d !== 0', name, value)
+        const [frac, exp] = `${value}.`.split('.')[1].split('e-')
+        const e = frac.length + (exp ? Number(exp) : 0)
+        if (Number.isInteger(value * 2 ** e)) return format('%s %% %d !== 0', name, value) // exact
         scope.isMultipleOf = functions.isMultipleOf
-        const [last, exp] = `${value}`.replace(/.*\./, '').split('e-')
-        const e = last.length + (exp ? Number(exp) : 0)
         const args = [name, value, e, Math.round(value * Math.pow(10, e))] // precompute for performance
         return format('!isMultipleOf(%s, %d, 1e%d, %d)', ...args)
       })

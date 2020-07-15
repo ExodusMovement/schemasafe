@@ -38,16 +38,9 @@ return ref0
 
 ```js
 'use strict'
-const isMultipleOf = (value, divisor, factor, factorMultiple) => {
-  if (value % divisor === 0) return true
-  const multiple = value * factor
-  if (multiple % factorMultiple === 0) return true
-  const normal = Math.floor(multiple + 0.5)
-  return normal / factor === value && normal % factorMultiple === 0
-};
 const ref0 = function validate(data, recursive) {
   if (typeof data === "number") {
-    if (!isMultipleOf(data, 1.5, 1e1, 15)) return false
+    if (data % 1.5 !== 0) return false
   }
   return true
 };
