@@ -160,9 +160,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
           fun.write('%s = [%s]', errors, errorJS)
         }
       }
+      if (suberr) mergeerror(suberr) // can only happen in allErrors
       if (allErrors) fun.write('errorCount++')
       else fun.write('return false')
-      if (suberr) mergeerror(suberr)
     }
     const errorIf = (condition, errorArgs) => {
       if (includeErrors === true && errors) fun.if(condition, () => error(errorArgs))
@@ -418,10 +418,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
       return suberr
     }
     const mergeerror = (suberr) => {
-      if (!suberr) return
       // suberror can be null e.g. on failed empty contains
-      const args = [errors, suberr, errors, suberr, suberr, errors, suberr]
-      fun.write('if (%s && %s) { %s.push(...%s) } else if (%s) %s = %s', ...args)
+      if (suberr !== null) fun.write('if (%s) %s.push(...%s)', suberr, errors, suberr)
     }
 
     // Extracted single additional(Items/Properties) rules, for reuse with unevaluated(Items/Properties)
