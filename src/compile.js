@@ -398,13 +398,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const prevWrap = (shouldWrap, writeBody) =>
       fun.if(shouldWrap && prev !== null ? format('errorCount === %s', prev) : true, writeBody)
 
+    const nexthistory = () => [...history, { stat, prop: current }]
     // Can not be used before undefined check above! The one performed by present()
-    const rule = (...args) => visit(errors, [...history, { stat, prop: current }], ...args).stat
+    const rule = (...args) => visit(errors, nexthistory(), ...args).stat
     const subrule = (suberr, ...args) => {
       const sub = gensym('sub')
       fun.write('const %s = (() => {', sub)
       if (allErrors) fun.write('let errorCount = 0') // scoped error counter
-      const { stat: delta } = visit(suberr, [...history, { stat, prop: current }], ...args)
+      const { stat: delta } = visit(suberr, nexthistory(), ...args)
       if (allErrors) {
         fun.write('return errorCount === 0')
       } else fun.write('return true')
