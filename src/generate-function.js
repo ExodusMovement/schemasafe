@@ -38,7 +38,7 @@ module.exports = () => {
     write(fmt, ...args) {
       if (typeof fmt !== 'string') throw new Error('Format must be a string!')
       if (fmt.includes('\n')) throw new Error('Only single lines are supported')
-      pushLine(args.length > 0 ? format(fmt, ...args) : fmt)
+      pushLine(format(fmt, ...args))
     },
 
     block(fmt, args, close, writeBody) {
