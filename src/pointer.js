@@ -96,8 +96,10 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
   }
 
   // Find in additional schemas
-  if (schemas.has(main))
-    results.push(...resolveReference(schemas.get(main), additionalSchemas, `#${hash}`))
+  if (schemas.has(main)) {
+    const additional = resolveReference(schemas.get(main), additionalSchemas, `#${hash}`)
+    results.push(...additional.map(([res, rRoot, rPath]) => [res, rRoot, joinPath(main, rPath)]))
+  }
 
   // Full refs to additional schemas
   if (schemas.has(ptr)) results.push([schemas.get(ptr), schemas.get(ptr), ptr])
