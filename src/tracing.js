@@ -22,6 +22,7 @@ const wrapFun = (f) => (...args) => f(...args.map(wrap))
 const stringValidated = (A) => A.fullstring || (A.type && !A.type.includes('string'))
 
 // Result means that both sets A and B are correct
+// type is intersected, lists of known properties are merged
 const andDelta = wrapFun((A, B) => ({
   items: Math.max(A.items, B.items),
   properties: [...A.properties, ...B.properties],
@@ -53,6 +54,7 @@ const inProperties = ({ properties: a, patterns: rega }, { properties: b, patter
     b.every((x) => a.includes(x) || rega.some((p) => regtest(p, x))))
 
 // Result means that at least one of sets A and B is correct
+// type is merged, lists of known properties are intersected
 const orDelta = wrapFun((A, B) => ({
   items: Math.min(A.items, B.items),
   properties: orProperties(A, B),
