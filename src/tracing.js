@@ -19,7 +19,8 @@ const initTracing = () => ({
 
 const wrap = (A) => ({ ...initTracing(), ...A }) // sets default empty values
 const wrapFun = (f) => (...args) => f(...args.map(wrap))
-const stringValidated = (A) => A.fullstring || (A.type && !A.type.includes('string'))
+const noType = (A, type) => A.type && !A.type.includes(type)
+const stringValidated = (A) => A.fullstring || noType(A, 'string')
 
 // Result means that both sets A and B are correct
 // type is intersected, lists of known properties are merged
@@ -40,9 +41,11 @@ const andDelta = wrapFun((A, B) => ({
 
 const regtest = (pattern, value) => new RegExp(pattern, 'u').test(value)
 
-const orProperties = ({ properties: a, patterns: rega }, { properties: b, patterns: regb }) => {
-  if (a.includes(true)) return b
-  if (b.includes(true)) return a
+const orProperties = (A, B) => {
+  const { properties: a, patterns: rega } = A
+  const { properties: b, patterns: regb } = B
+  if (noType(A, 'object') || a.includes(true)) return b
+  if (noType(B, 'object') || b.includes(true)) return a
   const afiltered = a.filter((x) => b.includes(x) || regb.some((p) => regtest(p, x)))
   const bfiltered = b.filter((x) => rega.some((p) => regtest(p, x)))
   return [...afiltered, ...bfiltered]
@@ -77,7 +80,7 @@ const applyDelta = (stat, delta) => {
   if (delta.required) stat.required.push(...delta.required)
   if (delta.type)
     stat.type = stat.type ? stat.type.filter((x) => delta.type.includes(x)) : delta.type
-  if (delta.fullstring || (stat.type && !stat.type.includes('string'))) stat.fullstring = true
+  if (delta.fullstring || noType(stat, 'string')) stat.fullstring = true
   if (delta.dyn) stat.dyn.items = Math.max(stat.dyn.items, delta.dyn.items)
   if (delta.dyn) stat.dyn.properties.push(...delta.dyn.properties)
   if (delta.dyn) stat.dyn.patterns.push(...delta.dyn.patterns)
