@@ -747,25 +747,26 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       handle('not', ['object', 'boolean'], (not) => subrule(null, current, not, subPath('not')).sub)
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
-      if ((node.if || node.if === false) && thenOrElse) {
-        const { sub, delta: deltaIf } = subrule(null, current, node.if, subPath('if'), dyn)
-        let deltaElse, deltaThen
-        fun.write('if (%s) {', safenot(sub))
-        if (node.else || node.else === false) {
-          deltaElse = rule(current, node.else, subPath('else'), dyn)
-          evaluateDeltaDynamic(deltaElse)
-          consume('else', 'object', 'boolean')
-        } else deltaElse = {}
-        if (node.then || node.then === false) {
-          fun.write('} else {')
-          deltaThen = rule(current, node.then, subPath('then'), dyn)
-          evaluateDeltaDynamic(andDelta(deltaIf, deltaThen))
-          consume('then', 'object', 'boolean')
-        } else deltaThen = {}
-        fun.write('}')
-        evaluateDelta(orDelta(deltaElse, andDelta(deltaIf, deltaThen)))
-        consume('if', 'object', 'boolean')
-      }
+      if (thenOrElse)
+        handle('if', ['object', 'boolean'], (ifS) => {
+          const { sub, delta: deltaIf } = subrule(null, current, ifS, subPath('if'), dyn)
+          let deltaElse, deltaThen
+          fun.write('if (%s) {', safenot(sub))
+          handle('else', ['object', 'boolean'], (elseS) => {
+            deltaElse = rule(current, elseS, subPath('else'), dyn)
+            evaluateDeltaDynamic(deltaElse)
+            return null
+          })
+          handle('then', ['object', 'boolean'], (thenS) => {
+            fun.write('} else {')
+            deltaThen = rule(current, thenS, subPath('then'), dyn)
+            evaluateDeltaDynamic(andDelta(deltaIf, deltaThen))
+            return null
+          })
+          fun.write('}')
+          evaluateDelta(orDelta(deltaElse || {}, andDelta(deltaIf, deltaThen || {})))
+          return null
+        })
 
       const performAllOf = (allOf, rulePath = 'allOf') => {
         enforce(allOf.length > 0, `${rulePath} cannot be empty`)
