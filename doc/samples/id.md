@@ -409,7 +409,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/properties/definitions/additionalProperties`
+ * `[requireValidation] type must be specified at https://json-schema.org/draft/2019-09/schema#/properties/definitions/additionalProperties`
 
 
 ## Valid use of empty fragments in location-independent $id
@@ -821,7 +821,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/properties/definitions/additionalProperties`
+ * `[requireValidation] type must be specified at https://json-schema.org/draft/2019-09/schema#/properties/definitions/additionalProperties`
 
 
 ## Unnormalized $ids are allowed but discouraged
@@ -1233,5 +1233,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/properties/definitions/additionalProperties`
+ * `[requireValidation] type must be specified at https://json-schema.org/draft/2019-09/schema#/properties/definitions/additionalProperties`
 

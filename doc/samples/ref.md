@@ -654,7 +654,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/properties/definitions/additionalProperties`
+ * `[requireValidation] type must be specified at https://json-schema.org/draft/2019-09/schema#/properties/definitions/additionalProperties`
 
 
 ## property named $ref that is not a reference
