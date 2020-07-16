@@ -117,7 +117,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/properties/foo/not`
+ * `[requireValidation] empty rules node is not allowed at #/properties/foo/not`
 
 
 ## not with boolean schema true

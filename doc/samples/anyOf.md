@@ -258,7 +258,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/anyOf/1`
+ * `[requireValidation] empty rules node is not allowed at #/anyOf/1`
 
 
 ## nested anyOf, to check validation semantics

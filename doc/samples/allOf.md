@@ -197,7 +197,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/allOf/0`
+ * `[requireValidation] empty rules node is not allowed at #/allOf/0`
 
 
 ## allOf with two empty schemas
@@ -220,7 +220,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/allOf/0`
+ * `[requireValidation] empty rules node is not allowed at #/allOf/0`
 
 
 ## allOf with the first empty schema
@@ -244,7 +244,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/allOf/0`
+ * `[requireValidation] empty rules node is not allowed at #/allOf/0`
 
 
 ## allOf with the last empty schema
@@ -268,7 +268,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/allOf/1`
+ * `[requireValidation] empty rules node is not allowed at #/allOf/1`
 
 
 ## nested allOf, to check validation semantics

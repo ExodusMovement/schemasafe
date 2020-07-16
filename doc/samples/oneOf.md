@@ -307,7 +307,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/oneOf/1`
+ * `[requireValidation] empty rules node is not allowed at #/oneOf/1`
 
 
 ## oneOf with required

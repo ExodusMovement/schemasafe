@@ -28,7 +28,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/0`
+ * `[requireValidation] empty rules node is not allowed at #/0`
 
 
 ## items is schema, no additionalItems
@@ -77,7 +77,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/0`
+ * `[requireValidation] empty rules node is not allowed at #/0`
 
 
 ## additionalItems as false without items

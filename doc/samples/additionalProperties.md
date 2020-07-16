@@ -31,7 +31,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/properties/foo`
+ * `[requireValidation] empty rules node is not allowed at #/properties/foo`
 
 
 ## non-ASCII pattern with additionalProperties
@@ -94,7 +94,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/properties/foo`
+ * `[requireValidation] empty rules node is not allowed at #/properties/foo`
 
 
 ## additionalProperties can exist by itself
@@ -145,7 +145,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/properties/foo`
+ * `[requireValidation] empty rules node is not allowed at #/properties/foo`
 
 
 ## additionalProperties should not look in applicators
@@ -176,5 +176,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node encountered at #/allOf/0/properties/foo`
+ * `[requireValidation] empty rules node is not allowed at #/allOf/0/properties/foo`
 

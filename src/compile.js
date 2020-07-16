@@ -205,7 +205,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       enforce(knownKeywords.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
     if (Object.keys(node).length === 0) {
-      enforceValidation('empty rules node', 'encountered')
+      enforceValidation('empty rules node', 'is not allowed')
       return { stat } // nothing to validate here, basically the same as node === true
     }
 
