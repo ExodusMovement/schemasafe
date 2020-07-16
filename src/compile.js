@@ -766,15 +766,19 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         consume('if', 'object', 'boolean')
       }
 
-      handle('allOf', ['array'], (allOf) => {
+      const performAllOf = (allOf, rulePath = 'allOf') => {
+        enforce(allOf.length > 0, `${rulePath} cannot be empty`)
         for (const [key, sch] of Object.entries(allOf))
-          evaluateDelta(rule(current, sch, subPath('allOf', key), dyn))
+          evaluateDelta(rule(current, sch, subPath(rulePath, key), dyn))
         return null
-      })
+      }
+      handle('allOf', ['array'], (allOf) => performAllOf(allOf))
 
       handle('anyOf', ['array'], (anyOf) => {
+        enforce(anyOf.length > 0, 'anyOf cannot be empty')
+        if (anyOf.length === 1) return performAllOf(anyOf)
         const suberr = suberror()
-        if (anyOf.length > 0 && !canSkipDynamic()) {
+        if (!canSkipDynamic()) {
           // In this case, all have to be checked to gather evaluated properties
           const entries = Object.entries(anyOf).map(([key, sch]) =>
             subrule(suberr, current, sch, subPath('anyOf', key), dyn)
@@ -798,6 +802,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       })
 
       handle('oneOf', ['array'], (oneOf) => {
+        enforce(oneOf.length > 0, 'oneOf cannot be empty')
+        if (oneOf.length === 1) return performAllOf(oneOf)
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
         const suberr = suberror()
@@ -810,7 +816,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           delta = delta ? orDelta(delta, entry.delta) : entry.delta
           return entry
         })
-        if (oneOf.length > 0) evaluateDelta(delta)
+        evaluateDelta(delta)
         errorIf(format('%s !== 1', passes), { path: ['oneOf'] })
         fun.if(format('%s === 0', passes), () => mergeerror(suberr)) // if none matched, dump all errors
         for (const entry of entries) fun.if(entry.sub, () => evaluateDeltaDynamic(entry.delta))

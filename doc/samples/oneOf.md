@@ -410,19 +410,7 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  let passes0 = 0
-  const sub0 = (() => {
-    let passes1 = 0
-    const sub1 = (() => {
-      if (!(data === null)) return false
-      return true
-    })()
-    if (sub1) passes1++
-    if (passes1 !== 1) return false
-    return true
-  })()
-  if (sub0) passes0++
-  if (passes0 !== 1) return false
+  if (!(data === null)) return false
   return true
 };
 return ref0

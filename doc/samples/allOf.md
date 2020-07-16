@@ -311,24 +311,12 @@ const ref0 = function validate(data, recursive) {
   if (typeof data === "number") {
     if (data % 2 !== 0) return false
   }
-  const sub0 = (() => {
-    if (typeof data === "number") {
-      if (data % 3 !== 0) return false
-    }
-    return true
-  })()
-  if (!sub0) {
-    return false
+  if (typeof data === "number") {
+    if (data % 3 !== 0) return false
   }
-  let passes0 = 0
-  const sub1 = (() => {
-    if (typeof data === "number") {
-      if (data % 5 !== 0) return false
-    }
-    return true
-  })()
-  if (sub1) passes0++
-  if (passes0 !== 1) return false
+  if (typeof data === "number") {
+    if (data % 5 !== 0) return false
+  }
   return true
 };
 return ref0
