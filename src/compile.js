@@ -795,7 +795,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           fun.write('if (%s) {', safenot(sub))
           delta = delta ? orDelta(delta, deltaVariant) : deltaVariant
         }
-        if (anyOf.length > 0) evaluateDelta(delta)
+        evaluateDelta(delta)
         error({ path: ['anyOf'], suberr })
         anyOf.forEach(() => fun.write('}'))
         return null
