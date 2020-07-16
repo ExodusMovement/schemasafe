@@ -44,8 +44,8 @@ tape('base64 decoding works', (t) => {
 
     t.ok(slow.time / native.time < 10, 'Custom speed is acceptable')
     t.ok(slow.time / native.time > 1.5, 'Custom is not the same as fast')
+    t.ok(fast.time / native.time < 2, 'Fast works at native speed')
   }
-  t.ok(fast.time / native.time < 2, 'Fast works at native speed')
 
   t.end()
 })
