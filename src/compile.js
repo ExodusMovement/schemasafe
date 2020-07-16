@@ -4,7 +4,7 @@ const { format, safe, safeand, safeor, safenot } = require('./safe-format')
 const genfun = require('./generate-function')
 const { resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
-const functions = require('./scope-functions')
+const { toPointer, ...functions } = require('./scope-functions')
 const { scopeMethods } = require('./scope-utils')
 const { buildName, types, jsHelpers } = require('./javascript')
 const { knownKeywords, schemaVersions, knownVocabularies } = require('./known-keywords')
@@ -35,7 +35,7 @@ const evaluatedStatic = Symbol('evaluatedStatic')
 const optDynamic = Symbol('optDynamic')
 
 const rootMeta = new WeakMap()
-const compileSchema = (schema, root, opts, scope, basePathRoot) => {
+const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   const {
     mode = 'default',
     useDefaults = false,
@@ -84,7 +84,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
 
     // fast case when there are no variables inside path
     if (path.every((part) => part.keyval !== undefined))
-      return format('%j', functions.toPointer(path.map((part) => part.keyval)))
+      return format('%j', toPointer(path.map((part) => part.keyval)))
 
     // Be very careful while refactoring, this code significantly affects includeErrors performance
     // It attempts to construct fast code presentation for paths, e.g. "#/abc/"+pointerPart(key0)+"/items/"+i0
@@ -138,7 +138,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
     const currPropImm = (...args) => propimm(current, ...args)
 
     const error = ({ path = [], prop = current, source, suberr }) => {
-      const schemaP = functions.toPointer([...schemaPath, ...path])
+      const schemaP = toPointer([...schemaPath, ...path])
       const dataP = includeErrors ? buildPath(prop) : null
       if (includeErrors === true && errors && source) {
         // we can include absoluteKeywordLocation later, perhaps
@@ -171,7 +171,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot) => {
 
     const fail = (msg, value) => {
       const comment = value !== undefined ? ` ${JSON.stringify(value)}` : ''
-      throw new Error(`${msg}${comment} at ${functions.toPointer(schemaPath)}`)
+      throw new Error(`${msg}${comment} at ${joinPath(basePathRoot, toPointer(schemaPath))}`)
     }
     const enforce = (ok, ...args) => ok || fail(...args)
     const laxMode = (ok, ...args) => enforce(mode === 'lax' || ok, ...args)
