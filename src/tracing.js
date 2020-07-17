@@ -87,19 +87,7 @@ const orDelta = wrapFun((A, B) => ({
   unknown: A.unknown || B.unknown,
 }))
 
-// Acts as andDelta, perhaps merge the impls?
-const applyDelta = (stat, delta) => {
-  if (delta.items) stat.items = Math.max(stat.items, delta.items)
-  if (delta.properties) stat.properties = merge(stat.properties, delta.properties)
-  if (delta.patterns) stat.patterns = merge(stat.patterns, delta.patterns)
-  if (delta.required) stat.required = merge(stat.required, delta.required)
-  if (delta.type) stat.type = stat.type ? intersect(stat.type, delta.type) : delta.type
-  if (delta.fullstring || noType(stat, 'string')) stat.fullstring = true
-  if (delta.dyn) stat.dyn.items = Math.max(stat.dyn.items, delta.dyn.items)
-  if (delta.dyn) stat.dyn.properties = merge(stat.dyn.properties, delta.dyn.properties)
-  if (delta.dyn) stat.dyn.patterns = merge(stat.dyn.patterns, delta.dyn.patterns)
-  if (delta.unknown) stat.unknown = true
-}
+const applyDelta = (stat, delta) => Object.assign(stat, andDelta(stat, delta))
 
 const isDynamic = wrapFun(({ unknown, items, dyn, ...stat }) => ({
   items: items !== Infinity && (unknown || dyn.items > items),
