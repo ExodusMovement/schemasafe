@@ -33,8 +33,8 @@ const merge = (a, b = []) => [...new Set([...a, ...b])]
 const intersect = (a, b) => a.filter((x) => b.includes(x))
 const wrap = (A) => ({ ...initTracing(), ...A }) // sets default empty values
 const wrapFun = (f) => (...args) => f(...args.map(wrap))
-const noType = (A, type) => A.type && !A.type.includes(type)
-const stringValidated = (A) => A.fullstring || noType(A, 'string')
+const isNotType = (A, type) => A.type && !A.type.includes(type)
+const stringValidated = (A) => A.fullstring || isNotType(A, 'string')
 
 // Result means that both sets A and B are correct
 // type is intersected, lists of known properties are merged
@@ -58,8 +58,8 @@ const regtest = (pattern, value) => new RegExp(pattern, 'u').test(value)
 const orProperties = (A, B) => {
   const { properties: a, patterns: rega } = A
   const { properties: b, patterns: regb } = B
-  if (noType(A, 'object') || a.includes(true)) return b
-  if (noType(B, 'object') || b.includes(true)) return a
+  if (isNotType(A, 'object') || a.includes(true)) return b
+  if (isNotType(B, 'object') || b.includes(true)) return a
   const afiltered = a.filter((x) => b.includes(x) || regb.some((p) => regtest(p, x)))
   const bfiltered = b.filter((x) => rega.some((p) => regtest(p, x)))
   return [...afiltered, ...bfiltered]
