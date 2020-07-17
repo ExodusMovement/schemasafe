@@ -230,7 +230,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       // opt-out on null is explicit in both places here, don't set default
       consume(prop, ...ruleTypes)
       if (handler !== null) {
-        const condition = handler(node[prop])
+        const condition = handler(node[prop], prop)
         if (condition !== null) errorIf(condition, { path: [prop], ...errorArgs })
       }
       return true
@@ -759,6 +759,47 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         return null
       }
       handle('allOf', ['array'], (allOf) => performAllOf(allOf))
+
+      handle('discriminator', ['object'], (discriminator) => {
+        const fix = (check, message, arg) => enforce(check, `[discriminator]: ${message}`, arg)
+        const { propertyName: pname, mapping: map, ...e0 } = discriminator
+        const dok = pname && node.type === 'object' && !node.oneOf !== !node.anyOf
+        fix(dok, 'need propertyName, type = object, oneOf OR anyOf')
+        const requiredPropname = Array.isArray(node.required) && node.required.includes(pname)
+        fix(requiredPropname, '[propertyName] should be placed in required')
+        fix(Object.keys(e0).length === 0, 'only propertyName is supported')
+        const keylen = (obj) => (schemaTypes.get('object')(obj) ? Object.keys(obj).length : null)
+        const seen = new Set()
+        handle(node.oneOf ? 'oneOf' : 'anyOf', ['array'], (branches, ruleName) => {
+          fix(branches.length > 0, 'branches cannot be empty')
+          fix(!map || keylen(map) === branches.length, 'mismatching mapping')
+          fun.write('switch (%s) {', buildName(currPropImm(pname))) // TODO: is `if {} else if {} else` better?
+          let delta
+          let i = 0
+          for (const { properties, ...br } of branches) {
+            // TODO: extract const of refs?
+            const { [pname]: { const: val, ...e1 } = {}, ...props } = properties || {}
+            const ok = typeof val === 'string' && !seen.has(val) && keylen(e1) === 0
+            fix(ok, 'branches need unique string const values for [propertyName]')
+            seen.add(val)
+            const okMapping = !map || (functions.hasOwn(map, val) && map[val] === br.$ref)
+            fix(okMapping, 'mismatching mapping for', val)
+            fun.write('case %j: {', val)
+            const subdelta = rule(current, { properties: props, ...br }, subPath(ruleName, i++))
+            evaluateDeltaDynamic(subdelta)
+            delta = delta ? orDelta(delta, subdelta) : subdelta
+            fun.write('}')
+            fun.write('break')
+          }
+          evaluateDelta(delta)
+          fun.write('default:')
+          error({ path: [ruleName] })
+          fun.write('}')
+          return null
+        })
+        return null
+      })
+      if (node.discriminator) return // don't perform anyOf / oneOf
 
       handle('anyOf', ['array'], (anyOf) => {
         enforce(anyOf.length > 0, 'anyOf cannot be empty')

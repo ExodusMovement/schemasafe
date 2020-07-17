@@ -17,6 +17,7 @@ const knownKeywords = [
   // Unused meta keywords not affecting validation (annotations and comments)
   // https://json-schema.org/understanding-json-schema/reference/generic.html
   ...['deprecated', 'description', 'title', 'examples', '$comment'], // unused
+  'discriminator', // optimization hint and error filtering only, does not affect validation result
 ]
 
 // Order is important, newer first!
