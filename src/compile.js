@@ -937,6 +937,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       // Sanity check, unreachable, double-check that we came from expected path
       enforce(allowed0.includes(n0) || allowed1.includes(n1), 'Unexpected')
     }
+    if (node.properties && !node.required) enforceValidation('if properties is used, required')
 
     return finish(local)
   }
