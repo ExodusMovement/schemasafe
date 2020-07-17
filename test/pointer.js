@@ -33,7 +33,7 @@ const uschemasI = fromEntries(
   Object.entries(schemasI).map(([id, schema]) => [id, { $id: `${url}${id}/`, ...schema }])
 )
 // url => url
-const uschemasU = fromEntries(Object.entries(uschemasI).map(([id, schema]) => [schema.$id, schema]))
+const uschemasU = fromEntries(Object.entries(uschemasI).map(([, schema]) => [schema.$id, schema]))
 
 const test = (t, schemas, tests) => {
   const additionalSchemas = buildSchemas(schemas)

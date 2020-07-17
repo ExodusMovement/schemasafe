@@ -348,9 +348,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       return null
     }
     handle('$ref', ['string'], ($ref) => {
-      const resolved = resolveReference(root, schemas, node.$ref, basePath())
+      const resolved = resolveReference(root, schemas, $ref, basePath())
       const [sub, subRoot, path] = resolved[0] || []
-      if (!sub && sub !== false) fail('failed to resolve $ref:', node.$ref)
+      if (!sub && sub !== false) fail('failed to resolve $ref:', $ref)
       const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
       return applyRef(n, { path: ['$ref'] })
     })
