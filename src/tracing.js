@@ -91,9 +91,8 @@ const intersectProps = ({ properties: a, patterns: rega }, { properties: b, patt
 }
 
 const inProperties = ({ properties: a, patterns: rega }, { properties: b, patterns: regb }) =>
-  a.includes(true) ||
-  (regb.every((x) => rega.includes(x)) &&
-    b.every((x) => a.includes(x) || rega.some((p) => regtest(p, x))))
+  b.every((x) => a.includes(x) || a.includes(true) || rega.some((p) => regtest(p, x))) &&
+  regb.every((x) => rega.includes(x) || a.includes(true))
 
 // Result means that at least one of sets A and B is correct
 // type is merged, lists of known properties are intersected, lists of dynamic properties are merged
