@@ -9,6 +9,18 @@
  *
  * isDynamic() checks that all potentially evaluated are also definitely evaluated, seperately
  * for items and properties, for use with unevaluatedItems and unevaluatedProperties.
+ *
+ * WARNING: it is important that this doesn't produce invalid information. i.e.:
+ *  * Extra properties or patterns, too high items
+ *  * Missing dyn.properties or dyn.patterns, too low dyn.items
+ *  * Extra fullstring flag or required entries
+ *  * Missing types, if type is present
+ *  * Missing unknown
+ *
+ * The other way around is non-optimal but safe.
+ *
+ * null means any type (i.e. any type is possible, not validated)
+ * true in properties means any property (i.e. all properties were evaluated)
  */
 
 const initTracing = () => ({
@@ -17,6 +29,8 @@ const initTracing = () => ({
   unknown: false,
 })
 
+const merge = (a, b = []) => [...new Set([...a, ...b])]
+const intersect = (a, b) => a.filter((x) => b.includes(x))
 const wrap = (A) => ({ ...initTracing(), ...A }) // sets default empty values
 const wrapFun = (f) => (...args) => f(...args.map(wrap))
 const noType = (A, type) => A.type && !A.type.includes(type)
@@ -26,15 +40,15 @@ const stringValidated = (A) => A.fullstring || noType(A, 'string')
 // type is intersected, lists of known properties are merged
 const andDelta = wrapFun((A, B) => ({
   items: Math.max(A.items, B.items),
-  properties: [...A.properties, ...B.properties],
-  patterns: [...A.patterns, ...B.patterns],
-  required: [...A.required, ...B.required],
-  type: A.type && B.type ? A.type.filter((x) => B.type.includes(x)) : A.type || B.type || null,
+  properties: merge(A.properties, B.properties),
+  patterns: merge(A.patterns, B.patterns),
+  required: merge(A.required, B.required),
+  type: A.type && B.type ? intersect(A.type, B.type) : A.type || B.type || null,
   fullstring: stringValidated(A) || stringValidated(B),
   dyn: {
     items: Math.max(A.dyn.items, B.dyn.items),
-    properties: [...A.dyn.properties, ...B.dyn.properties],
-    patterns: [...A.dyn.patterns, ...B.dyn.patterns],
+    properties: merge(A.dyn.properties, B.dyn.properties),
+    patterns: merge(A.dyn.patterns, B.dyn.patterns),
   },
   unknown: A.unknown || B.unknown,
 }))
@@ -63,27 +77,27 @@ const orDelta = wrapFun((A, B) => ({
   properties: orProperties(A, B),
   patterns: A.patterns.filter((x) => B.patterns.includes(x)),
   required: A.required.filter((x) => B.required.includes(x)),
-  type: A.type && B.type ? [...new Set([...A.type, ...B.type])] : null,
+  type: A.type && B.type ? merge(A.type, B.type) : null,
   fullstring: stringValidated(A) && stringValidated(B),
   dyn: {
     items: Math.max(A.items, B.items, A.dyn.items, B.dyn.items),
-    properties: [...A.properties, ...B.properties, ...A.dyn.properties, ...B.dyn.properties],
-    patterns: [...A.patterns, ...B.patterns, ...A.dyn.patterns, ...B.dyn.patterns],
+    properties: merge(merge(A.properties, B.properties), merge(A.dyn.properties, B.dyn.properties)),
+    patterns: merge(merge(A.patterns, B.patterns), merge(A.dyn.patterns, B.dyn.patterns)),
   },
   unknown: A.unknown || B.unknown,
 }))
 
+// Acts as andDelta, perhaps merge the impls?
 const applyDelta = (stat, delta) => {
   if (delta.items) stat.items = Math.max(stat.items, delta.items)
-  if (delta.properties) stat.properties.push(...delta.properties)
-  if (delta.patterns) stat.patterns.push(...delta.patterns)
-  if (delta.required) stat.required.push(...delta.required)
-  if (delta.type)
-    stat.type = stat.type ? stat.type.filter((x) => delta.type.includes(x)) : delta.type
+  if (delta.properties) stat.properties = merge(stat.properties, delta.properties)
+  if (delta.patterns) stat.patterns = merge(stat.patterns, delta.patterns)
+  if (delta.required) stat.required = merge(stat.required, delta.required)
+  if (delta.type) stat.type = stat.type ? intersect(stat.type, delta.type) : delta.type
   if (delta.fullstring || noType(stat, 'string')) stat.fullstring = true
   if (delta.dyn) stat.dyn.items = Math.max(stat.dyn.items, delta.dyn.items)
-  if (delta.dyn) stat.dyn.properties.push(...delta.dyn.properties)
-  if (delta.dyn) stat.dyn.patterns.push(...delta.dyn.patterns)
+  if (delta.dyn) stat.dyn.properties = merge(stat.dyn.properties, delta.dyn.properties)
+  if (delta.dyn) stat.dyn.patterns = merge(stat.dyn.patterns, delta.dyn.patterns)
   if (delta.unknown) stat.unknown = true
 }
 

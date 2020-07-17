@@ -450,8 +450,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
     const additionalCondition = (key, properties, patternProperties) =>
       safeand(
-        ...[...new Set(properties)].map((p) => format('%s !== %j', key, p)),
-        ...[...new Set(patternProperties)].map((p) => safenot(patternTest(p, key)))
+        ...properties.map((p) => format('%s !== %j', key, p)),
+        ...patternProperties.map((p) => safenot(patternTest(p, key)))
       )
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
