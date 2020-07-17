@@ -4,7 +4,7 @@ const tape = require('tape')
 const { randomBytes } = require('crypto')
 const { deBase64 } = require('../src/scope-functions')
 
-const arr = (size, gen) => Array(100).fill()
+const arr = (size) => Array(size).fill()
 const strings = [
   ...arr(1000).map((_, i) => i),
   ...arr(100).map(() => Math.floor(10 * 1024 * Math.random())),
