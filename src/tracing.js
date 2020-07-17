@@ -21,6 +21,7 @@
  *
  * null means any type (i.e. any type is possible, not validated)
  * true in properties means any property (i.e. all properties were evaluated)
+ * fullstring means that the object is not an unvalidated string (i.e. is either validated or not a string)
  */
 
 const initTracing = () => ({
@@ -33,33 +34,35 @@ const merge = (a, b = []) => [...new Set([...a, ...b])]
 const intersect = (a, b) => a.filter((x) => b.includes(x))
 const wrap = (A) => ({ ...initTracing(), ...A }) // sets default empty values
 const wrapFun = (f) => (...args) => f(...args.map(wrap))
-const isNotType = (A, type) => A.type && !A.type.includes(type)
-const stringValidated = (A) => A.fullstring || isNotType(A, 'string')
+const isNotType = (type, t) => type && !type.includes(t)
 
 // Result means that both sets A and B are correct
 // type is intersected, lists of known properties are merged
-const andDelta = wrapFun((A, B) => ({
-  items: Math.max(A.items, B.items),
-  properties: merge(A.properties, B.properties),
-  patterns: merge(A.patterns, B.patterns),
-  required: merge(A.required, B.required),
-  type: A.type && B.type ? intersect(A.type, B.type) : A.type || B.type || null,
-  fullstring: stringValidated(A) || stringValidated(B),
-  dyn: {
-    items: Math.max(A.dyn.items, B.dyn.items),
-    properties: merge(A.dyn.properties, B.dyn.properties),
-    patterns: merge(A.dyn.patterns, B.dyn.patterns),
-  },
-  unknown: A.unknown || B.unknown,
-}))
+const andDelta = wrapFun((A, B) => {
+  const type = A.type && B.type ? intersect(A.type, B.type) : A.type || B.type || null
+  return {
+    items: Math.max(A.items, B.items),
+    properties: merge(A.properties, B.properties),
+    patterns: merge(A.patterns, B.patterns),
+    required: merge(A.required, B.required),
+    type,
+    fullstring: isNotType(type, 'string') || A.fullstring || B.fullstring,
+    dyn: {
+      items: Math.max(A.dyn.items, B.dyn.items),
+      properties: merge(A.dyn.properties, B.dyn.properties),
+      patterns: merge(A.dyn.patterns, B.dyn.patterns),
+    },
+    unknown: A.unknown || B.unknown,
+  }
+})
 
 const regtest = (pattern, value) => new RegExp(pattern, 'u').test(value)
 
 const orProperties = (A, B) => {
   const { properties: a, patterns: rega } = A
   const { properties: b, patterns: regb } = B
-  if (isNotType(A, 'object') || a.includes(true)) return b
-  if (isNotType(B, 'object') || b.includes(true)) return a
+  if (isNotType(A.type, 'object') || a.includes(true)) return b
+  if (isNotType(B.type, 'object') || b.includes(true)) return a
   const afiltered = a.filter((x) => b.includes(x) || regb.some((p) => regtest(p, x)))
   const bfiltered = b.filter((x) => rega.some((p) => regtest(p, x)))
   return [...afiltered, ...bfiltered]
@@ -71,14 +74,14 @@ const inProperties = ({ properties: a, patterns: rega }, { properties: b, patter
     b.every((x) => a.includes(x) || rega.some((p) => regtest(p, x))))
 
 // Result means that at least one of sets A and B is correct
-// type is merged, lists of known properties are intersected
+// type is merged, lists of known properties are intersected, lists of dynamic properties are merged
 const orDelta = wrapFun((A, B) => ({
   items: Math.min(A.items, B.items),
   properties: orProperties(A, B),
   patterns: A.patterns.filter((x) => B.patterns.includes(x)),
   required: A.required.filter((x) => B.required.includes(x)),
   type: A.type && B.type ? merge(A.type, B.type) : null,
-  fullstring: stringValidated(A) && stringValidated(B),
+  fullstring: A.fullstring && B.fullstring,
   dyn: {
     items: Math.max(A.items, B.items, A.dyn.items, B.dyn.items),
     properties: merge(merge(A.properties, B.properties), merge(A.dyn.properties, B.dyn.properties)),
