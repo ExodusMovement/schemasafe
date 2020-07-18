@@ -89,19 +89,10 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   let passes0 = 0
-  const sub0 = (() => {
-    return true
-  })()
-  if (sub0) passes0++
-  const sub1 = (() => {
-    return true
-  })()
-  if (sub1) passes0++
+  if (true) passes0++
+  if (true) passes0++
   if (passes0 > 1) return false
-  const sub2 = (() => {
-    return true
-  })()
-  if (sub2) passes0++
+  if (true) passes0++
   if (passes0 !== 1) return false
   return true
 };
@@ -110,7 +101,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] schema = true is not allowed at #/oneOf/0`
+ * `[requireValidation] type must be specified at #`
 
 
 ## oneOf with boolean schemas, one true
@@ -127,30 +118,19 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   let passes0 = 0
-  const sub0 = (() => {
-    return true
-  })()
-  if (sub0) passes0++
-  const sub1 = (() => {
-    return false
-    return true
-  })()
-  if (sub1) passes0++
+  if (true) passes0++
+  if (false) passes0++
   if (passes0 > 1) return false
-  const sub2 = (() => {
-    return false
-    return true
-  })()
-  if (sub2) passes0++
+  if (false) passes0++
   if (passes0 !== 1) return false
   return true
 };
 return ref0
 ```
 
-##### Strong mode notices
+### Warnings
 
- * `[requireValidation] schema = true is not allowed at #/oneOf/0`
+ * `some checks are never reachable at #`
 
 
 ## oneOf with boolean schemas, more than one true
@@ -167,29 +147,19 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   let passes0 = 0
-  const sub0 = (() => {
-    return true
-  })()
-  if (sub0) passes0++
-  const sub1 = (() => {
-    return true
-  })()
-  if (sub1) passes0++
+  if (true) passes0++
+  if (true) passes0++
   if (passes0 > 1) return false
-  const sub2 = (() => {
-    return false
-    return true
-  })()
-  if (sub2) passes0++
+  if (false) passes0++
   if (passes0 !== 1) return false
   return true
 };
 return ref0
 ```
 
-##### Strong mode notices
+### Warnings
 
- * `[requireValidation] schema = true is not allowed at #/oneOf/0`
+ * `some checks are never reachable at #`
 
 
 ## oneOf with boolean schemas, all false
@@ -206,27 +176,19 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   let passes0 = 0
-  const sub0 = (() => {
-    return false
-    return true
-  })()
-  if (sub0) passes0++
-  const sub1 = (() => {
-    return false
-    return true
-  })()
-  if (sub1) passes0++
+  if (false) passes0++
+  if (false) passes0++
   if (passes0 > 1) return false
-  const sub2 = (() => {
-    return false
-    return true
-  })()
-  if (sub2) passes0++
+  if (false) passes0++
   if (passes0 !== 1) return false
   return true
 };
 return ref0
 ```
+
+### Warnings
+
+ * `some checks are never reachable at #`
 
 
 ## oneOf complex types
@@ -295,10 +257,7 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub0) passes0++
-  const sub1 = (() => {
-    return true
-  })()
-  if (sub1) passes0++
+  if (true) passes0++
   if (passes0 !== 1) return false
   return true
 };
@@ -307,7 +266,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node is not allowed at #/oneOf/1`
+ * `[requireValidation] type must be specified at #`
 
 
 ## oneOf with required

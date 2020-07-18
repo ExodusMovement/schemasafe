@@ -51,7 +51,7 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [minimum](./minimum.md)                                           | 2     | -                 | -        | -             |
 | [multipleOf](./multipleOf.md)                                     | 3     | -                 | -        | -             |
 | [not](./not.md)                                                   | 6     | -                 | -        | -             |
-| [oneOf](./oneOf.md)                                               | 11    | -                 | -        | -             |
+| [oneOf](./oneOf.md)                                               | 11    | -                 | 3        | -             |
 | [pattern](./pattern.md)                                           | 2     | -                 | -        | -             |
 | [patternProperties](./patternProperties.md)                       | 4     | -                 | -        | -             |
 | [properties](./properties.md)                                     | 4     | -                 | -        | -             |

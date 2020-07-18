@@ -90,14 +90,8 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  const sub0 = (() => {
-    return true
-  })()
-  if (!sub0) {
-    const sub1 = (() => {
-      return true
-    })()
-    if (!sub1) {
+  if (false) {
+    if (false) {
       return false
     }
   }
@@ -108,7 +102,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] schema = true is not allowed at #/anyOf/0`
+ * `[requireValidation] type must be specified at #`
 
 
 ## anyOf with boolean schemas, some true
@@ -124,15 +118,8 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  const sub0 = (() => {
-    return true
-  })()
-  if (!sub0) {
-    const sub1 = (() => {
-      return false
-      return true
-    })()
-    if (!sub1) {
+  if (false) {
+    if (true) {
       return false
     }
   }
@@ -143,7 +130,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] schema = true is not allowed at #/anyOf/0`
+ * `[requireValidation] type must be specified at #`
 
 
 ## anyOf with boolean schemas, all false
@@ -159,16 +146,8 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  const sub0 = (() => {
-    return false
-    return true
-  })()
-  if (!sub0) {
-    const sub1 = (() => {
-      return false
-      return true
-    })()
-    if (!sub1) {
+  if (true) {
+    if (true) {
       return false
     }
   }
@@ -244,10 +223,7 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (!sub0) {
-    const sub1 = (() => {
-      return true
-    })()
-    if (!sub1) {
+    if (false) {
       return false
     }
   }
@@ -258,7 +234,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node is not allowed at #/anyOf/1`
+ * `[requireValidation] type must be specified at #`
 
 
 ## nested anyOf, to check validation semantics

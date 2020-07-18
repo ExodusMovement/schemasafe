@@ -33,6 +33,7 @@ module.exports = () => {
   }
 
   return {
+    optimizedOut: false, // some branch of code has been optimized out
     size: () => lines.length,
 
     write(fmt, ...args) {
@@ -56,8 +57,10 @@ module.exports = () => {
     },
 
     if(condition, writeBody) {
-      /* c8 ignore next */
-      if (`${condition}` === 'false') throw new Error('Unexpected: false if condition')
+      if (`${condition}` === 'false') {
+        this.optimizedOut = true
+        return
+      }
       if (`${condition}` === 'true') return writeBody()
       this.block('if (%s) {', [condition], '}', writeBody)
     },

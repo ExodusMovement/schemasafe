@@ -34,6 +34,12 @@ const propimm = (parent, keyval, checked = false) => Object.freeze({ parent, key
 const evaluatedStatic = Symbol('evaluatedStatic')
 const optDynamic = Symbol('optDynamic')
 
+const constantValue = (schema) => {
+  if (typeof schema === 'boolean') return schema
+  if (schemaTypes.get('object')(schema) && Object.keys(schema).length === 0) return true
+  return undefined
+}
+
 const rootMeta = new WeakMap()
 const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   const {
@@ -44,6 +50,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     allErrors = false,
     dryRun = false,
     allowUnusedKeywords = opts.mode === 'lax',
+    allowUnreachable = opts.mode === 'lax',
     requireValidation = opts.mode === 'strong',
     requireStringValidation = opts.mode === 'strong',
     complexityChecks = opts.mode === 'strong',
@@ -196,7 +203,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         // node === false
         errorIf(present(current), {})
       }
-      evaluateDelta({ properties: [true], items: Infinity, type: [] }) // everything is evaluated for false
+      evaluateDelta({ type: [] }) // everything is evaluated for false
       return { stat }
     }
 
@@ -402,6 +409,17 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     // Can not be used before undefined check above! The one performed by present()
     const rule = (...args) => visit(errors, nexthistory(), ...args).stat
     const subrule = (suberr, ...args) => {
+      switch (constantValue(args[1])) {
+        case true:
+          return { sub: format('true'), delta: {} }
+        case false:
+          return { sub: format('false'), delta: { type: [] } }
+        case undefined:
+          break
+        /* c8 ignore next */
+        default:
+          throw new Error('Unreachable')
+      }
       const sub = gensym('sub')
       fun.write('const %s = (() => {', sub)
       if (allErrors) fun.write('let errorCount = 0') // scoped error counter
@@ -916,6 +934,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     if (typeIfAdded && allErrors) fun.block('else {', [], '}', performValidation)
     else performValidation()
 
+    if (!allowUnreachable) enforce(!fun.optimizedOut, 'some checks are never reachable')
     if (!isSub) {
       if (!stat.type) enforceValidation('type')
       if (typeApplicable('array') && stat.items !== Infinity && !(node.maxItems <= stat.items))

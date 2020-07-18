@@ -92,10 +92,7 @@ const ref0 = function validate(data, recursive) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
-      const sub0 = (() => {
-        return true
-      })()
-      if (sub0) passes0++
+      if (true) passes0++
     }
     if (passes0 < 1) return false
   }
@@ -106,7 +103,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] schema = true is not allowed at #/contains`
+ * `[requireValidation] type must be specified at #`
 
 
 ## contains keyword with boolean schema false
@@ -121,16 +118,11 @@ return ref0
 
 ```js
 'use strict'
-const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
-      const sub0 = (() => {
-        if (data[i] !== undefined && hasOwn(data, i)) return false
-        return true
-      })()
-      if (sub0) passes0++
+      if (false) passes0++
     }
     if (passes0 < 1) return false
   }

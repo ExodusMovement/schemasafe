@@ -104,10 +104,7 @@ const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
-      const sub0 = (() => {
-        return true
-      })()
-      if (sub0) return false
+      if (true) return false
     }
   }
   return true
@@ -117,7 +114,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] empty rules node is not allowed at #/properties/foo/not`
+ * `[requireValidation] type must be specified at #/properties/foo`
 
 
 ## not with boolean schema true
@@ -133,10 +130,7 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  const sub0 = (() => {
-    return true
-  })()
-  if (sub0) return false
+  if (true) return false
   return true
 };
 return ref0
@@ -144,7 +138,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] schema = true is not allowed at #/not`
+ * `[requireValidation] type must be specified at #`
 
 
 ## not with boolean schema false
@@ -160,11 +154,7 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  const sub0 = (() => {
-    return false
-    return true
-  })()
-  if (sub0) return false
+  if (false) return false
   return true
 };
 return ref0

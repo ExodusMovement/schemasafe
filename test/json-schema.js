@@ -21,6 +21,10 @@ const unsafe = new Set([
   'if-then-else.json/ignore else without if',
   'if-then-else.json/non-interference across combined schemas',
   'unevaluatedProperties.json/unevaluatedProperties with nested unevaluatedProperties',
+  'not.json/not with boolean schema false',
+  'oneOf.json/oneOf with boolean schemas, one true',
+  'oneOf.json/oneOf with boolean schemas, more than one true',
+  'oneOf.json/oneOf with boolean schemas, all false',
 
   // draft3 only
   'draft3/additionalItems.json/additionalItems should not look in applicators',

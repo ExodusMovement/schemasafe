@@ -222,10 +222,7 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  const sub0 = (() => {
-    return true
-  })()
-  if (!sub0) {
+  if (false) {
     if (!(data === "else")) return false
   } else {
     if (!(data === "then")) return false
@@ -234,10 +231,6 @@ const ref0 = function validate(data, recursive) {
 };
 return ref0
 ```
-
-##### Strong mode notices
-
- * `[requireValidation] schema = true is not allowed at #/if`
 
 
 ## if with boolean schema false
@@ -253,11 +246,7 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  const sub0 = (() => {
-    return false
-    return true
-  })()
-  if (!sub0) {
+  if (true) {
     if (!(data === "else")) return false
   } else {
     if (!(data === "then")) return false
