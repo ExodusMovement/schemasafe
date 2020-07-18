@@ -22,6 +22,7 @@
  * null means any type (i.e. any type is possible, not validated)
  * true in properties means any property (i.e. all properties were evaluated)
  * fullstring means that the object is not an unvalidated string (i.e. is either validated or not a string)
+ * unknown means that there could be evaluated items or properties unknown to both top-level or dyn
  *
  * For normalization:
  *   1. If type is applicable:
@@ -56,7 +57,7 @@ const normalize = ({ type = null, dyn: d = {}, ...A }) => ({
     properties: typeIsNot(type, 'object') ? [] : merge(A.properties || [], d.properties || []),
     patterns: typeIsNot(type, 'object') ? [] : merge(A.patterns || [], d.patterns || []),
   },
-  unknown: A.unknown || false,
+  unknown: (A.unknown && !(typeIsNot(type, 'object') && typeIsNot(type, 'array'))) || false,
 })
 
 const initTracing = () => normalize({})
