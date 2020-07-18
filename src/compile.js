@@ -812,14 +812,17 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           return null
         }
         let delta
-        for (const [key, sch] of Object.entries(anyOf)) {
-          const { sub, delta: deltaVariant } = subrule(suberr, current, sch, subPath('anyOf', key))
-          fun.write('if (%s) {', safenot(sub))
-          delta = delta ? orDelta(delta, deltaVariant) : deltaVariant
+        let body = () => error({ path: ['anyOf'], suberr })
+        for (const [key, sch] of Object.entries(anyOf).reverse()) {
+          const oldBody = body
+          body = () => {
+            const { sub, delta: deltaVar } = subrule(suberr, current, sch, subPath('anyOf', key))
+            fun.if(safenot(sub), oldBody)
+            delta = delta ? orDelta(delta, deltaVar) : deltaVar
+          }
         }
+        body()
         evaluateDelta(delta)
-        error({ path: ['anyOf'], suberr })
-        anyOf.forEach(() => fun.write('}'))
         return null
       })
 

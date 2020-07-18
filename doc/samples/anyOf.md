@@ -90,19 +90,14 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (false) {
-    if (false) {
-      return false
-    }
-  }
   return true
 };
 return ref0
 ```
 
-##### Strong mode notices
+### Warnings
 
- * `[requireValidation] type must be specified at #`
+ * `some checks are never reachable at #`
 
 
 ## anyOf with boolean schemas, some true
@@ -118,19 +113,14 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (false) {
-    if (true) {
-      return false
-    }
-  }
   return true
 };
 return ref0
 ```
 
-##### Strong mode notices
+### Warnings
 
- * `[requireValidation] type must be specified at #`
+ * `some checks are never reachable at #`
 
 
 ## anyOf with boolean schemas, all false
@@ -146,11 +136,7 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (true) {
-    if (true) {
-      return false
-    }
-  }
+  return false
   return true
 };
 return ref0
@@ -222,19 +208,14 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data === "number")) return false
     return true
   })()
-  if (!sub0) {
-    if (false) {
-      return false
-    }
-  }
   return true
 };
 return ref0
 ```
 
-##### Strong mode notices
+### Warnings
 
- * `[requireValidation] type must be specified at #`
+ * `some checks are never reachable at #`
 
 
 ## nested anyOf, to check validation semantics

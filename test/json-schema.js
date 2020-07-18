@@ -24,6 +24,9 @@ const unsafe = new Set([
   'if-then-else.json/non-interference across combined schemas',
   'unevaluatedProperties.json/unevaluatedProperties with nested unevaluatedProperties',
   'not.json/not with boolean schema false',
+  'anyOf.json/anyOf with one empty schema',
+  'anyOf.json/anyOf with boolean schemas, all true',
+  'anyOf.json/anyOf with boolean schemas, some true',
   'oneOf.json/oneOf with boolean schemas, one true',
   'oneOf.json/oneOf with boolean schemas, more than one true',
   'oneOf.json/oneOf with boolean schemas, all false',
@@ -41,6 +44,7 @@ const unsafe = new Set([
   // ajv tests
   'rules/if.json/then/else without if should be ignored',
   'rules/if.json/if without then/else should be ignored',
+  'rules/anyOf.json/anyOf with one of schemas empty',
   'schemas/cosmicrealms.json/schema from cosmicrealms benchmark',
   'schemas/advanced.json/advanced schema from z-schema benchmark (https://github.com/zaggino/z-schema)',
   'issues/27_1_recursive_raml_schema.json/JSON Schema for a standard RAML object (#27)',
