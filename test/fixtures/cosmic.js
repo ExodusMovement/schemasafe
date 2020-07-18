@@ -42,6 +42,7 @@ const valid = {
     'the-character-limit@for-each-part.of-the-domain.is-sixty-three-characters.this-is-exactly-sixty-three-characters-so-it-is-valid-blah-blah.com',
     'local@sub.domains.com',
   ],
+  ipAddresses: ['127.0.0.1', '24.48.64.2', '192.168.1.1', '209.68.44.3', '2.2.2.2'],
 }
 
 const invalid = {
@@ -58,6 +59,13 @@ const invalid = {
   favoriteSingleDigitWholeNumbers: [78, 2, 999],
   favoriteFiveLetterWord: 'codernaut',
   emailAddresses: [],
+  ipAddresses: [
+    '999.0.099.1',
+    '294.48.64.2346',
+    false,
+    '2221409.64214128.42414.235233',
+    '124124.12412412',
+  ],
 }
 
 const schema = {
@@ -76,6 +84,7 @@ const schema = {
     'favoriteSingleDigitWholeNumbers',
     'favoriteFiveLetterWord',
     'emailAddresses',
+    'ipAddresses',
   ],
   properties: {
     fullName: { type: 'string' },
@@ -109,6 +118,7 @@ const schema = {
       uniqueItems: true,
       items: { type: 'string', format: 'email' },
     },
+    ipAddresses: { type: 'array', uniqueItems: true, items: { type: 'string', format: 'ipv4' } },
   },
 }
 
