@@ -236,12 +236,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       return true
     }
 
-    const finish = (local) => {
-      if (!definitelyPresent) fun.write('}') // undefined check
-      enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
-      return { stat, local } // return statically evaluated
-    }
-
     if (node === root) {
       const $schema = get('$schema', 'string') || $schemaDefault
       if ($schema) {
@@ -952,6 +946,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       if (!definitelyPresent) fun.write('if (%s) {', present(current))
     }
     writeMain()
+    if (!definitelyPresent) fun.write('}') // undefined check
 
     // Checks related to static schema analysis
     if (!allowUnreachable) enforce(!fun.optimizedOut, 'some checks are never reachable')
@@ -977,8 +972,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       enforce(allowed0.includes(n0) || allowed1.includes(n1), 'Unexpected')
     }
     if (node.properties && !node.required) enforceValidation('if properties is used, required')
+    enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
 
-    return finish(local)
+    return { stat, local } // return statically evaluated
   }
 
   const { stat, local } = visit(format('validate.errors'), [], { name: safe('data') }, schema, [])
