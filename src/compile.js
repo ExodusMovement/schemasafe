@@ -409,16 +409,18 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     // Can not be used before undefined check above! The one performed by present()
     const rule = (...args) => visit(errors, nexthistory(), ...args).stat
     const subrule = (suberr, ...args) => {
-      switch (constantValue(args[1])) {
-        case true:
-          return { sub: format('true'), delta: {} }
-        case false:
-          return { sub: format('false'), delta: { type: [] } }
-        case undefined:
-          break
-        /* c8 ignore next */
-        default:
-          throw new Error('Unreachable')
+      if (args[0] === current) {
+        switch (constantValue(args[1])) {
+          case true:
+            return { sub: format('true'), delta: {} }
+          case false:
+            return { sub: format('false'), delta: { type: [] } }
+          case undefined:
+            break
+          /* c8 ignore next */
+          default:
+            throw new Error('Unreachable')
+        }
       }
       const sub = gensym('sub')
       fun.write('const %s = (() => {', sub)
