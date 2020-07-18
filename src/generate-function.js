@@ -12,13 +12,13 @@ module.exports = () => {
 
   const pushLine = (line) => {
     if (INDENT_END.test(line.trim()[0])) indent--
-    lines.push(`${' '.repeat(indent * 2)}${line}`)
+    lines.push({ indent, code: line })
     if (INDENT_START.test(line[line.length - 1])) indent++
   }
 
   const build = () => {
     if (indent !== 0) throw new Error('Unexpected indent at build()')
-    const joined = lines.join('\n')
+    const joined = lines.map((line) => `${' '.repeat(line.indent * 2)}${line.code}`).join('\n')
     return /^[a-z][a-z0-9]*$/i.test(joined) ? `return ${joined}` : `return (${joined})`
   }
 
