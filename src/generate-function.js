@@ -43,7 +43,7 @@ module.exports = () => {
       return true // code was written
     },
 
-    block(prefix, writeBody) {
+    block(prefix, writeBody, noInline = false) {
       const oldIndent = indent
       this.write('%s {', prefix)
       const length = lines.length
@@ -53,9 +53,10 @@ module.exports = () => {
         lines.pop()
         indent = oldIndent
         return false // nothing written
-      } else if (length === lines.length - 1) {
-        // a single line has been written, try to inline. Check below is just for generating more readable code
+      } else if (length === lines.length - 1 && !noInline) {
+        // a single line has been written, inline it if opt-in allows
         const { code } = lines[lines.length - 1]
+        // check below is just for generating more readable code, it's safe to inline all !noInline
         if (!/^(if|for) /.test(code)) {
           lines.length -= 2
           indent = oldIndent
@@ -72,8 +73,8 @@ module.exports = () => {
       } else if (`${condition}` === 'true') {
         if (writeBody) writeBody()
         if (writeElse) this.optimizedOut = true
-      } else if (writeBody && this.block(format('if (%s)', condition), writeBody)) {
-        if (writeElse) this.block(format('else'), writeElse)
+      } else if (writeBody && this.block(format('if (%s)', condition), writeBody, !!writeElse)) {
+        if (writeElse) this.block(format('else'), writeElse) // !!writeElse above ensures {} wrapping before `else`
       } else if (writeElse) {
         this.if(safenot(condition), writeElse)
       }
