@@ -104,7 +104,7 @@ const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
-      if (true) return false
+      return false
     }
   }
   return true
@@ -130,7 +130,7 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (true) return false
+  return false
   return true
 };
 return ref0
@@ -154,13 +154,12 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (false) return false
   return true
 };
 return ref0
 ```
 
-##### Strong mode notices
+### Warnings
 
- * `[requireValidation] type must be specified at #`
+ * `some checks are never reachable at #`
 

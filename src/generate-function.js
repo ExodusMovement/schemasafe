@@ -40,6 +40,7 @@ module.exports = () => {
       if (typeof fmt !== 'string') throw new Error('Format must be a string!')
       if (fmt.includes('\n')) throw new Error('Only single lines are supported')
       pushLine(format(fmt, ...args))
+      return true // code was written
     },
 
     block(prefix, writeBody) {
@@ -51,10 +52,17 @@ module.exports = () => {
         // no lines inside block, unwind the block
         lines.pop()
         indent = oldIndent
-        return false
+        return false // nothing written
+      } else if (length === lines.length - 1) {
+        // a single line has been written, try to inline. Check below is just for generating more readable code
+        const { indent: lineIndent, code } = lines[lines.length - 1]
+        if (prefix.length + lineIndent + code.length <= 120 && !/^(if|for) /.test(code)) {
+          lines.length -= 2
+          indent = oldIndent
+          return this.write('%s %s', prefix, code)
+        }
       }
-      this.write('}')
-      return true
+      return this.write('}')
     },
 
     if(condition, writeBody, writeElse) {
@@ -67,7 +75,7 @@ module.exports = () => {
       } else if (writeBody && this.block(format('if (%s)', condition), writeBody)) {
         if (writeElse) this.block(format('else'), writeElse)
       } else if (writeElse) {
-        if (writeElse) this.if(safenot(condition), writeElse)
+        this.if(safenot(condition), writeElse)
       }
     },
 

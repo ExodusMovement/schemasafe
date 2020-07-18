@@ -95,7 +95,9 @@ const ref3 = function validate(data, recursive) {
       if (!(data["$recursiveAnchor"] === true)) return false
     }
     if (data["$vocabulary"] !== undefined && hasOwn(data, "$vocabulary")) {
-      if (!(typeof data["$vocabulary"] === "object" && data["$vocabulary"] && !Array.isArray(data["$vocabulary"]))) return false
+      if (!(typeof data["$vocabulary"] === "object" && data["$vocabulary"] && !Array.isArray(data["$vocabulary"]))) {
+        return false
+      }
       for (const key2 of Object.keys(data["$vocabulary"])) {
         if (!format1.test(key2)) return false
       }
@@ -154,9 +156,7 @@ const ref4 = function validate(data, recursive) {
           if (!ref5(data.items, recursive || validate)) return false
           return true
         })()
-        if (!sub3) {
-          return false
-        }
+        if (!sub3) return false
       }
     }
     if (data.contains !== undefined && hasOwn(data, "contains")) {
@@ -175,7 +175,9 @@ const ref4 = function validate(data, recursive) {
       }
     }
     if (data.patternProperties !== undefined && hasOwn(data, "patternProperties")) {
-      if (!(typeof data.patternProperties === "object" && data.patternProperties && !Array.isArray(data.patternProperties))) return false
+      if (!(typeof data.patternProperties === "object" && data.patternProperties && !Array.isArray(data.patternProperties))) {
+        return false
+      }
       for (const key6 of Object.keys(data.patternProperties)) {
         if (!format2(key6)) return false
       }
@@ -184,7 +186,9 @@ const ref4 = function validate(data, recursive) {
       }
     }
     if (data.dependentSchemas !== undefined && hasOwn(data, "dependentSchemas")) {
-      if (!(typeof data.dependentSchemas === "object" && data.dependentSchemas && !Array.isArray(data.dependentSchemas))) return false
+      if (!(typeof data.dependentSchemas === "object" && data.dependentSchemas && !Array.isArray(data.dependentSchemas))) {
+        return false
+      }
       for (const key8 of Object.keys(data.dependentSchemas)) {
         if (!(recursive || validate)(data.dependentSchemas[key8], recursive || validate)) return false
       }
@@ -226,7 +230,9 @@ const ref8 = function validate(data, recursive) {
   return true
 };
 const ref9 = function validate(data, recursive) {
-  if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) return false
+  if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) {
+    return false
+  }
   return true
 };
 const ref6 = function validate(data, recursive) {
@@ -283,7 +289,9 @@ const ref6 = function validate(data, recursive) {
       if (!ref2(data.required, recursive || validate)) return false
     }
     if (data.dependentRequired !== undefined && hasOwn(data, "dependentRequired")) {
-      if (!(typeof data.dependentRequired === "object" && data.dependentRequired && !Array.isArray(data.dependentRequired))) return false
+      if (!(typeof data.dependentRequired === "object" && data.dependentRequired && !Array.isArray(data.dependentRequired))) {
+        return false
+      }
       for (const key9 of Object.keys(data.dependentRequired)) {
         if (!ref2(data.dependentRequired[key9], recursive || validate)) return false
       }
@@ -308,9 +316,7 @@ const ref6 = function validate(data, recursive) {
           if (!unique(data.type)) return false
           return true
         })()
-        if (!sub5) {
-          return false
-        }
+        if (!sub5) return false
       }
     }
   }
@@ -385,9 +391,7 @@ const ref1 = function validate(data, recursive) {
             if (!ref2(data.dependencies[key1], recursive || validate)) return false
             return true
           })()
-          if (!sub1) {
-            return false
-          }
+          if (!sub1) return false
         }
       }
     }
@@ -507,7 +511,9 @@ const ref3 = function validate(data, recursive) {
       if (!(data["$recursiveAnchor"] === true)) return false
     }
     if (data["$vocabulary"] !== undefined && hasOwn(data, "$vocabulary")) {
-      if (!(typeof data["$vocabulary"] === "object" && data["$vocabulary"] && !Array.isArray(data["$vocabulary"]))) return false
+      if (!(typeof data["$vocabulary"] === "object" && data["$vocabulary"] && !Array.isArray(data["$vocabulary"]))) {
+        return false
+      }
       for (const key2 of Object.keys(data["$vocabulary"])) {
         if (!format1.test(key2)) return false
       }
@@ -566,9 +572,7 @@ const ref4 = function validate(data, recursive) {
           if (!ref5(data.items, recursive || validate)) return false
           return true
         })()
-        if (!sub3) {
-          return false
-        }
+        if (!sub3) return false
       }
     }
     if (data.contains !== undefined && hasOwn(data, "contains")) {
@@ -587,7 +591,9 @@ const ref4 = function validate(data, recursive) {
       }
     }
     if (data.patternProperties !== undefined && hasOwn(data, "patternProperties")) {
-      if (!(typeof data.patternProperties === "object" && data.patternProperties && !Array.isArray(data.patternProperties))) return false
+      if (!(typeof data.patternProperties === "object" && data.patternProperties && !Array.isArray(data.patternProperties))) {
+        return false
+      }
       for (const key6 of Object.keys(data.patternProperties)) {
         if (!format2(key6)) return false
       }
@@ -596,7 +602,9 @@ const ref4 = function validate(data, recursive) {
       }
     }
     if (data.dependentSchemas !== undefined && hasOwn(data, "dependentSchemas")) {
-      if (!(typeof data.dependentSchemas === "object" && data.dependentSchemas && !Array.isArray(data.dependentSchemas))) return false
+      if (!(typeof data.dependentSchemas === "object" && data.dependentSchemas && !Array.isArray(data.dependentSchemas))) {
+        return false
+      }
       for (const key8 of Object.keys(data.dependentSchemas)) {
         if (!(recursive || validate)(data.dependentSchemas[key8], recursive || validate)) return false
       }
@@ -638,7 +646,9 @@ const ref8 = function validate(data, recursive) {
   return true
 };
 const ref9 = function validate(data, recursive) {
-  if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) return false
+  if (!(data === "array" || data === "boolean" || data === "integer" || data === "null" || data === "number" || data === "object" || data === "string")) {
+    return false
+  }
   return true
 };
 const ref6 = function validate(data, recursive) {
@@ -695,7 +705,9 @@ const ref6 = function validate(data, recursive) {
       if (!ref2(data.required, recursive || validate)) return false
     }
     if (data.dependentRequired !== undefined && hasOwn(data, "dependentRequired")) {
-      if (!(typeof data.dependentRequired === "object" && data.dependentRequired && !Array.isArray(data.dependentRequired))) return false
+      if (!(typeof data.dependentRequired === "object" && data.dependentRequired && !Array.isArray(data.dependentRequired))) {
+        return false
+      }
       for (const key9 of Object.keys(data.dependentRequired)) {
         if (!ref2(data.dependentRequired[key9], recursive || validate)) return false
       }
@@ -720,9 +732,7 @@ const ref6 = function validate(data, recursive) {
           if (!unique(data.type)) return false
           return true
         })()
-        if (!sub5) {
-          return false
-        }
+        if (!sub5) return false
       }
     }
   }
@@ -797,9 +807,7 @@ const ref1 = function validate(data, recursive) {
             if (!ref2(data.dependencies[key1], recursive || validate)) return false
             return true
           })()
-          if (!sub1) {
-            return false
-          }
+          if (!sub1) return false
         }
       }
     }

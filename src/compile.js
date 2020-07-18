@@ -171,10 +171,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       if (allErrors) fun.write('errorCount++')
       else fun.write('return false')
     }
-    const errorIf = (condition, errorArgs) => {
-      if (includeErrors === true && errors) fun.if(condition, () => error(errorArgs))
-      else fun.write('if (%s) return false', condition) // fast-track and inline for more readable code
-    }
+    const errorIf = (condition, errorArgs) => fun.if(condition, () => error(errorArgs))
 
     const fail = (msg, value) => {
       const comment = value !== undefined ? ` ${JSON.stringify(value)}` : ''

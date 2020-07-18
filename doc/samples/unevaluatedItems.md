@@ -310,12 +310,8 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (!(sub0 || sub1)) return false
-  if (sub0) {
-    evaluatedItems0.push(2)
-  }
-  if (sub1) {
-    evaluatedItems0.push(3)
-  }
+  if (sub0) evaluatedItems0.push(2)
+  if (sub1) evaluatedItems0.push(3)
   if (data.length > Math.max(1, ...evaluatedItems0)) return false
   return true
 };

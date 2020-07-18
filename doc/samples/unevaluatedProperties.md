@@ -71,9 +71,7 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-  for (const key0 of Object.keys(data)) {
-    return false
-  }
+  for (const key0 of Object.keys(data)) return false
   return true
 };
 return ref0
@@ -103,9 +101,7 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data.foo === "string")) return false
   }
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo") {
-      return false
-    }
+    if (key0 !== "foo") return false
   }
   return true
 };
@@ -141,9 +137,7 @@ const ref0 = function validate(data, recursive) {
     }
   }
   for (const key1 of Object.keys(data)) {
-    if (!(key1.startsWith("foo"))) {
-      return false
-    }
+    if (!(key1.startsWith("foo"))) return false
   }
   return true
 };
@@ -215,9 +209,7 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data.bar === "string")) return false
   }
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "bar" && key0 !== "foo") {
-      return false
-    }
+    if (key0 !== "bar" && key0 !== "foo") return false
   }
   return true
 };
@@ -258,9 +250,7 @@ const ref0 = function validate(data, recursive) {
     }
   }
   for (const key1 of Object.keys(data)) {
-    if (key1 !== "foo" && !(key1.startsWith("bar"))) {
-      return false
-    }
+    if (key1 !== "foo" && !(key1.startsWith("bar"))) return false
   }
   return true
 };
@@ -388,19 +378,11 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (!(sub0 || sub1 || sub2)) return false
-  if (sub0) {
-    evaluatedProps0[0].push(...["bar"])
-  }
-  if (sub1) {
-    evaluatedProps0[0].push(...["baz"])
-  }
-  if (sub2) {
-    evaluatedProps0[0].push(...["quux"])
-  }
+  if (sub0) evaluatedProps0[0].push(...["bar"])
+  if (sub1) evaluatedProps0[0].push(...["baz"])
+  if (sub2) evaluatedProps0[0].push(...["quux"])
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0)) {
-      return false
-    }
+    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0)) return false
   }
   return true
 };
@@ -459,16 +441,10 @@ const ref0 = function validate(data, recursive) {
   })()
   if (sub1) passes0++
   if (passes0 !== 1) return false
-  if (sub0) {
-    evaluatedProps0[0].push(...["bar"])
-  }
-  if (sub1) {
-    evaluatedProps0[0].push(...["baz"])
-  }
+  if (sub0) evaluatedProps0[0].push(...["bar"])
+  if (sub1) evaluatedProps0[0].push(...["baz"])
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0)) {
-      return false
-    }
+    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0)) return false
   }
   return true
 };
@@ -516,9 +492,7 @@ const ref0 = function validate(data, recursive) {
   })()
   if (sub0) return false
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo") {
-      return false
-    }
+    if (key0 !== "foo") return false
   }
   return true
 };
@@ -580,9 +554,7 @@ const ref0 = function validate(data, recursive) {
     evaluatedProps0[0].push(...["baz"])
   }
   for (const key0 of Object.keys(data)) {
-    if (true && !propertyIn(key0, evaluatedProps0)) {
-      return false
-    }
+    if (true && !propertyIn(key0, evaluatedProps0)) return false
   }
   return true
 };
@@ -632,9 +604,7 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data.foo === "string")) return false
   }
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0)) {
-      return false
-    }
+    if (key0 !== "foo" && !propertyIn(key0, evaluatedProps0)) return false
   }
   return true
 };
@@ -670,9 +640,7 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data.foo === "string")) return false
   }
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo") {
-      return false
-    }
+    if (key0 !== "foo") return false
   }
   return true
 };
@@ -718,9 +686,7 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data.foo === "string")) return false
   }
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "bar" && key0 !== "foo") {
-      return false
-    }
+    if (key0 !== "bar" && key0 !== "foo") return false
   }
   return true
 };
@@ -751,9 +717,7 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
-    for (const key0 of Object.keys(data)) {
-      return false
-    }
+    for (const key0 of Object.keys(data)) return false
   }
   return true
 };
@@ -858,9 +822,7 @@ const ref0 = function validate(data, recursive) {
   if (data.foo !== undefined && hasOwn(data, "foo")) {
     if (!(typeof data.foo === "string")) return false
   }
-  for (const key0 of Object.keys(data)) {
-    return false
-  }
+  for (const key0 of Object.keys(data)) return false
   return true
 };
 return ref0
@@ -899,9 +861,7 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data.foo === "string")) return false
   }
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo") {
-      return false
-    }
+    if (key0 !== "foo") return false
   }
   return true
 };
@@ -940,9 +900,7 @@ const ref0 = function validate(data, recursive) {
   if (data.foo !== undefined && hasOwn(data, "foo")) {
     if (!(typeof data.foo === "string")) return false
   }
-  for (const key1 of Object.keys(data)) {
-    return false
-  }
+  for (const key1 of Object.keys(data)) return false
   return true
 };
 return ref0
@@ -981,9 +939,7 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data.foo === "string")) return false
   }
   for (const key1 of Object.keys(data)) {
-    if (key1 !== "foo") {
-      return false
-    }
+    if (key1 !== "foo") return false
   }
   return true
 };

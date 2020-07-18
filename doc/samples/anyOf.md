@@ -24,9 +24,7 @@ const ref0 = function validate(data, recursive) {
       }
       return true
     })()
-    if (!sub1) {
-      return false
-    }
+    if (!sub1) return false
   }
   return true
 };
@@ -63,9 +61,7 @@ const ref0 = function validate(data, recursive) {
       if (data.length < 4 || stringLength(data) < 4) return false
       return true
     })()
-    if (!sub1) {
-      return false
-    }
+    if (!sub1) return false
   }
   return true
 };
@@ -177,9 +173,7 @@ const ref0 = function validate(data, recursive) {
       }
       return true
     })()
-    if (!sub1) {
-      return false
-    }
+    if (!sub1) return false
   }
   return true
 };

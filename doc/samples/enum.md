@@ -52,7 +52,9 @@ const deepEqual = (obj, obj2) => {
   return false
 };
 const ref0 = function validate(data, recursive) {
-  if (!(data === 6 || data === "foo" || data === true || deepEqual(data, []) || deepEqual(data, {"foo":12}))) return false
+  if (!(data === 6 || data === "foo" || data === true || deepEqual(data, []) || deepEqual(data, {"foo":12}))) {
+    return false
+  }
   return true
 };
 return ref0

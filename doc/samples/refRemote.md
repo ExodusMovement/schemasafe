@@ -256,9 +256,7 @@ const ref1 = function validate(data, recursive) {
       if (!ref2(data, recursive)) return false
       return true
     })()
-    if (!sub1) {
-      return false
-    }
+    if (!sub1) return false
   }
   return true
 };

@@ -19,9 +19,7 @@
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key1 of Object.keys(data)) {
-      if (key1 !== "foo" && key1 !== "bar" && !(key1.startsWith("v"))) {
-        return false
-      }
+      if (key1 !== "foo" && key1 !== "bar" && !(key1.startsWith("v"))) return false
     }
   }
   return true
@@ -49,9 +47,7 @@ return ref0
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key1 of Object.keys(data)) {
-      if (!(key1.startsWith("á"))) {
-        return false
-      }
+      if (!(key1.startsWith("á"))) return false
     }
   }
   return true

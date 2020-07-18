@@ -67,9 +67,7 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
-    for (const key0 of Object.keys(data)) {
-      return false
-    }
+    for (const key0 of Object.keys(data)) return false
   }
   return true
 };
