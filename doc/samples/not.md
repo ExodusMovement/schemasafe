@@ -103,9 +103,7 @@ return ref0
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
-    if (data.foo !== undefined && hasOwn(data, "foo")) {
-      return false
-    }
+    if (data.foo !== undefined && hasOwn(data, "foo")) return false
   }
   return true
 };

@@ -935,18 +935,15 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       if (stat.items < Infinity && node.maxItems <= stat.items) evaluateDelta({ items: Infinity })
     }
 
-    // presence check
+    // presence check and call main validation block
     if (node.default !== undefined && useDefaults) {
       if (definitelyPresent) fail('Can not apply default value here (e.g. at root)')
-      fun.write('if (%s) {', safenot(present(current)))
-      fun.write('%s = %j', name, get('default', 'jsonval'))
-      fun.write('} else {')
+      const defvalue = get('default', 'jsonval')
+      fun.if(present(current), writeMain, () => fun.write('%s = %j', name, defvalue))
     } else {
       handle('default', ['jsonval'], null) // unused
-      if (!definitelyPresent) fun.write('if (%s) {', present(current))
+      fun.if(definitelyPresent ? true : present(current), writeMain)
     }
-    writeMain()
-    if (!definitelyPresent) fun.write('}') // undefined check
 
     // Checks related to static schema analysis
     if (!allowUnreachable) enforce(!fun.optimizedOut, 'some checks are never reachable')

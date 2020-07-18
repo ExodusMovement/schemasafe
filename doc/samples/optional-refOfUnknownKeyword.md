@@ -60,8 +60,6 @@ const ref1 = function validate(data, recursive) {
 };
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
-    if (data.foo !== undefined && hasOwn(data, "foo")) {
-    }
     if (data.bar !== undefined && hasOwn(data, "bar")) {
       if (!ref1(data.bar, recursive)) return false
     }
