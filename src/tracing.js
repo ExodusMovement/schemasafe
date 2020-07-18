@@ -32,9 +32,9 @@
  *   2. If type is not applicable, the following rules apply:
  *     * `fullstring = true` if `string` type is not applicable
  *     * `items = Infinity`, `dyn.items = 0` if `array` type is not applicable
- *     * `required = [true]` if `object` type is not applicable
  *     * `properties = [true]`, `dyn.properties = []` if `object` type is not applicable
  *     * `patterns = dyn.patterns = []` if `object` type is not applicable
+ *     * `required = []` if `object` type is not applicable
  *
  * That allows to simplify the `or` operation.
  */
@@ -50,7 +50,7 @@ const normalize = ({ type = null, dyn: d = {}, ...A }) => ({
   items: typeIsNot(type, 'array') ? Infinity : A.items || 0,
   properties: typeIsNot(type, 'object') ? [true] : (A.properties || []).sort(),
   patterns: typeIsNot(type, 'object') ? [] : (A.patterns || []).sort(),
-  required: typeIsNot(type, 'object') ? [true] : (A.required || []).sort(),
+  required: typeIsNot(type, 'object') ? [] : (A.required || []).sort(),
   fullstring: typeIsNot(type, 'string') || A.fullstring || false,
   dyn: {
     items: typeIsNot(type, 'array') ? 0 : Math.max(A.items || 0, d.items || 0),
@@ -101,7 +101,10 @@ const orDelta = wrapFull((A, B) => ({
   type: A.type && B.type ? merge(A.type, B.type) : null,
   items: Math.min(A.items, B.items),
   ...intersectProps(A, B),
-  required: intersect(A.required, B.required),
+  required:
+    (typeIsNot(A.type, 'object') && B.required) ||
+    (typeIsNot(B.type, 'object') && A.required) ||
+    intersect(A.required, B.required),
   fullstring: A.fullstring && B.fullstring,
   dyn: {
     items: Math.max(A.dyn.items, B.dyn.items),
