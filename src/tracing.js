@@ -38,18 +38,18 @@
  * That allows to simplify the `or` operation.
  */
 
-const merge = (a, b) => [...new Set([...a, ...b])]
+const merge = (a, b) => [...new Set([...a, ...b])].sort()
 const intersect = (a, b) => a.filter((x) => b.includes(x))
 const wrapArgs = (f) => (...args) => f(...args.map(normalize))
 const wrapFull = (f) => (...args) => normalize(f(...args.map(normalize)))
 const typeIsNot = (type, t) => type && !type.includes(t) // type=null means any and includes anything
 
 const normalize = ({ type = null, dyn: d = {}, ...A }) => ({
-  type,
+  type: type ? type.sort() : type,
   items: typeIsNot(type, 'array') ? Infinity : A.items || 0,
-  properties: typeIsNot(type, 'object') ? [true] : A.properties || [],
-  patterns: typeIsNot(type, 'object') ? [] : A.patterns || [],
-  required: typeIsNot(type, 'object') ? [true] : A.required || [],
+  properties: typeIsNot(type, 'object') ? [true] : (A.properties || []).sort(),
+  patterns: typeIsNot(type, 'object') ? [] : (A.patterns || []).sort(),
+  required: typeIsNot(type, 'object') ? [true] : (A.required || []).sort(),
   fullstring: typeIsNot(type, 'string') || A.fullstring || false,
   dyn: {
     items: typeIsNot(type, 'array') ? 0 : Math.max(A.items || 0, d.items || 0),
