@@ -437,7 +437,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
     const mergeerror = (suberr) => {
       // suberror can be null e.g. on failed empty contains
-      if (suberr !== null) fun.write('if (%s) %s.push(...%s)', suberr, errors, suberr)
+      if (suberr !== null) fun.if(suberr, () => fun.write('%s.push(...%s)', errors, suberr))
     }
 
     // Extracted single additional(Items/Properties) rules, for reuse with unevaluated(Items/Properties)
@@ -622,7 +622,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const suberr = suberror()
         forArray(current, format('0'), (prop) => {
           const { sub } = subrule(suberr, prop, node.contains, subPath('contains'))
-          fun.write('if (%s) %s++', sub, passes)
+          fun.if(sub, () => fun.write('%s++', passes))
           // evaluateDelta({ unknown: true }) // draft2020: contains counts towards evaluatedItems
         })
 
@@ -836,7 +836,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const entries = Object.entries(oneOf).map(([key, sch]) => {
           if (!includeErrors && i++ > 1) errorIf(format('%s > 1', passes), { path: ['oneOf'] })
           const entry = subrule(suberr, current, sch, subPath('oneOf', key), dyn)
-          fun.write('if (%s) %s++', entry.sub, passes)
+          fun.if(entry.sub, () => fun.write('%s++', passes))
           delta = delta ? orDelta(delta, entry.delta) : entry.delta
           return entry
         })

@@ -89,10 +89,10 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   let passes0 = 0
-  if (true) passes0++
-  if (true) passes0++
+  passes0++
+  passes0++
   if (passes0 > 1) return false
-  if (true) passes0++
+  passes0++
   if (passes0 !== 1) return false
   return true
 };
@@ -118,10 +118,8 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   let passes0 = 0
-  if (true) passes0++
-  if (false) passes0++
+  passes0++
   if (passes0 > 1) return false
-  if (false) passes0++
   if (passes0 !== 1) return false
   return true
 };
@@ -147,10 +145,9 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   let passes0 = 0
-  if (true) passes0++
-  if (true) passes0++
+  passes0++
+  passes0++
   if (passes0 > 1) return false
-  if (false) passes0++
   if (passes0 !== 1) return false
   return true
 };
@@ -176,10 +173,7 @@ return ref0
 'use strict'
 const ref0 = function validate(data, recursive) {
   let passes0 = 0
-  if (false) passes0++
-  if (false) passes0++
   if (passes0 > 1) return false
-  if (false) passes0++
   if (passes0 !== 1) return false
   return true
 };
@@ -257,7 +251,7 @@ const ref0 = function validate(data, recursive) {
     return true
   })()
   if (sub0) passes0++
-  if (true) passes0++
+  passes0++
   if (passes0 !== 1) return false
   return true
 };
