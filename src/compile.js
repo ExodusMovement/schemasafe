@@ -886,9 +886,59 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       applyDynamicToDynamic(trace, local.items, local.props)
     }
 
-    /* Actual validation starts below */
+    // main post-presence check validation function
+    const writeMain = () => {
+      if (local.items) fun.write('const %s = [0]', local.items)
+      if (local.props) fun.write('const %s = [[], []]', local.props)
 
-    // 1: presence check
+      // refs
+      handle('$ref', ['string'], ($ref) => {
+        const resolved = resolveReference(root, schemas, $ref, basePath())
+        const [sub, subRoot, path] = resolved[0] || []
+        if (!sub && sub !== false) fail('failed to resolve $ref:', $ref)
+        const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
+        return applyRef(n, { path: ['$ref'] })
+      })
+      if (node.$ref && getMeta().exclusiveRefs) {
+        enforce(!opts[optDynamic], 'unevaluated* is supported only on draft2019-09 and above')
+        return // ref overrides any sibling keywords for older schemas
+      }
+      handle('$recursiveRef', ['string'], ($recursiveRef) => {
+        enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
+        // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
+        const n = recursiveAnchor ? format('(recursive || validate)') : format('validate')
+        return applyRef(n, { path: ['$recursiveRef'] })
+      })
+
+      // typecheck
+      let typeCheck = null
+      handle('type', ['string', 'array'], (type) => {
+        const typearr = Array.isArray(type) ? type : [type]
+        for (const t of typearr) enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
+        if (current.type) {
+          enforce(functions.deepEqual(typearr, [current.type]), 'One type allowed:', current.type)
+          evaluateDelta({ type: [current.type] })
+          return null
+        }
+        if (parentCheckedType(...typearr)) return null
+        const filteredTypes = typearr.filter((t) => typeApplicable(t))
+        if (filteredTypes.length === 0) fail('No valid types possible')
+        evaluateDelta({ type: typearr }) // can be safely done here, filteredTypes already prepared
+        typeCheck = safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
+        return null
+      })
+
+      // main validation block
+      // if type validation was needed and did not return early, wrap this inside an else clause.
+      if (typeCheck && allErrors) {
+        fun.if(typeCheck, () => error({ path: ['type'] }), performValidation)
+      } else {
+        if (typeCheck) errorIf(typeCheck, { path: ['type'] })
+        performValidation()
+      }
+    }
+
+    // presence check
     if (node.default !== undefined && useDefaults) {
       if (definitelyPresent) fail('Can not apply default value here (e.g. at root)')
       fun.write('if (%s) {', safenot(present(current)))
@@ -898,56 +948,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       handle('default', ['jsonval'], null) // unused
       if (!definitelyPresent) fun.write('if (%s) {', present(current))
     }
+    writeMain()
 
-    if (local.items) fun.write('const %s = [0]', local.items)
-    if (local.props) fun.write('const %s = [[], []]', local.props)
-
-    // 2: refs
-    handle('$ref', ['string'], ($ref) => {
-      const resolved = resolveReference(root, schemas, $ref, basePath())
-      const [sub, subRoot, path] = resolved[0] || []
-      if (!sub && sub !== false) fail('failed to resolve $ref:', $ref)
-      const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
-      return applyRef(n, { path: ['$ref'] })
-    })
-    if (node.$ref && getMeta().exclusiveRefs) {
-      enforce(!opts[optDynamic], 'unevaluated* is supported only on draft2019-09 schemas and above')
-      return finish() // ref overrides any sibling keywords for older schemas
-    }
-    handle('$recursiveRef', ['string'], ($recursiveRef) => {
-      enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
-      // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
-      const n = recursiveAnchor ? format('(recursive || validate)') : format('validate')
-      return applyRef(n, { path: ['$recursiveRef'] })
-    })
-
-    // 3: typecheck
-    let typeCheck = null
-    handle('type', ['string', 'array'], (type) => {
-      const typearr = Array.isArray(type) ? type : [type]
-      for (const t of typearr) enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
-      if (current.type) {
-        enforce(functions.deepEqual(typearr, [current.type]), 'One type is allowed:', current.type)
-        evaluateDelta({ type: [current.type] })
-        return null
-      }
-      if (parentCheckedType(...typearr)) return null
-      const filteredTypes = typearr.filter((t) => typeApplicable(t))
-      if (filteredTypes.length === 0) fail('No valid types possible')
-      evaluateDelta({ type: typearr }) // can be safely done here, filteredTypes already prepared
-      typeCheck = safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
-      return null
-    })
-
-    // 4: main validation block
-    // if type validation was needed and did not return early, wrap this inside an else clause.
-    if (typeCheck && allErrors) {
-      fun.if(typeCheck, () => error({ path: ['type'] }), performValidation)
-    } else {
-      if (typeCheck) errorIf(typeCheck, { path: ['type'] })
-      performValidation()
-    }
-
+    // Checks related to static schema analysis
     if (!allowUnreachable) enforce(!fun.optimizedOut, 'some checks are never reachable')
     if (!isSub) {
       if (!stat.type) enforceValidation('type')
