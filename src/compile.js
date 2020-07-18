@@ -987,8 +987,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   } else fun.write('return true')
   fun.write('}')
 
-  if (dryRun) return
-
   validate = fun.makeFunction(scope)
   validate[evaluatedStatic] = stat
   delete scope[funname] // more logical key order
