@@ -42,9 +42,9 @@ module.exports = () => {
       pushLine(format(fmt, ...args))
     },
 
-    block(fmt, args, close, writeBody) {
+    block(prefix, writeBody) {
       const oldIndent = indent
-      this.write(fmt, ...args)
+      this.write('%s {', prefix)
       const length = lines.length
       writeBody()
       if (length === lines.length) {
@@ -53,7 +53,7 @@ module.exports = () => {
         indent = oldIndent
         return false
       }
-      this.write(close)
+      this.write('}')
       return true
     },
 
@@ -64,8 +64,8 @@ module.exports = () => {
       } else if (`${condition}` === 'true') {
         if (writeBody) writeBody()
         if (writeElse) this.optimizedOut = true
-      } else if (writeBody && this.block('if (%s) {', [condition], '}', writeBody)) {
-        if (writeElse) this.block('else {', [], '}', writeElse)
+      } else if (writeBody && this.block(format('if (%s)', condition), writeBody)) {
+        if (writeElse) this.block(format('else'), writeElse)
       } else if (writeElse) {
         if (writeElse) this.if(safenot(condition), writeElse)
       }

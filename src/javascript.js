@@ -67,7 +67,7 @@ const jsHelpers = (fun, scope, propvar, { unmodifiedPrototypes, isJSON }, noopRe
 
   const forObjectKeys = (obj, writeBody) => {
     const key = gensym('key')
-    fun.block('for (const %s of Object.keys(%s)) {', [key, buildName(obj)], '}', () => {
+    fun.block(format('for (const %s of Object.keys(%s))', key, buildName(obj)), () => {
       writeBody(propvar(obj, key, true), key) // always own property here
     })
   }
@@ -75,7 +75,7 @@ const jsHelpers = (fun, scope, propvar, { unmodifiedPrototypes, isJSON }, noopRe
   const forArray = (obj, start, writeBody) => {
     const i = genloop()
     const name = buildName(obj)
-    fun.block('for (let %s = %s; %s < %s.length; %s++) {', [i, start, i, name, i], '}', () => {
+    fun.block(format('for (let %s = %s; %s < %s.length; %s++)', i, start, i, name, i), () => {
       writeBody(propvar(obj, i, unmodifiedPrototypes, true), i) // own property in Array if proto not mangled
     })
   }

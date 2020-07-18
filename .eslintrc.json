@@ -20,16 +20,12 @@
         "message": "Use template literals instead of .toString()"
       },
       {
-        "selector": "CallExpression:matches([callee.name='format'], [callee.property.name='write'], [callee.property.name='block']):not(:matches([arguments.0.type='Literal'], [arguments.0.type='Identifier']:matches([arguments.0.name='fmt'], [arguments.0.name='close'])))",
-        "message": "Only literals or 'fmt' / 'close' identifiers are allowed as first format(), .write() and .block() argument (fmt)"
+        "selector": "CallExpression:matches([callee.name='format'], [callee.property.name='write']):not(:matches([arguments.0.type='Literal'], [arguments.0.type='Identifier']:matches([arguments.0.name='fmt'], [arguments.0.name='close'])))",
+        "message": "Only literals or 'fmt' / 'close' identifiers are allowed as first format() and .write() argument (fmt)"
       },
       {
-        "selector": "CallExpression[callee.property.name='block']:not(:matches([arguments.2.type='Literal'], [arguments.2.name='close']))",
-        "message": "Only literals or 'close' are allowed as third .block() argument (close)"
-      },
-      {
-        "selector": ":not(:matches([id.name='format'], [key.name='write'], [key.name='block'])) > [params] > Identifier:matches([name='fmt'], [name='close'])",
-        "message": "Identifiers 'fmt' / 'close' can be only defined as format(), .write() and .block() arguments"
+        "selector": ":not(:matches([id.name='format'], [key.name='write'])) > [params] > Identifier:matches([name='fmt'], [name='close'])",
+        "message": "Identifiers 'fmt' / 'close' can be only defined as format() and .write() arguments"
       },
       {
         "selector": "VariableDeclarator > .id:matches([name='fmt'], [name='close'])",
