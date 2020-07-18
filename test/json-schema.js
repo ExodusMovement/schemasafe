@@ -14,8 +14,6 @@ const unsafe = new Set([
   'maxContains.json/maxContains without contains is ignored',
   'minContains.json/minContains without contains is ignored',
   'minContains.json/maxContains < minContains',
-  'ref.json/escaped pointer ref',
-  'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
   'if-then-else.json/if with boolean schema true',
   'if-then-else.json/if with boolean schema false',
   'if-then-else.json/ignore if without then or else',
@@ -30,6 +28,13 @@ const unsafe = new Set([
   'oneOf.json/oneOf with boolean schemas, one true',
   'oneOf.json/oneOf with boolean schemas, more than one true',
   'oneOf.json/oneOf with boolean schemas, all false',
+
+  // fixed in draft2019 tests
+  'draft7/ref.json/escaped pointer ref',
+  'draft6/ref.json/escaped pointer ref',
+  'draft4/ref.json/escaped pointer ref',
+  'draft3/ref.json/escaped pointer ref',
+  'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
 
   // draft3 only
   'draft3/additionalItems.json/additionalItems should not look in applicators',
@@ -131,6 +136,12 @@ function processTest(main, id, file, shouldIngore, requiresLax) {
               if (shouldIngore(`${id}/${block.description}/${test.description}`)) continue
               t.same(validate(test.data), test.valid, test.description)
               t.same(parse(JSON.stringify(test.data)).valid, test.valid, test.description)
+            }
+            if (mode === 'lax') {
+              t.throws(
+                () => validator(wrapped, { ...opts, mode: 'default' }),
+                'Throws without lax mode'
+              )
             }
           }
         }
