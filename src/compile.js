@@ -936,6 +936,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (typeCheck) errorIf(typeCheck, { path: ['type'] })
         performValidation()
       }
+
+      // account for maxItems to recheck if they limit items. TODO: perhaps we could keep track of this in stat?
+      if (stat.items < Infinity && node.maxItems <= stat.items) evaluateDelta({ items: Infinity })
     }
 
     // presence check
@@ -954,7 +957,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     if (!allowUnreachable) enforce(!fun.optimizedOut, 'some checks are never reachable')
     if (!isSub) {
       if (!stat.type) enforceValidation('type')
-      if (typeApplicable('array') && stat.items !== Infinity && !(node.maxItems <= stat.items))
+      if (typeApplicable('array') && stat.items !== Infinity)
         enforceValidation(node.items ? 'additionalItems or unevaluatedItems' : 'items rule')
       if (typeApplicable('object') && !stat.properties.includes(true))
         enforceValidation('additionalProperties or unevaluatedProperties')
