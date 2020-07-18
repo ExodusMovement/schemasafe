@@ -79,7 +79,7 @@ const andDelta = wrapFull((A, B) => ({
   unknown: A.unknown || B.unknown,
 }))
 
-const regtest = (pattern, value) => new RegExp(pattern, 'u').test(value)
+const regtest = (pattern, value) => value !== true && new RegExp(pattern, 'u').test(value)
 
 const intersectProps = ({ properties: a, patterns: rega }, { properties: b, patterns: regb }) => {
   // properties
