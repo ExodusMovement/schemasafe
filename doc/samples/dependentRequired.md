@@ -65,9 +65,7 @@ return ref0
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
-    if (data.quux !== undefined && hasOwn(data, "quux") && !(data.foo !== undefined && hasOwn(data, "foo") && data.bar !== undefined && hasOwn(data, "bar"))) {
-      return false
-    }
+    if (data.quux !== undefined && hasOwn(data, "quux") && !(data.foo !== undefined && hasOwn(data, "foo") && data.bar !== undefined && hasOwn(data, "bar"))) return false
   }
   return true
 };
@@ -94,12 +92,8 @@ return ref0
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data, recursive) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
-    if (data["foo\nbar"] !== undefined && hasOwn(data, "foo\nbar") && !(data["foo\rbar"] !== undefined && hasOwn(data, "foo\rbar"))) {
-      return false
-    }
-    if (data["foo\"bar"] !== undefined && hasOwn(data, "foo\"bar") && !(data["foo'bar"] !== undefined && hasOwn(data, "foo'bar"))) {
-      return false
-    }
+    if (data["foo\nbar"] !== undefined && hasOwn(data, "foo\nbar") && !(data["foo\rbar"] !== undefined && hasOwn(data, "foo\rbar"))) return false
+    if (data["foo\"bar"] !== undefined && hasOwn(data, "foo\"bar") && !(data["foo'bar"] !== undefined && hasOwn(data, "foo'bar"))) return false
   }
   return true
 };
