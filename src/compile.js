@@ -281,16 +281,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     handle('$id', ['string'], setId) || handle('id', ['string'], setId)
     handle('$anchor', ['string'], null) // $anchor is used only for ref resolution, on usage
 
-    if (node.default !== undefined && useDefaults) {
-      if (definitelyPresent) fail('Can not apply default value here (e.g. at root)')
-      fun.write('if (%s) {', safenot(present(current)))
-      fun.write('%s = %j', name, get('default', 'jsonval'))
-      fun.write('} else {')
-    } else {
-      handle('default', ['jsonval'], null) // unused
-      if (!definitelyPresent) fun.write('if (%s) {', present(current))
-    }
-
     // evaluated: declare dynamic
     const needUnevaluated = (rule) =>
       opts[optDynamic] && (node[rule] || node[rule] === false || node === schema)
@@ -298,8 +288,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       items: needUnevaluated('unevaluatedItems') ? gensym('evaluatedItems') : null,
       props: needUnevaluated('unevaluatedProperties') ? gensym('evaluatedProps') : null,
     })
-    if (local.items) fun.write('const %s = [0]', local.items)
-    if (local.props) fun.write('const %s = [[], []]', local.props)
     const dyn = { items: local.items || trace.items, props: local.props || trace.props }
     const canSkipDynamic = () =>
       (!dyn.items || stat.items === Infinity) && (!dyn.props || stat.properties.includes(true))
@@ -351,23 +339,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       })
       return null
     }
-    handle('$ref', ['string'], ($ref) => {
-      const resolved = resolveReference(root, schemas, $ref, basePath())
-      const [sub, subRoot, path] = resolved[0] || []
-      if (!sub && sub !== false) fail('failed to resolve $ref:', $ref)
-      const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
-      return applyRef(n, { path: ['$ref'] })
-    })
-    if (node.$ref && getMeta().exclusiveRefs) {
-      enforce(!opts[optDynamic], 'unevaluated* is supported only on draft2019-09 schemas and above')
-      return finish() // ref overrides any sibling keywords for older schemas
-    }
-    handle('$recursiveRef', ['string'], ($recursiveRef) => {
-      enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
-      // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
-      const n = recursiveAnchor ? format('(recursive || validate)') : format('validate')
-      return applyRef(n, { path: ['$recursiveRef'] })
-    })
 
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
 
@@ -403,7 +374,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       fun.if(shouldWrap && prev !== null ? format('errorCount === %s', prev) : true, writeBody)
 
     const nexthistory = () => [...history, { stat, prop: current }]
-    // Can not be used before undefined check above! The one performed by present()
+    // Can not be used before undefined check! The one performed by present()
     const rule = (...args) => visit(errors, nexthistory(), ...args).stat
     const subrule = (suberr, ...args) => {
       if (args[0] === current) {
@@ -890,8 +861,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       })
     }
 
-    /* Actual post-$ref validation happens below */
-
     const performValidation = () => {
       if (prev !== null) fun.write('const %s = errorCount', prev)
       if (checkConst()) {
@@ -917,6 +886,42 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       applyDynamicToDynamic(trace, local.items, local.props)
     }
 
+    /* Actual validation starts below */
+
+    // 1: presence check
+    if (node.default !== undefined && useDefaults) {
+      if (definitelyPresent) fail('Can not apply default value here (e.g. at root)')
+      fun.write('if (%s) {', safenot(present(current)))
+      fun.write('%s = %j', name, get('default', 'jsonval'))
+      fun.write('} else {')
+    } else {
+      handle('default', ['jsonval'], null) // unused
+      if (!definitelyPresent) fun.write('if (%s) {', present(current))
+    }
+
+    if (local.items) fun.write('const %s = [0]', local.items)
+    if (local.props) fun.write('const %s = [[], []]', local.props)
+
+    // 2: refs
+    handle('$ref', ['string'], ($ref) => {
+      const resolved = resolveReference(root, schemas, $ref, basePath())
+      const [sub, subRoot, path] = resolved[0] || []
+      if (!sub && sub !== false) fail('failed to resolve $ref:', $ref)
+      const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
+      return applyRef(n, { path: ['$ref'] })
+    })
+    if (node.$ref && getMeta().exclusiveRefs) {
+      enforce(!opts[optDynamic], 'unevaluated* is supported only on draft2019-09 schemas and above')
+      return finish() // ref overrides any sibling keywords for older schemas
+    }
+    handle('$recursiveRef', ['string'], ($recursiveRef) => {
+      enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
+      // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
+      const n = recursiveAnchor ? format('(recursive || validate)') : format('validate')
+      return applyRef(n, { path: ['$recursiveRef'] })
+    })
+
+    // 3: typecheck
     let typeCheck = null
     handle('type', ['string', 'array'], (type) => {
       const typearr = Array.isArray(type) ? type : [type]
@@ -934,7 +939,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       return null
     })
 
-    // If type validation was needed and did not return early, wrap this inside an else clause.
+    // 4: main validation block
+    // if type validation was needed and did not return early, wrap this inside an else clause.
     if (typeCheck && allErrors) {
       fun.if(typeCheck, () => error({ path: ['type'] }), performValidation)
     } else {
