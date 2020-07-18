@@ -543,3 +543,19 @@ tape('jsonCheck option', function(t) {
 
   t.end()
 })
+
+tape('additionalProperties blocks undefined', function(t) {
+  const schema = { additionalProperties: false }
+  const validate = validator(schema)
+  t.ok(validate({}), 'empty is valid')
+  t.notOk(validate({ x: undefined }), 'undefined is not valid')
+  t.end()
+})
+
+tape('additionalItems blocks undefined', function(t) {
+  const schema = { items: [], additionalItems: false }
+  const validate = validator(schema)
+  t.ok(validate([]), 'empty is valid')
+  t.notOk(validate([undefined]), 'undefined is not valid')
+  t.end()
+})

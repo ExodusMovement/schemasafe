@@ -196,7 +196,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         // any is valid
         enforceValidation('schema = true', 'is not allowed')
         return { stat } // nothing is evaluated for true
-      } else if (definitelyPresent) {
+      } else if (definitelyPresent || current.inKeys) {
         // node === false always fails in this case
         error({})
       } else {
