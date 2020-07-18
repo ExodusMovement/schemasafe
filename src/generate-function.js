@@ -1,6 +1,6 @@
 'use strict'
 
-const { format, safe } = require('./safe-format')
+const { format, safe, safenot } = require('./safe-format')
 const { jaystring } = require('./javascript')
 
 const INDENT_START = /[{[]/
@@ -51,18 +51,24 @@ module.exports = () => {
         // no lines inside block, unwind the block
         lines.pop()
         indent = oldIndent
-        return
+        return false
       }
       this.write(close)
+      return true
     },
 
-    if(condition, writeBody) {
+    if(condition, writeBody, writeElse) {
       if (`${condition}` === 'false') {
-        this.optimizedOut = true
-        return
+        if (writeElse) writeElse()
+        if (writeBody) this.optimizedOut = true
+      } else if (`${condition}` === 'true') {
+        if (writeBody) writeBody()
+        if (writeElse) this.optimizedOut = true
+      } else if (writeBody && this.block('if (%s) {', [condition], '}', writeBody)) {
+        if (writeElse) this.block('else {', [], '}', writeElse)
+      } else if (writeElse) {
+        if (writeElse) this.if(safenot(condition), writeElse)
       }
-      if (`${condition}` === 'true') return writeBody()
-      this.block('if (%s) {', [condition], '}', writeBody)
     },
 
     makeModule(scope = {}) {

@@ -768,20 +768,22 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       if (thenOrElse)
         handle('if', ['object', 'boolean'], (ifS) => {
           const { sub, delta: deltaIf } = subrule(null, current, ifS, subPath('if'), dyn)
-          let deltaElse, deltaThen
-          fun.write('if (%s) {', safenot(sub))
+          let handleElse, handleThen, deltaElse, deltaThen
           handle('else', ['object', 'boolean'], (elseS) => {
-            deltaElse = rule(current, elseS, subPath('else'), dyn)
-            evaluateDeltaDynamic(deltaElse)
+            handleElse = () => {
+              deltaElse = rule(current, elseS, subPath('else'), dyn)
+              evaluateDeltaDynamic(deltaElse)
+            }
             return null
           })
           handle('then', ['object', 'boolean'], (thenS) => {
-            fun.write('} else {')
-            deltaThen = rule(current, thenS, subPath('then'), dyn)
-            evaluateDeltaDynamic(andDelta(deltaIf, deltaThen))
+            handleThen = () => {
+              deltaThen = rule(current, thenS, subPath('then'), dyn)
+              evaluateDeltaDynamic(andDelta(deltaIf, deltaThen))
+            }
             return null
           })
-          fun.write('}')
+          fun.if(sub, handleThen, handleElse)
           evaluateDelta(orDelta(deltaElse || {}, andDelta(deltaIf, deltaThen || {})))
           return null
         })
@@ -913,7 +915,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       applyDynamicToDynamic(trace, local.items, local.props)
     }
 
-    let typeIfAdded = false
+    let typeCheck = null
     handle('type', ['string', 'array'], (type) => {
       const typearr = Array.isArray(type) ? type : [type]
       for (const t of typearr) enforce(typeof t === 'string' && types.has(t), 'Unknown type:', t)
@@ -926,13 +928,17 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       const filteredTypes = typearr.filter((t) => typeApplicable(t))
       if (filteredTypes.length === 0) fail('No valid types possible')
       evaluateDelta({ type: typearr }) // can be safely done here, filteredTypes already prepared
-      typeIfAdded = true
-      return safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
+      typeCheck = safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
+      return null
     })
 
     // If type validation was needed and did not return early, wrap this inside an else clause.
-    if (typeIfAdded && allErrors) fun.block('else {', [], '}', performValidation)
-    else performValidation()
+    if (typeCheck && allErrors) {
+      fun.if(typeCheck, () => error({ path: ['type'] }), performValidation)
+    } else {
+      if (typeCheck) errorIf(typeCheck, { path: ['type'] })
+      performValidation()
+    }
 
     if (!allowUnreachable) enforce(!fun.optimizedOut, 'some checks are never reachable')
     if (!isSub) {

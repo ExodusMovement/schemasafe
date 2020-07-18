@@ -88,8 +88,7 @@ const ref0 = function validate(data, recursive) {
     }
     return true
   })()
-  if (!sub0) {
-  } else {
+  if (sub0) {
     if (typeof data === "number") {
       if (!(-10 <= data)) return false
     }
@@ -161,13 +160,14 @@ const ref0 = function validate(data, recursive) {
     }
     return true
   })()
-  if (!sub0) {
-    if (typeof data === "number") {
-      if (data % 2 !== 0) return false
-    }
-  } else {
+  if (sub0) {
     if (typeof data === "number") {
       if (!(-10 <= data)) return false
+    }
+  }
+  else {
+    if (typeof data === "number") {
+      if (data % 2 !== 0) return false
     }
   }
   return true
@@ -222,15 +222,15 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (false) {
-    if (!(data === "else")) return false
-  } else {
-    if (!(data === "then")) return false
-  }
+  if (!(data === "then")) return false
   return true
 };
 return ref0
 ```
+
+### Warnings
+
+ * `some checks are never reachable at #`
 
 
 ## if with boolean schema false
@@ -246,13 +246,13 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
-  if (true) {
-    if (!(data === "else")) return false
-  } else {
-    if (!(data === "then")) return false
-  }
+  if (!(data === "else")) return false
   return true
 };
 return ref0
 ```
+
+### Warnings
+
+ * `some checks are never reachable at #`
 

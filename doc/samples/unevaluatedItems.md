@@ -459,16 +459,17 @@ const ref0 = function validate(data, recursive) {
     }
     return true
   })()
-  if (!sub0) {
-    if (data[3] !== undefined && hasOwn(data, 3)) {
-      if (!(data[3] === "else")) return false
-    }
-    evaluatedItems0.push(4)
-  } else {
+  if (sub0) {
     if (data[2] !== undefined && hasOwn(data, 2)) {
       if (!(data[2] === "then")) return false
     }
     evaluatedItems0.push(3)
+  }
+  else {
+    if (data[3] !== undefined && hasOwn(data, 3)) {
+      if (!(data[3] === "else")) return false
+    }
+    evaluatedItems0.push(4)
   }
   if (data.length > Math.max(3, ...evaluatedItems0)) return false
   return true

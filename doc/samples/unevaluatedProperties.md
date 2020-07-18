@@ -569,14 +569,15 @@ const ref0 = function validate(data, recursive) {
     if (!(data.foo === "then")) return false
     return true
   })()
-  if (!sub0) {
-    if (!(data.baz !== undefined && hasOwn(data, "baz"))) return false
-    if (!(typeof data.baz === "string")) return false
-    evaluatedProps0[0].push(...["baz"])
-  } else {
+  if (sub0) {
     if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
     if (!(typeof data.bar === "string")) return false
     evaluatedProps0[0].push(...["bar","foo"])
+  }
+  else {
+    if (!(data.baz !== undefined && hasOwn(data, "baz"))) return false
+    if (!(typeof data.baz === "string")) return false
+    evaluatedProps0[0].push(...["baz"])
   }
   for (const key0 of Object.keys(data)) {
     if (true && !propertyIn(key0, evaluatedProps0)) {
@@ -590,7 +591,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/else/properties/baz`
+ * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/then/properties/bar`
 
 
 ## unevaluatedProperties with dependentSchemas

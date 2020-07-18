@@ -37,7 +37,7 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [exclusiveMinimum](./exclusiveMinimum.md)                         | 1     | -                 | -        | -             |
 | [format](./format.md)                                             | 19    | 4                 | -        | -             |
 | [id](./id.md)                                                     | 3     | -                 | -        | -             |
-| [if-then-else](./if-then-else.md)                                 | 9     | -                 | 4        | -             |
+| [if-then-else](./if-then-else.md)                                 | 9     | -                 | 6        | -             |
 | [items](./items.md)                                               | 7     | -                 | -        | -             |
 | [maxContains](./maxContains.md)                                   | 3     | -                 | 1        | -             |
 | [maxItems](./maxItems.md)                                         | 1     | -                 | -        | -             |
