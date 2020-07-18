@@ -215,7 +215,7 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data.bar === "string")) return false
   }
   for (const key0 of Object.keys(data)) {
-    if (key0 !== "foo" && key0 !== "bar") {
+    if (key0 !== "bar" && key0 !== "foo") {
       return false
     }
   }
@@ -576,7 +576,7 @@ const ref0 = function validate(data, recursive) {
   } else {
     if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
     if (!(typeof data.bar === "string")) return false
-    evaluatedProps0[0].push(...["foo","bar"])
+    evaluatedProps0[0].push(...["bar","foo"])
   }
   for (const key0 of Object.keys(data)) {
     if (true && !propertyIn(key0, evaluatedProps0)) {
