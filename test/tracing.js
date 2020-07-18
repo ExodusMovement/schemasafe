@@ -13,7 +13,6 @@ const parse = (str) => {
   // items can be Infinty, but that goes as null in JSON (items can't be null)
   if (obj.items === null) obj.items = Infinity
   if (obj.dyn && obj.dyn.items === null) obj.dyn.items = Infinity
-  for (const key of ['type', 'properties', 'patterns', 'required']) if (obj[key]) obj[key].sort()
   return obj
 }
 const stringify = (obj) => JSON.stringify(obj)
