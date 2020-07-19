@@ -12,28 +12,28 @@ specification:
      either as `type` on the same level as `discriminator`, or in each branch separately.
 
   3. Each `oneOf`/`anyOf` branch **must** have a `const` rule on the property targeted by
-    `propertyName` of the `discriminator`, either directly or inside a `$ref`.
+     `propertyName` of the `discriminator`, either directly or inside a `$ref`.
 
-    _While seeming a bit excessive, this is the rule that makes `discriminator` both well-defined
-    and compatible with JSON Schema spec, while being a subset of OAPI `discriminator`._
+     _While seeming a bit excessive, this is the rule that makes `discriminator` both well-defined
+     and compatible with JSON Schema spec, while being a subset of OAPI `discriminator`._
 
-    Currently, those `const` values must be unique strings, which additionally makes `oneOf` and
-    `anyOf` identical there in relation to the validation result. The uniqueness and being a string
-    requirement might be lifted in the future, if it would be deemed useful.
+     Currently, those `const` values must be unique strings, which additionally makes `oneOf` and
+     `anyOf` identical there in relation to the validation result. The uniqueness and being a string
+     requirement might be lifted in the future, if it would be deemed useful.
 
   4. Property targeted by `propertyName` of the `discriminator` **must** be placed in `required`,
      either on the same level as `discriminator`, or in each branch separately. Failing to do so
      would make _all_ `const` checks pass on that property, per the JSON Schema specification.
 
   5. `mapping` is supported but only when it has the exact same set of branches as `oneOf`/`anyOf`,
-    values of the `mapping` correspond to used `$ref` values of the branches and the keys of
-    the mapping match `const` values on the `propertyName` of the `discriminator` in corresponding
-    branches.
+     values of the `mapping` correspond to used `$ref` values of the branches and the keys of
+     the mapping match `const` values on the `propertyName` of the `discriminator` in corresponding
+     branches.
 
-    That way, `mapping` doesn't really do anything at all, and brings in no new information to the
-    validator. It only serves a sanity check (`@exodus/schemasafe` will refuse to compile a schema
-    which has a `mapping` that mismatches the above constraints) and as an additional commentary
-    to whoever is reading the schema.
+     That way, `mapping` doesn't really do anything at all, and brings in no new information to the
+     validator. It only serves a sanity check (`@exodus/schemasafe` will refuse to compile a schema
+     which has a `mapping` that mismatches the above constraints) and as an additional commentary
+     to whoever is reading the schema.
 
 ## Action
 
