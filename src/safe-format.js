@@ -75,6 +75,9 @@ const safewrap = (fun) => (...args) => {
   return new SafeString(fun(...args))
 }
 
+const safepriority = (arg) =>
+  // simple expression and single brackets can not break priority
+  /^[a-z][a-z0-9_().]*$/i.test(arg) || /^\([^()]+\)$/i.test(arg) ? arg : format('(%s)', arg)
 const safeor = safewrap(
   (...args) => (args.some((arg) => `${arg}` === 'true') ? 'true' : args.join(' || ') || 'false')
 )
@@ -84,9 +87,7 @@ const safeand = safewrap(
 const safenot = (arg) => {
   if (`${arg}` === 'true') return safe('false')
   if (`${arg}` === 'false') return safe('true')
-  // simple expression and single brackets can not break priority
-  if (/^[a-z][a-z0-9_().]*$/i.test(arg) || /^\([^()]+\)$/i.test(arg)) return format('!%s', arg)
-  return format('!(%s)', arg)
+  return format('!%s', safepriority(arg))
 }
 
 module.exports = { format, safe, safeor, safeand, safenot }
