@@ -68,86 +68,86 @@ It affects three things though:
 All of the examples below are equivalent, i.e. pass and fail on the same input and produce a similar
 list of errors, differing in just the `keywordLocation` pointer because of refs.
 
-```js
+```json
 {
-  type: 'object',
-  required: ['objectType'],
-  discriminator: { propertyName: 'objectType' },
-  oneOf: [{
-    properties: { objectType: { const: 'obj1' } },
-    required: ['a'],
+  "type": "object",
+  "required": ["objectType"],
+  "discriminator": { "propertyName": "objectType" },
+  "oneOf": [{
+    "properties": { "objectType": { "const": "obj1" } },
+    "required": ["a"]
   }, {
-    properties: { objectType: { const: 'obj2' } },
-    required: ['b'],
+    "properties": { "objectType": { "const": "obj2" } },
+    "required": ["b"]
   }]
 }
 ```
 
-```js
+```json
 {
-  $defs: {
-    obj1: {
-      type: 'object',
-      properties: { objectType: { const: 'obj1' } },
-      required: ['objectType', 'a'],
+  "$defs": {
+    "obj1": {
+      "type": "object",
+      "properties": { "objectType": { "const": "obj1" } },
+      "required": ["objectType", "a"]
     },
-    obj2: {
-      type: 'object',
-      properties: { objectType: { const: 'obj2' } },
-      required: ['objectType', 'b'],
-    },
-  },
-  discriminator: { propertyName: 'objectType' },
-  oneOf: [
-    { $ref: '#/$defs/obj1' },
-    { $ref: '#/$defs/obj2' },
-  ]
-}
-```
-
-```js
-{
-  $defs: {
-    obj1: {
-      type: 'object',
-      properties: { objectType: { const: 'obj1' } },
-      required: ['objectType', 'a'],
-    },
-    obj2: {
-      type: 'object',
-      properties: { objectType: { const: 'obj2' } },
-      required: ['objectType', 'b'],
-    },
-  },
-  discriminator: {
-    propertyName: 'objectType',
-    mapping: {
-      obj1: '#/$defs/obj1',
-      obj2: '#/$defs/obj2',
+    "obj2": {
+      "type": "object",
+      "properties": { "objectType": { "const": "obj2" } },
+      "required": ["objectType", "b"]
     }
   },
-  oneOf: [
-    { $ref: '#/$defs/obj1' },
-    { $ref: '#/$defs/obj2' },
+  "discriminator": { "propertyName": "objectType" },
+  "oneOf": [
+    { "$ref": "#/$defs/obj1" },
+    { "$ref": "#/$defs/obj2" }
   ]
 }
 ```
 
-```js
+```json
 {
-  $defs: {
-    obj1: { required: ['a'] },
-    obj2: { required: ['b'] },
+  "$defs": {
+    "obj1": {
+      "type": "object",
+      "properties": { "objectType": { "const": "obj1" } },
+      "required": ["objectType", "a"]
+    },
+    "obj2": {
+      "type": "object",
+      "properties": { "objectType": { "const": "obj2" } },
+      "required": ["objectType", "b"]
+    }
   },
-  type: 'object',
-  required: ['objectType'],
-  discriminator: { propertyName: 'objectType' },
-  oneOf: [{
-    properties: { objectType: { const: 'obj1' } },
-    $ref: '#/$defs/obj1'
+  "discriminator": {
+    "propertyName": "objectType",
+    "mapping": {
+      "obj1": "#/$defs/obj1",
+      "obj2": "#/$defs/obj2"
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/obj1" },
+    { "$ref": "#/$defs/obj2" }
+  ]
+}
+```
+
+```json
+{
+  "$defs": {
+    "obj1": { "required": ["a"] },
+    "obj2": { "required": ["b"] }
+  },
+  "type": "object",
+  "required": ["objectType"],
+  "discriminator": { "propertyName": "objectType" },
+  "oneOf": [{
+    "properties": { "objectType": { "const": "obj1" } },
+    "$ref": "#/$defs/obj1"
   }, {
-    properties: { objectType: { const: 'obj2' } },
-    $ref: '#/$defs/obj2'
+    "properties": { "objectType": { "const": "obj2" } },
+    "$ref": "#/$defs/obj2"
   }]
 }
 ```
