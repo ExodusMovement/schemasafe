@@ -11,7 +11,7 @@ Based on JSON Schema Test Suite for `draft2019-09`.
    mode.
 
    JSON Schema spec allows usage of ineffective or unknown keywords, which is considered a mistake
-   by `@exodus/schemasafe` by default. `lax` mode lifts that sanity check.
+   by `@exodus/schemasafe` by default. `lax` mode lifts that coherence check.
 
  * **Misclassified** — schemas that classified at least one test value incorrectly, i.e. gave
    `true` where testsuite expected `false` or vice versa.

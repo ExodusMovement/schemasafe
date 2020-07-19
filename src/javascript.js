@@ -46,7 +46,7 @@ const jsHelpers = (fun, scope, propvar, { unmodifiedPrototypes, isJSON }, noopRe
   const { gensym, genpattern, genloop } = scopeMethods(scope, propvar)
 
   const present = (obj) => {
-    const name = buildName(obj) // also checks for sanity, do not remove
+    const name = buildName(obj) // also checks for coherence, do not remove
     const { parent, keyval, keyname, inKeys, checked } = obj
     /* c8 ignore next */
     if (checked || (inKeys && isJSON)) throw new Error('Unreachable: useless check for undefined')

@@ -6,7 +6,7 @@ const stringLength = (string) =>
   /[\uD800-\uDFFF]/.test(string) ? [...string].length : string.length
 
 // A isMultipleOf B: shortest decimal denoted as A % shortest decimal denoted as B === 0
-// Optimized, sanity checks and precomputation are outside of this method
+// Optimized, coherence checks and precomputation are outside of this method
 const isMultipleOf = (value, divisor, factor, factorMultiple) => {
   if (value % divisor === 0) return true
   const multiple = value * factor
