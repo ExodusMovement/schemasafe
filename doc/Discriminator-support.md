@@ -83,9 +83,51 @@ It affects three things though:
 ```
 
 ```js
-TODO: refs
+{
+  $defs: {
+    obj1: {
+      type: 'object',
+      properties: { objectType: { const: 'obj1' } },
+      required: ['objectType', 'a'],
+    },
+    obj2: {
+      type: 'object',
+      properties: { objectType: { const: 'obj2' }, b: { type: 'string' } },
+      required: ['objectType', 'b'],
+    },
+  },
+  discriminator: { propertyName: 'objectType' },
+  oneOf: [
+    { $ref: '#/$defs/obj1' },
+    { $ref: '#/$defs/obj2' },
+  ]
+}
 ```
 
 ```js
-TODO: refs + mapping
+{
+  $defs: {
+    obj1: {
+      type: 'object',
+      properties: { objectType: { const: 'obj1' } },
+      required: ['objectType', 'a'],
+    },
+    obj2: {
+      type: 'object',
+      properties: { objectType: { const: 'obj2' } },
+      required: ['objectType', 'b'],
+    },
+  },
+  discriminator: {
+    propertyName: 'objectType',
+    mapping: {
+      obj1: '#/$defs/obj1',
+      obj2: '#/$defs/obj2',
+    }
+  },
+  oneOf: [
+    { $ref: '#/$defs/obj1' },
+    { $ref: '#/$defs/obj2' },
+  ]
+}
 ```
