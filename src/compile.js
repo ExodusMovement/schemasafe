@@ -48,7 +48,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     removeAdditional = false, // supports additionalProperties: false and additionalItems: false
     includeErrors = false,
     allErrors = false,
-    dryRun = false,
+    dryRun, // unused, just for rest siblings
     allowUnusedKeywords = opts.mode === 'lax',
     allowUnreachable = opts.mode === 'lax',
     requireValidation = opts.mode === 'strong',

@@ -43,7 +43,7 @@
     "no-proto": 2,
     "no-prototype-builtins": 2,
     "no-shadow": 2,
-    "no-unused-vars": [2, { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }],
+    "no-unused-vars": [2, { "vars": "all", "args": "after-used", "ignoreRestSiblings": true }],
     "prefer-const": 2,
     "prefer-object-spread": 2,
     "prefer-template": 2,
