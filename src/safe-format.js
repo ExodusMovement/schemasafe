@@ -89,5 +89,7 @@ const safenot = (arg) => {
   if (`${arg}` === 'false') return safe('true')
   return format('!%s', safepriority(arg))
 }
+// this function is priority-safe, unlike safeor, hence it's exported and safeor is not atm
+const safenotor = (...args) => safenot(safeor(...args))
 
-module.exports = { format, safe, safeor, safeand, safenot }
+module.exports = { format, safe, safeand, safenot, safenotor }

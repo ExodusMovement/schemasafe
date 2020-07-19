@@ -1,6 +1,6 @@
 'use strict'
 
-const { format, safe, safeand, safeor, safenot } = require('./safe-format')
+const { format, safe, safeand, safenot, safenotor } = require('./safe-format')
 const genfun = require('./generate-function')
 const { resolveReference, joinPath } = require('./pointer')
 const formats = require('./formats')
@@ -721,7 +721,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       return handle('enum', ['array'], (vals) => {
         const objects = vals.filter((value) => value && typeof value === 'object')
         const primitive = vals.filter((value) => !(value && typeof value === 'object'))
-        return safenot(safeor(...[...primitive, ...objects].map((value) => compare(name, value))))
+        return safenotor(...[...primitive, ...objects].map((value) => compare(name, value)))
       })
     }
 
@@ -770,7 +770,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
             subrule(suberr, current, sch, subPath('anyOf', key), dyn)
           )
           evaluateDelta(entries.reduce((acc, cur) => orDelta(acc, cur.delta), {}))
-          const condition = safenot(safeor(...entries.map(({ sub }) => sub)))
+          const condition = safenotor(...entries.map(({ sub }) => sub))
           errorIf(condition, { path: ['anyOf'], suberr })
           for (const { delta, sub } of entries) fun.if(sub, () => evaluateDeltaDynamic(delta))
           return null
@@ -918,7 +918,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const filteredTypes = typearr.filter((t) => typeApplicable(t))
         if (filteredTypes.length === 0) fail('No valid types possible')
         evaluateDelta({ type: typearr }) // can be safely done here, filteredTypes already prepared
-        typeCheck = safenot(safeor(...filteredTypes.map((t) => types.get(t)(name))))
+        typeCheck = safenotor(...filteredTypes.map((t) => types.get(t)(name)))
         return null
       })
 
