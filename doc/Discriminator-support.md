@@ -65,6 +65,9 @@ It affects three things though:
 
 ## Examples
 
+All of the examples below are equivalent, i.e. pass and fail on the same input and produce a similar
+list of errors, differing in just the `keywordLocation` pointer because of refs.
+
 ```js
 {
   type: 'object',
@@ -76,9 +79,6 @@ It affects three things though:
   }, {
     properties: { objectType: { const: 'obj2' } },
     required: ['b'],
-  }, {
-    properties: { objectType: { const: 'system' } },
-    required: ['c'],
   }]
 }
 ```
@@ -93,7 +93,7 @@ It affects three things though:
     },
     obj2: {
       type: 'object',
-      properties: { objectType: { const: 'obj2' }, b: { type: 'string' } },
+      properties: { objectType: { const: 'obj2' } },
       required: ['objectType', 'b'],
     },
   },
