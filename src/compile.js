@@ -763,8 +763,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       handle('discriminator', ['object'], (discriminator) => {
         const fix = (check, message, arg) => enforce(check, `[discriminator]: ${message}`, arg)
         const { propertyName: pname, mapping: map, ...e0 } = discriminator
-        const dok = pname && node.type === 'object' && !node.oneOf !== !node.anyOf
-        fix(dok, 'need propertyName, type = object, oneOf OR anyOf')
+        // TODO:check for type outside of the branches
+        fix(pname && !node.oneOf !== !node.anyOf, 'need propertyName, oneOf OR anyOf')
         const requiredPropname = Array.isArray(node.required) && node.required.includes(pname)
         fix(requiredPropname, '[propertyName] should be placed in required')
         fix(Object.keys(e0).length === 0, 'only propertyName is supported')
@@ -797,6 +797,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           fun.write('}')
           return null
         })
+        fix(functions.deepEqual(stat.type, ['object']), 'has to be checked for type:', 'object')
         return null
       })
       if (node.discriminator) return // don't perform anyOf / oneOf
