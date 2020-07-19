@@ -31,9 +31,9 @@ specification:
      branches.
 
      That way, `mapping` doesn't really do anything at all, and brings in no new information to the
-     validator. It only serves a sanity check (`@exodus/schemasafe` will refuse to compile a schema
-     which has a `mapping` that mismatches the above constraints) and as an additional commentary
-     to whoever is reading the schema.
+     validator. It only serves as a sanity check (`@exodus/schemasafe` will refuse to compile a
+     schema which has a `mapping` that mismatches the above constraints) and as an additional
+     commentary to whoever is reading the schema.
 
 ## Action
 
