@@ -132,3 +132,22 @@ It affects three things though:
   ]
 }
 ```
+
+```js
+{
+  $defs: {
+    obj1: { required: ['a'] },
+    obj2: { required: ['b'] },
+  },
+  type: 'object',
+  required: ['objectType'],
+  discriminator: { propertyName: 'objectType' },
+  oneOf: [{
+    properties: { objectType: { const: 'obj1' } },
+    $ref: '#/$defs/obj1'
+  }, {
+    properties: { objectType: { const: 'obj2' } },
+    $ref: '#/$defs/obj2'
+  }]
+}
+```
