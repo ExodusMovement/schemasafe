@@ -763,7 +763,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       handle('discriminator', ['object'], (discriminator) => {
         const fix = (check, message, arg) => enforce(check, `[discriminator]: ${message}`, arg)
         const { propertyName: pname, mapping: map, ...e0 } = discriminator
-        // TODO:check for type outside of the branches
         const prop = currPropImm(pname)
         const runDiscriminator = () => {
           fix(pname && !node.oneOf !== !node.anyOf, 'need propertyName, oneOf OR anyOf')
@@ -797,10 +796,15 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
             return null
           })
         }
-        if (!checked(pname)) {
-          const errorPath = ['discriminator', 'propertyName']
-          fun.if(present(prop), runDiscriminator, () => error({ path: errorPath, prop }))
-        } else runDiscriminator()
+        const postTypeCheck = () => {
+          if (!checked(pname)) {
+            const errorPath = ['discriminator', 'propertyName']
+            fun.if(present(prop), runDiscriminator, () => error({ path: errorPath, prop }))
+          } else runDiscriminator()
+        }
+        if (allErrors || !functions.deepEqual(stat.type, ['object'])) {
+          fun.if(types.get('object')(name), postTypeCheck, () => error({ path: ['discriminator'] }))
+        } else postTypeCheck()
         // can't evaluateDelta on type and required to not break the checks below, but discriminator
         // is usually used with refs anyway so those won't be of much use
         fix(functions.deepEqual(stat.type, ['object']), 'has to be checked for type:', 'object')
