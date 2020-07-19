@@ -627,6 +627,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       })
     }
 
+    // if allErrors is false, we can skip present check for required properties validated before
+    const checked = (p) =>
+      !allErrors &&
+      (stat.required.includes(p) || queryCurrent().some((h) => h.stat.required.includes(p)))
+
     const checkObjects = () => {
       const propertiesCount = format('Object.keys(%s).length', name)
       handle('maxProperties', ['natural'], (max) => format('%s > %d', propertiesCount, max))
@@ -641,11 +646,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         })
         return null
       })
-
-      // if allErrors is false, we can skip present check for required properties validated before
-      const checked = (p) =>
-        !allErrors &&
-        (stat.required.includes(p) || queryCurrent().some((h) => h.stat.required.includes(p)))
 
       handle('required', ['array'], (required) => {
         for (const req of required) {
@@ -763,9 +763,67 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       }
       handle('allOf', ['array'], (allOf) => performAllOf(allOf))
 
+      let handleDiscriminator = null
+      handle('discriminator', ['object'], (discriminator) => {
+        const seen = new Set()
+        const fix = (check, message, arg) => enforce(check, `[discriminator]: ${message}`, arg)
+        const { propertyName: pname, mapping: map, ...e0 } = discriminator
+        const prop = currPropImm(pname)
+        fix(pname && !node.oneOf !== !node.anyOf, 'need propertyName, oneOf OR anyOf')
+        fix(Object.keys(e0).length === 0, 'only "propertyName" and "mapping" are supported')
+        const keylen = (obj) => (schemaTypes.get('object')(obj) ? Object.keys(obj).length : null)
+        handleDiscriminator = (branches, ruleName) => {
+          fix(map === undefined || keylen(map) === branches.length, 'mismatching mapping size')
+          const runDiscriminator = () => {
+            fun.write('switch (%s) {', buildName(prop)) // we could also have used ifs for complex types
+            let delta
+            for (const [i, { properties, ...branch }] of Object.entries(branches)) {
+              const { [pname]: { const: ownval, ...e1 } = {}, ...props } = properties || {}
+              let val = ownval
+              if (!val && branch.$ref) {
+                const [sub] = resolveReference(root, schemas, branch.$ref, basePath())[0] || []
+                enforce(schemaTypes.get('object')(sub), 'failed to resolve $ref:', branch.$ref)
+                val = ((sub.properties || {})[pname] || {}).const
+              }
+              const ok = typeof val === 'string' && !seen.has(val) && Object.keys(e1).length === 0
+              fix(ok, 'branches need unique string const values for [propertyName]')
+              seen.add(val)
+              const okMapping = !map || (functions.hasOwn(map, val) && map[val] === branch.$ref)
+              fix(okMapping, 'mismatching mapping for', val)
+              fun.write('case %j: {', val)
+              const subdelta = rule(current, { properties: props, ...branch }, subPath(ruleName, i))
+              evaluateDeltaDynamic(subdelta)
+              delta = delta ? orDelta(delta, subdelta) : subdelta
+              fun.write('}')
+              fun.write('break')
+            }
+            evaluateDelta(delta)
+            fun.write('default:')
+            error({ path: [ruleName] })
+            fun.write('}')
+          }
+          const propCheck = () => {
+            if (!checked(pname)) {
+              const errorPath = ['discriminator', 'propertyName']
+              fun.if(present(prop), runDiscriminator, () => error({ path: errorPath, prop }))
+            } else runDiscriminator()
+          }
+          if (allErrors || !functions.deepEqual(stat.type, ['object'])) {
+            fun.if(types.get('object')(name), propCheck, () => error({ path: ['discriminator'] }))
+          } else propCheck()
+          // can't evaluateDelta on type and required to not break the checks below, but discriminator
+          // is usually used with refs anyway so those won't be of much use
+          fix(functions.deepEqual(stat.type, ['object']), 'has to be checked for type:', 'object')
+          fix(stat.required.includes(pname), 'propertyName should be placed in required:', pname)
+          return null
+        }
+        return null
+      })
+
       handle('anyOf', ['array'], (anyOf) => {
         enforce(anyOf.length > 0, 'anyOf cannot be empty')
         if (anyOf.length === 1) return performAllOf(anyOf)
+        if (handleDiscriminator) return handleDiscriminator(anyOf, 'anyOf')
         const suberr = suberror()
         if (!canSkipDynamic()) {
           // In this case, all have to be checked to gather evaluated properties
@@ -796,6 +854,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       handle('oneOf', ['array'], (oneOf) => {
         enforce(oneOf.length > 0, 'oneOf cannot be empty')
         if (oneOf.length === 1) return performAllOf(oneOf)
+        if (handleDiscriminator) return handleDiscriminator(oneOf, 'oneOf')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
         const suberr = suberror()
