@@ -763,27 +763,26 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       handle('discriminator', ['object'], (discriminator) => {
         const fix = (check, message, arg) => enforce(check, `[discriminator]: ${message}`, arg)
         const { propertyName: pname, mapping: map, ...e0 } = discriminator
-        // TODO:check for type outside of the branches
+        // TODO:check for type and required propertyname outside of the branches
         fix(pname && !node.oneOf !== !node.anyOf, 'need propertyName, oneOf OR anyOf')
-        fix(Object.keys(e0).length === 0, 'only propertyName and mapping" are supported')
+        fix(Object.keys(e0).length === 0, 'only "propertyName" and "mapping" are supported')
         const keylen = (obj) => (schemaTypes.get('object')(obj) ? Object.keys(obj).length : null)
         const seen = new Set()
         handle(node.oneOf ? 'oneOf' : 'anyOf', ['array'], (branches, ruleName) => {
           fix(branches.length > 0, 'branches cannot be empty')
-          fix(!map || keylen(map) === branches.length, 'mismatching mapping')
-          fun.write('switch (%s) {', buildName(currPropImm(pname))) // TODO: is `if {} else if {} else` better?
+          fix(map === undefined || keylen(map) === branches.length, 'mismatching mapping size')
+          fun.write('switch (%s) {', buildName(currPropImm(pname))) // we could also have used ifs for complex types
           let delta
-          let i = 0
-          for (const { properties, ...br } of branches) {
+          for (const [i, { properties, ...branch }] of Object.entries(branches)) {
             // TODO: extract const of refs?
             const { [pname]: { const: val, ...e1 } = {}, ...props } = properties || {}
-            const ok = typeof val === 'string' && !seen.has(val) && keylen(e1) === 0
+            const ok = typeof val === 'string' && !seen.has(val) && Object.keys(e1).length === 0
             fix(ok, 'branches need unique string const values for [propertyName]')
             seen.add(val)
-            const okMapping = !map || (functions.hasOwn(map, val) && map[val] === br.$ref)
+            const okMapping = !map || (functions.hasOwn(map, val) && map[val] === branch.$ref)
             fix(okMapping, 'mismatching mapping for', val)
             fun.write('case %j: {', val)
-            const subdelta = rule(current, { properties: props, ...br }, subPath(ruleName, i++))
+            const subdelta = rule(current, { properties: props, ...branch }, subPath(ruleName, i))
             evaluateDeltaDynamic(subdelta)
             delta = delta ? orDelta(delta, subdelta) : subdelta
             fun.write('}')
@@ -796,7 +795,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           return null
         })
         fix(functions.deepEqual(stat.type, ['object']), 'has to be checked for type:', 'object')
-        fix(stat.required.includes(pname), 'propertyName should be placed in required',pname)
+        fix(stat.required.includes(pname), 'propertyName should be placed in required:', pname)
         return null
       })
       if (node.discriminator) return // don't perform anyOf / oneOf
