@@ -46,7 +46,7 @@ It affects three things though:
   1. Error reporting — only errors related to the target `oneOf`/`anyOf` branch would be reported
      (or a single error if doesn't match any), instead of errors from each branch merged together.
 
-     Without `discriminator` in the same `oneOf` + `const` combination, it might very hard to
+     Without `discriminator` in the same `oneOf` + `const` combination, it might be very hard to
      understand from a large set of errors (of a first unrelated error) which exactly mismatched, if
      the validation failed.
 
