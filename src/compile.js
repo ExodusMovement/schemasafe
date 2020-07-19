@@ -82,6 +82,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   if (requireSchema && $schemaDefault) throw new Error('requireSchema forbids $schemaDefault')
   if (mode === 'strong' && !requireSchema) throw new Error('Strong mode demands requireSchema')
 
+  const isDev = typeof process !== 'undefined' && Number(process.env.SCHEMASAFE_DEV) > 0
+  if ((removeAdditional || useDefaults) && !isDev)
+    throw new Error('removeAdditional and useDefaults support is not production-ready yet')
+
   const { gensym, getref, genref, genformat } = scopeMethods(scope)
 
   const buildPath = (prop) => {
