@@ -1,6 +1,7 @@
 # Discriminator support
 
-`@exodus/schemasafe` supports a strict subset of the [`discriminator` API](FIXME).
+`@exodus/schemasafe` supports a strict subset of the
+[`discriminator` API](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#discriminatorObject).
 
 It has the following additional requirements to be safe and compatible with upstream JSON Schema
 specification:
