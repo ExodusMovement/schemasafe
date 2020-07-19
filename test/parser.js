@@ -3,6 +3,8 @@
 const tape = require('tape')
 const { validator, parser } = require('../')
 
+const $schema = 'https://json-schema.org/draft/2019-09/schema#'
+
 tape('exports', (t) => {
   t.strictEqual(typeof validator, 'function', 'validator is a function')
   t.strictEqual(typeof parser, 'function', 'parser is a function')
@@ -11,46 +13,51 @@ tape('exports', (t) => {
 
 tape('default is strong mode', (t) => {
   t.throws(() => {
-    parser({})
+    parser({ $schema })
   }, /\[requireValidation\]/)
 
   t.throws(() => {
-    parser({ type: 'string' })
+    parser({ $schema, type: 'string' })
   }, /\[requireStringValidation\]/)
 
   t.throws(() => {
-    parser({}, { requireValidation: false })
+    parser({ $schema }, { requireValidation: false })
   }, /Strong mode demands/)
 
   t.doesNotThrow(() => {
-    parser({}, { mode: 'default' })
+    parser({ $schema }, { mode: 'default' })
   })
 
   t.end()
 })
 
 tape('parser works correctly', (t) => {
-  t.strictEqual(typeof parser({ type: 'string', format: 'date' }), 'function', 'returns a function')
+  t.strictEqual(
+    typeof parser({ $schema, type: 'string', format: 'date' }),
+    'function',
+    'returns a function'
+  )
 
   for (const includeErrors of [false, true]) {
     {
-      const result = parser({ type: 'integer' }, { includeErrors })('x')
+      const result = parser({ $schema, type: 'integer' }, { includeErrors })('x')
       t.strictEqual(result.valid, false, 'Parse failed')
       t.strictEqual(result.value, undefined, 'No value is returned')
     }
     {
-      const result = parser({ type: 'integer' }, { includeErrors })('{}')
+      const result = parser({ $schema, type: 'integer' }, { includeErrors })('{}')
       t.strictEqual(result.valid, false, 'Validation failed')
       t.strictEqual(result.value, undefined, 'No value is returned')
     }
     {
-      const result = parser({ type: 'integer' }, { includeErrors })('10')
+      const result = parser({ $schema, type: 'integer' }, { includeErrors })('10')
       t.strictEqual(result.valid, true, 'Validation succeded')
       t.strictEqual(result.value, 10, 'Corect value is returned')
     }
   }
 
   const schema = {
+    $schema,
     type: 'object',
     required: ['foo'],
     properties: { foo: { const: 42 } },

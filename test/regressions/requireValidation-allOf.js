@@ -3,8 +3,9 @@
 const tape = require('tape')
 const { validator } = require('../../')
 
-const fail = (t, schema, msg) => t.throws(() => validator(schema, { mode: 'strong' }), msg)
-const pass = (t, schema, msg) => t.doesNotThrow(() => validator(schema, { mode: 'strong' }), msg)
+const opts = { requireValidation: true }
+const fail = (t, schema, msg) => t.throws(() => validator(schema, opts), msg)
+const pass = (t, schema, msg) => t.doesNotThrow(() => validator(schema, opts), msg)
 
 tape('requireValidation works with allOf/anyOf/oneOf, objects', (t) => {
   fail(t, {}, 'no validation done fails')

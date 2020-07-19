@@ -51,6 +51,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     dryRun, // unused, just for rest siblings
     allowUnusedKeywords = opts.mode === 'lax',
     allowUnreachable = opts.mode === 'lax',
+    requireSchema = opts.mode === 'strong',
     requireValidation = opts.mode === 'strong',
     requireStringValidation = opts.mode === 'strong',
     complexityChecks = opts.mode === 'strong',
@@ -78,6 +79,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
     throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
   if (!includeErrors && allErrors) throw new Error('allErrors requires includeErrors to be enabled')
+  if (requireSchema && $schemaDefault) throw new Error('requireSchema forbids $schemaDefault')
+  if (mode === 'strong' && !requireSchema) throw new Error('Strong mode demands requireSchema')
 
   const { gensym, getref, genref, genformat } = scopeMethods(scope)
 
@@ -247,7 +250,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         rootMeta.set(root, {
           exclusiveRefs: schemaIsOlderThan('draft/2019-09'),
         })
-      }
+      } else enforce(!requireSchema, '[requireSchema] $schema is required')
       handle('$vocabulary', ['object'], ($vocabulary) => {
         for (const [vocab, flag] of Object.entries($vocabulary)) {
           if (flag === false) continue
