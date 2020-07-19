@@ -765,9 +765,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const { propertyName: pname, mapping: map, ...e0 } = discriminator
         // TODO:check for type outside of the branches
         fix(pname && !node.oneOf !== !node.anyOf, 'need propertyName, oneOf OR anyOf')
-        const requiredPropname = Array.isArray(node.required) && node.required.includes(pname)
-        fix(requiredPropname, '[propertyName] should be placed in required')
-        fix(Object.keys(e0).length === 0, 'only propertyName is supported')
+        fix(Object.keys(e0).length === 0, 'only propertyName and mapping" are supported')
         const keylen = (obj) => (schemaTypes.get('object')(obj) ? Object.keys(obj).length : null)
         const seen = new Set()
         handle(node.oneOf ? 'oneOf' : 'anyOf', ['array'], (branches, ruleName) => {
@@ -798,6 +796,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           return null
         })
         fix(functions.deepEqual(stat.type, ['object']), 'has to be checked for type:', 'object')
+        fix(stat.required.includes(pname), 'propertyName should be placed in required',pname)
         return null
       })
       if (node.discriminator) return // don't perform anyOf / oneOf
