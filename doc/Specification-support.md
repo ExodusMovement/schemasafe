@@ -6,6 +6,8 @@ If you notice issues with any of those draft versions support, please file an is
 a test case to [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite)
 which is used in this project to ensure correctness.
 
+Additionally, a [strict subset of `discriminator`](./Discriminator-support.md) is implemented.
+
 ---
 
 `draft03` and below are not supported, though for convenience some compatibility with it is present,
