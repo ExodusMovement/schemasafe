@@ -775,8 +775,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
             fun.write('switch (%s) {', buildName(prop)) // we could also have used ifs for complex types
             let delta
             for (const [i, { properties, ...branch }] of Object.entries(branches)) {
-              // TODO: extract const of refs?
-              const { [pname]: { const: val, ...e1 } = {}, ...props } = properties || {}
+              const { [pname]: { const: ownval, ...e1 } = {}, ...props } = properties || {}
+              let val = ownval
+              if (!val && branch.$ref) {
+                const [sub] = resolveReference(root, schemas, branch.$ref, basePath())[0] || []
+                enforce(schemaTypes.get('object')(sub), 'failed to resolve $ref:', branch.$ref)
+                const { [pname]: { const: refval, ...e2 } = {} } = sub.properties || {}
+                val = refval
+              }
               const ok = typeof val === 'string' && !seen.has(val) && Object.keys(e1).length === 0
               fix(ok, 'branches need unique string const values for [propertyName]')
               seen.add(val)
