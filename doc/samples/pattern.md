@@ -24,7 +24,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## pattern is not anchored

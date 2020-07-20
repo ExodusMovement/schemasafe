@@ -23,7 +23,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## maximum validation with unsigned integer
@@ -49,5 +49,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 

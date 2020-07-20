@@ -25,7 +25,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## not multiple types
@@ -53,7 +53,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## not more complex schema
@@ -85,7 +85,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/not/properties/foo`
+ * `[requireValidation] if properties is used, required should be specified at #/not`
 
 
 ## forbidden property
@@ -112,7 +112,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/properties/foo`
+ * `[requireValidation] type should be specified at #/properties/foo`
 
 
 ## not with boolean schema true
@@ -136,7 +136,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## not with boolean schema false

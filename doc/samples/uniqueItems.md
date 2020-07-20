@@ -62,7 +62,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `maxItems should be specified for non-primitive uniqueItems at #`
+ * `[complexityChecks] maxItems should be specified for non-primitive uniqueItems at #`
 
 
 ## uniqueItems with an array of items
@@ -134,7 +134,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `maxItems should be specified for non-primitive uniqueItems at #`
+ * `[complexityChecks] maxItems should be specified for non-primitive uniqueItems at #`
 
 
 ## uniqueItems with an array of items and additionalItems=false
@@ -211,7 +211,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## uniqueItems=false validation
@@ -234,7 +234,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## uniqueItems=false with an array of items
@@ -269,7 +269,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## uniqueItems=false with an array of items and additionalItems=false
@@ -306,5 +306,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 

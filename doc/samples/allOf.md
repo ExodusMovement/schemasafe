@@ -34,7 +34,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/allOf/1/properties/foo`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/allOf/1/properties/foo`
 
 
 ## allOf with base schema
@@ -77,7 +77,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/allOf/0/properties/foo`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/allOf/0/properties/foo`
 
 
 ## allOf simple types
@@ -106,7 +106,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## allOf with boolean schemas, all true
@@ -324,5 +324,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 

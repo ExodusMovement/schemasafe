@@ -28,7 +28,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## an array of schemas for items
@@ -60,7 +60,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/1`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/1`
 
 
 ## items with boolean schema (true)
@@ -112,7 +112,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## items with boolean schemas
@@ -206,7 +206,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalProperties or unevaluatedProperties must be specified at #`
+ * `[requireValidation] additionalProperties or unevaluatedProperties should be specified at #`
 
 
 ## nested items

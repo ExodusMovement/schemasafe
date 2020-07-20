@@ -33,7 +33,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## anyOf with base schema
@@ -70,7 +70,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
 
 
 ## anyOf with boolean schemas, all true
@@ -182,7 +182,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/anyOf/1/properties/foo`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/anyOf/1/properties/foo`
 
 
 ## anyOf with one empty schema

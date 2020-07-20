@@ -16,9 +16,9 @@ function processSchema(block) {
   const { description, comment } = block
   for (const mode of ['strong', 'default', 'lax']) {
     try {
-      const $schemaDefault = 'http://json-schema.org/draft/2019-09/schema#'
-      const opts = { schemas, mode, isJSON: true, $schemaDefault }
-      const validate = validator(block.schema, opts)
+      const $schema = 'http://json-schema.org/draft/2019-09/schema#'
+      const opts = { schemas, mode, isJSON: true }
+      const validate = validator({ $schema, ...block.schema }, opts)
       const mistakes = block.tests.filter((test) => validate(test.data) !== test.valid).length
       const ok = mistakes === 0
       const source = validate

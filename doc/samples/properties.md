@@ -29,7 +29,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/bar`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/bar`
 
 
 ## properties, patternProperties, additionalProperties interaction
@@ -82,7 +82,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] items rule must be specified at #/properties/foo`
+ * `[requireValidation] items rule should be specified at #/properties/foo`
 
 
 ## properties with boolean schema
@@ -162,5 +162,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 

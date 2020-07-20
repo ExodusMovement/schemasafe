@@ -36,7 +36,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/contains`
+ * `[requireValidation] type should be specified at #/contains`
 
 
 ## contains keyword with const keyword
@@ -73,7 +73,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## contains keyword with boolean schema true
@@ -141,7 +141,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## items + contains
@@ -187,5 +187,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/items`
+ * `[requireValidation] type should be specified at #/items`
 

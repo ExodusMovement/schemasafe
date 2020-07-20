@@ -110,7 +110,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalProperties or unevaluatedProperties must be specified at #`
+ * `[requireValidation] additionalProperties or unevaluatedProperties should be specified at #`
 
 
 ## enum with escaped characters

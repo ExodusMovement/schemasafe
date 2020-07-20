@@ -34,7 +34,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## oneOf with base schema
@@ -72,7 +72,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
 
 
 ## oneOf with boolean schemas, all true
@@ -101,7 +101,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## oneOf with boolean schemas, one true
@@ -229,7 +229,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/oneOf/1/properties/foo`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/oneOf/1/properties/foo`
 
 
 ## oneOf with empty schema
@@ -260,7 +260,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## oneOf with required
@@ -302,7 +302,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalProperties or unevaluatedProperties must be specified at #`
+ * `[requireValidation] additionalProperties or unevaluatedProperties should be specified at #`
 
 
 ## oneOf with missing optional property

@@ -29,7 +29,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/properties/foo`
+ * `[requireValidation] type should be specified at #/properties/foo`
 
 
 ## relative pointer ref to object
@@ -70,7 +70,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## relative pointer ref to array
@@ -106,7 +106,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## escaped pointer ref
@@ -164,7 +164,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## nested refs
@@ -240,7 +240,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] items rule must be specified at #`
+ * `[requireValidation] items rule should be specified at #`
 
 
 ## remote ref, containing refs itself
@@ -646,7 +646,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at https://json-schema.org/draft/2019-09/schema#/properties/definitions/additionalProperties`
+ * `[requireValidation] type should be specified at https://json-schema.org/draft/2019-09/schema#/properties/definitions/additionalProperties`
 
 
 ## property named $ref that is not a reference
@@ -675,7 +675,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/$ref`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/$ref`
 
 
 ## property named $ref, containing an actual $ref
@@ -711,7 +711,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
 
 
 ## $ref to boolean schema true
@@ -826,7 +826,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/meta`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/meta`
 
 
 ## refs with quote
@@ -862,7 +862,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## ref creates new scope when adjacent to keywords
@@ -902,5 +902,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 

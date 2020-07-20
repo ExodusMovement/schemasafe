@@ -42,7 +42,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] if properties is used, required must be specified at #/dependentSchemas/bar`
+ * `[requireValidation] if properties is used, required should be specified at #/dependentSchemas/bar`
 
 
 ## boolean subschemas
@@ -110,5 +110,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #`
+ * `[requireValidation] type should be specified at #`
 

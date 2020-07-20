@@ -61,7 +61,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
 
 
 ## object type matches objects
@@ -85,7 +85,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalProperties or unevaluatedProperties must be specified at #`
+ * `[requireValidation] additionalProperties or unevaluatedProperties should be specified at #`
 
 
 ## array type matches arrays
@@ -109,7 +109,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] items rule must be specified at #`
+ * `[requireValidation] items rule should be specified at #`
 
 
 ## boolean type matches booleans
@@ -173,7 +173,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
 
 
 ## type as array with one item
@@ -197,7 +197,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
 
 
 ## type: array or object
@@ -221,7 +221,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] items rule must be specified at #`
+ * `[requireValidation] items rule should be specified at #`
 
 
 ## type: array, object or null
@@ -245,5 +245,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] items rule must be specified at #`
+ * `[requireValidation] items rule should be specified at #`
 

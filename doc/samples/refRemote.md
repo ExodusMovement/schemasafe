@@ -23,6 +23,10 @@ const ref0 = function validate(data, recursive) {
 return ref0
 ```
 
+##### Strong mode notices
+
+ * `[requireSchema] $schema is required at http://localhost:1234/integer.json#`
+
 
 ## fragment within remote ref
 
@@ -117,7 +121,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type must be specified at #/items`
+ * `[requireSchema] $schema is required at http://localhost:1234/folder/folderInteger.json#`
 
 
 ## base URI change - change folder
@@ -169,7 +173,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalProperties or unevaluatedProperties must be specified at #`
+ * `[requireSchema] $schema is required at http://localhost:1234/folder/folderInteger.json#`
 
 
 ## base URI change - change folder in subschema
@@ -222,7 +226,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalProperties or unevaluatedProperties must be specified at #`
+ * `[requireSchema] $schema is required at http://localhost:1234/folder/folderInteger.json#`
 
 
 ## root ref in remote ref
@@ -272,5 +276,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema must be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
+ * `[requireSchema] $schema is required at #`
 
