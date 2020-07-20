@@ -36,11 +36,18 @@ const core = {
   time: (input) =>
     input.length <= 9 + 12 + 6 &&
     /^([0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-]\d\d(:?\d\d)?)?$/i.test(input),
-  'date-time': (input) =>
-    input.length <= 10 + 1 + 9 + 12 + 6 &&
-    /^\d{4}-(0[1-9]|1[0-2])-[0-3]\d[t\s]([0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-]\d\d(:?\d\d)?)$/i.test(
-      input
-    ),
+  // first two lines specific to date-time, then tests for unanchored (at end) date, code identical to 'date' above
+  'date-time': (input) => {
+    if (input.length > 10 + 1 + 9 + 12 + 6) return false
+    const full = /^\d{4}-(0[1-9]|1[0-2])-[0-3]\d[t\s]([0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-]\d\d(:?\d\d)?)$/i
+    if (!full.test(input)) return false
+    if (/^\d\d\d\d-(0[1-9]|1[0-2])-([012][1-8]|[12]0|[01]9)/.test(input)) return true
+    const matches = input.match(/^(\d\d\d\d)-(0[1-9]|1[0-2])-(29|3[01])/)
+    if (!matches) return false
+    const [year, month, day] = [matches[1] | 0, matches[2] | 0, matches[3] | 0]
+    if (month === 2) return day === 29 && (year % 16 === 0 || (year % 4 === 0 && year % 25 !== 0))
+    return day < 31 || month <= 7 === (month % 2 === 1)
+  },
 
   /* ipv4 and ipv6 are from ajv with length restriction */
   // optimized https://www.safaribooksonline.com/library/view/regular-expressions-cookbook/9780596802837/ch07s16.html
