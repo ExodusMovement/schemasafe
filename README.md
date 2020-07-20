@@ -25,7 +25,7 @@ Supports [draft-04/06/07/2019-09](doc/Specification-support.md).
   code without being JSON-wrapped.
 * 0 dependencies
 * Very fast
-* Supports JSON Schema draft-04/06/07/2019-09 and the `descriminator` OpenAPI keyword.
+* Supports JSON Schema draft-04/06/07/2019-09 and the `discriminator` OpenAPI keyword.
 * Can assign defaults and/or remove additional properties when schema allows to do that safely.
   Throws at build time if those options are used with schemas that don't allow to do that safely.
 
