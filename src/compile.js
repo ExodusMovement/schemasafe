@@ -82,10 +82,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   if (requireSchema && $schemaDefault) throw new Error('requireSchema forbids $schemaDefault')
   if (mode === 'strong' && !requireSchema) throw new Error('Strong mode demands requireSchema')
 
-  const isDev = typeof process !== 'undefined' && Number(process.env.SCHEMASAFE_DEV) > 0
-  if ((removeAdditional || useDefaults) && !isDev)
-    throw new Error('removeAdditional and useDefaults support is not production-ready yet')
-
   const { gensym, getref, genref, genformat } = scopeMethods(scope)
 
   const buildPath = (prop) => {
@@ -190,6 +186,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const enforceValidation = (msg, suffix = 'must be specified') =>
       enforce(!requireValidation, `[requireValidation] ${msg} ${suffix}`)
     const subPath = (...args) => [...schemaPath, ...args]
+    const uncertain = (msg) =>
+      enforce(!removeAdditional && !useDefaults, `[removeAdditional/useDefaults] uncertain: ${msg}`)
 
     // evaluated tracing
     const stat = initTracing()
@@ -413,11 +411,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     // Extracted single additional(Items/Properties) rules, for reuse with unevaluated(Items/Properties)
-    const shouldRemoveAdditional = removeAdditional && !isSub // TODO: improve this check to exclude all uncertain paths, allow allOf
     const additionalItems = (rulePath, limit) => {
       const handled = handle(rulePath, ['object', 'boolean'], (ruleValue) => {
         if (ruleValue === false) {
-          if (!shouldRemoveAdditional) return format('%s.length > %s', name, limit)
+          if (!removeAdditional) return format('%s.length > %s', name, limit)
           fun.write('if (%s.length > %s) %s.length = %s', name, limit, name, limit)
           return null
         }
@@ -430,7 +427,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       const handled = handle(rulePath, ['object', 'boolean'], (ruleValue) => {
         forObjectKeys(current, (sub, key) => {
           fun.if(condition(key), () => {
-            if (ruleValue === false && shouldRemoveAdditional) fun.write('delete %s[%s]', name, key)
+            if (ruleValue === false && removeAdditional) fun.write('delete %s[%s]', name, key)
             else rule(sub, ruleValue, subPath(rulePath))
           })
         })
@@ -589,6 +586,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       // As a result, omitting .items is not allowed by default, only in allowUnusedKeywords mode
 
       handle('contains', ['object', 'boolean'], () => {
+        uncertain('contains')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
 
@@ -683,6 +681,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
               ((typeof deps === 'object' && !Array.isArray(deps)) || typeof deps === 'boolean') &&
               dependencies !== 'dependentRequired'
             ) {
+              uncertain(dependencies)
               const body = () => {
                 const delta = rule(current, deps, subPath(dependencies, key), dyn)
                 evaluateDelta(orDelta({}, delta))
@@ -735,10 +734,12 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
     const checkGeneric = () => {
       handle('not', ['object', 'boolean'], (not) => subrule(null, current, not, subPath('not')).sub)
+      if (node.not) uncertain('not')
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
       if (thenOrElse)
         handle('if', ['object', 'boolean'], (ifS) => {
+          uncertain('if/then/else')
           const { sub, delta: deltaIf } = subrule(null, current, ifS, subPath('if'), dyn)
           let handleElse, handleThen, deltaElse, deltaThen
           handle('else', ['object', 'boolean'], (elseS) => {
@@ -829,6 +830,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         enforce(anyOf.length > 0, 'anyOf cannot be empty')
         if (anyOf.length === 1) return performAllOf(anyOf)
         if (handleDiscriminator) return handleDiscriminator(anyOf, 'anyOf')
+        uncertain('anyOf, use discriminator to make it certain')
         const suberr = suberror()
         if (!canSkipDynamic()) {
           // In this case, all have to be checked to gather evaluated properties
@@ -860,6 +862,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         enforce(oneOf.length > 0, 'oneOf cannot be empty')
         if (oneOf.length === 1) return performAllOf(oneOf)
         if (handleDiscriminator) return handleDiscriminator(oneOf, 'oneOf')
+        uncertain('oneOf, use discriminator to make it certain')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
         const suberr = suberror()

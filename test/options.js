@@ -52,5 +52,30 @@ tape('removeAdditional', (t) => {
     'array: items + additionalItems + removeAdditional'
   )
 
+  t.doesNotThrow(
+    () => validator({ additionalProperties: false }, { removeAdditional: true }),
+    'certain'
+  )
+  t.doesNotThrow(
+    () =>
+      validator(
+        {
+          anyOf: [{ additionalProperties: false }],
+        },
+        { removeAdditional: true }
+      ),
+    'still certain'
+  )
+  t.throws(
+    () =>
+      validator(
+        {
+          anyOf: [{}, { additionalProperties: false }],
+        },
+        { removeAdditional: true }
+      ),
+    /uncertain/,
+    'uncertain'
+  )
   t.end()
 })
