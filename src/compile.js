@@ -1017,7 +1017,16 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
     // Checks related to static schema analysis
     if (!allowUnreachable) enforce(!fun.optimizedOut, 'some checks are never reachable')
-    if (!isSub) {
+    if (isSub) {
+      const n0 = schemaPath[schemaPath.length - 1]
+      const n1 = schemaPath[schemaPath.length - 2]
+      const allowed0 = ['not', 'if', 'then', 'else']
+      const allowed1 = ['oneOf', 'anyOf', 'allOf', 'dependencies', 'dependentSchemas']
+      // Coherence check, unreachable, double-check that we came from expected path
+      enforce(allowed0.includes(n0) || allowed1.includes(n1), 'Unexpected')
+    } else if (!schemaPath.includes('not')) {
+      // 'not' does not mark anything as evaluated (unlike even if/then/else), so it's safe to exclude from these
+      // checks, as we are sure that everything will be checked without it. It can be viewed as a pure add-on.
       if (!stat.type) enforceValidation('type')
       if (typeApplicable('array') && stat.items !== Infinity)
         enforceValidation(node.items ? 'additionalItems or unevaluatedItems' : 'items rule')
@@ -1030,13 +1039,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const stringWarning = 'pattern, format or contentSchema must be specified for strings'
         fail(`[requireStringValidation] ${stringWarning}, use pattern: ^[\\s\\S]*$ to opt-out`)
       }
-    } else {
-      const n0 = schemaPath[schemaPath.length - 1]
-      const n1 = schemaPath[schemaPath.length - 2]
-      const allowed0 = ['not', 'if', 'then', 'else']
-      const allowed1 = ['oneOf', 'anyOf', 'allOf', 'dependencies', 'dependentSchemas']
-      // Coherence check, unreachable, double-check that we came from expected path
-      enforce(allowed0.includes(n0) || allowed1.includes(n1), 'Unexpected')
     }
     if (node.properties && !node.required) enforceValidation('if properties is used, required')
     enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
