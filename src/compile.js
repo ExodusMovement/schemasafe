@@ -183,7 +183,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const enforce = (ok, ...args) => ok || fail(...args)
     const laxMode = (ok, ...args) => enforce(mode === 'lax' || ok, ...args)
     const enforceMinMax = (a, b) => laxMode(!(node[b] < node[a]), `Invalid ${a} / ${b} combination`)
-    const enforceValidation = (msg, suffix = 'must be specified') =>
+    const enforceValidation = (msg, suffix = 'should be specified') =>
       enforce(!requireValidation, `[requireValidation] ${msg} ${suffix}`)
     const subPath = (...args) => [...schemaPath, ...args]
     const uncertain = (msg) =>
@@ -1035,7 +1035,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         for (const sub of ['additionalProperties', 'unevaluatedProperties'])
           if (node[sub]) enforceValidation(`wild-card ${sub}`, 'requires propertyNames')
       if (!stat.fullstring && requireStringValidation) {
-        const stringWarning = 'pattern, format or contentSchema must be specified for strings'
+        const stringWarning = 'pattern, format or contentSchema should be specified for strings'
         fail(`[requireStringValidation] ${stringWarning}, use pattern: ^[\\s\\S]*$ to opt-out`)
       }
     }
