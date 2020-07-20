@@ -283,16 +283,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const evaluateDeltaDynamic = (delta) => {
       // Skips applying those that have already been proved statically
       if (dyn.items && delta.items > stat.items) fun.write('%s.push(%d)', dyn.items, delta.items)
-      if (dyn.props) {
+      if (dyn.props && delta.properties.includes(true) && !stat.properties.includes(true)) {
+        fun.write('%s[0].push(true)', dyn.props)
+      } else if (dyn.props) {
         const inStat = (properties, patterns) => inProperties(stat, { properties, patterns })
         const properties = delta.properties.filter((x) => !inStat([x], []))
         const patterns = delta.patterns.filter((x) => !inStat([], [x]))
-        if (properties.includes(true)) {
-          fun.write('%s[0].push(true)', dyn.props)
-        } else {
-          if (properties.length > 0) fun.write('%s[0].push(...%j)', dyn.props, properties)
-          if (patterns.length > 0) fun.write('%s[1].push(...%s)', dyn.props, patterns)
-        }
+        if (properties.length > 0) fun.write('%s[0].push(...%j)', dyn.props, properties)
+        if (patterns.length > 0) fun.write('%s[1].push(...%s)', dyn.props, patterns)
       }
     }
     const applyDynamicToDynamic = (target, items, props) => {
@@ -367,17 +365,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const rule = (...args) => visit(errors, nexthistory(), ...args).stat
     const subrule = (suberr, ...args) => {
       if (args[0] === current) {
-        switch (constantValue(args[1])) {
-          case true:
-            return { sub: format('true'), delta: {} }
-          case false:
-            return { sub: format('false'), delta: { type: [] } }
-          case undefined:
-            break
-          default:
-            /* c8 ignore next */
-            throw new Error('Unreachable')
-        }
+        const constval = constantValue(args[1])
+        if (constval === true) return { sub: format('true'), delta: {} }
+        if (constval === false) return { sub: format('false'), delta: { type: [] } }
       }
       const sub = gensym('sub')
       fun.write('const %s = (() => {', sub)
@@ -668,12 +658,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
               dependencies !== 'dependentRequired'
             ) {
               uncertain(dependencies)
-              const body = () => {
+              fun.if(item.checked ? true : present(item), () => {
                 const delta = rule(current, deps, subPath(dependencies, key), dyn)
                 evaluateDelta(orDelta({}, delta))
                 evaluateDeltaDynamic(delta)
-              }
-              fun.if(item.checked ? true : present(item), body)
+              })
             } else fail(`Unexpected ${dependencies} entry`)
           }
           return null
@@ -1039,9 +1028,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     fun.write('validate.evaluatedDynamic = [%s, %s]', local.items, local.props)
   }
 
-  if (allErrors) {
-    fun.write('return errorCount === 0')
-  } else fun.write('return true')
+  if (allErrors) fun.write('return errorCount === 0')
+  else fun.write('return true')
+
   fun.write('}')
 
   validate = fun.makeFunction(scope)
@@ -1058,10 +1047,8 @@ const compile = (schema, opts) => {
   } catch (e) {
     // For performance, we try to build the schema without dynamic tracing first, then re-run with
     // it enabled if needed. Enabling it without need can give up to about 40% performance drop.
-    if (e.message === 'Dynamic unevaluated tracing is not enabled') {
-      const scope = Object.create(null)
-      return { scope, ref: compileSchema(schema, schema, { ...opts, [optDynamic]: true }, scope) }
-    }
+    if (!opts[optDynamic] && e.message === 'Dynamic unevaluated tracing is not enabled')
+      return compile(schema, { ...opts, [optDynamic]: true })
     throw e
   }
 }
