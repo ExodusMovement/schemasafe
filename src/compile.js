@@ -1018,12 +1018,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     // Checks related to static schema analysis
     if (!allowUnreachable) enforce(!fun.optimizedOut, 'some checks are never reachable')
     if (isSub) {
-      const n0 = schemaPath[schemaPath.length - 1]
-      const n1 = schemaPath[schemaPath.length - 2]
-      const allowed0 = ['not', 'if', 'then', 'else']
-      const allowed1 = ['oneOf', 'anyOf', 'allOf', 'dependencies', 'dependentSchemas']
+      const logicalOp = ['not', 'if', 'then', 'else'].includes(schemaPath[schemaPath.length - 1])
+      const branchOp = ['oneOf', 'anyOf', 'allOf'].includes(schemaPath[schemaPath.length - 2])
+      const depOp = ['dependencies', 'dependentSchemas'].includes(schemaPath[schemaPath.length - 2])
       // Coherence check, unreachable, double-check that we came from expected path
-      enforce(allowed0.includes(n0) || allowed1.includes(n1), 'Unexpected')
+      enforce(logicalOp || branchOp || depOp, 'Unexpected')
     } else if (!schemaPath.includes('not')) {
       // 'not' does not mark anything as evaluated (unlike even if/then/else), so it's safe to exclude from these
       // checks, as we are sure that everything will be checked without it. It can be viewed as a pure add-on.
