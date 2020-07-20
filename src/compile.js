@@ -157,18 +157,13 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (allErrors) {
           fun.write('if (validate.errors === null) validate.errors = []')
           fun.write('validate.errors.push(...%s.map(e => errorMerge(e, %j, %s)))', ...args)
-        } else {
-          fun.write('validate.errors = [errorMerge(%s[0], %j, %s)]', ...args)
-        }
+        } else fun.write('validate.errors = [errorMerge(%s[0], %j, %s)]', ...args)
       } else if (includeErrors === true && errors) {
         const errorJS = format('{ keywordLocation: %j, instanceLocation: %s }', schemaP, dataP)
         if (allErrors) {
           fun.write('if (%s === null) %s = []', errors, errors)
           fun.write('%s.push(%s)', errors, errorJS)
-        } else {
-          // Array assignment is significantly faster, do not refactor the two branches
-          fun.write('%s = [%s]', errors, errorJS)
-        }
+        } else fun.write('%s = [%s]', errors, errorJS) // Array assignment is significantly faster, do not refactor the two branches
       }
       if (suberr) mergeerror(suberr) // can only happen in allErrors
       if (allErrors) fun.write('errorCount++')
@@ -188,6 +183,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const subPath = (...args) => [...schemaPath, ...args]
     const uncertain = (msg) =>
       enforce(!removeAdditional && !useDefaults, `[removeAdditional/useDefaults] uncertain: ${msg}`)
+    const complex = (msg, arg) => enforce(!complexityChecks, `[complexityChecks] ${msg}`, arg)
 
     // evaluated tracing
     const stat = initTracing()
@@ -195,16 +191,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
     if (typeof node === 'boolean') {
       if (node === true) {
-        // any is valid
-        enforceValidation('schema = true', 'is not allowed')
+        enforceValidation('schema = true', 'is not allowed') // any is valid here
         return { stat } // nothing is evaluated for true
-      } else if (definitelyPresent || current.inKeys) {
-        // node === false always fails in this case
-        error({})
-      } else {
-        // node === false
-        errorIf(present(current), {})
       }
+      errorIf(definitelyPresent || current.inKeys ? true : present(current), {}) // node === false
       evaluateDelta({ type: [] }) // everything is evaluated for false
       return { stat }
     }
@@ -362,8 +352,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       enforce(typeof source === 'string', 'Invalid pattern:', source)
       if (requireValidation || requireStringValidation)
         enforce(/^\^.*\$$/.test(source), 'Should start with ^ and end with $:', source)
-      if (complexityChecks && ((source.match(/[{+*]/g) || []).length > 1 || /\)[{+*]/.test(source)))
-        enforce(target.maxLength !== undefined, 'maxLength should be specified for:', source)
+      if ((/[{+*].*[{+*]/.test(source) || /\)[{+*]/.test(source)) && target.maxLength === undefined)
+        complex('maxLength should be specified for pattern:', source)
     }
 
     // Those checks will need to be skipped if another error is set in this block before those ones
@@ -384,8 +374,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
             return { sub: format('false'), delta: { type: [] } }
           case undefined:
             break
-          /* c8 ignore next */
           default:
+            /* c8 ignore next */
             throw new Error('Unreachable')
         }
       }
@@ -494,13 +484,12 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           const formatImpl = formatsObj[fmtname]
           const valid = formatImpl instanceof RegExp || typeof formatImpl === 'function'
           enforce(valid, 'Invalid format used:', fmtname)
-          const n = genformat(formatImpl)
           if (formatImpl instanceof RegExp) {
             // built-in formats are fine, check only ones from options
             if (functions.hasOwn(optFormats, fmtname)) enforceRegex(formatImpl.source)
-            return format('!%s.test(%s)', n, target)
+            return format('!%s.test(%s)', genformat(formatImpl), target)
           }
-          return format('!%s(%s)', n, target)
+          return format('!%s(%s)', genformat(formatImpl), target)
         }
 
         handle('format', ['string'], (value) => {
@@ -511,8 +500,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         handle('pattern', ['string'], (pattern) => {
           enforceRegex(pattern)
           evaluateDelta({ fullstring: true })
-          if (noopRegExps.has(pattern)) return null
-          return safenot(patternTest(pattern, name))
+          return noopRegExps.has(pattern) ? null : safenot(patternTest(pattern, name))
         })
 
         enforce(node.contentSchema !== false, 'contentSchema cannot be set to false')
@@ -606,7 +594,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         return null
       })
 
-      const uniqueIsSimple = () => {
+      const uniqueSimple = () => {
         if (node.maxItems !== undefined) return true
         if (typeof node.items === 'object') {
           if (Array.isArray(node.items) && node.additionalItems === false) return true
@@ -621,10 +609,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       prevWrap(true, () => {
         handle('uniqueItems', ['boolean'], (uniqueItems) => {
           if (uniqueItems === false) return null
-          if (complexityChecks)
-            enforce(uniqueIsSimple(), 'maxItems should be specified for non-primitive uniqueItems')
-          scope.unique = functions.unique
-          scope.deepEqual = functions.deepEqual
+          if (!uniqueSimple()) complex('maxItems should be specified for non-primitive uniqueItems')
+          Object.assign(scope, { unique: functions.unique, deepEqual: functions.deepEqual })
           return format('!unique(%s)', name)
         })
       })

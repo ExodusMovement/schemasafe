@@ -61,6 +61,6 @@ tape('complex are valid without complexity checks', (t) => {
 
 tape('complex fail complexity checks', (t) => {
   for (const schema of complex)
-    t.throws(() => validator(schema, { formats, complexityChecks: true }))
+    t.throws(() => validator(schema, { formats, complexityChecks: true }), /\[complexityChecks\]/)
   t.end()
 })
