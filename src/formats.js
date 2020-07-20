@@ -19,11 +19,20 @@ const core = {
     return host.split('.').every((part) => /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/i.test(part))
   },
 
-  // 'time' matches ajv + length checks, 'date' is slightly improved in month part
-  // date: http://tools.ietf.org/html/rfc3339#section-5.6
-  // date-time: http://tools.ietf.org/html/rfc3339#section-5.6
+  // 'time' matches ajv + length checks, 'date' matches ajv full
+  // date: https://tools.ietf.org/html/rfc3339#section-5.6
+  // date-time: https://tools.ietf.org/html/rfc3339#section-5.6
+  // leap year: https://tools.ietf.org/html/rfc3339#appendix-C
   // 11: 1990-01-01, 1: T, 9: 00:00:00., 12: maxiumum fraction length (non-standard), 6: +00:00
-  date: (input) => input.length === 10 && /^\d{4}-(0[1-9]|1[0-2])-[0-3]\d$/.test(input),
+  date: (input) => {
+    if (input.length !== 10) return false
+    if (/^\d\d\d\d-(0[1-9]|1[0-2])-([012][1-8]|[12]0|[01]9)$/.test(input)) return true
+    const matches = input.match(/^(\d\d\d\d)-(0[1-9]|1[0-2])-(29|3[01])$/)
+    if (!matches) return false
+    const [year, month, day] = [matches[1] | 0, matches[2] | 0, matches[3] | 0]
+    if (month === 2) return day === 29 && (year % 16 === 0 || (year % 4 === 0 && year % 25 !== 0))
+    return day < 31 || month <= 7 === (month % 2 === 1)
+  },
   time: (input) =>
     input.length <= 9 + 12 + 6 &&
     /^([0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-]\d\d(:?\d\d)?)?$/i.test(input),

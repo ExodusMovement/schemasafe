@@ -1,0 +1,20 @@
+[
+  {
+    "description": "Date format: additional tests",
+    "schema": { "type": "string", "format": "date" },
+    "tests": [
+      { "data": "2020-01-31", "valid": true, "description": "valid" },
+      { "data": "2020-03-31", "valid": true, "description": "valid" },
+      { "data": "2020-04-30", "valid": true, "description": "valid" },
+      { "data": "2020-04-31", "valid": false, "description": "invalid" },
+      { "data": "2020-02-31", "valid": false, "description": "invalid" },
+      { "data": "2020-02-30", "valid": false, "description": "invalid" },
+      { "data": "2020-02-29", "valid": true, "description": "valid" },
+      { "data": "2020-02-28", "valid": true, "description": "valid" },
+      { "data": "2021-02-31", "valid": false, "description": "invalid" },
+      { "data": "2021-02-30", "valid": false, "description": "invalid" },
+      { "data": "2021-02-29", "valid": false, "description": "invalid" },
+      { "data": "2021-02-28", "valid": true, "description": "valid" }
+    ]
+  }
+]
