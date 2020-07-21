@@ -778,11 +778,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
                 seen.add(val)
                 fun.write('case %j:', val)
               }
-              fun.write('{')
               const subdelta = rule(current, { properties: props, ...branch }, subPath(ruleName, i))
               evaluateDeltaDynamic(subdelta)
               delta = delta ? orDelta(delta, subdelta) : subdelta
-              fun.write('}')
               fun.write('break')
             }
             fix(map === undefined || keylen(map) === seen.size, 'mismatching mapping size')
