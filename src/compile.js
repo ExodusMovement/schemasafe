@@ -74,13 +74,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     throw new Error(`Unknown options: ${Object.keys(unknown).join(', ')}`)
 
   if (!['strong', 'lax', 'default'].includes(mode)) throw new Error(`Invalid mode: ${mode}`)
-  if (mode === 'strong' && (!requireValidation || !requireStringValidation || !complexityChecks))
-    throw new Error('Strong mode demands require(String)Validation and complexityChecks')
-  if (mode === 'strong' && (weakFormats || allowUnusedKeywords))
-    throw new Error('Strong mode forbids weakFormats and allowUnusedKeywords')
   if (!includeErrors && allErrors) throw new Error('allErrors requires includeErrors to be enabled')
   if (requireSchema && $schemaDefault) throw new Error('requireSchema forbids $schemaDefault')
-  if (mode === 'strong' && !requireSchema) throw new Error('Strong mode demands requireSchema')
+  if (mode === 'strong') {
+    const strong = { requireValidation, requireStringValidation, complexityChecks, requireSchema }
+    const weak = { weakFormats, allowUnusedKeywords }
+    for (const [k, v] of Object.entries(strong)) if (!v) throw new Error(`Strong mode demands ${k}`)
+    for (const [k, v] of Object.entries(weak)) if (v) throw new Error(`Strong mode forbids ${k}`)
+  }
 
   const { gensym, getref, genref, genformat } = scopeMethods(scope)
 
