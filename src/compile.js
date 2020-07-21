@@ -329,16 +329,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
 
     // This is used for typechecks, null means * here
-    const allIn = (arr, valid) => {
-      /* c8 ignore next */
-      if (!Array.isArray(valid) || valid.length === 0) throw new Error('Unreachable')
-      return arr && arr.every((s) => valid.includes(s)) // all arr entries are in valid
-    }
-    const someIn = (arr, possible) => {
-      /* c8 ignore next */
-      if (!Array.isArray(possible) || possible.length === 0) throw new Error('Unreachable')
-      return arr === null || arr.some((x) => possible.includes(x)) // at least one arr entry is in possible
-    }
+    const allIn = (arr, valid) => arr && arr.every((s) => valid.includes(s)) // all arr entries are in valid
+    const someIn = (arr, possible) => possible.some((x) => arr === null || arr.includes(x)) // all possible are in arrs
 
     const parentCheckedType = (...valid) => queryCurrent().some((h) => allIn(h.stat.type, valid))
     const definitelyType = (...valid) => allIn(stat.type, valid) || parentCheckedType(...valid)
