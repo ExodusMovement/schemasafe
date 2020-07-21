@@ -11,15 +11,15 @@ specification:
   2. Type of the object using `discriminator` must be provable to be `object` — can be specified
      either as `type` on the same level as `discriminator`, or in each branch separately.
 
-  3. Each `oneOf`/`anyOf` branch **must** have a `const` rule on the property targeted by
-     `propertyName` of the `discriminator`, either directly or inside a `$ref`.
+  3. Each `oneOf`/`anyOf` branch **must** have a `const` _or_ `enum` rule on the property targeted
+     by `propertyName` of the `discriminator`, either directly or inside a `$ref`.
 
      _While seeming a bit excessive, this is the rule that makes `discriminator` both well-defined
      and compatible with JSON Schema spec, while being a subset of OAPI `discriminator`._
 
-     Currently, those `const` values must be unique strings, which additionally makes `oneOf` and
-     `anyOf` identical there in relation to the validation result. The uniqueness and being a string
-     requirement might be lifted in the future, if it would be deemed useful.
+     Currently, those `const` or `enum` values must be unique strings, which additionally makes
+     `oneOf` and `anyOf` identical there in relation to the validation result. The uniqueness and
+     being a string requirement might be lifted in the future, if it would be deemed useful.
 
   4. Property targeted by `propertyName` of the `discriminator` **must** be placed in `required`,
      either on the same level as `discriminator`, or in each branch separately. Failing to do so
@@ -27,8 +27,8 @@ specification:
 
   5. `mapping` is supported but only when it has the exact same set of branches as `oneOf`/`anyOf`,
      values of the `mapping` correspond to used `$ref` values of the branches and the keys of
-     the mapping match `const` values on the `propertyName` of the `discriminator` in corresponding
-     branches.
+     the mapping match `const`/`enum` values on the `propertyName` of the `discriminator` in
+     corresponding branches.
 
      That way, `mapping` doesn't really do anything at all, and brings in no new information to the
      validator. It only serves as a coherence check (`@exodus/schemasafe` will refuse to compile a
@@ -47,12 +47,12 @@ It affects three things though:
   1. Error reporting — only errors related to the target `oneOf`/`anyOf` branch would be reported
      (or a single error if doesn't match any), instead of errors from each branch merged together.
 
-     Without `discriminator` in the same `oneOf` + `const` combination, it might be very hard to
-     understand from a large set of errors (of a first unrelated error) which exactly mismatched, if
-     the validation failed.
+     Without `discriminator` in the same `oneOf` + `const`/`enum` combination, it might be very hard
+     to understand from a large set of errors (of a first unrelated error) which exactly mismatched,
+     if the validation failed.
 
   2. Optimization — the validator can optimize this efficiently, i.e. first just check the `const`
-     value, then only check the corresponding branch of rules.
+     or `enum` value, then only check the corresponding branch of rules.
 
      This is also possible in `allErrors` mode due to filtering out errors from other branches.
 
@@ -61,7 +61,7 @@ It affects three things though:
      to be a good idea.
 
   3. Schema readability — this makes the schema more clear that just a `oneOf`/`anyOf` over
-     a set of branches with `const` rules.
+     a set of branches with `const`/`enum` rules.
 
 ## Examples
 

@@ -130,5 +130,153 @@
         "valid": false
       }
     ]
+  },
+  {
+    "description": "discriminator with enums",
+    "schemas": [
+      {
+        "type": "object",
+        "required": ["type"],
+        "discriminator": { "propertyName": "type" },
+        "oneOf": [
+          {
+            "properties": { "type": { "const": "obj1" } },
+            "required": ["a"]
+          },
+          {
+            "properties": { "type": { "enum": ["obj2", "obj3"] } },
+            "required": ["b"]
+          }
+        ]
+      },
+      {
+        "$defs": {
+          "obj1": {
+            "type": "object",
+            "properties": { "type": { "const": "obj1" } },
+            "required": ["type", "a"]
+          },
+          "obj2": {
+            "type": "object",
+            "properties": { "type": { "enum": ["obj2", "obj3"] } },
+            "required": ["type", "b"]
+          }
+        },
+        "discriminator": { "propertyName": "type" },
+        "oneOf": [
+          { "$ref": "#/$defs/obj1" },
+          { "$ref": "#/$defs/obj2" }
+        ]
+      },
+      {
+        "$defs": {
+          "obj1": {
+            "type": "object",
+            "properties": { "type": { "const": "obj1" } },
+            "required": ["type", "a"]
+          },
+          "obj2": {
+            "type": "object",
+            "properties": { "type": { "enum": ["obj2", "obj3"] } },
+            "required": ["type", "b"]
+          }
+        },
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "obj1": "#/$defs/obj1",
+            "obj2": "#/$defs/obj2",
+            "obj3": "#/$defs/obj2"
+          }
+        },
+        "oneOf": [{ "$ref": "#/$defs/obj1" }, { "$ref": "#/$defs/obj2" }]
+      },
+      {
+        "$defs": {
+          "obj1": { "required": ["a"] },
+          "obj2": { "required": ["b"] }
+        },
+        "type": "object",
+        "required": ["type"],
+        "discriminator": { "propertyName": "type" },
+        "anyOf": [
+          {
+            "properties": { "type": { "const": "obj1" } },
+            "$ref": "#/$defs/obj1"
+          },
+          {
+            "properties": { "type": { "enum": ["obj2", "obj3"] } },
+            "$ref": "#/$defs/obj2"
+          }
+        ]
+      }
+    ],
+    "tests": [
+      {
+        "description": "A valid object 1",
+        "data": { "type": "obj1", "a": 1 },
+        "valid": true
+      },
+      {
+        "description": "A valid object 2",
+        "data": { "type": "obj2", "b": "string" },
+        "valid": true
+      },
+      {
+        "description": "A valid object 3",
+        "data": { "type": "obj3", "b": "string" },
+        "valid": true
+      },
+      {
+        "description": "An invalid object 1 A",
+        "data": { "type": "obj1" },
+        "valid": false
+      },
+      {
+        "description": "An invalid object 2 A",
+        "data": { "type": "obj2" },
+        "valid": false
+      },
+      {
+        "description": "An invalid object 3 A",
+        "data": { "type": "obj3" },
+        "valid": false
+      },
+      {
+        "description": "An invalid object 1 B",
+        "data": { "type": "obj1", "b": "string" },
+        "valid": false
+      },
+      {
+        "description": "An invalid object 2 B",
+        "data": { "type": "obj2", "a": 1 },
+        "valid": false
+      },
+      {
+        "description": "An invalid object 3 B",
+        "data": { "type": "obj3", "a": 1 },
+        "valid": false
+      },
+      {
+        "description": "An empty object",
+        "data": {},
+        "valid": false
+      },
+      {
+        "description": "An object with invalid type",
+        "data": { "type": "obj9", "a": 1, "b": "string" },
+        "valid": false
+      },
+      {
+        "description": "A non-object",
+        "data": "string",
+        "valid": false
+      },
+      {
+        "description": "An array",
+        "data": [],
+        "valid": false
+      }
+    ]
   }
 ]

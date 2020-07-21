@@ -754,30 +754,38 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         fix(Object.keys(e0).length === 0, 'only "propertyName" and "mapping" are supported')
         const keylen = (obj) => (schemaTypes.get('object')(obj) ? Object.keys(obj).length : null)
         handleDiscriminator = (branches, ruleName) => {
-          fix(map === undefined || keylen(map) === branches.length, 'mismatching mapping size')
           const runDiscriminator = () => {
             fun.write('switch (%s) {', buildName(prop)) // we could also have used ifs for complex types
             let delta
-            for (const [i, { properties, ...branch }] of Object.entries(branches)) {
-              const { [pname]: { const: ownval, ...e1 } = {}, ...props } = properties || {}
-              let val = ownval
-              if (!val && branch.$ref) {
+            for (const [i, { properties = {}, ...branch }] of Object.entries(branches)) {
+              const { [pname]: { const: myval, enum: myenum, ...e1 } = {}, ...props } = properties
+              let vals = myval !== undefined ? [myval] : myenum
+              if (!vals && branch.$ref) {
                 const [sub] = resolveReference(root, schemas, branch.$ref, basePath())[0] || []
                 enforce(schemaTypes.get('object')(sub), 'failed to resolve $ref:', branch.$ref)
-                val = ((sub.properties || {})[pname] || {}).const
+                const rprop = (sub.properties || {})[pname] || {}
+                vals = rprop.const !== undefined ? [rprop.const] : rprop.enum
               }
-              const ok = typeof val === 'string' && !seen.has(val) && Object.keys(e1).length === 0
-              fix(ok, 'branches need unique string const values for [propertyName]')
-              seen.add(val)
-              const okMapping = !map || (functions.hasOwn(map, val) && map[val] === branch.$ref)
-              fix(okMapping, 'mismatching mapping for', val)
-              fun.write('case %j: {', val)
+              const ok1 = Array.isArray(vals) && vals.length > 0
+              fix(ok1, 'branches should have unique string const or enum values for [propertyName]')
+              const ok2 = Object.keys(e1).length === 0 && (!myval || !myenum)
+              fix(ok2, 'only const OR enum rules are allowed on [propertyName] in branches')
+              for (const val of vals) {
+                const okMapping = !map || (functions.hasOwn(map, val) && map[val] === branch.$ref)
+                fix(okMapping, 'mismatching mapping for', val)
+                const valok = typeof val === 'string' && !seen.has(val)
+                fix(valok, 'const/enum values for [propertyName] should be unique strings')
+                seen.add(val)
+                fun.write('case %j:', val)
+              }
+              fun.write('{')
               const subdelta = rule(current, { properties: props, ...branch }, subPath(ruleName, i))
               evaluateDeltaDynamic(subdelta)
               delta = delta ? orDelta(delta, subdelta) : subdelta
               fun.write('}')
               fun.write('break')
             }
+            fix(map === undefined || keylen(map) === seen.size, 'mismatching mapping size')
             evaluateDelta(delta)
             fun.write('default:')
             error({ path: [ruleName] })
