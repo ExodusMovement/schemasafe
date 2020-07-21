@@ -26,6 +26,9 @@ const schemaTypes = new Map(
   })
 )
 
+const schemaIsOlderThan = ($schema, ver) =>
+  schemaVersions.indexOf($schema) > schemaVersions.indexOf(`https://json-schema.org/${ver}/schema`)
+
 // Helper methods for semi-structured paths
 const propvar = (parent, keyname, inKeys = false, number = false) =>
   Object.freeze({ parent, keyname, inKeys, number }) // property by variable
@@ -237,12 +240,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       if ($schema) {
         const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
         enforce(schemaVersions.includes(version), 'Unexpected schema version:', version)
-        const schemaIsOlderThan = (ver) =>
-          schemaVersions.indexOf(version) >
-          schemaVersions.indexOf(`https://json-schema.org/${ver}/schema`)
-        rootMeta.set(root, {
-          exclusiveRefs: schemaIsOlderThan('draft/2019-09'),
-        })
+        rootMeta.set(root, { exclusiveRefs: schemaIsOlderThan(version, 'draft/2019-09') })
       } else enforce(!requireSchema, '[requireSchema] $schema is required')
       handle('$vocabulary', ['object'], ($vocabulary) => {
         for (const [vocab, flag] of Object.entries($vocabulary)) {
