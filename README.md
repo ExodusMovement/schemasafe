@@ -12,7 +12,7 @@ Supports [draft-04/06/07/2019-09](doc/Specification-support.md).
 ## Features
 
 * Converts schemas to self-contained JavaScript files, can be used in the build process.\
-  _Integrates nicely with bundlers, so one won't need to generate code in runtime and that works with CSP._
+  _Integrates nicely with bundlers, so one won't need to generate code in runtime, and that works with CSP._
 * Optional `requireValidation: true` mode enforces full validation of the input object.\
   **Using `mode: "strong"` is recommended which combines that option with other extra schema safety checks.**
 * Does not fail open on unknown or unprocessed keywords — instead throws at build time if schema
