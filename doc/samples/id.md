@@ -62,9 +62,9 @@ const ref2 = function validate(data, recursive) {
   if (!unique(data)) return false
   return true
 };
-const format0 = new RegExp("^(?:|(?:|[a-z][a-z0-9+-.]*:)\\/?\\/)(?:|[^\\\\\\s#][^\\s#]*)(?:|#[^\\\\\\s]*)$", "i");
+const format0 = new RegExp("^(|(|[a-z][a-z0-9+\\-.]*:)\\/?\\/)(|[^\\\\\\s#][^\\s#]*)(|#[^\\\\\\s]*)$", "i");
 const pattern0 = new RegExp("^[^#]*#?$", "u");
-const format1 = new RegExp("^[a-z][a-z0-9+-.]*:[^\\s]*$", "i");
+const format1 = new RegExp("^[a-z][a-z0-9+\\-.]*:[^\\s]*$", "i");
 const pattern1 = new RegExp("^[A-Za-z][-A-Za-z0-9.:_]*$", "u");
 const ref3 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
@@ -468,9 +468,9 @@ const ref2 = function validate(data, recursive) {
   if (!unique(data)) return false
   return true
 };
-const format0 = new RegExp("^(?:|(?:|[a-z][a-z0-9+-.]*:)\\/?\\/)(?:|[^\\\\\\s#][^\\s#]*)(?:|#[^\\\\\\s]*)$", "i");
+const format0 = new RegExp("^(|(|[a-z][a-z0-9+\\-.]*:)\\/?\\/)(|[^\\\\\\s#][^\\s#]*)(|#[^\\\\\\s]*)$", "i");
 const pattern0 = new RegExp("^[^#]*#?$", "u");
-const format1 = new RegExp("^[a-z][a-z0-9+-.]*:[^\\s]*$", "i");
+const format1 = new RegExp("^[a-z][a-z0-9+\\-.]*:[^\\s]*$", "i");
 const pattern1 = new RegExp("^[A-Za-z][-A-Za-z0-9.:_]*$", "u");
 const ref3 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
@@ -874,9 +874,9 @@ const ref2 = function validate(data, recursive) {
   if (!unique(data)) return false
   return true
 };
-const format0 = new RegExp("^(?:|(?:|[a-z][a-z0-9+-.]*:)\\/?\\/)(?:|[^\\\\\\s#][^\\s#]*)(?:|#[^\\\\\\s]*)$", "i");
+const format0 = new RegExp("^(|(|[a-z][a-z0-9+\\-.]*:)\\/?\\/)(|[^\\\\\\s#][^\\s#]*)(|#[^\\\\\\s]*)$", "i");
 const pattern0 = new RegExp("^[^#]*#?$", "u");
-const format1 = new RegExp("^[a-z][a-z0-9+-.]*:[^\\s]*$", "i");
+const format1 = new RegExp("^[a-z][a-z0-9+\\-.]*:[^\\s]*$", "i");
 const pattern1 = new RegExp("^[A-Za-z][-A-Za-z0-9.:_]*$", "u");
 const ref3 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
