@@ -26,12 +26,13 @@ const core = {
   // 11: 1990-01-01, 1: T, 9: 00:00:00., 12: maxiumum fraction length (non-standard), 6: +00:00
   date: (input) => {
     if (input.length !== 10) return false
-    if (/^\d\d\d\d-(0[1-9]|1[0-2])-([012][1-8]|[12]0|[01]9)$/.test(input)) return true
-    const matches = input.match(/^(\d\d\d\d)-(0[1-9]|1[0-2])-(29|3[01])$/)
+    if (/^\d\d\d\d-(0[13-9]|1[012])-([012][1-9]|[123]0)$/.test(input)) return true
+    if (/^\d\d\d\d-02-([012][1-8]|[12]0|[01]9)$/.test(input)) return true
+    if (/^\d\d\d\d-(0[13578]|1[02])-31$/.test(input)) return true
+    const matches = input.match(/^(\d\d\d\d)-02-29$/)
     if (!matches) return false
-    const [year, month, day] = [matches[1] | 0, matches[2] | 0, matches[3] | 0]
-    if (month === 2) return day === 29 && (year % 16 === 0 || (year % 4 === 0 && year % 25 !== 0))
-    return day < 31 || month <= 7 === (month % 2 === 1)
+    const year = matches[1] | 0
+    return year % 16 === 0 || (year % 4 === 0 && year % 25 !== 0)
   },
   time: (input) =>
     input.length <= 9 + 12 + 6 &&
@@ -41,12 +42,13 @@ const core = {
     if (input.length > 10 + 1 + 9 + 12 + 6) return false
     const full = /^\d{4}-(0[1-9]|1[0-2])-[0-3]\d[t\s]([0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-]\d\d(:?\d\d)?)$/i
     if (!full.test(input)) return false
-    if (/^\d\d\d\d-(0[1-9]|1[0-2])-([012][1-8]|[12]0|[01]9)/.test(input)) return true
-    const matches = input.match(/^(\d\d\d\d)-(0[1-9]|1[0-2])-(29|3[01])/)
+    if (/^\d\d\d\d-(0[13-9]|1[012])-([012][1-9]|[123]0)/.test(input)) return true
+    if (/^\d\d\d\d-02-([012][1-8]|[12]0|[01]9)/.test(input)) return true
+    if (/^\d\d\d\d-(0[13578]|1[02])-31/.test(input)) return true
+    const matches = input.match(/^(\d\d\d\d)-02-29/)
     if (!matches) return false
-    const [year, month, day] = [matches[1] | 0, matches[2] | 0, matches[3] | 0]
-    if (month === 2) return day === 29 && (year % 16 === 0 || (year % 4 === 0 && year % 25 !== 0))
-    return day < 31 || month <= 7 === (month % 2 === 1)
+    const year = matches[1] | 0
+    return year % 16 === 0 || (year % 4 === 0 && year % 25 !== 0)
   },
 
   /* ipv4 and ipv6 are from ajv with length restriction */
