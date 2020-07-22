@@ -183,4 +183,4 @@ versions.
 
 ## License
 
-MIT
+[MIT](./LICENSE)
