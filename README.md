@@ -11,21 +11,21 @@ Supports [draft-04/06/07/2019-09](doc/Specification-support.md).
 
 ## Features
 
-* Converts schemas to self-contained JavaScript files, can be used in the build process.\
+* [Converts schemas to self-contained JavaScript files](#generate-modules), can be used in the build process.\
   _Integrates nicely with bundlers, so one won't need to generate code in runtime, and that works with CSP._
 * Optional `requireValidation: true` mode enforces full validation of the input object.\
   **Using `mode: "strong"` is recommended which combines that option with other extra schema safety checks.**
-* Does not fail open on unknown or unprocessed keywords — instead throws at build time if schema
-  was not fully understood.
+* Does not fail open on unknown or unprocessed keywords — instead throws at build time if schema was not fully understood.
   _That is implemented by tracking processed keywords and ensuring that none remain uncovered._
 * Does not fail open on schema problems -- instead throws at build time.\
   _E.g. it will detect mistakes like `{type: "array", "maxLength": 2}`._
-* Under 1700 lines of code, non-minified.
-* Uses secure code generation approach to prevent data from schema from leaking into the generated
-  code without being JSON-wrapped.
-* 0 dependencies
-* Very fast
-* Supports JSON Schema draft-04/06/07/2019-09 and the `discriminator` OpenAPI keyword.
+* [Under 1700 lines of code](./doc/Auditable.md), non-minified.
+* Uses [secure code generation](./doc/Secure-code-generation.md) approach to prevent data from schema from leaking into
+  the generated code without being JSON-wrapped.
+* [0 dependencies](./doc/Auditable.md)
+* [Very fast](./doc/Performance.md)
+* Supports JSON Schema [draft-04/06/07/2019-09](./doc/Specification-support.md) and the
+  [`discriminator` OpenAPI keyword](./doc/Discriminator-support.md).
 * Can assign defaults and/or remove additional properties when schema allows to do that safely.
   Throws at build time if those options are used with schemas that don't allow to do that safely.
 

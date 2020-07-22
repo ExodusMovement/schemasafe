@@ -1,6 +1,7 @@
 # Performance
 
-`@exodus/schemasafe` uses code generation to be fast.
+`@exodus/schemasafe` uses code generation to
+[be fast](https://github.com/ebdrup/json-schema-benchmark#performance).
 
 It compiles the provided schemas into [auditable](./Auditable.md) validation and parser
 [modules](./Module-generation.md), which can be optimized by V8 in run-time.
