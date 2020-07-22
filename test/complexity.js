@@ -29,6 +29,8 @@ const simple = [
   { patternProperties: { '^foo.*$': {} } },
   { patternProperties: { '^b.*a.*r$': {} }, propertyNames: { maxLength: 10 } },
   { propertyNames: { pattern: '^(a[a-z]+)*$', maxLength: 10 } },
+  { uniqueItems: true, items: { const: 'a' } },
+  { uniqueItems: true, items: { enum: ['a', 'b', 'c'] } },
 ]
 
 const complex = [

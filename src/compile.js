@@ -579,10 +579,13 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (node.maxItems !== undefined) return true
         if (typeof node.items === 'object') {
           if (Array.isArray(node.items) && node.additionalItems === false) return true
-          if (!Array.isArray(node.items) && node.items.type) {
-            const itemTypes = Array.isArray(node.items.type) ? node.items.type : [node.items.type]
-            const primitiveTypes = ['null', 'boolean', 'number', 'integer', 'string']
-            if (itemTypes.every((itemType) => primitiveTypes.includes(itemType))) return true
+          if (!Array.isArray(node.items)) {
+            if (node.items.enum || functions.hasOwn(node.items, 'const')) return true
+            if (node.items.type) {
+              const itemTypes = Array.isArray(node.items.type) ? node.items.type : [node.items.type]
+              const primitiveTypes = ['null', 'boolean', 'number', 'integer', 'string']
+              if (itemTypes.every((itemType) => primitiveTypes.includes(itemType))) return true
+            }
           }
         }
         return false
