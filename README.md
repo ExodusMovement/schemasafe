@@ -15,10 +15,10 @@ Supports [draft-04/06/07/2019-09](doc/Specification-support.md) and the
 * [Converts schemas to self-contained JavaScript files](#generate-modules), can be used in the build process.\
   _Integrates nicely with bundlers, so one won't need to generate code in runtime, and that works with CSP._
 * Optional `requireValidation: true` mode enforces full validation of the input object.\
-  **Using `mode: "strong"` is recommended which combines that option with other extra schema safety checks.**
+  **Using `mode: "strong"` is recommended, — it combines that option with additional schema safety checks.**
 * Does not fail open on unknown or unprocessed keywords — instead throws at build time if schema was not fully understood.
   _That is implemented by tracking processed keywords and ensuring that none remain uncovered._
-* Does not fail open on schema problems -- instead throws at build time.\
+* Does not fail open on schema problems — instead throws at build time.\
   _E.g. it will detect mistakes like `{type: "array", "maxLength": 2}`._
 * [Under 1700 lines of code](./doc/Auditable.md), non-minified.
 * Uses [secure code generation](./doc/Secure-code-generation.md) approach to prevent data from schema from leaking into
@@ -132,6 +132,9 @@ See [Error handling](./doc/Error-handling.md) for more information.
 
 ## Generate Modules
 
+See the [doc/samples](./doc/samples/README.md) directory to see how `@exodus/schemasafe` compiles
+the `draft/2019-09` test suite.
+
 To compile a validator function to an IIFE, call `validate.toModule()`:
 
 ```js
@@ -166,9 +169,9 @@ console.log(validate.toModule())
 ## Performance
 
 `@exodus/schemasafe` uses code generation to turn a JSON schema into javascript code that is easily
-optimizeable by v8.
+optimizeable by v8 and [extremely fast](https://github.com/ebdrup/json-schema-benchmark).
 
-See [Performance](./doc/Performance.md) for information on options that might affect performace
+See [Performance](./doc/Performance.md) for information on options that might affect performance
 both ways.
 
 ## Previous work
