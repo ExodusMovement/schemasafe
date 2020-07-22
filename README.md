@@ -2,7 +2,8 @@
 
 A code-generating [JSON Schema](https://json-schema.org/) validator that attempts to be reasonably secure.
 
-Supports [draft-04/06/07/2019-09](doc/Specification-support.md).
+Supports [draft-04/06/07/2019-09](doc/Specification-support.md) and the
+[`discriminator` OpenAPI keyword](./doc/Discriminator-support.md).
 
 [![Node CI Status](https://github.com/ExodusMovement/schemasafe/workflows/Node%20CI/badge.svg)](https://github.com/ExodusMovement/schemasafe/actions)
 [![npm](https://img.shields.io/npm/v/@exodus/schemasafe.svg)](https://www.npmjs.com/package/@exodus/schemasafe)
@@ -24,7 +25,7 @@ Supports [draft-04/06/07/2019-09](doc/Specification-support.md).
   the generated code without being JSON-wrapped.
 * [0 dependencies](./doc/Auditable.md)
 * [Very fast](./doc/Performance.md)
-* Supports JSON Schema [draft-04/06/07/2019-09](./doc/Specification-support.md) and the
+* Supports JSON Schema [draft-04/06/07/2019-09](./doc/Specification-support.md) and a strict subset of the
   [`discriminator` OpenAPI keyword](./doc/Discriminator-support.md).
 * Can assign defaults and/or remove additional properties when schema allows to do that safely.
   Throws at build time if those options are used with schemas that don't allow to do that safely.
