@@ -25,7 +25,7 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [allOf](./allOf.md)                                               | 12    | -                 | -        | -             |
 | [anchor](./anchor.md)                                             | 3     | -                 | -        | -             |
 | [anyOf](./anyOf.md)                                               | 8     | -                 | 3        | -             |
-| [boolean_schema](./boolean_schema.md)                             | 2     | -                 | -        | 1             |
+| [boolean_schema](./boolean_schema.md)                             | 2     | -                 | -        | -             |
 | [const](./const.md)                                               | 11    | -                 | -        | -             |
 | [contains](./contains.md)                                         | 5     | -                 | -        | -             |
 | [default](./default.md)                                           | 2     | -                 | -        | -             |

@@ -20,7 +20,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] schema = true is not allowed at #`
 
 
 ## boolean schema 'false'
@@ -36,16 +36,9 @@ false
 ```js
 'use strict'
 const ref0 = function validate(data, recursive) {
+  return false
   return true
 };
 return ref0
 ```
-
-##### Strong mode notices
-
- * `[requireValidation] type should be specified at #`
-
-### Misclassified!
-
-**This schema caused 9 misclassifications!**
 
