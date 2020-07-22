@@ -95,6 +95,9 @@ console.log(validate('hello')) // true
 console.log(validate(42)) // false
 ```
 
+`schemas` can be either an object as shown above, a `Map`, or plain array of schemas (given that
+those have corresponding `$id` set at top level inside schemas themselves).
+
 ## Enabling errors shows information about the source of the error
 
 When the `includeErrors` option is set to `true`, `@exodus/schemasafe` also outputs:
