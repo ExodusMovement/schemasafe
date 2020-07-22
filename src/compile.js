@@ -577,26 +577,22 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
       const uniqueSimple = () => {
         if (node.maxItems !== undefined) return true
-        if (typeof node.items === 'object') {
-          if (Array.isArray(node.items) && node.additionalItems === false) return true
-          if (!Array.isArray(node.items)) {
-            const itemsSimple = (ischema) => {
-              if (ischema.enum || functions.hasOwn(ischema, 'const')) return true
-              if (ischema.type) {
-                const itemTypes = Array.isArray(ischema.type) ? ischema.type : [ischema.type]
-                const primitiveTypes = ['null', 'boolean', 'number', 'integer', 'string']
-                if (itemTypes.every((itemType) => primitiveTypes.includes(itemType))) return true
-              }
-              if (ischema.$ref) {
-                const [sub] = resolveReference(root, schemas, ischema.$ref, basePath())[0] || []
-                enforce(schemaTypes.get('object')(sub), 'failed to resolve $ref:', ischema.$ref)
-                if (itemsSimple(sub)) return true
-              }
-              return false
-            }
-            if (itemsSimple(node.items)) return true
+        if (Array.isArray(node.items) && node.additionalItems === false) return true
+        const itemsSimple = (ischema) => {
+          if (!schemaTypes.get('object')(ischema)) return false
+          if (ischema.enum || functions.hasOwn(ischema, 'const')) return true
+          if (ischema.type) {
+            const itemTypes = Array.isArray(ischema.type) ? ischema.type : [ischema.type]
+            const primitiveTypes = ['null', 'boolean', 'number', 'integer', 'string']
+            if (itemTypes.every((itemType) => primitiveTypes.includes(itemType))) return true
           }
+          if (ischema.$ref) {
+            const [sub] = resolveReference(root, schemas, ischema.$ref, basePath())[0] || []
+            if (itemsSimple(sub)) return true
+          }
+          return false
         }
+        if (itemsSimple(node.items)) return true
         return false
       }
       prevWrap(true, () => {
