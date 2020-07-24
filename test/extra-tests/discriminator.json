@@ -76,6 +76,38 @@
             "$ref": "#/$defs/obj2"
           }
         ]
+      },
+      {
+        "type": "object",
+        "required": ["type"],
+        "discriminator": { "propertyName": "type" },
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": { "type": { "const": "obj1" }, "a": { "type": "number" } },
+            "required": ["a"]
+          },
+          {
+            "properties": { "type": { "const": "obj2" }, "b": { "type": "string" } },
+            "required": ["b"]
+          }
+        ]
+      },
+      {
+        "type": "object",
+        "required": ["type"],
+        "discriminator": { "propertyName": "type" },
+        "unevaluatedProperties": false,
+        "oneOf": [
+          {
+            "properties": { "type": { "const": "obj1" }, "a": { "type": "number" } },
+            "required": ["a"]
+          },
+          {
+            "properties": { "type": { "const": "obj2" }, "b": { "type": "string" } },
+            "required": ["b"]
+          }
+        ]
       }
     ],
     "tests": [

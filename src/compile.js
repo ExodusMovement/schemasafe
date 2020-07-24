@@ -141,7 +141,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   const recursiveAnchor = schema && schema.$recursiveAnchor === true
   const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
-  const visit = (errors, history, current, node, schemaPath, trace = {}) => {
+  const visit = (errors, history, current, node, schemaPath, trace = {}, constProperty = null) => {
     // e.g. top-level data and property names, OR already checked by present() in history, OR in keys and not undefined
     const isSub = history.length > 0 && history[history.length - 1].prop === current
     const queryCurrent = () => history.filter((h) => h.prop === current)
@@ -669,8 +669,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       }
 
       handle('properties', ['object'], (properties) => {
-        for (const p of Object.keys(properties))
+        for (const p of Object.keys(properties)) {
+          if (constProperty === p) continue // checked in discriminator, avoid double-check
           rule(currPropImm(p, checked(p)), properties[p], subPath('properties', p))
+        }
         evaluateDelta({ properties: Object.keys(properties || {}) })
         return null
       })
@@ -756,8 +758,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           const runDiscriminator = () => {
             fun.write('switch (%s) {', buildName(prop)) // we could also have used ifs for complex types
             let delta
-            for (const [i, { properties = {}, ...branch }] of Object.entries(branches)) {
-              const { [pname]: { const: myval, enum: myenum, ...e1 } = {}, ...props } = properties
+            for (const [i, branch] of Object.entries(branches)) {
+              const { const: myval, enum: myenum, ...e1 } = (branch.properties || {})[pname] || {}
               let vals = myval !== undefined ? [myval] : myenum
               if (!vals && branch.$ref) {
                 const [sub] = resolveReference(root, schemas, branch.$ref, basePath())[0] || []
@@ -777,7 +779,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
                 seen.add(val)
                 fun.write('case %j:', val)
               }
-              const subdelta = rule(current, { properties: props, ...branch }, subPath(ruleName, i))
+              const subdelta = rule(current, branch, subPath(ruleName, i), dyn, pname)
               evaluateDeltaDynamic(subdelta)
               delta = delta ? orDelta(delta, subdelta) : subdelta
               fun.write('break')
