@@ -18,7 +18,7 @@ module.exports = () => {
 
   const build = () => {
     if (indent !== 0) throw new Error('Unexpected indent at build()')
-    const joined = lines.map((line) => `${' '.repeat(line.indent * 2)}${line.code}`).join('\n')
+    const joined = lines.map((line) => format('%w%s', line.indent * 2, line.code)).join('\n')
     return /^[a-z][a-z0-9]*$/i.test(joined) ? `return ${joined}` : `return (${joined})`
   }
 

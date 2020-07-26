@@ -36,7 +36,7 @@ const jsval = (val) => {
 }
 
 const format = (fmt, ...args) => {
-  const res = fmt.replace(/%[%drscj]/g, (match) => {
+  const res = fmt.replace(/%[%drscjw]/g, (match) => {
     if (match === '%%') return '%'
     if (args.length === 0) throw new Error('Unexpected arguments count')
     const val = args.shift()
@@ -56,6 +56,9 @@ const format = (fmt, ...args) => {
         throw new Error('Expected a compare op')
       case '%j':
         return jsval(val)
+      case '%w':
+        if (Number.isInteger(val) && val >= 0) return ' '.repeat(val)
+        throw new Error('Expected a non-negative integer for indentation')
     }
     /* c8 ignore next */
     throw new Error(`Unreachable`)
