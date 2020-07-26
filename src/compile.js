@@ -24,6 +24,7 @@ const schemaTypes = new Map(
     jsonval: (arg) => functions.deepEqual(arg, JSON.parse(JSON.stringify(arg))),
   })
 )
+const isPlainObject = schemaTypes.get('object')
 
 const schemaIsOlderThan = ($schema, ver) =>
   schemaVersions.indexOf($schema) > schemaVersions.indexOf(`https://json-schema.org/${ver}/schema`)
@@ -38,7 +39,7 @@ const optDynamic = Symbol('optDynamic')
 
 const constantValue = (schema) => {
   if (typeof schema === 'boolean') return schema
-  if (schemaTypes.get('object')(schema) && Object.keys(schema).length === 0) return true
+  if (isPlainObject(schema) && Object.keys(schema).length === 0) return true
   return undefined
 }
 
@@ -202,7 +203,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       return { stat }
     }
 
-    enforce(node && Object.getPrototypeOf(node) === Object.prototype, 'Schema is not an object')
+    enforce(isPlainObject(node), 'Schema is not an object')
     for (const key of Object.keys(node))
       enforce(knownKeywords.includes(key) || allowUnusedKeywords, 'Keyword not supported:', key)
 
@@ -578,7 +579,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (node.maxItems !== undefined) return true
         if (Array.isArray(node.items) && node.additionalItems === false) return true
         const itemsSimple = (ischema) => {
-          if (!schemaTypes.get('object')(ischema)) return false
+          if (!isPlainObject(ischema)) return false
           if (ischema.enum || functions.hasOwn(ischema, 'const')) return true
           if (ischema.type) {
             const itemTypes = Array.isArray(ischema.type) ? ischema.type : [ischema.type]
@@ -752,7 +753,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const prop = currPropImm(pname)
         fix(pname && !node.oneOf !== !node.anyOf, 'need propertyName, oneOf OR anyOf')
         fix(Object.keys(e0).length === 0, 'only "propertyName" and "mapping" are supported')
-        const keylen = (obj) => (schemaTypes.get('object')(obj) ? Object.keys(obj).length : null)
+        const keylen = (obj) => (isPlainObject(obj) ? Object.keys(obj).length : null)
         handleDiscriminator = (branches, ruleName) => {
           const runDiscriminator = () => {
             fun.write('switch (%s) {', buildName(prop)) // we could also have used ifs for complex types
@@ -762,7 +763,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
               let vals = myval !== undefined ? [myval] : myenum
               if (!vals && branch.$ref) {
                 const [sub] = resolveReference(root, schemas, branch.$ref, basePath())[0] || []
-                enforce(schemaTypes.get('object')(sub), 'failed to resolve $ref:', branch.$ref)
+                enforce(isPlainObject(sub), 'failed to resolve $ref:', branch.$ref)
                 const rprop = (sub.properties || {})[pname] || {}
                 vals = rprop.const !== undefined ? [rprop.const] : rprop.enum
               }
