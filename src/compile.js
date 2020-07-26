@@ -16,8 +16,8 @@ const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*', '
 const schemaTypes = new Map(
   Object.entries({
     boolean: (arg) => typeof arg === 'boolean',
-    array: (arg) => Array.isArray(arg),
-    object: (arg) => typeof arg === 'object' && arg && !Array.isArray(arg),
+    array: (arg) => Array.isArray(arg) && Object.getPrototypeOf(arg) === Array.prototype,
+    object: (arg) => arg && Object.getPrototypeOf(arg) === Object.prototype,
     finite: (arg) => Number.isFinite(arg),
     natural: (arg) => Number.isInteger(arg) && arg >= 0,
     string: (arg) => typeof arg === 'string',
