@@ -673,7 +673,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           if (constProperty === p) continue // checked in discriminator, avoid double-check
           rule(currPropImm(p, checked(p)), properties[p], subPath('properties', p))
         }
-        evaluateDelta({ properties: Object.keys(properties || {}) })
+        evaluateDelta({ properties: Object.keys(properties) })
         return null
       })
 
@@ -687,7 +687,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
               })
             }
           })
-          evaluateDelta({ patterns: Object.keys(patternProperties || {}) })
+          evaluateDelta({ patterns: Object.keys(patternProperties) })
           return null
         })
         if (node.additionalProperties || node.additionalProperties === false) {
