@@ -19,7 +19,6 @@ const schemaTypes = new Map(
     array: (arg) => Array.isArray(arg),
     object: (arg) => typeof arg === 'object' && arg && !Array.isArray(arg),
     finite: (arg) => Number.isFinite(arg),
-    integer: (arg) => Number.isInteger(arg),
     natural: (arg) => Number.isInteger(arg) && arg >= 0,
     string: (arg) => typeof arg === 'string',
     jsonval: (arg) => functions.deepEqual(arg, JSON.parse(JSON.stringify(arg))),
