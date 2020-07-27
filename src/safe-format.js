@@ -61,7 +61,7 @@ const format = (fmt, ...args) => {
         throw new Error('Expected a non-negative integer for indentation')
     }
     /* c8 ignore next */
-    throw new Error(`Unreachable`)
+    throw new Error('Unreachable')
   })
   if (args.length !== 0) throw new Error('Unexpected arguments count')
   return new SafeString(res)

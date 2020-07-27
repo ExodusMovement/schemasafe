@@ -9,7 +9,8 @@ function untilde(string) {
       case '~0':
         return '~'
     }
-    throw new Error(`Invalid tilde escape: ${match}`)
+    /* c8 ignore next */
+    throw new Error('Unreachable')
   })
 }
 
