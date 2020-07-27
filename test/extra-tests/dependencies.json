@@ -1,0 +1,75 @@
+[
+  {
+    "description": "complex dependencies",
+    "schema": {
+      "type": "object",
+      "required": ["x", "y"],
+      "dependentRequired": {
+        "x": ["a", "b", "c", "d"],
+        "b": ["c", "d", "e"],
+        "d": ["c" ]
+      },
+      "dependentSchemas": {
+        "a": { "required": [ "k" ], "properties": { "k": { "type": "string" } } },
+        "c": { "required": [ "k", "c" ] }
+      }
+    },
+    "tests": [
+      {
+        "description": "Empty is invalid",
+        "data": {},
+        "valid": false
+      },
+      {
+        "description": "All required properties present",
+        "data": { "x": 1, "y": 1, "a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "k": "s" },
+        "valid": true
+      },
+      {
+        "description": "Invalid 'k' type",
+        "data": { "x": 1, "y": 1, "a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "k": 1},
+        "valid": false
+      },
+      {
+        "description": "Missing 'x'",
+        "data": { "y": 1, "a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "k": "s" },
+        "valid": false
+      },
+      {
+        "description": "Missing 'y'",
+        "data": { "x": 1, "a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "k": "s" },
+        "valid": false
+      },
+      {
+        "description": "Missing 'a'",
+        "data": { "x": 1, "y": 1, "b": 1, "c": 1, "d": 1, "e": 1, "k": "s" },
+        "valid": false
+      },
+      {
+        "description": "Missing 'b'",
+        "data": { "x": 1, "y": 1, "a": 1, "c": 1, "d": 1, "e": 1, "k": "s" },
+        "valid": false
+      },
+      {
+        "description": "Missing 'c'",
+        "data": { "x": 1, "y": 1, "a": 1, "b": 1, "d": 1, "e": 1, "k": "s" },
+        "valid": false
+      },
+      {
+        "description": "Missing 'd'",
+        "data": { "x": 1, "y": 1, "a": 1, "b": 1, "c": 1, "e": 1, "k": "s" },
+        "valid": false
+      },
+      {
+        "description": "Missing 'e'",
+        "data": { "x": 1, "y": 1, "a": 1, "b": 1, "c": 1, "d": 1, "k": "s" },
+        "valid": false
+      },
+      {
+        "description": "Missing 'k'",
+        "data": { "x": 1, "y": 1, "a": 1, "b": 1, "c": 1, "d": 1, "e": 1 },
+        "valid": false
+      }
+    ]
+  }
+]
