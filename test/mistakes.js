@@ -1,7 +1,7 @@
 'use strict'
 
 const tape = require('tape')
-const { validator } = require('..')
+const { validator, parser } = require('..')
 
 tape('$ref throws on invalid refs', (t) => {
   const throws = (schema, message = /failed to resolve \$ref/) =>
@@ -53,8 +53,26 @@ tape('Invalid options throw', (t) => {
   throws({ mode: 'stong' }, /Invalid mode/)
   throws({ mode: 'strong', requireValidation: false }, /Strong mode/)
 
+  passes({ isJSON: true })
+  passes({ jsonCheck: true })
+  passes({ isJSON: true, jsonCheck: false })
+  passes({ isJSON: false, jsonCheck: true })
+  throws({ isJSON: true, jsonCheck: true }, /Can not specify.* isJSON and jsonCheck/)
+
   passes({ schemas: [] })
   throws({ schemas: 'not-a-valid-schemas' }, /Unexpected value for 'schemas' option/)
+
+  t.end()
+})
+
+tape('Invalid parser options throw', (t) => {
+  const schema = { $schema: 'http://json-schema.org/draft/2019-09/schema#', type: 'number' }
+  const throws = (options, message) => t.throws(() => parser(schema, options), message)
+  const passes = (options) => t.doesNotThrow(() => parser(schema, options))
+
+  passes({})
+  throws({ isJSON: true }, /not applicable in parser mode/)
+  throws({ jsonCheck: true }, /not applicable in parser mode/)
 
   t.end()
 })
