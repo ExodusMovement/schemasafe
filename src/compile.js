@@ -289,7 +289,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const properties = delta.properties.filter((x) => !inStat([x], []))
         const patterns = delta.patterns.filter((x) => !inStat([], [x]))
         if (properties.length > 0) fun.write('%s[0].push(...%j)', dyn.props, properties)
-        if (patterns.length > 0) fun.write('%s[1].push(...%s)', dyn.props, patterns)
+        if (patterns.length > 0) fun.write('%s[1].push(...%j)', dyn.props, patterns)
       }
     }
     const applyDynamicToDynamic = (target, items, props) => {
