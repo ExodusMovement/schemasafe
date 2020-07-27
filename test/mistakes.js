@@ -85,3 +85,29 @@ tape('Invalid dependencies', (t) => {
 
   t.end()
 })
+
+tape('Invalid max/min', (t) => {
+  const throws = (schema, message = /Invalid (min|max)(imum|Items|Properties)/) =>
+    t.throws(() => validator(schema), message)
+  const passes = (schema) => t.doesNotThrow(() => validator(schema))
+
+  passes({})
+
+  passes({ items: [true, true, true], maxItems: 3 })
+  passes({ items: [true, true, true], maxItems: 4 })
+  throws({ items: [true, true, true], maxItems: 2 })
+
+  passes({ minItems: 2, maxItems: 3 })
+  passes({ minItems: 3, maxItems: 3 })
+  throws({ minItems: 3, maxItems: 2 })
+
+  passes({ minProperties: 2, maxProperties: 3 })
+  passes({ minProperties: 3, maxProperties: 3 })
+  throws({ minProperties: 3, maxProperties: 2 })
+
+  passes({ minimum: 2, maximum: 3 })
+  passes({ minimum: 3, maximum: 3 })
+  throws({ minimum: 3, maximum: 2 })
+
+  t.end()
+})
