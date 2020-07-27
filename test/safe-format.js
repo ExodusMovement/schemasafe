@@ -59,5 +59,17 @@ tape('format throws on invalid data', (t) => {
   t.throws(() => format('%c', /xx/), /Expected a compare op/)
   t.throws(() => format('%c', safe('id')), /Expected a compare op/)
 
+  // %w: - identation size
+  t.doesNotThrow(() => format('%w', 4))
+  t.doesNotThrow(() => format('%w', 0))
+  t.throws(() => format('%w', -4), /Expected a non-negative integer/)
+  t.throws(() => format('%w', Infinity))
+  t.throws(() => format('%w', 'id'), /Expected a non-negative integer/)
+  t.throws(() => format('%w', '<'), /Expected a non-negative integer/)
+  t.throws(() => format('%w', '>='), /Expected a non-negative integer/)
+  t.throws(() => format('%w', {}), /Expected a non-negative integer/)
+  t.throws(() => format('%w', /xx/), /Expected a non-negative integer/)
+  t.throws(() => format('%w', safe('id')), /Expected a non-negative integer/)
+
   t.end()
 })
