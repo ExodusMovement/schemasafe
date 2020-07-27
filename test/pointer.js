@@ -77,6 +77,17 @@ const testsU = (schemas) => [
   [root, `${url}three/#/x/y`, '', schemas.three.x.y, schemas.three, `${url}three/xid/`],
 ]
 
+tape('invalid $id in schemas array', (t) => {
+  const valid = ['https://example.com/#', 'https://example.com/#']
+  for (const $id of valid) t.doesNotThrow(() => buildSchemas([{ $id }]))
+
+  const invalid = ['foo', 'foo#', 'foo/#', '#/foo', '/foo#']
+  for (const $id of invalid)
+    t.throws(() => buildSchemas([{ $id }]), /Schema with missing or invalid \$id/)
+
+  t.end()
+})
+
 tape('with a schemas object', (t) => {
   test(t, schemasI, testsI(schemasI))
   test(t, schemasU, testsU(schemasI))
