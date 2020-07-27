@@ -111,3 +111,13 @@ tape('Invalid max/min', (t) => {
 
   t.end()
 })
+
+tape('Invalid default', (t) => {
+  t.doesNotThrow(() => validator({ default: {} }, { useDefaults: false }))
+  t.doesNotThrow(() => validator({ items: [{ default: {} }] }, { useDefaults: true }))
+  t.throws(
+    () => validator({ default: {} }, { useDefaults: true }),
+    /Can not apply default value here/
+  )
+  t.end()
+})
