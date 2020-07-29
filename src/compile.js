@@ -253,13 +253,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
     if (node === schema && recursiveAnchor) handle('$recursiveAnchor', ['boolean'], null) // already applied
 
-    handle('title', ['string'], null) // unused, meta-only
-    handle('description', ['string'], null) // unused, meta-only
-    handle('deprecated', ['boolean'], null) // unused, meta-only
-    handle('readOnly', ['boolean'], null) // unused, meta-only
-    handle('writeOnly', ['boolean'], null) // unused, meta-only
     handle('examples', ['array'], null) // unused, meta-only
-    handle('$comment', ['string'], null) // unused, meta-only
+    for (const ignore of ['title', 'description', '$comment']) handle(ignore, ['string'], null) // unused, meta-only strings
+    for (const ignore of ['deprecated', 'readOnly', 'writeOnly']) handle(ignore, ['boolean'], null) // unused, meta-only flags
 
     handle('$defs', ['object'], null) || handle('definitions', ['object'], null) // defs are allowed, those are validated on usage
 
