@@ -16,7 +16,8 @@ const knownKeywords = [
   ...['unevaluatedProperties', 'unevaluatedItems'], // see-through
   // Unused meta keywords not affecting validation (annotations and comments)
   // https://json-schema.org/understanding-json-schema/reference/generic.html
-  ...['deprecated', 'description', 'title', 'examples', '$comment'], // unused
+  // https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.9
+  ...['title', 'description', 'deprecated', 'readOnly', 'writeOnly', 'examples', '$comment'], // unused meta
   'discriminator', // optimization hint and error filtering only, does not affect validation result
 ]
 
