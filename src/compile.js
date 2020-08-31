@@ -57,6 +57,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     requireSchema = opts.mode === 'strong',
     requireValidation = opts.mode === 'strong',
     requireStringValidation = opts.mode === 'strong',
+    forbidNoopValues = opts.mode === 'strong', // e.g. $recursiveAnchor: false (it's false by default)
     complexityChecks = opts.mode === 'strong',
     unmodifiedPrototypes = false, // assumes no mangled Object/Array prototypes
     isJSON = false, // assume input to be JSON, which e.g. makes undefined impossible
@@ -251,8 +252,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       })
     }
 
-    if (node === schema && recursiveAnchor) handle('$recursiveAnchor', ['boolean'], null) // already applied
-
     handle('examples', ['array'], null) // unused, meta-only
     for (const ignore of ['title', 'description', '$comment']) handle(ignore, ['string'], null) // unused, meta-only strings
     for (const ignore of ['deprecated', 'readOnly', 'writeOnly']) handle(ignore, ['boolean'], null) // unused, meta-only flags
@@ -266,6 +265,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
     handle('$id', ['string'], setId) || handle('id', ['string'], setId)
     handle('$anchor', ['string'], null) // $anchor is used only for ref resolution, on usage
+
+    if (node === schema && (recursiveAnchor || !forbidNoopValues))
+      handle('$recursiveAnchor', ['boolean'], null) // already applied
 
     // evaluated: declare dynamic
     const needUnevaluated = (rule) =>
