@@ -27,15 +27,28 @@ module.exports = [
     ...require('./../JSON-Schema-Test-Suite/remotes/subSchemas-defs.json'),
   },
   {
-    $id: 'http://localhost:1234/folder/folderInteger.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/folder/folderInteger.json'),
-  },
-  {
     $id: 'http://localhost:1234/name.json',
     ...require('./../JSON-Schema-Test-Suite/remotes/name.json'),
   },
   {
     $id: 'http://localhost:1234/name-defs.json',
     ...require('./../JSON-Schema-Test-Suite/remotes/name-defs.json'),
+  },
+  {
+    // for AJV test issues/62_resolution_scope_change.json
+    $id: 'http://localhost:1234/folder/folderInteger.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChange/folderInteger.json'),
+  },
+  {
+    $id: 'http://localhost:1234/baseUriChange/folderInteger.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChange/folderInteger.json'),
+  },
+  {
+    $id: 'http://localhost:1234/baseUriChangeFolder/folderInteger.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChangeFolder/folderInteger.json'),
+  },
+  {
+    $id: 'http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChangeFolderInSubschema/folderInteger.json'),
   },
 ]
