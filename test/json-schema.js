@@ -29,11 +29,6 @@ const unsafe = new Set([
   'oneOf.json/oneOf with boolean schemas, more than one true',
   'oneOf.json/oneOf with boolean schemas, all false',
 
-  // fixed in draft2019 tests
-  'draft7/ref.json/escaped pointer ref',
-  'draft6/ref.json/escaped pointer ref',
-  'draft4/ref.json/escaped pointer ref',
-  'draft3/ref.json/escaped pointer ref',
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
 
   // draft3 only
