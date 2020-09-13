@@ -16,4 +16,4 @@ interface ValidatorOptions {
 
 declare const validator: (schema: object, options?: ValidatorOptions) => Validate;
 
-export { validator, Validate, ValidationError };
+export { validator, Validate, ValidationError, ValidatorOptions };
