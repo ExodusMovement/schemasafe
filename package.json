@@ -4,6 +4,7 @@
   "description": "JSON Safe Parser & Schema Validator",
   "license": "MIT",
   "main": "src/index.js",
+  "types": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/ExodusMovement/schemasafe.git"
