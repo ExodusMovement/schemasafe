@@ -951,6 +951,15 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       }
       handle('$recursiveRef', ['string'], ($recursiveRef) => {
         enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
+        // Resolve to recheck that recursive ref is enabled
+        const resolved = resolveReference(root, schemas, '#', basePath())
+        const [sub, subRoot, path] = resolved[0] || []
+        laxMode(sub.$recursiveAnchor, '$recursiveRef without $recursiveAnchor')
+        if (!sub.$recursiveAnchor || !recursiveAnchor) {
+          // regular ref
+          const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
+          return applyRef(n, { path: ['$recursiveRef'] })
+        }
         // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
         const n = recursiveAnchor ? format('(recursive || validate)') : format('validate')
         return applyRef(n, { path: ['$recursiveRef'] })

@@ -30,6 +30,12 @@ const unsafe = new Set([
 
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
 
+  // tests $recursiveRef without $recursiveAnchor, we treat this as a mistake
+  'extra-tests/recursiveRef.391.json/$recursiveRef without $recursiveAnchor works like $ref',
+  'extra-tests/recursiveRef.391.json/$recursiveRef with $recursiveAnchor: false works like $ref',
+  'extra-tests/recursiveRef.391.json/$recursiveRef with no $recursiveAnchor works like $ref',
+  'extra-tests/recursiveRef.391.json/$recursiveRef with no $recursiveAnchor in the initial target schema resource',
+
   // draft3 only
   'draft3/additionalItems.json/additionalItems should not look in applicators',
   'draft3/additionalProperties.json/additionalProperties should not look in applicators',
