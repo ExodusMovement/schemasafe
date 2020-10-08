@@ -38,7 +38,7 @@ npm install --save @exodus/schemasafe
 
 ## Usage
 
-Simply pass a schema to compile it
+Simply pass a schema to compile it:
 
 ```js
 const { validator } = require('@exodus/schemasafe')
@@ -55,6 +55,28 @@ const validate = validator({
 
 console.log('should be valid', validate({ hello: 'world' }))
 console.log('should not be valid', validate({}))
+```
+
+Or use the [parser mode](./doc/Parser-not-validator.md):
+
+```js
+const { parser } = require('.')
+
+const parse = parser({
+  $schema: 'https://json-schema.org/draft/2019-09/schema',
+  type: 'object',
+  required: ['hello'],
+  properties: {
+    hello: {
+      pattern: '^[a-z]+$',
+      type: 'string'
+    }
+  },
+  additionalProperties: false
+})
+
+console.log('returns { valid: true, value }:', parse('{"hello": "world" }'))
+console.log('returns { valid: false }:', parse('{}'))
 ```
 
 ## Custom formats
