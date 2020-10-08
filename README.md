@@ -15,7 +15,7 @@ Supports [draft-04/06/07/2019-09](doc/Specification-support.md) and the
 * [Converts schemas to self-contained JavaScript files](#generate-modules), can be used in the build process.\
   _Integrates nicely with bundlers, so one won't need to generate code in runtime, and that works with CSP._
 * Optional `requireValidation: true` mode enforces full validation of the input object.\
-  **Using `mode: "strong"` is recommended, — it combines that option with additional schema safety checks.**
+  **Using [`mode: "strong"`](./doc/Strong-mode.md) is recommended, — it combines that option with additional schema safety checks.**
 * Does not fail open on unknown or unprocessed keywords — instead throws at build time if schema was not fully understood.
   _That is implemented by tracking processed keywords and ensuring that none remain uncovered._
 * Does not fail open on schema problems — instead throws at build time.\
@@ -57,7 +57,8 @@ console.log('should be valid', validate({ hello: 'world' }))
 console.log('should not be valid', validate({}))
 ```
 
-Or use the [parser mode](./doc/Parser-not-validator.md):
+Or use the [parser mode](./doc/Parser-not-validator.md) (running in
+[strong mode](./doc/Strong-mode.md) by default):
 
 ```js
 const { parser } = require('.')
@@ -78,6 +79,10 @@ const parse = parser({
 console.log('returns { valid: true, value }:', parse('{"hello": "world" }'))
 console.log('returns { valid: false }:', parse('{}'))
 ```
+
+## Options
+
+See [options documentation](./doc/Options.md) for the full list of supported options.
 
 ## Custom formats
 
