@@ -1,3 +1,6 @@
+// This typings are experimental and known to be incomplete.
+// Help wanted at https://github.com/ExodusMovement/schemasafe/issues/130
+
 interface ValidationError {
   keywordLocation: string;
   instanceLocation: string;
