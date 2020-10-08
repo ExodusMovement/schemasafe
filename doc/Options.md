@@ -57,6 +57,10 @@
     intent is to prevent a mistake when those checks are missed. If they are present, it is assumed
     that the shema author chose an appropriate value corresponding to the regex complexity.
 
+  * `forbidNoopValues` — refuse to compile schemas with certain noop keywords that make no sense.\
+    Currently, that is only `$recursiveAnchor: false`.\
+    This option is overridable even in `'strong'` mode.
+
 ## Options for relaxing coherence checks
 
   * `allowUnusedKeywords` — `opts.mode === 'lax'` by default.\

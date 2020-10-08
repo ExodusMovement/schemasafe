@@ -15,6 +15,10 @@ Strong mode enforces the following [options](./Options.md):
   * `requireStringValidation`
   * `complexityChecks`
 
+Strong mode enables the following options by default (overridable):
+
+  * `forbidNoopValues`
+
 Strong mode disables and forbids the following options:
 
   * `weakFormats`
