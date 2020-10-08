@@ -2,35 +2,41 @@
 
 ## Regular options
 
-  * `mode` — `'default'` by default in `validator()`, `'strong'` by default in `parser()`.
+  * `mode` — `'default'` by default in `validator()`, `'strong'` by default in `parser()`.\
     See also [strong mode documentation](./Strong-mode.md).
 
   * `useDefaults` — `false` by default. Apply `default:` values from the schema to missing
     properties.
 
-  * `removeAdditional` — `false` by default. Removes additional properties instead of failing the
-    validation on them. Supports `additionalProperties: false` and `additionalItems: false`.
+  * `removeAdditional` — `false` by default.\
+    Removes additional properties instead of failing the validation on them.\
+    Supports `additionalProperties: false` and `additionalItems: false`.\
     Note that it fails to compile the schema in case of uncertain paths with this option.
 
-  * `includeErrors` — `false` by default. Enable returning errors (without it, just a validaton flag
-    is returned).
+  * `includeErrors` — `false` by default.\
+    Enable returning errors (without it, just a validaton flag is returned).
 
-  * `allErrors` — `false` by default. Return all errors, not just the first one.
+  * `allErrors` — `false` by default.\
+    Return all errors, not just the first one.
 
-  * `dryRun` — `false` by default. Don't produce a validator, just verify the schema.
+  * `dryRun` — `false` by default.\
+    Don't produce a validator, just verify the schema.
 
-  * `$schemaDefault` — `null` by default. Can not be used if `requireSchema` is on.
+  * `$schemaDefault` — `null` by default.\
+    Can not be used if `requireSchema` is on.
 
-  * `formats` — `{}` by default.
+  * `formats` — `{}` by default.\
+    Additional formats to use.
 
   * `weakFormats` — `true` in `'default'` and `'lax'` modes, `false` in
-    [`'strong'` mode](./Strong-mode.md) by default.
-    Adds support for formats deemed potentially weak (currently, only `RegExp`).
+    [`'strong'` mode](./Strong-mode.md) by default.\
+    Add support for formats deemed potentially weak (currently, only `RegExp`).
 
-  * `extraFormats` — `false` by default.
+  * `extraFormats` — `false` by default.\
+    Enable extra built-in non-standard formats, see [formats.js](../src/formats.js).
 
-  * `schemas` — empty by default. Either a `Map`, an `Array`, or an `Object` with schemas to resolve
-    external `$ref` pointers.
+  * `schemas` — empty by default.\
+    Either a `Map`, an `Array`, or an `Object` with schemas to resolve external `$ref` pointers.
 
 ## Options for enforcing additional checks
 
@@ -53,10 +59,10 @@
 
 ## Options for relaxing coherence checks
 
-  * `allowUnusedKeywords` — `opts.mode === 'lax'` by default.
+  * `allowUnusedKeywords` — `opts.mode === 'lax'` by default.\
     Allows unused keywords to be present in the schema.
 
-  * `allowUnreachable` — `opts.mode === 'lax'` by default.
+  * `allowUnreachable` — `opts.mode === 'lax'` by default.\
     Allows unreachable checks to be present in the schema.
 
 ## Options to pass assumptions about input
