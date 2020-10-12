@@ -75,6 +75,7 @@ const parser = function(schema, opts = {}) {
       'return parse(src)',
       '});',
     ].join('\n')
+  parse.toJSON = () => schema
   return parse
 }
 
