@@ -54,7 +54,7 @@ const parser = function(schema, opts = {}) {
           }
           return { valid: true, value }
         } catch ({ message }) {
-          return { valid: false, message }
+          return { valid: false, error: message }
         }
       }
     : (src) => {
