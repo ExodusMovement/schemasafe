@@ -76,8 +76,8 @@ const parse = parser({
   additionalProperties: false
 })
 
-console.log('returns { valid: true, value }:', parse('{"hello": "world" }'))
-console.log('returns { valid: false }:', parse('{}'))
+console.log(parse('{"hello": "world" }')) // { valid: true, value: { hello: 'world' } }
+console.log(parse('{}')) // { valid: false }
 ```
 
 ## Options
