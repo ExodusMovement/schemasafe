@@ -1,7 +1,89 @@
 // These typings are experimental and known to be incomplete.
 // Help wanted at https://github.com/ExodusMovement/schemasafe/issues/130
 
-type Schema = object
+type Schema =
+  | true
+  | false
+  | {
+      // version
+      $schema?: string
+      $vocabulary?: string
+      // pointers
+      id?: string
+      $id?: string
+      $anchor?: string
+      $ref?: string
+      definitions?: { [id: string]: Schema }
+      $defs?: { [id: string]: Schema }
+      $recursiveRef?: string
+      $recursiveAnchor?: boolean
+      // generic
+      type?: string
+      required?: boolean
+      default?: any
+      // constant values
+      enum?: Array<any>
+      const?: any
+      // logical checks
+      not?: Schema
+      allOf?: Array<Schema>
+      anyOf?: Array<Schema>
+      oneOf?: Array<Schema>
+      if?: Schema
+      then?: Schema
+      else?: Schema
+      // numbers
+      maximum?: number
+      minimum?: number
+      exclusiveMaximum?: number
+      exclusiveMinimum?: number
+      multipleOf?: number
+      divisibleBy?: number
+      // arrays, basic
+      items?: Schema | Array<Schema>
+      maxItems?: number
+      minItems?: number
+      additionalItems?: Schema
+      // arrays, complex
+      contains?: Schema
+      minContains?: number
+      maxContains?: number
+      uniqueItems?: boolean
+      // strings
+      maxLength?: number
+      minLength?: number
+      format?: string
+      pattern?: string
+      // strings content
+      contentEncoding?: string
+      contentMediaType?: string
+      contentSchema?: Schema
+      // objects
+      properties?: { [id: string]: Schema }
+      maxProperties?: number
+      minProperties?: number
+      additionalProperties?: Schema
+      patternProperties?: { [pattern: string]: Schema }
+      propertyNames?: Schema
+      dependencies?: { [id: string]: Array<string> | Schema }
+      dependentRequired?: { [id: string]: Array<string> }
+      dependentSchemas?: { [id: string]: Schema }
+      // see-through
+      unevaluatedProperties?: Schema
+      unevaluatedItems?: Schema
+      // Unused meta keywords not affecting validation (annotations and comments)
+      // https://json-schema.org/understanding-json-schema/reference/generic.html
+      // https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.9
+      title?: string
+      description?: string
+      deprecated?: boolean
+      readOnly?: boolean
+      writeOnly?: boolean
+      examples?: Array<any>
+      $comment?: string
+      // optimization hint and error filtering only, does not affect validation result
+      discriminator?: { propertyName: string; mapping?: { [value: string]: string } }
+    }
 
 interface ValidationError {
   keywordLocation: string
