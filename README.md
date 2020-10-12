@@ -166,6 +166,30 @@ console.log(validate.errors)
 // [ { keywordLocation: '#/properties/hello/type', instanceLocation: '#/hello' } ]
 ```
 
+Or, similarly, with parser API:
+
+```js
+const schema = {
+  $schema: 'https://json-schema.org/draft/2019-09/schema',
+  type: 'object',
+  required: ['hello'],
+  properties: {
+    hello: {
+      type: 'string',
+      pattern: '^[a-z]+$',
+    }
+  },
+  additionalProperties: false,
+}
+const parse = parser(schema, { includeErrors: true })
+
+console.log(parse('{ "hello": 100 }'));
+// { valid: false,
+//   error: 'JSON validation failed for type at #/hello',
+//   errors: [ { keywordLocation: '#/properties/hello/type', instanceLocation: '#/hello' } ]
+// }
+```
+
 Only the first error is reported by default unless `allErrors` option is also set to `true` in
 addition to `includeErrors`.
 
