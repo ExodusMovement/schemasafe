@@ -1,6 +1,8 @@
 // These typings are experimental and known to be incomplete.
 // Help wanted at https://github.com/ExodusMovement/schemasafe/issues/130
 
+type Json = string | number | boolean | null | Array<Json> | { [id: string]: Json }
+
 type Schema =
   | true
   | false
@@ -20,10 +22,10 @@ type Schema =
       // generic
       type?: string | Array<string>
       required?: boolean
-      default?: any
+      default?: Json
       // constant values
-      enum?: Array<any>
-      const?: any
+      enum?: Array<Json>
+      const?: Json
       // logical checks
       not?: Schema
       allOf?: Array<Schema>
@@ -79,7 +81,7 @@ type Schema =
       deprecated?: boolean
       readOnly?: boolean
       writeOnly?: boolean
-      examples?: Array<any>
+      examples?: Array<Json>
       $comment?: string
       // optimization hint and error filtering only, does not affect validation result
       discriminator?: { propertyName: string; mapping?: { [value: string]: string } }
@@ -91,7 +93,7 @@ interface ValidationError {
 }
 
 interface Validate {
-  (value: any): boolean
+  (value: Json): boolean
   errors?: ValidationError[]
   toModule(): string
   toJSON(): Schema
@@ -123,7 +125,7 @@ interface ValidatorOptions {
 
 interface ParseResult {
   valid: boolean
-  value?: any
+  value?: Json
   error?: string
   errors?: ValidationError[]
 }
@@ -146,5 +148,6 @@ export {
   ValidatorOptions,
   ParseResult,
   Parse,
+  Json,
   Schema,
 }
