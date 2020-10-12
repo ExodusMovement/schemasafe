@@ -37,8 +37,8 @@ type Schema =
       // numbers
       maximum?: number
       minimum?: number
-      exclusiveMaximum?: number
-      exclusiveMinimum?: number
+      exclusiveMaximum?: number | boolean
+      exclusiveMinimum?: number | boolean
       multipleOf?: number
       divisibleBy?: number
       // arrays, basic
