@@ -33,10 +33,10 @@ interface ValidatorOptions {
   isJSON?: boolean
   jsonCheck?: boolean
   $schemaDefault?: string | null
-  formats?: object
+  formats?: { [key: string]: RegExp | ((input: string) => boolean) }
   weakFormats?: boolean
   extraFormats?: boolean
-  schemas?: Map<string, Schema> | Array<Schema> | object
+  schemas?: Map<string, Schema> | Array<Schema> | { [id: string]: Schema }
 }
 
 interface ParseResult {
