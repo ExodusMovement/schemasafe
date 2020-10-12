@@ -27,6 +27,7 @@ interface ValidatorOptions {
   complexityChecks?: boolean;
   unmodifiedPrototypes?: boolean;
   isJSON?: boolean;
+  jsonCheck?: boolean;
   $schemaDefault?: string | null;
   formats?: any; // FIXME
   weakFormats?: boolean;
