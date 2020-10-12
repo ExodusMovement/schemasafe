@@ -47,7 +47,7 @@ interface ParseResult {
 }
 
 interface Parse {
-  (value: any): ParseResult;
+  (value: string): ParseResult;
   toModule: () => string;
   toJSON: () => Schema;
 }
