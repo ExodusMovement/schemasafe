@@ -18,14 +18,14 @@ Several options that have a nagative effect on performance:
 * `includeErrors`, `allErrors` (all off by default) -- see
   [Error handling](./Error-handling.md#options).
 
-* `jsonCheck` (off by default) — using [parser mode](./Parser-not-validator.md) instead is advised.
+* `jsonCheck` (off by default) — using [parser API](./Parser-not-validator.md) instead is advised.
 
 ## Options that increase performance
 
 * `isJSON` (off by default) — assumes that input was received from e.g. `JSON.parse` and does not
   include values that can not be expressed in JSON, e.g. `undefined`.
 
-  Using [parser mode](./Parser-not-validator.md) instead is advised, which automatically enables it.
+  Using [parser API](./Parser-not-validator.md) instead is advised, which automatically enables it.
 
 * `unmodifiedPrototypes` — assumes that `Object` and `Array` prototypes are not modified (i.e. don't
   include any other properties) _at the time of validation_.

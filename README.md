@@ -57,7 +57,7 @@ console.log('should be valid', validate({ hello: 'world' }))
 console.log('should not be valid', validate({}))
 ```
 
-Or use the [parser mode](./doc/Parser-not-validator.md) (running in
+Or use the [parser API](./doc/Parser-not-validator.md) (running in
 [strong mode](./doc/Strong-mode.md) by default):
 
 ```js
@@ -80,7 +80,7 @@ console.log(parse('{"hello": "world" }')) // { valid: true, value: { hello: 'wor
 console.log(parse('{}')) // { valid: false }
 ```
 
-Parser mode is recommended, because this way you can avoid handling unvalidated JSON objects in
+Parser API is recommended, because this way you can avoid handling unvalidated JSON objects in
 non-string form at all in your code.
 
 ## Options
