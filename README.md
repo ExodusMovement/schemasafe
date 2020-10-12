@@ -90,20 +90,31 @@ See [options documentation](./doc/Options.md) for the full list of supported opt
 ## Custom formats
 
 `@exodus/schemasafe` supports the formats specified in JSON schema v4 (such as date-time).
-If you want to add your own custom formats pass them as the formats options to the validator
+If you want to add your own custom formats pass them as the formats options to the validator:
 
 ```js
 const validate = validator({
   type: 'string',
+  format: 'no-foo'
+}, {
+  formats: {
+    'no-foo': (str) => !str.includes('foo'),
+  }
+})
+console.log(validate('test')) // true
+console.log(validate('foo')) // false
+
+const parse = parser({
+  $schema: 'https://json-schema.org/draft/2019-09/schema',
+  type: 'string',
   format: 'only-a'
 }, {
   formats: {
-    'only-a': /^a+$/
+    'only-a': /^a+$/,
   }
 })
-
-console.log(validate('aa')) // true
-console.log(validate('ab')) // false
+console.log(parse('"aa"')) // { valid: true, value: 'aa' }
+console.log(parse('"ab"')) // { valid: false }
 ```
 
 ## External schemas
