@@ -18,7 +18,7 @@ type Schema =
       $recursiveRef?: string
       $recursiveAnchor?: boolean
       // generic
-      type?: string
+      type?: string | Array<string>
       required?: boolean
       default?: any
       // constant values
