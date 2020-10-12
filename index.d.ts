@@ -11,8 +11,8 @@ interface ValidationError {
 interface Validate {
   (value: any): boolean;
   errors?: ValidationError[];
-  toModule: () => string;
-  toJSON: () => Schema;
+  toModule(): string;
+  toJSON(): Schema;
 }
 
 interface ValidatorOptions {
@@ -48,12 +48,12 @@ interface ParseResult {
 
 interface Parse {
   (value: string): ParseResult;
-  toModule: () => string;
-  toJSON: () => Schema;
+  toModule(): string;
+  toJSON(): Schema;
 }
 
 declare const validator: (schema: Schema, options?: ValidatorOptions) => Validate;
 
 declare const parser: (schema: Schema, options?: ValidatorOptions) => Parse;
 
-export { validator, parser, Validate, ValidationError, ValidatorOptions, ParseResult, Parse };
+export { validator, parser, Validate, ValidationError, ValidatorOptions, ParseResult, Parse, Schema };
