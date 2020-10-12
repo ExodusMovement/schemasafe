@@ -80,6 +80,9 @@ console.log(parse('{"hello": "world" }')) // { valid: true, value: { hello: 'wor
 console.log(parse('{}')) // { valid: false }
 ```
 
+Parser mode is recommended, because this way you can avoid handling unvalidated JSON objects in
+non-string form at all in your code.
+
 ## Options
 
 See [options documentation](./doc/Options.md) for the full list of supported options.
