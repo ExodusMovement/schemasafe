@@ -9,6 +9,8 @@ interface ValidationError {
 interface Validate {
   (value: any): boolean;
   errors?: ValidationError[];
+  toModule: () => string;
+  toJSON: () => any;
 }
 
 interface ValidatorOptions {
@@ -44,6 +46,8 @@ interface ParseResult {
 
 interface Parse {
   (value: any): ParseResult;
+  toModule: () => string;
+  toJSON: () => any;
 }
 
 declare const validator: (schema: object, options?: ValidatorOptions) => Validate;
