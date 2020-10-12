@@ -1,6 +1,8 @@
 // This typings are experimental and known to be incomplete.
 // Help wanted at https://github.com/ExodusMovement/schemasafe/issues/130
 
+type Schema = object;
+
 interface ValidationError {
   keywordLocation: string;
   instanceLocation: string;
@@ -10,7 +12,7 @@ interface Validate {
   (value: any): boolean;
   errors?: ValidationError[];
   toModule: () => string;
-  toJSON: () => any;
+  toJSON: () => Schema;
 }
 
 interface ValidatorOptions {
@@ -31,10 +33,10 @@ interface ValidatorOptions {
   isJSON?: boolean;
   jsonCheck?: boolean;
   $schemaDefault?: string | null;
-  formats?: any; // FIXME
+  formats?: object;
   weakFormats?: boolean;
   extraFormats?: boolean;
-  schemas?: any; // FIXME
+  schemas?: Map<string, Schema> | Array<Schema> | object;
 }
 
 interface ParseResult {
@@ -47,11 +49,11 @@ interface ParseResult {
 interface Parse {
   (value: any): ParseResult;
   toModule: () => string;
-  toJSON: () => any;
+  toJSON: () => Schema;
 }
 
-declare const validator: (schema: object, options?: ValidatorOptions) => Validate;
+declare const validator: (schema: Schema, options?: ValidatorOptions) => Validate;
 
-declare const parser: (schema: object, options?: ValidatorOptions) => Parse;
+declare const parser: (schema: Schema, options?: ValidatorOptions) => Parse;
 
 export { validator, parser, Validate, ValidationError, ValidatorOptions, ParseResult, Parse };
