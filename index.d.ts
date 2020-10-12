@@ -34,6 +34,19 @@ interface ValidatorOptions {
   schemas?: any; // FIXME
 }
 
+interface ParseResult {
+  valid: boolean;
+  value?: any;
+  error?: string;
+  errors?: ValidationError[];
+}
+
+interface Parse {
+  (value: any): ParseResult;
+}
+
 declare const validator: (schema: object, options?: ValidatorOptions) => Validate;
 
-export { validator, Validate, ValidationError, ValidatorOptions };
+declare const parser: (schema: object, options?: ValidatorOptions) => Parse;
+
+export { validator, parser, Validate, ValidationError, ValidatorOptions, ParseResult, Parse };
