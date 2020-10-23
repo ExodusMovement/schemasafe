@@ -616,9 +616,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       handle('minProperties', ['natural'], (min) => format('%s < %d', propertiesCount, min))
       enforceMinMax('minProperties', 'maxProperties')
 
-      handle('propertyNames', ['object', 'boolean'], (names) => {
+      handle('propertyNames', ['object', 'boolean'], (s) => {
         forObjectKeys(current, (sub, key) => {
-          const nameSchema = typeof names === 'object' ? { type: 'string', ...names } : names
+          // Add default type for non-ref schemas, so strong mode is fine with omitting it
+          const nameSchema = typeof s === 'object' && !s.$ref ? { type: 'string', ...s } : s
           const nameprop = Object.freeze({ name: key, errorParent: sub, type: 'string' })
           rule(nameprop, nameSchema, subPath('propertyNames'))
         })
