@@ -1,0 +1,60 @@
+[
+    {
+        "description": "$ref used in propertyNames with draft 2019-09",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2019-09/schema#",
+            "definitions": {
+                "keys": {
+                    "type": "string"
+                }
+            },
+            "type": "object",
+            "propertyNames": {
+                "$ref": "#/definitions/keys"
+            }
+        },
+        "tests": [
+            {
+                "description": "has no property",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "has string property",
+                "data": {
+                    "foo": true
+                },
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "$ref used in propertyNames with draft 07",
+        "schema": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "definitions": {
+                "keys": {
+                    "type": "string"
+                }
+            },
+            "type": "object",
+            "propertyNames": {
+                "$ref": "#/definitions/keys"
+            }
+        },
+        "tests": [
+            {
+                "description": "has no property",
+                "data": {},
+                "valid": true
+            },
+            {
+                "description": "has string property",
+                "data": {
+                    "foo": true
+                },
+                "valid": true
+            }
+        ]
+    }
+]
