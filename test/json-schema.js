@@ -31,10 +31,10 @@ const unsafe = new Set([
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
 
   // tests $recursiveRef without $recursiveAnchor, we treat this as a mistake
-  'extra-tests/recursiveRef.391.json/$recursiveRef without $recursiveAnchor works like $ref',
-  'extra-tests/recursiveRef.391.json/$recursiveRef with $recursiveAnchor: false works like $ref',
-  'extra-tests/recursiveRef.391.json/$recursiveRef with no $recursiveAnchor works like $ref',
-  'extra-tests/recursiveRef.391.json/$recursiveRef with no $recursiveAnchor in the initial target schema resource',
+  'extra-tests/prs/recursiveRef.391.json/$recursiveRef without $recursiveAnchor works like $ref',
+  'extra-tests/prs/recursiveRef.391.json/$recursiveRef with $recursiveAnchor: false works like $ref',
+  'extra-tests/prs/recursiveRef.391.json/$recursiveRef with no $recursiveAnchor works like $ref',
+  'extra-tests/prs/recursiveRef.391.json/$recursiveRef with no $recursiveAnchor in the initial target schema resource',
 
   // draft3 only
   'draft3/additionalItems.json/additionalItems should not look in applicators',
@@ -93,6 +93,7 @@ function processTestDir(schemaDir, main, subdir = '') {
   for (const file of fs.readdirSync(dir)) {
     const sub = path.join(subdir, file) // relative to schemaDir
     if (shouldIngore(sub)) continue
+    if (file.endsWith('.md')) continue
     if (file.endsWith('.json')) {
       const content = fs.readFileSync(path.join(dir, file), 'utf-8')
       processTest(main, sub, JSON.parse(content), shouldIngore, requiresLax)
