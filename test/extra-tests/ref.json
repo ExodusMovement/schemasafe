@@ -56,5 +56,53 @@
                 "valid": true
             }
         ]
+    },
+    {
+        "description": "$ref does not contain object with draft 2019-09",
+        "schema": {
+            "$schema": "https://json-schema.org/draft/2019-09/schema#",
+            "definitions": {
+                "x": {
+                    "properties": {
+                        "test": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "type": "object",
+            "$ref": "#/definitions/x"
+        },
+        "tests": [
+            {
+                "description": "has no property",
+                "data": {},
+                "valid": true
+            }
+        ]
+    },
+    {
+        "description": "$ref does not contain object with draft 07",
+        "schema": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "definitions": {
+                "x": {
+                    "properties": {
+                        "test": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "type": "object",
+            "$ref": "#/definitions/x"
+        },
+        "tests": [
+            {
+                "description": "has no property",
+                "data": {},
+                "valid": true
+            }
+        ]
     }
 ]
