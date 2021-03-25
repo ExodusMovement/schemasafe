@@ -253,3 +253,17 @@ versions.
 ## License
 
 [MIT](./LICENSE)
+
+## Contributing
+
+Get a fully set up development environment with:
+
+```sh
+git clone https://github.com/ExodusMovement/schemasafe
+cd schemasafe
+
+yarn lint
+git submodule update --init --recursive
+
+yarn test
+```
