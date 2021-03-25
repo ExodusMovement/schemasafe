@@ -912,7 +912,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       if (prev !== null) fun.write('const %s = errorCount', prev)
       if (checkConst()) {
         // const/enum shouldn't have any other validation rules except for already checked type/$ref
-        enforce(unused.size === 0, 'Unexpected keywords mixed with const or enum:', [...unused])
+        enforce(
+          unused.size === 0 || allowUnusedKeywords,
+          'Unexpected keywords mixed with const or enum:',
+          [...unused]
+        )
         const typeKeys = [...types.keys()] // we don't extract type from const/enum, it's enough that we know that it's present
         evaluateDelta({ properties: [true], items: Infinity, type: typeKeys, fullstring: true }) // everything is evaluated for const
         return
