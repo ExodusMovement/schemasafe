@@ -21,7 +21,7 @@ type Schema =
       $recursiveAnchor?: boolean
       // generic
       type?: string | Array<string>
-      required?: boolean
+      required?: Array<string>
       default?: Json
       // constant values
       enum?: Array<Json>
