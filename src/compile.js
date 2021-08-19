@@ -943,6 +943,16 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const resolved = resolveReference(root, schemas, $ref, basePath())
         const [sub, subRoot, path] = resolved[0] || []
         if (!sub && sub !== false) fail('failed to resolve $ref:', $ref)
+        if (sub.type) {
+          // This could be done better, but for now we check only the direct type in the $ref
+          const type = Array.isArray(sub.type) ? sub.type : [sub.type]
+          evaluateDelta({ type })
+          if (requireValidation) {
+            // If validation is required, then $ref is guranteed to validate all items and properties
+            if (type.includes('array')) evaluateDelta({ items: Infinity })
+            if (type.includes('object')) evaluateDelta({ properties: [true] })
+          }
+        }
         const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
         return applyRef(n, { path: ['$ref'] })
       })
