@@ -52,6 +52,9 @@
     "tap-spec": "^5.0.0",
     "tape": "^4.7.0"
   },
+  "resolutions": {
+    "tap-spec/tap-out/trim": "^1.0.1"
+  },
   "keywords": [
     "JSON",
     "schema",
