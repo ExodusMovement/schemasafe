@@ -100,6 +100,7 @@ const unsupported = new Set([
 
   // need investigation
   'draft2019-09/recursiveRef.json/multiple dynamic paths to the $recursiveRef keyword',
+  'draft2019-09/recursiveRef.json/dynamic $recursiveRef destination (not predictable at schema compile time)',
   'optional/format/time.json/validation of time strings/a valid time string with leap second with offset',
 
   // draft2020-12 only

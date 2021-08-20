@@ -43,6 +43,14 @@ module.exports = [
     ...require('./../JSON-Schema-Test-Suite/remotes/name-defs.json'),
   },
   {
+    $id: 'http://localhost:1234/ref-and-defs.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/ref-and-defs.json'),
+  },
+  {
+    $id: 'http://localhost:1234/ref-and-definitions.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/ref-and-definitions.json'),
+  },
+  {
     // for AJV test issues/62_resolution_scope_change.json
     $id: 'http://localhost:1234/folder/folderInteger.json',
     ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChange/folderInteger.json'),
