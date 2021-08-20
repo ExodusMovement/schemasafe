@@ -65,7 +65,8 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
   const local = decodeURI(hash).replace(/\/$/, '')
 
   // Find in self by id path
-  const visit = (sub, oldPath) => {
+  const withSpecialChilds = ['properties', 'patternProperties', '$defs', 'definitions']
+  const visit = (sub, oldPath, specialChilds = false) => {
     if (!sub || typeof sub !== 'object') return
     const id = sub.$id || sub.id
     let path = oldPath
@@ -85,7 +86,10 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
       path = joinPath(path, `#${sub.$anchor}`)
       if (path === ptr) results.push([sub, root, oldPath])
     }
-    for (const k of Object.keys(sub)) visit(sub[k], path)
+    for (const k of Object.keys(sub)) {
+      if (!specialChilds && ['const', 'enum', 'examples', 'comment'].includes(k)) continue
+      visit(sub[k], path, !specialChilds && withSpecialChilds.includes(k))
+    }
   }
   visit(root, '')
 
