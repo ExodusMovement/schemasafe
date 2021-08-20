@@ -68,8 +68,23 @@ const unsupported = new Set([
   'optional/format/idn-email.json',
   'optional/format/idn-hostname.json',
 
-  // deliberate differences
+  // deliberate differences where format/content do not expect any validation by default in upstream
   'draft2019-09/content.json', // expected to be noop in draft2019-09 and actually implemented as an assertion here
+  'format.json/validation of e-mail addresses/invalid email string is only an annotation by default',
+  'format.json/validation of regexes/invalid regex string is only an annotation by default',
+  'format.json/validation of IP addresses/invalid ipv4 string is only an annotation by default',
+  'format.json/validation of IPv6 addresses/invalid ipv6 string is only an annotation by default',
+  'format.json/validation of hostnames/invalid hostname string is only an annotation by default',
+  'format.json/validation of date strings/invalid date string is only an annotation by default',
+  'format.json/validation of date-time strings/invalid date-time string is only an annotation by default',
+  'format.json/validation of time strings/invalid time string is only an annotation by default',
+  'format.json/validation of JSON pointers/invalid json-pointer string is only an annotation by default',
+  'format.json/validation of relative JSON pointers/invalid relative-json-pointer string is only an annotation by default',
+  'format.json/validation of URIs/invalid uri string is only an annotation by default',
+  'format.json/validation of URI references/invalid uri-reference string is only an annotation by default',
+  'format.json/validation of URI templates/invalid uri-template string is only an annotation by default',
+  'format.json/validation of UUIDs/invalid uuid string is only an annotation by default',
+  'format.json/validation of durations/invalid duration string is only an annotation by default',
 
   //  draft4/draft3, optional
   'optional/zeroTerminatedFloats.json', // makes no sense in js
@@ -88,6 +103,9 @@ const unsupported = new Set([
   'rules/format.json/validation of URL strings',
   'rules/format.json/validation of JSON-pointer URI fragment strings',
   'issues/33_json_schema_latest.json/use latest json schema as v4 (#33)',
+
+  // need investigation
+  'draft2019-09/recursiveRef.json/multiple dynamic paths to the $recursiveRef keyword',
 ])
 
 function processTestDir(schemaDir, main, subdir = '') {
