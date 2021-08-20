@@ -77,21 +77,7 @@ const unsupported = new Set([
   // deliberate differences where format/content do not expect any validation by default in upstream
   'draft2019-09/content.json', // expected to be noop in draft2019-09 and actually implemented as an assertion here
   'draft2020-12/content.json', // same as draft2019-09, we have a replacement test
-  'format.json/validation of e-mail addresses/invalid email string is only an annotation by default',
-  'format.json/validation of regexes/invalid regex string is only an annotation by default',
-  'format.json/validation of IP addresses/invalid ipv4 string is only an annotation by default',
-  'format.json/validation of IPv6 addresses/invalid ipv6 string is only an annotation by default',
-  'format.json/validation of hostnames/invalid hostname string is only an annotation by default',
-  'format.json/validation of date strings/invalid date string is only an annotation by default',
-  'format.json/validation of date-time strings/invalid date-time string is only an annotation by default',
-  'format.json/validation of time strings/invalid time string is only an annotation by default',
-  'format.json/validation of JSON pointers/invalid json-pointer string is only an annotation by default',
-  'format.json/validation of relative JSON pointers/invalid relative-json-pointer string is only an annotation by default',
-  'format.json/validation of URIs/invalid uri string is only an annotation by default',
-  'format.json/validation of URI references/invalid uri-reference string is only an annotation by default',
-  'format.json/validation of URI templates/invalid uri-template string is only an annotation by default',
-  'format.json/validation of UUIDs/invalid uuid string is only an annotation by default',
-  'format.json/validation of durations/invalid duration string is only an annotation by default',
+  // see also unsupportedMask below
 
   //  draft4/draft3, optional
   'optional/zeroTerminatedFloats.json', // makes no sense in js
@@ -123,10 +109,17 @@ const unsupported = new Set([
   'draft2020-12/id.json/Unnormalized $ids are allowed but discouraged',
   'draft2020-12/ref.json/remote ref, containing refs itself',
 ])
+const unsupportedMask = [
+  // deliberate differences where format/content do not expect any validation by default in upstream
+  /^format\.json\/[^/]+\/invalid [a-z0-9_-]+ string is only an annotation by default$/,
+]
 
 function processTestDir(schemaDir, main, subdir = '') {
   const dir = path.join(__dirname, schemaDir, main, subdir)
-  const shouldIngore = (id) => unsupported.has(id) || unsupported.has(`${main}/${id}`)
+  const shouldIngore = (id) =>
+    unsupported.has(id) ||
+    unsupported.has(`${main}/${id}`) ||
+    unsupportedMask.some((mask) => mask.test(id))
   const requiresLax = (id) => unsafe.has(id) || unsafe.has(`${main}/${id}`)
   for (const file of fs.readdirSync(dir)) {
     const sub = path.join(subdir, file) // relative to schemaDir
