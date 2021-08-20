@@ -30,12 +30,6 @@ const unsafe = new Set([
 
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
 
-  // tests $recursiveRef without $recursiveAnchor, we treat this as a mistake
-  'extra-tests/prs/recursiveRef.391.json/$recursiveRef without $recursiveAnchor works like $ref',
-  'extra-tests/prs/recursiveRef.391.json/$recursiveRef with $recursiveAnchor: false works like $ref',
-  'extra-tests/prs/recursiveRef.391.json/$recursiveRef with no $recursiveAnchor works like $ref',
-  'extra-tests/prs/recursiveRef.391.json/$recursiveRef with no $recursiveAnchor in the initial target schema resource',
-
   // draft3 only
   'draft3/additionalItems.json/additionalItems should not look in applicators',
   'draft3/additionalProperties.json/additionalProperties should not look in applicators',
@@ -45,6 +39,12 @@ const unsafe = new Set([
   'draft2019-09/optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
   'draft2019-09/unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties outside',
   'draft2019-09/unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties inside',
+  // tests $recursiveRef without $recursiveAnchor, we treat this as a mistake
+  'draft2019-09/recursiveRef.json/$recursiveRef without $recursiveAnchor works like $ref',
+  'draft2019-09/recursiveRef.json/$recursiveRef with $recursiveAnchor: false works like $ref',
+  'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor works like $ref',
+  'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor in the initial target schema resource',
+  'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor in the outer schema resource',
 
   // ajv tests
   'rules/if.json/then/else without if should be ignored',
