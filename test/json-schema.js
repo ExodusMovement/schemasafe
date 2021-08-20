@@ -68,6 +68,9 @@ const unsupported = new Set([
   'optional/format/idn-email.json',
   'optional/format/idn-hostname.json',
 
+  // deliberate differences
+  'draft2019-09/content.json', // expected to be noop in draft2019-09 and actually implemented as an assertion here
+
   //  draft4/draft3, optional
   'optional/zeroTerminatedFloats.json', // makes no sense in js
   //  draft3 is deprecated and not fully supported
