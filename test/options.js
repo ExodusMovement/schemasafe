@@ -79,3 +79,40 @@ tape('removeAdditional', (t) => {
   )
   t.end()
 })
+
+tape('allowUnusedKeywords includes enums', (t) => {
+  const run = (schema, options, value) => [validator(schema, options)(value), value]
+
+  const schema = {
+    title: "JSON schema for the TypeScript compiler's configuration file",
+    $schema: 'http://json-schema.org/draft-04/schema#',
+    id: 'https://json.schemastore.org/tsconfig',
+    definitions: {
+      compilerOptionsDefinition: {
+        properties: {
+          compilerOptions: {
+            type: 'object',
+            properties: {
+              x: {
+                description: 'y.',
+                enum: ['1', '2', '3'],
+                // This is what the test is checking
+                markdownDescription: 'z',
+              },
+            },
+          },
+        },
+      },
+    },
+    type: 'object',
+    allOf: [
+      {
+        $ref: '#/definitions/compilerOptionsDefinition',
+      },
+    ],
+  }
+
+  t.deepEqual(run(schema, { allowUnusedKeywords: true }, { x: 1 }), [true, { x: 1 }], '')
+
+  t.end()
+})
