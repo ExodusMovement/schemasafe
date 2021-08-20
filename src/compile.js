@@ -592,22 +592,22 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         return null
       })
 
-      const uniqueSimple = () => {
-        const itemsSimple = (ischema) => {
-          if (!isPlainObject(ischema)) return false
-          if (ischema.enum || functions.hasOwn(ischema, 'const')) return true
-          if (ischema.type) {
-            const itemTypes = Array.isArray(ischema.type) ? ischema.type : [ischema.type]
-            const primitiveTypes = ['null', 'boolean', 'number', 'integer', 'string']
-            if (itemTypes.every((itemType) => primitiveTypes.includes(itemType))) return true
-          }
-          if (ischema.$ref) {
-            const [sub] = resolveReference(root, schemas, ischema.$ref, basePath())[0] || []
-            if (itemsSimple(sub)) return true
-          }
-          return false
+      const itemsSimple = (ischema) => {
+        if (!isPlainObject(ischema)) return false
+        if (ischema.enum || functions.hasOwn(ischema, 'const')) return true
+        if (ischema.type) {
+          const itemTypes = Array.isArray(ischema.type) ? ischema.type : [ischema.type]
+          const primitiveTypes = ['null', 'boolean', 'number', 'integer', 'string']
+          if (itemTypes.every((itemType) => primitiveTypes.includes(itemType))) return true
         }
-        const itemsSimpleOrFalse = (ischema) => ischema === false || itemsSimple(ischema)
+        if (ischema.$ref) {
+          const [sub] = resolveReference(root, schemas, ischema.$ref, basePath())[0] || []
+          if (itemsSimple(sub)) return true
+        }
+        return false
+      }
+      const itemsSimpleOrFalse = (ischema) => ischema === false || itemsSimple(ischema)
+      const uniqueSimple = () => {
         if (node.maxItems !== undefined || itemsSimpleOrFalse(node.items)) return true
         // In old format, .additionalItems requires .items to have effect
         if (Array.isArray(node.items) && itemsSimpleOrFalse(node.additionalItems)) return true
