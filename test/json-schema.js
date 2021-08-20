@@ -27,6 +27,7 @@ const unsafe = new Set([
   'oneOf.json/oneOf with boolean schemas, one true',
   'oneOf.json/oneOf with boolean schemas, more than one true',
   'oneOf.json/oneOf with boolean schemas, all false',
+  'unknownKeyword.json/$id inside an unknown keyword is not a real identifier',
 
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
 

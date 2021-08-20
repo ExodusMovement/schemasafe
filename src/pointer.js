@@ -1,5 +1,7 @@
 'use strict'
 
+const { knownKeywords } = require('./known-keywords')
+
 function untilde(string) {
   if (!string.includes('~')) return string
   return string.replace(/~[01]/g, (match) => {
@@ -87,6 +89,7 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
       if (path === ptr) results.push([sub, root, oldPath])
     }
     for (const k of Object.keys(sub)) {
+      if (!specialChilds && !Array.isArray(sub) && !knownKeywords.includes(k)) continue
       if (!specialChilds && ['const', 'enum', 'examples', 'comment'].includes(k)) continue
       visit(sub[k], path, !specialChilds && withSpecialChilds.includes(k))
     }
