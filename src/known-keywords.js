@@ -7,7 +7,7 @@ const knownKeywords = [
   ...['enum', 'const'], // constant values
   ...['not', 'allOf', 'anyOf', 'oneOf', 'if', 'then', 'else'], // logical checks
   ...['maximum', 'minimum', 'exclusiveMaximum', 'exclusiveMinimum', 'multipleOf', 'divisibleBy'], // numbers
-  ...['items', 'maxItems', 'minItems', 'additionalItems'], // arrays, basic
+  ...['items', 'maxItems', 'minItems', 'additionalItems', 'prefixItems'], // arrays, basic
   ...['contains', 'minContains', 'maxContains', 'uniqueItems'], // arrays, complex
   ...['maxLength', 'minLength', 'format', 'pattern'], // strings
   ...['contentEncoding', 'contentMediaType', 'contentSchema'], // strings content
@@ -22,7 +22,10 @@ const knownKeywords = [
 ]
 
 // Order is important, newer first!
-const schemaDrafts = ['draft/2019-09', 'draft-07', 'draft-06', 'draft-04', 'draft-03']
+const schemaDrafts = [
+  ...['draft/2020-12', 'draft/2019-09'], // new
+  ...['draft-07', 'draft-06', 'draft-04', 'draft-03'], // historic
+]
 const schemaVersions = schemaDrafts.map((draft) => `https://json-schema.org/${draft}/schema`)
 
 const vocab2019 = ['core', 'applicator', 'validation', 'meta-data', 'format', 'content']

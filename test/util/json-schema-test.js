@@ -6,6 +6,7 @@ const schemas = require('./schemas')
 
 const schemaVersions = new Map(
   Object.entries({
+    'draft2020-12': 'http://json-schema.org/draft/2020-12/schema#',
     'draft2019-09': 'http://json-schema.org/draft/2019-09/schema#',
     draft7: 'http://json-schema.org/draft-07/schema#',
     draft6: 'http://json-schema.org/draft-06/schema#',

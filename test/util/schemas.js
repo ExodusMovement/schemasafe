@@ -2,6 +2,14 @@
 
 module.exports = [
   // standard
+  require('./../schemas/json-schema-draft-2020-12/meta/core.json'),
+  require('./../schemas/json-schema-draft-2020-12/meta/applicator.json'),
+  require('./../schemas/json-schema-draft-2020-12/meta/unevaluated.json'),
+  require('./../schemas/json-schema-draft-2020-12/meta/validation.json'),
+  require('./../schemas/json-schema-draft-2020-12/meta/meta-data.json'),
+  require('./../schemas/json-schema-draft-2020-12/meta/format-annotation.json'),
+  require('./../schemas/json-schema-draft-2020-12/meta/content.json'),
+  require('./../schemas/json-schema-draft-2020-12/schema.json'),
   require('./../schemas/json-schema-draft-2019-09/meta/core.json'),
   require('./../schemas/json-schema-draft-2019-09/meta/applicator.json'),
   require('./../schemas/json-schema-draft-2019-09/meta/validation.json'),

@@ -48,7 +48,10 @@ const generateMeta = (root, $schema, enforce, requireSchema) => {
   if ($schema) {
     const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
     enforce(schemaVersions.includes(version), 'Unexpected schema version:', version)
-    rootMeta.set(root, { exclusiveRefs: schemaIsOlderThan(version, 'draft/2019-09') })
+    rootMeta.set(root, {
+      exclusiveRefs: schemaIsOlderThan(version, 'draft/2019-09'),
+      newItemsSyntax: !schemaIsOlderThan(version, 'draft/2020-12'),
+    })
   } else {
     enforce(!requireSchema, '[requireSchema] $schema is required')
     rootMeta.set(root, {})
@@ -538,29 +541,35 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
     const checkArrays = () => {
       handle('maxItems', ['natural'], (max) => {
-        if (Array.isArray(node.items) && node.items.length > max)
-          fail(`Invalid maxItems: ${max} is less than items array length`)
+        const prefixItemsName = getMeta().newItemsSyntax ? 'prefixItems' : 'items'
+        if (Array.isArray(node[prefixItemsName]) && node[prefixItemsName].length > max)
+          fail(`Invalid maxItems: ${max} is less than ${prefixItemsName} array length`)
         return format('%s.length > %d', name, max)
       })
       handle('minItems', ['natural'], (min) => format('%s.length < %d', name, min)) // can be higher that .items length with additionalItems
       enforceMinMax('minItems', 'maxItems')
 
-      handle('items', ['object', 'array', 'boolean'], (items) => {
-        if (Array.isArray(items)) {
-          for (let p = 0; p < items.length; p++) rule(currPropImm(p), items[p], subPath(`${p}`))
-          evaluateDelta({ items: items.length })
-        } else {
+      const checkItemsArray = (items) => {
+        for (let p = 0; p < items.length; p++) rule(currPropImm(p), items[p], subPath(`${p}`))
+        evaluateDelta({ items: items.length })
+        return null
+      }
+      if (getMeta().newItemsSyntax) {
+        handle('prefixItems', ['array'], checkItemsArray)
+        additionalItems('items', format('%d', (node.prefixItems || []).length))
+      } else if (Array.isArray(node.items)) {
+        handle('items', ['array'], checkItemsArray)
+        additionalItems('additionalItems', format('%d', node.items.length))
+      } else {
+        handle('items', ['object', 'boolean'], (items) => {
           forArray(current, format('0'), (prop) => rule(prop, items, subPath('items')))
           evaluateDelta({ items: Infinity })
-        }
-        return null
-      })
-
-      if (Array.isArray(node.items))
-        additionalItems('additionalItems', format('%d', node.items.length))
-      // Else additionalItems is allowed, but ignored per some spec tests!
-      // We do nothing and let it throw except for in allowUnusedKeywords mode
-      // As a result, omitting .items is not allowed by default, only in allowUnusedKeywords mode
+          return null
+        })
+        // If items is not an array, additionalItems is allowed, but ignored per some spec tests!
+        // We do nothing and let it throw except for in allowUnusedKeywords mode
+        // As a result, omitting .items is not allowed by default, only in allowUnusedKeywords mode
+      }
 
       handle('contains', ['object', 'boolean'], () => {
         uncertain('contains')
@@ -584,8 +593,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       })
 
       const uniqueSimple = () => {
-        if (node.maxItems !== undefined) return true
-        if (Array.isArray(node.items) && node.additionalItems === false) return true
         const itemsSimple = (ischema) => {
           if (!isPlainObject(ischema)) return false
           if (ischema.enum || functions.hasOwn(ischema, 'const')) return true
@@ -600,7 +607,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           }
           return false
         }
-        if (itemsSimple(node.items)) return true
+        const itemsSimpleOrFalse = (ischema) => ischema === false || itemsSimple(ischema)
+        if (node.maxItems !== undefined || itemsSimpleOrFalse(node.items)) return true
+        // In old format, .additionalItems requires .items to have effect
+        if (Array.isArray(node.items) && itemsSimpleOrFalse(node.additionalItems)) return true
         return false
       }
       prevWrap(true, () => {

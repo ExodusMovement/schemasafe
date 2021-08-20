@@ -46,6 +46,12 @@ const unsafe = new Set([
   'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor in the initial target schema resource',
   'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor in the outer schema resource',
 
+  // draft2020-12 only
+  'draft2020-12/optional/refOfUnknownKeyword.json/reference of a root arbitrary keyword ',
+  'draft2020-12/optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
+  'draft2020-12/unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties outside',
+  'draft2020-12/unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties inside',
+
   // ajv tests
   'rules/if.json/then/else without if should be ignored',
   'rules/if.json/if without then/else should be ignored',
@@ -70,6 +76,7 @@ const unsupported = new Set([
 
   // deliberate differences where format/content do not expect any validation by default in upstream
   'draft2019-09/content.json', // expected to be noop in draft2019-09 and actually implemented as an assertion here
+  'draft2020-12/content.json', // same as draft2019-09, we have a replacement test
   'format.json/validation of e-mail addresses/invalid email string is only an annotation by default',
   'format.json/validation of regexes/invalid regex string is only an annotation by default',
   'format.json/validation of IP addresses/invalid ipv4 string is only an annotation by default',
@@ -106,6 +113,15 @@ const unsupported = new Set([
 
   // need investigation
   'draft2019-09/recursiveRef.json/multiple dynamic paths to the $recursiveRef keyword',
+
+  // draft2020-12 only
+  // $dynamicAnchor/$dynamicRef
+  'draft2020-12/dynamicRef.json',
+  'draft2020-12/defs.json/validate definition against metaschema',
+  'draft2020-12/id.json/Invalid use of fragments in location-independent $id',
+  'draft2020-12/id.json/Valid use of empty fragments in location-independent $id',
+  'draft2020-12/id.json/Unnormalized $ids are allowed but discouraged',
+  'draft2020-12/ref.json/remote ref, containing refs itself',
 ])
 
 function processTestDir(schemaDir, main, subdir = '') {
@@ -133,6 +149,7 @@ processTestDir(testsDir, 'draft6')
 processTestDir(testsDir, 'draft7')
 processTestDir(testsDir, 'draft3')
 processTestDir(testsDir, 'draft2019-09')
+processTestDir(testsDir, 'draft2020-12')
 
 /** extra tests not (yet) merged upstream **/
 processTestDir('', 'extra-tests')
