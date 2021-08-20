@@ -7,7 +7,7 @@ const { processTest } = require('./util/json-schema-test')
 
 // these tests require lax mode
 const unsafe = new Set([
-  'additionalItems.json/items is schema, no additionalItems',
+  'additionalItems.json/when items is schema, additionalItems does nothing',
   'additionalItems.json/additionalItems as false without items',
   'additionalItems.json/additionalItems should not look in applicators, valid case',
   'maxContains.json/maxContains without contains is ignored',
@@ -101,6 +101,9 @@ const unsupported = new Set([
   'draft2019-09/recursiveRef.json/multiple dynamic paths to the $recursiveRef keyword',
 
   // draft2020-12 only
+  'draft2020-12/unevaluatedItems.json/unevaluatedItems depends on adjacent contains',
+  'draft2020-12/unevaluatedItems.json/unevaluatedItems depends on multiple nested contains',
+  'draft2020-12/unevaluatedItems.json/unevaluatedItems and contains interact to control item dependency relationship',
   // $dynamicAnchor/$dynamicRef
   'draft2020-12/dynamicRef.json',
   'draft2020-12/defs.json/validate definition against metaschema',
