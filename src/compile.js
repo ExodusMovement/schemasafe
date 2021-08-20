@@ -44,6 +44,17 @@ const constantValue = (schema) => {
 }
 
 const rootMeta = new WeakMap()
+const generateMeta = (root, $schema, enforce, requireSchema) => {
+  if ($schema) {
+    const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
+    enforce(schemaVersions.includes(version), 'Unexpected schema version:', version)
+    rootMeta.set(root, { exclusiveRefs: schemaIsOlderThan(version, 'draft/2019-09') })
+  } else {
+    enforce(!requireSchema, '[requireSchema] $schema is required')
+    rootMeta.set(root, {})
+  }
+}
+
 const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   const {
     mode = 'default',
@@ -140,7 +151,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   const { present, forObjectKeys, forArray, patternTest, compare } = helpers
 
   const recursiveAnchor = schema && schema.$recursiveAnchor === true
-  const getMeta = () => rootMeta.get(root) || {}
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (errors, history, current, node, schemaPath, trace = {}, { constProp } = {}) => {
     // e.g. top-level data and property names, OR already checked by present() in history, OR in keys and not undefined
@@ -189,6 +199,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const uncertain = (msg) =>
       enforce(!removeAdditional && !useDefaults, `[removeAdditional/useDefaults] uncertain: ${msg}`)
     const complex = (msg, arg) => enforce(!complexityChecks, `[complexityChecks] ${msg}`, arg)
+    const saveMeta = ($sch) => generateMeta(root, $sch || $schemaDefault, enforce, requireSchema)
+    const getMeta = () => rootMeta.get(root)
 
     // evaluated tracing
     const stat = initTracing()
@@ -237,12 +249,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     if (node === root) {
-      const $schema = get('$schema', 'string') || $schemaDefault
-      if ($schema) {
-        const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
-        enforce(schemaVersions.includes(version), 'Unexpected schema version:', version)
-        rootMeta.set(root, { exclusiveRefs: schemaIsOlderThan(version, 'draft/2019-09') })
-      } else enforce(!requireSchema, '[requireSchema] $schema is required')
+      saveMeta(get('$schema', 'string'))
       handle('$vocabulary', ['object'], ($vocabulary) => {
         for (const [vocab, flag] of Object.entries($vocabulary)) {
           if (flag === false) continue
@@ -250,7 +257,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         }
         return null
       })
-    }
+    } else if (!getMeta()) saveMeta(root.$schema)
 
     handle('examples', ['array'], null) // unused, meta-only
     for (const ignore of ['title', 'description', '$comment']) handle(ignore, ['string'], null) // unused, meta-only strings
