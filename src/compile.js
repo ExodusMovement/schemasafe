@@ -353,7 +353,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     // Those checks will need to be skipped if another error is set in this block before those ones
-    const haveComplex = node.uniqueItems || node.pattern || node.patternProperties || node.format
+    const havePattern = node.pattern && !noopRegExps.has(node.pattern) // we won't generate code for noop
+    const haveComplex = node.uniqueItems || havePattern || node.patternProperties || node.format
     const prev = allErrors && haveComplex ? gensym('prev') : null
     const prevWrap = (shouldWrap, writeBody) =>
       fun.if(shouldWrap && prev !== null ? format('errorCount === %s', prev) : true, writeBody)
