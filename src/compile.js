@@ -151,6 +151,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   const { present, forObjectKeys, forArray, patternTest, compare } = helpers
 
   const recursiveAnchor = schema && schema.$recursiveAnchor === true
+  const getMeta = () => rootMeta.get(root)
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (errors, history, current, node, schemaPath, trace = {}, { constProp } = {}) => {
     // e.g. top-level data and property names, OR already checked by present() in history, OR in keys and not undefined
@@ -200,7 +201,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       enforce(!removeAdditional && !useDefaults, `[removeAdditional/useDefaults] uncertain: ${msg}`)
     const complex = (msg, arg) => enforce(!complexityChecks, `[complexityChecks] ${msg}`, arg)
     const saveMeta = ($sch) => generateMeta(root, $sch || $schemaDefault, enforce, requireSchema)
-    const getMeta = () => rootMeta.get(root)
 
     // evaluated tracing
     const stat = initTracing()
