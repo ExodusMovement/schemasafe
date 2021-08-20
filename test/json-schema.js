@@ -99,6 +99,7 @@ const unsupported = new Set([
 
   // need investigation
   'draft2019-09/recursiveRef.json/multiple dynamic paths to the $recursiveRef keyword',
+  'optional/format/time.json/validation of time strings/a valid time string with leap second with offset',
 
   // draft2020-12 only
   'draft2020-12/unevaluatedItems.json/unevaluatedItems depends on adjacent contains',

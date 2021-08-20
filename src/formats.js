@@ -36,11 +36,13 @@ const core = {
   },
   time: (input) =>
     input.length <= 9 + 12 + 6 &&
-    /^([0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-]\d\d(:?\d\d)?)?$/i.test(input),
+    /^((2[0-3]|[0-1]\d):[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-](2[0-3]|[0-1]\d)(:?[0-5]\d)?)?$/i.test(
+      input
+    ),
   // first two lines specific to date-time, then tests for unanchored (at end) date, code identical to 'date' above
   'date-time': (input) => {
     if (input.length > 10 + 1 + 9 + 12 + 6) return false
-    const full = /^\d{4}-(0[1-9]|1[0-2])-[0-3]\d[t\s]([0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-]\d\d(:?\d\d)?)$/i
+    const full = /^\d{4}-(0[1-9]|1[0-2])-[0-3]\d[t\s]((2[0-3]|[0-1]\d):[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-](2[0-3]|[0-1]\d)(:?[0-5]\d)?)$/i
     if (!full.test(input)) return false
     if (/^\d\d\d\d-(0[13-9]|1[012])-([012][1-9]|[123]0)/.test(input)) return true
     if (/^\d\d\d\d-02-([012][1-8]|[12]0|[01]9)/.test(input)) return true
