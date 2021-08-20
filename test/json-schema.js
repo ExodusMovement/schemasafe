@@ -75,6 +75,7 @@ const unsupported = new Set([
   'draft3/disallow.json',
   'draft3/type.json', // we don't want draft3-specific type logic
   'draft3/required.json', // we don't support boolean required
+  'draft3/infinite-loop-detection.json', // has 'extends'
   'draft3/enum.json/enums in properties', // we don't support boolean required
   'draft3/ref.json/remote ref, containing refs itself',
   'draft3/optional/ecmascript-regex.json/ECMA 262 regex dialect recognition', // broken assumption in test
