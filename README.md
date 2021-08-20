@@ -239,6 +239,20 @@ optimizeable by v8 and [extremely fast](https://github.com/ebdrup/json-schema-be
 See [Performance](./doc/Performance.md) for information on options that might affect performance
 both ways.
 
+## Contributing
+
+Get a fully set up development environment with:
+
+```sh
+git clone https://github.com/ExodusMovement/schemasafe
+cd schemasafe
+
+git submodule update --init --recursive
+yarn
+yarn lint
+yarn test
+```
+
 ## Previous work
 
 This is based on a heavily rewritten version of the amazing (but outdated)
@@ -249,21 +263,7 @@ Compared to `is-my-json-valid`, `@exodus/schemasafe` adds security-first design,
 newer spec versions support, slimmer and more maintainable code, 0 dependencies, self-contained JS
 module generation, fixes bugs and adds better test coverage, and drops support for outdated Node.js
 versions.
-
 ## License
 
 [MIT](./LICENSE)
 
-## Contributing
-
-Get a fully set up development environment with:
-
-```sh
-git clone https://github.com/ExodusMovement/schemasafe
-cd schemasafe
-
-yarn lint
-git submodule update --init --recursive
-
-yarn test
-```
