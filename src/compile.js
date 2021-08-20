@@ -709,12 +709,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     const checkConst = () => {
-      if (handle('const', ['jsonval'], (val) => safenot(compare(name, val)))) return true
-      return handle('enum', ['array'], (vals) => {
+      const handledConst = handle('const', ['jsonval'], (val) => safenot(compare(name, val)))
+      if (handledConst && !allowUnusedKeywords) return true // enum can't be present, this is rechecked by allowUnusedKeywords
+      const handledEnum = handle('enum', ['array'], (vals) => {
         const objects = vals.filter((value) => value && typeof value === 'object')
         const primitive = vals.filter((value) => !(value && typeof value === 'object'))
         return safenotor(...[...primitive, ...objects].map((value) => compare(name, value)))
       })
+      return handledConst || handledEnum
     }
 
     const checkGeneric = () => {
@@ -919,15 +921,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const performValidation = () => {
       if (prev !== null) fun.write('const %s = errorCount', prev)
       if (checkConst()) {
-        // const/enum shouldn't have any other validation rules except for already checked type/$ref
-        enforce(
-          unused.size === 0 || allowUnusedKeywords,
-          'Unexpected keywords mixed with const or enum:',
-          [...unused]
-        )
         const typeKeys = [...types.keys()] // we don't extract type from const/enum, it's enough that we know that it's present
         evaluateDelta({ properties: [true], items: Infinity, type: typeKeys, fullstring: true }) // everything is evaluated for const
-        return
+        if (!allowUnusedKeywords) {
+          // const/enum shouldn't have any other validation rules except for already checked type/$ref
+          enforce(unused.size === 0, 'Unexpected keywords mixed with const or enum:', [...unused])
+          // If it does though, we should not short-circuit validation. This could be optimized by extracting types, but not significant
+          return
+        }
       }
 
       typeWrap(checkNumbers, ['number', 'integer'], types.get('number')(name))

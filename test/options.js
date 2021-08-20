@@ -116,3 +116,37 @@ tape('allowUnusedKeywords includes enums', (t) => {
 
   t.end()
 })
+
+tape('allowUnusedKeywords does not short-circuit const/enums checks', (t) => {
+  const constEnumSchema = {
+    $schema: 'http://json-schema.org/draft-07/schema#',
+    const: 'value',
+    enum: ['enum'],
+  }
+
+  t.throws(() => validator(constEnumSchema), /Unexpected keywords mixed with const or enum:/)
+
+  t.doesNotThrow(() => {
+    const validate = validator(constEnumSchema, { allowUnusedKeywords: true })
+    t.notOk(validate('value'), '"value" in conflicting const/enum')
+    t.notOk(validate('enum'), '"enum" in conflicting const/enum')
+    t.notOk(validate({}), '{} in conflicting const/enum')
+  })
+
+  const constTypeSchema = {
+    $schema: 'http://json-schema.org/draft-07/schema#',
+    const: 'value',
+    allOf: [{ type: 'object' }],
+  }
+
+  t.throws(() => validator(constTypeSchema), /Unexpected keywords mixed with const or enum:/)
+
+  t.doesNotThrow(() => {
+    const validate = validator(constTypeSchema, { allowUnusedKeywords: true })
+    t.notOk(validate('value'), '"value" in conflicting const/type')
+    t.notOk(validate('enum'), '"enum" in conflicting const/type')
+    t.notOk(validate({}), '{} in conflicting const/type')
+  })
+
+  t.end()
+})
