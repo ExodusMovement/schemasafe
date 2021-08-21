@@ -66,10 +66,10 @@ const unsafe = new Set([
 
 const unsupported = new Set([
   // Unsupported formats
-  'format.json/validation of IRIs',
-  'format.json/validation of IRI references',
-  'format.json/validation of IDN hostnames',
-  'format.json/validation of IDN e-mail addresses',
+  'format.json/iri format',
+  'format.json/iri-reference format',
+  'format.json/idn-email format',
+  'format.json/idn-hostname format',
   'optional/format/iri-reference.json',
   'optional/format/iri.json',
   'optional/format/idn-email.json',
@@ -102,6 +102,9 @@ const unsupported = new Set([
   'draft2019-09/recursiveRef.json/multiple dynamic paths to the $recursiveRef keyword',
   'draft2019-09/recursiveRef.json/dynamic $recursiveRef destination (not predictable at schema compile time)',
   'optional/format/time.json/validation of time strings/a valid time string with leap second with offset',
+
+  // invalid tests in upstream
+  'optional/unicode.json',
 
   // draft2020-12 only
   'draft2020-12/unevaluatedItems.json/unevaluatedItems depends on adjacent contains',
