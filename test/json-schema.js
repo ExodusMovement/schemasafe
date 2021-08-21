@@ -20,6 +20,8 @@ const unsafe = new Set([
   'if-then-else.json/ignore else without if',
   'if-then-else.json/non-interference across combined schemas',
   'unevaluatedProperties.json/unevaluatedProperties with nested unevaluatedProperties',
+  'unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties outside',
+  'unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties inside',
   'not.json/not with boolean schema false',
   'anyOf.json/anyOf with one empty schema',
   'anyOf.json/anyOf with boolean schemas, all true',
@@ -28,6 +30,8 @@ const unsafe = new Set([
   'oneOf.json/oneOf with boolean schemas, more than one true',
   'oneOf.json/oneOf with boolean schemas, all false',
   'unknownKeyword.json/$id inside an unknown keyword is not a real identifier',
+  'optional/refOfUnknownKeyword.json/reference of a root arbitrary keyword ',
+  'optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
 
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
 
@@ -36,22 +40,12 @@ const unsafe = new Set([
   'draft3/additionalProperties.json/additionalProperties should not look in applicators',
 
   // draft2019-09 only
-  'draft2019-09/optional/refOfUnknownKeyword.json/reference of a root arbitrary keyword ',
-  'draft2019-09/optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
-  'draft2019-09/unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties outside',
-  'draft2019-09/unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties inside',
   // tests $recursiveRef without $recursiveAnchor, we treat this as a mistake
   'draft2019-09/recursiveRef.json/$recursiveRef without $recursiveAnchor works like $ref',
   'draft2019-09/recursiveRef.json/$recursiveRef with $recursiveAnchor: false works like $ref',
   'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor works like $ref',
   'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor in the initial target schema resource',
   'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor in the outer schema resource',
-
-  // draft2020-12 only
-  'draft2020-12/optional/refOfUnknownKeyword.json/reference of a root arbitrary keyword ',
-  'draft2020-12/optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
-  'draft2020-12/unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties outside',
-  'draft2020-12/unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties inside',
 
   // ajv tests
   'rules/if.json/then/else without if should be ignored',
