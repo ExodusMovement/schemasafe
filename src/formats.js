@@ -42,10 +42,9 @@ const core = {
     if (!/:60/.test(input)) return true
     const p = input.match(/([0-9.]+|[^0-9.])/g)
     let hm = Number(p[0]) * 60 + Number(p[2])
-    if (p[5] === '+') hm -= Number(p[6] || 0) * 60 + Number(p[8] || 0)
+    if (p[5] === '+') hm += 24 * 60 - Number(p[6] || 0) * 60 - Number(p[8] || 0)
     else if (p[5] === '-') hm += Number(p[6] || 0) * 60 + Number(p[8] || 0)
-    hm = (hm + 24 * 60) % (24 * 60)
-    return hm === 23 * 60 + 59
+    return hm % (24 * 60) === 23 * 60 + 59
   },
   // first two lines specific to date-time, then tests for unanchored (at end) date, code identical to 'date' above
   'date-time': (input) => {
@@ -55,10 +54,9 @@ const core = {
     if (/:60/.test(input)) {
       const p = input.slice(11).match(/([0-9.]+|[^0-9.])/g)
       let hm = Number(p[0]) * 60 + Number(p[2])
-      if (p[5] === '+') hm -= Number(p[6] || 0) * 60 + Number(p[8] || 0)
+      if (p[5] === '+') hm += 24 * 60 - Number(p[6] || 0) * 60 - Number(p[8] || 0)
       else if (p[5] === '-') hm += Number(p[6] || 0) * 60 + Number(p[8] || 0)
-      hm = (hm + 24 * 60) % (24 * 60)
-      if (hm !== 23 * 60 + 59) return false
+      if (hm % (24 * 60) !== 23 * 60 + 59) return false
     }
     if (/^\d\d\d\d-(0[13-9]|1[012])-([012][1-9]|[123]0)/.test(input)) return true
     if (/^\d\d\d\d-02-([012][1-8]|[12]0|[01]9)/.test(input)) return true
