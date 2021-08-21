@@ -96,15 +96,6 @@ const unsupported = new Set([
   // need investigation
   'draft2019-09/recursiveRef.json/multiple dynamic paths to the $recursiveRef keyword',
   'draft2019-09/recursiveRef.json/dynamic $recursiveRef destination (not predictable at schema compile time)',
-  // leap seconds support with time-offset combo needs to be fixed
-  'optional/format/time.json/validation of time strings/valid leap second, positive time-offset',
-  'optional/format/time.json/validation of time strings/valid leap second, large positive time-offset',
-  'optional/format/time.json/validation of time strings/invalid leap second, positive time-offset (wrong hour)',
-  'optional/format/time.json/validation of time strings/invalid leap second, positive time-offset (wrong minute)',
-  'optional/format/time.json/validation of time strings/valid leap second, negative time-offset',
-  'optional/format/time.json/validation of time strings/valid leap second, large negative time-offset',
-  'optional/format/time.json/validation of time strings/invalid leap second, negative time-offset (wrong hour)',
-  'optional/format/time.json/validation of time strings/invalid leap second, negative time-offset (wrong minute)',
 
   // invalid tests in upstream
   'optional/unicode.json',

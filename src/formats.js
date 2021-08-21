@@ -34,16 +34,32 @@ const core = {
     const year = matches[1] | 0
     return year % 16 === 0 || (year % 4 === 0 && year % 25 !== 0)
   },
-  time: (input) =>
-    input.length <= 9 + 12 + 6 &&
-    /^((2[0-3]|[0-1]\d):[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-](2[0-3]|[0-1]\d)(:?[0-5]\d)?)?$/i.test(
-      input
-    ),
+  // leap second handling is special, we check it's 23:59:60.*
+  time: (input) => {
+    if (input.length > 9 + 12 + 6) return false
+    const time = /^(2[0-3]|[0-1]\d):[0-5]\d:([0-5]\d|60)(\.\d+)?(z|[+-](2[0-3]|[0-1]\d)(:?[0-5]\d)?)?$/i
+    if (!time.test(input)) return false
+    if (!/:60/.test(input)) return true
+    const p = input.match(/([0-9.]+|[^0-9.])/g)
+    let hm = Number(p[0]) * 60 + Number(p[2])
+    if (p[5] === '+') hm -= Number(p[6] || 0) * 60 + Number(p[8] || 0)
+    else if (p[5] === '-') hm += Number(p[6] || 0) * 60 + Number(p[8] || 0)
+    hm = (hm + 24 * 60) % (24 * 60)
+    return hm === 23 * 60 + 59
+  },
   // first two lines specific to date-time, then tests for unanchored (at end) date, code identical to 'date' above
   'date-time': (input) => {
     if (input.length > 10 + 1 + 9 + 12 + 6) return false
-    const full = /^\d{4}-(0[1-9]|1[0-2])-[0-3]\d[t\s]((2[0-3]|[0-1]\d):[0-5]\d:[0-5]\d|23:59:60)(\.\d+)?(z|[+-](2[0-3]|[0-1]\d)(:?[0-5]\d)?)$/i
+    const full = /^\d{4}-(0[1-9]|1[0-2])-[0-3]\d[t\s](2[0-3]|[0-1]\d):[0-5]\d:([0-5]\d|60)(\.\d+)?(z|[+-](2[0-3]|[0-1]\d)(:?[0-5]\d)?)$/i
     if (!full.test(input)) return false
+    if (/:60/.test(input)) {
+      const p = input.slice(11).match(/([0-9.]+|[^0-9.])/g)
+      let hm = Number(p[0]) * 60 + Number(p[2])
+      if (p[5] === '+') hm -= Number(p[6] || 0) * 60 + Number(p[8] || 0)
+      else if (p[5] === '-') hm += Number(p[6] || 0) * 60 + Number(p[8] || 0)
+      hm = (hm + 24 * 60) % (24 * 60)
+      if (hm !== 23 * 60 + 59) return false
+    }
     if (/^\d\d\d\d-(0[13-9]|1[012])-([012][1-9]|[123]0)/.test(input)) return true
     if (/^\d\d\d\d-02-([012][1-8]|[12]0|[01]9)/.test(input)) return true
     if (/^\d\d\d\d-(0[13578]|1[02])-31/.test(input)) return true
