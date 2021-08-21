@@ -23,6 +23,7 @@ const knownKeywords = [
 
 // Order is important, newer first!
 const schemaDrafts = [
+  ...['draft/future'], // not recommended to use, might change / break in an unexpected way
   ...['draft/2020-12', 'draft/2019-09'], // new
   ...['draft-07', 'draft-06', 'draft-04', 'draft-03'], // historic
 ]

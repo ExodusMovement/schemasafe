@@ -72,6 +72,7 @@ const unsupported = new Set([
   // deliberate differences where format/content do not expect any validation by default in upstream
   'draft2019-09/content.json', // expected to be noop in draft2019-09 and actually implemented as an assertion here
   'draft2020-12/content.json', // same as draft2019-09, we have a replacement test
+  'draft-future/content.json', // same
   // see also unsupportedMask below
 
   //  draft4/draft3, optional
@@ -119,6 +120,24 @@ const unsupported = new Set([
   'draft2020-12/id.json/Valid use of empty fragments in location-independent $id',
   'draft2020-12/id.json/Unnormalized $ids are allowed but discouraged',
   'draft2020-12/ref.json/remote ref, containing refs itself',
+
+  // draft-future, same as draft2020-12
+  'draft-future/unevaluatedItems.json/unevaluatedItems depends on adjacent contains',
+  'draft-future/unevaluatedItems.json/unevaluatedItems depends on multiple nested contains',
+  'draft-future/unevaluatedItems.json/unevaluatedItems and contains interact to control item dependency relationship',
+  'draft-future/dynamicRef.json',
+  // draft-future only
+  'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on adjacent contains',
+  'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on multiple nested contains',
+  // no meta schema
+  'draft-future/defs.json/validate definition against metaschema',
+  'draft-future/id.json/Invalid use of fragments in location-independent $id',
+  'draft-future/id.json/Valid use of empty fragments in location-independent $id',
+  'draft-future/id.json/Unnormalized $ids are allowed but discouraged',
+  'draft-future/ref.json/remote ref, containing refs itself',
+  // object contains
+  'draft-future/contains.json',
+  'draft-future/maxContains.json',
 ])
 const unsupportedMask = [
   // deliberate differences where format/content do not expect any validation by default in upstream
@@ -154,6 +173,7 @@ processTestDir(testsDir, 'draft7')
 processTestDir(testsDir, 'draft3')
 processTestDir(testsDir, 'draft2019-09')
 processTestDir(testsDir, 'draft2020-12')
+processTestDir(testsDir, 'draft-future')
 
 /** extra tests not (yet) merged upstream **/
 processTestDir('', 'extra-tests')
