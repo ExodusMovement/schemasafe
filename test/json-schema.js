@@ -45,7 +45,6 @@ const unsafe = new Set([
   'draft2019-09/recursiveRef.json/$recursiveRef with $recursiveAnchor: false works like $ref',
   'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor works like $ref',
   'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor in the initial target schema resource',
-  'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor in the outer schema resource',
 
   // ajv tests
   'rules/if.json/then/else without if should be ignored',
@@ -92,10 +91,6 @@ const unsupported = new Set([
   'rules/format.json/validation of URL strings',
   'rules/format.json/validation of JSON-pointer URI fragment strings',
   'issues/33_json_schema_latest.json/use latest json schema as v4 (#33)',
-
-  // need investigation
-  'draft2019-09/recursiveRef.json/multiple dynamic paths to the $recursiveRef keyword',
-  'draft2019-09/recursiveRef.json/dynamic $recursiveRef destination (not predictable at schema compile time)',
 
   // invalid tests in upstream
   'optional/unicode.json',

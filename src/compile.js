@@ -153,7 +153,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   const helpers = jsHelpers(fun, scope, propvar, { unmodifiedPrototypes, isJSON }, noopRegExps)
   const { present, forObjectKeys, forArray, patternTest, compare } = helpers
 
-  const recursiveAnchor = schema && schema.$recursiveAnchor === true
+  const recursiveLog = []
   const getMeta = () => rootMeta.get(root)
   const basePathStack = basePathRoot ? [basePathRoot] : []
   const visit = (errors, history, current, node, schemaPath, trace = {}, { constProp } = {}) => {
@@ -276,8 +276,12 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     handle('$id', ['string'], setId) || handle('id', ['string'], setId)
     handle('$anchor', ['string'], null) // $anchor is used only for ref resolution, on usage
 
-    if (node === schema && (recursiveAnchor || !forbidNoopValues))
-      handle('$recursiveAnchor', ['boolean'], null) // already applied
+    if (node.$recursiveAnchor || !forbidNoopValues) {
+      handle('$recursiveAnchor', ['boolean'], (isRecursive) => {
+        if (isRecursive) recursiveLog.push([node, root, basePath()])
+        return null
+      })
+    }
 
     // evaluated: declare dynamic
     const needUnevaluated = (rule) =>
@@ -311,19 +315,25 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       }
     }
 
+    const makeRecursive = () => {
+      if (recursiveLog.length === 0) return format('recursive') // no recursive default, i.e. no $recursiveAnchor has been set in this schema
+      const [sub, subRoot, path] = recursiveLog[0]
+      if (sub === schema) return format('recursive || validate') // recursion points to schema, we default recursive to validate
+      const recursive = getref(sub) || compileSchema(sub, subRoot, opts, scope, path) // else we have ti default it to compileSchema
+      return format('recursive || %s', recursive)
+    }
     const applyRef = (n, errorArgs) => {
       // evaluated: propagate static from ref to current, skips cyclic.
       // Can do this before the call as the call is just a write
       const delta = (scope[n] && scope[n][evaluatedStatic]) || { unknown: true } // assume unknown if ref is cyclic
       evaluateDelta(delta)
-      // Allow recursion to here only if $recursiveAnchor is true, else skip from deep recursion
-      const recursive = recursiveAnchor ? format('recursive || validate') : format('recursive')
-      if (!includeErrors && canSkipDynamic()) return format('!%s(%s, %s)', n, name, recursive) // simple case
+      const call = format('%s(%s, %s)', n, name, makeRecursive())
+      if (!includeErrors && canSkipDynamic()) return format('!%s', call) // simple case
       const res = gensym('res')
       const err = gensym('err') // Save and restore errors in case of recursion (if needed)
       const suberr = gensym('suberr')
       if (includeErrors) fun.write('const %s = validate.errors', err)
-      fun.write('const %s = %s(%s, %s)', res, n, name, recursive)
+      fun.write('const %s = %s', res, call)
       if (includeErrors) fun.write('const %s = %s.errors', suberr, n)
       if (includeErrors) fun.write('validate.errors = %s', err)
       errorIf(safenot(res), { ...errorArgs, source: suberr })
@@ -1035,6 +1045,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       handle('default', ['jsonval'], null) // unused
       fun.if(definitelyPresent ? true : present(current), writeMain)
     }
+
+    // restore recursiveAnchor history if it's not empty and ends with current node
+    if (recursiveLog[0] && recursiveLog[recursiveLog.length - 1][0] === node) recursiveLog.pop()
 
     // Checks related to static schema analysis
     if (!allowUnreachable) enforce(!fun.optimizedOut, 'some checks are never reachable')
