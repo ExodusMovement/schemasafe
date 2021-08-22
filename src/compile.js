@@ -989,14 +989,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const resolved = resolveReference(root, schemas, '#', basePath())
         const [sub, subRoot, path] = resolved[0] || []
         laxMode(sub.$recursiveAnchor, '$recursiveRef without $recursiveAnchor')
-        if (!sub.$recursiveAnchor || !recursiveAnchor) {
-          // regular ref
-          const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
-          return applyRef(n, { path: ['$recursiveRef'] })
-        }
+        const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
         // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
-        const n = recursiveAnchor ? format('(recursive || validate)') : format('validate')
-        return applyRef(n, { path: ['$recursiveRef'] })
+        const nrec = sub.$recursiveAnchor ? format('(recursive || %s)', n) : n
+        return applyRef(nrec, { path: ['$recursiveRef'] })
       })
 
       // typecheck
