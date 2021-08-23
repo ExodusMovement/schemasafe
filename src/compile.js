@@ -1003,7 +1003,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
         // Resolve to recheck that recursive ref is enabled
         const resolved = resolveReference(root, schemas, '#', basePath())
-        const [sub, subRoot, path] = resolved[0] || []
+        const [sub, subRoot, path] = resolved[0]
         laxMode(sub.$recursiveAnchor, '$recursiveRef without $recursiveAnchor')
         const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
         // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
