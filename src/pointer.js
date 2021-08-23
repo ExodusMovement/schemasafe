@@ -82,10 +82,11 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
         if (res !== undefined) results.push([res, root, joinPath(oldPath, objpath2path(objpath))])
       }
     }
-    if (sub.$anchor && typeof sub.$anchor === 'string') {
-      if (sub.$anchor.includes('#')) throw new Error("$anchor can't include '#'")
-      if (sub.$anchor.startsWith('/')) throw new Error("$anchor can't start with '/'")
-      path = joinPath(path, `#${sub.$anchor}`)
+    const anchor = sub.$anchor || sub.$dynamicAnchor // ensured to not conflict in compile.js
+    if (anchor && typeof anchor === 'string') {
+      if (anchor.includes('#')) throw new Error("$anchor can't include '#'")
+      if (anchor.startsWith('/')) throw new Error("$anchor can't start with '/'")
+      path = joinPath(path, `#${anchor}`)
       if (path === ptr) results.push([sub, root, oldPath])
     }
     for (const k of Object.keys(sub)) {

@@ -276,6 +276,12 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     handle('$id', ['string'], setId) || handle('id', ['string'], setId)
     handle('$anchor', ['string'], null) // $anchor is used only for ref resolution, on usage
 
+    handle('$dynamicAnchor', ['string'], (dynamicAnchor) => {
+      const matchesAnchor = node.$anchor === undefined || node.$anchor === dynamicAnchor
+      enforce(matchesAnchor, "$dynamicAnchor can't differ from $anchor", dynamicAnchor)
+      return null
+    })
+
     if (node.$recursiveAnchor || !forbidNoopValues) {
       handle('$recursiveAnchor', ['boolean'], (isRecursive) => {
         if (isRecursive) recursiveLog.push([node, root, basePath()])

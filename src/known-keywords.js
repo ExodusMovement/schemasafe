@@ -2,7 +2,8 @@
 
 const knownKeywords = [
   ...['$schema', '$vocabulary'], // version
-  ...['id', '$id', '$anchor', '$ref', 'definitions', '$defs', '$recursiveRef', '$recursiveAnchor'], // pointers
+  ...['id', '$id', '$anchor', '$ref', 'definitions', '$defs'], // pointers
+  ...['$recursiveRef', '$recursiveAnchor', '$dynamicAnchor'],
   ...['type', 'required', 'default'], // generic
   ...['enum', 'const'], // constant values
   ...['not', 'allOf', 'anyOf', 'oneOf', 'if', 'then', 'else'], // logical checks
@@ -30,6 +31,13 @@ const schemaDrafts = [
 const schemaVersions = schemaDrafts.map((draft) => `https://json-schema.org/${draft}/schema`)
 
 const vocab2019 = ['core', 'applicator', 'validation', 'meta-data', 'format', 'content']
-const knownVocabularies = vocab2019.map((v) => `https://json-schema.org/draft/2019-09/vocab/${v}`)
+const vocab2020 = [
+  ...['core', 'applicator', 'unevaluated', 'validation'],
+  ...['meta-data', 'format-annotation', 'content'],
+]
+const knownVocabularies = [
+  ...vocab2019.map((v) => `https://json-schema.org/draft/2019-09/vocab/${v}`),
+  ...vocab2020.map((v) => `https://json-schema.org/draft/2020-12/vocab/${v}`),
+]
 
 module.exports = { knownKeywords, schemaVersions, knownVocabularies }
