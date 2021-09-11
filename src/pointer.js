@@ -45,7 +45,7 @@ function joinPath(baseFull, sub) {
   if (!base.includes('/') || protocolRegex.test(sub)) return sub
   if (protocolRegex.test(base)) return `${new URL(sub, base)}`
   if (sub.startsWith('/')) return sub
-  return `${base.replace(/\/?[^/]*$/, '')}/${sub}`
+  return [...base.split('/').slice(0, -1), sub].join('/')
 }
 
 function objpath2path(objpath) {
