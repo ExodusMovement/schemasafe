@@ -72,7 +72,9 @@ const unsupported = new Set([
   'draft2019-09/content.json', // expected to be noop in draft2019-09 and actually implemented as an assertion here
   'draft2020-12/content.json', // same as draft2019-09, we have a replacement test
   'draft-future/content.json', // same
-  // see also unsupportedMask below
+
+  // we have leading time-offset (e.g. Z) optional in time format for compat reasons for now
+  'optional/format/time.json/validation of time strings/no time offset',
 
   //  draft4/draft3, optional
   'optional/zeroTerminatedFloats.json', // makes no sense in js
@@ -125,10 +127,7 @@ const unsupported = new Set([
   'draft-future/contains.json',
   'draft-future/maxContains.json',
 ])
-const unsupportedMask = [
-  // deliberate differences where format/content do not expect any validation by default in upstream
-  /^format\.json\/[^/]+\/invalid [a-z0-9_-]+ string is only an annotation by default$/,
-]
+const unsupportedMask = []
 
 function processTestDir(schemaDir, main, subdir = '') {
   const dir = path.join(__dirname, schemaDir, main, subdir)
