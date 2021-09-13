@@ -20,7 +20,7 @@ Supports [draft-04/06/07/2019-09](doc/Specification-support.md) and the
   _That is implemented by tracking processed keywords and ensuring that none remain uncovered._
 * Does not fail open on schema problems — instead throws at build time.\
   _E.g. it will detect mistakes like `{type: "array", "maxLength": 2}`._
-* [Under 1700 lines of code](./doc/Auditable.md), non-minified.
+* [Less than 2000 lines of code](./doc/Auditable.md), non-minified.
 * Uses [secure code generation](./doc/Secure-code-generation.md) approach to prevent data from schema from leaking into
   the generated code without being JSON-wrapped.
 * [0 dependencies](./doc/Auditable.md)

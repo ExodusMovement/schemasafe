@@ -2,7 +2,7 @@
 
 Features:
 
-  * Whole module size is ~1600 lines of code.
+  * Whole module size is ~1900 lines of code.
 
   * 0 dependencies on any other packages.
 
