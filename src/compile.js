@@ -1008,6 +1008,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const nrec = sub.$recursiveAnchor ? format('(recursive || %s)', n) : n
         return applyRef(nrec, { path: ['$recursiveRef'] })
       })
+      handle('$dynamicRef', ['string'], ($dynamicRef) => {
+        fail('$dynamicRef support is not yet implemented:', $dynamicRef)
+      })
 
       // typecheck
       let typeCheck = null

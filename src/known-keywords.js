@@ -3,7 +3,7 @@
 const knownKeywords = [
   ...['$schema', '$vocabulary'], // version
   ...['id', '$id', '$anchor', '$ref', 'definitions', '$defs'], // pointers
-  ...['$recursiveRef', '$recursiveAnchor', '$dynamicAnchor'],
+  ...['$recursiveRef', '$recursiveAnchor', '$dynamicAnchor', '$dynamicRef'],
   ...['type', 'required', 'default'], // generic
   ...['enum', 'const'], // constant values
   ...['not', 'allOf', 'anyOf', 'oneOf', 'if', 'then', 'else'], // logical checks
