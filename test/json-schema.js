@@ -115,12 +115,6 @@ const unsupported = new Set([
   // draft-future only
   'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on adjacent contains',
   'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on multiple nested contains',
-  // no meta schema
-  'draft-future/defs.json/validate definition against metaschema',
-  'draft-future/id.json/Invalid use of fragments in location-independent $id',
-  'draft-future/id.json/Valid use of empty fragments in location-independent $id',
-  'draft-future/id.json/Unnormalized $ids are allowed but discouraged',
-  'draft-future/ref.json/remote ref, containing refs itself',
   // object contains
   'draft-future/contains.json',
   'draft-future/maxContains.json',

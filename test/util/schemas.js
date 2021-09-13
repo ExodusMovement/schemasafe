@@ -21,6 +21,39 @@ module.exports = [
   require('./../schemas/json-schema-draft-06.json'),
   require('./../schemas/json-schema-draft-04.json'),
   require('./../schemas/json-schema-draft-03.json'),
+  // future, use latest available for refs to draft/future for now (until future schema becomes available)
+  {
+    ...require('./../schemas/json-schema-draft-2020-12/meta/core.json'),
+    $id: 'https://json-schema.org/draft/future/meta/core',
+  },
+  {
+    ...require('./../schemas/json-schema-draft-2020-12/meta/applicator.json'),
+    $id: 'https://json-schema.org/draft/future/meta/applicator',
+  },
+  {
+    ...require('./../schemas/json-schema-draft-2020-12/meta/unevaluated.json'),
+    $id: 'https://json-schema.org/draft/future/meta/unevaluated',
+  },
+  {
+    ...require('./../schemas/json-schema-draft-2020-12/meta/validation.json'),
+    $id: 'https://json-schema.org/draft/future/meta/validation',
+  },
+  {
+    ...require('./../schemas/json-schema-draft-2020-12/meta/meta-data.json'),
+    $id: 'https://json-schema.org/draft/future/meta/meta-data',
+  },
+  {
+    ...require('./../schemas/json-schema-draft-2020-12/meta/format-annotation.json'),
+    $id: 'https://json-schema.org/draft/future/meta/format-annotation',
+  },
+  {
+    ...require('./../schemas/json-schema-draft-2020-12/meta/content.json'),
+    $id: 'https://json-schema.org/draft/future/meta/content',
+  },
+  {
+    ...require('./../schemas/json-schema-draft-2020-12/schema.json'),
+    $id: 'https://json-schema.org/draft/future/schema',
+  },
   // remote
   {
     $id: 'http://localhost:1234/integer.json',
