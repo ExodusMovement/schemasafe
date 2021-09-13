@@ -65,10 +65,6 @@ const unsafe = new Set([
 
 const unsupported = new Set([
   // Unsupported formats
-  'format.json/iri format',
-  'format.json/iri-reference format',
-  'format.json/idn-email format',
-  'format.json/idn-hostname format',
   'optional/format/iri-reference.json',
   'optional/format/iri.json',
   'optional/format/idn-email.json',
@@ -121,6 +117,16 @@ const unsupported = new Set([
 ])
 const unsupportedMask = []
 
+// There is no option to make all formats fallback to noop, but users can easily opt-in to that
+// per-format, or get a visible error in compile time
+const unsupportedFormats = {
+  iri: () => true,
+  'iri-reference': () => true,
+  'idn-email': () => true,
+  'idn-hostname': () => true,
+}
+const manualFormats = (file) => (file === 'format.json' ? unsupportedFormats : undefined)
+
 function processTestDir(schemaDir, main, subdir = '') {
   const dir = path.join(__dirname, schemaDir, main, subdir)
   const shouldIngore = (id) =>
@@ -134,7 +140,7 @@ function processTestDir(schemaDir, main, subdir = '') {
     if (file.endsWith('.md')) continue
     if (file.endsWith('.json')) {
       const content = fs.readFileSync(path.join(dir, file), 'utf-8')
-      processTest(main, sub, JSON.parse(content), shouldIngore, requiresLax)
+      processTest(main, sub, JSON.parse(content), shouldIngore, requiresLax, manualFormats(file))
     } else {
       // assume it's a dir and let it fail otherwise
       processTestDir(schemaDir, main, sub)
