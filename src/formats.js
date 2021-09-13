@@ -8,7 +8,7 @@ const core = {
   // the second regex checks for quoted, starting-leading dot in name, and two dots anywhere
   email: (input) => {
     if (input.length > 318) return false
-    const fast = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]{1,20}(\.[a-z0-9!#$%&'*+/=?^_`{|}~-]{1,21}){0,2}@[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,60}[a-z0-9])?){0,3}$/
+    const fast = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]{1,20}(\.[a-z0-9!#$%&'*+/=?^_`{|}~-]{1,21}){0,2}@[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,60}[a-z0-9])?){0,3}$/i
     if (fast.test(input)) return true
     if (!input.includes('@') || /(^\.|^"|\.@|\.\.)/.test(input)) return false
     const [name, host, ...rest] = input.split('@')
