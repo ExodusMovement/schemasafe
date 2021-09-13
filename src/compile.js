@@ -321,12 +321,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       }
     }
 
+    const compileSub = (sub, subR, path) =>
+      sub === schema ? safe('validate') : getref(sub) || compileSchema(sub, subR, opts, scope, path)
     const makeRecursive = () => {
       if (recursiveLog.length === 0) return format('recursive') // no recursive default, i.e. no $recursiveAnchor has been set in this schema
-      const [sub, subRoot, path] = recursiveLog[0]
-      if (sub === schema) return format('recursive || validate') // recursion points to schema, we default recursive to validate
-      const recursive = getref(sub) || compileSchema(sub, subRoot, opts, scope, path) // else we have ti default it to compileSchema
-      return format('recursive || %s', recursive)
+      return format('recursive || %s', compileSub(...recursiveLog[0]))
     }
     const applyRef = (n, errorArgs) => {
       // evaluated: propagate static from ref to current, skips cyclic.
