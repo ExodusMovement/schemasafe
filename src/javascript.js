@@ -102,12 +102,33 @@ const jsHelpers = (fun, scope, propvar, { unmodifiedPrototypes, isJSON }, noopRe
     return format('%s.test(%s)', genpattern(pat), key)
   }
 
-  const compare = (variableName, value) => {
-    if (value && typeof value === 'object') {
-      scope.deepEqual = functions.deepEqual
-      return format('deepEqual(%s, %j)', variableName, value)
+  const compare = (name, val) => {
+    if (!val || typeof val !== 'object') return format('%s === %j', name, val)
+
+    let type // type is needed for speedup only, deepEqual rechecks that
+    // small plain object/arrays are fast cases and we inline those instead of calling deepEqual
+    const shouldInline = (arr) => arr.length <= 3 && arr.every((x) => !x || typeof x !== 'object')
+    if (Array.isArray(val)) {
+      type = types.get('array')(name)
+      if (shouldInline(val)) {
+        let k = format('%s.length === %d', name, val.length)
+        for (let i = 0; i < val.length; i++) k = format('%s && %s[%d] === %j', k, name, i, val[i])
+        return format('%s && %s', type, k)
+      }
+    } else {
+      type = types.get('object')(name)
+      const [keys, values] = [Object.keys(val), Object.values(val)]
+      if (shouldInline(values)) {
+        let k = format('Object.keys(%s).length === %d', name, keys.length)
+        if (keys.length > 0) scope.hasOwn = functions.hasOwn
+        for (const key of keys) k = format('%s && hasOwn(%s, %j)', k, name, key)
+        for (const key of keys) k = format('%s && %s[%j] === %j', k, name, key, val[key])
+        return format('%s && %s', type, k)
+      }
     }
-    return format('%s === %j', variableName, value)
+
+    scope.deepEqual = functions.deepEqual
+    return format('%s && deepEqual(%s, %j)', type, name, val)
   }
 
   return { present, forObjectKeys, forArray, patternTest, compare, propvar }
