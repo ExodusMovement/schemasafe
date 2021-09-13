@@ -18,10 +18,9 @@ const core = {
   },
   // matches ajv + length checks
   hostname: (input) => {
-    const host = input.endsWith('.') ? input.slice(0, input.length - 1) : input
-    if (host.length > 253) return false
-    if (!/^[a-z0-9.-]+$/i.test(host)) return false
-    return host.split('.').every((part) => /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/i.test(part))
+    if (input.length > (input.endsWith('.') ? 254 : 253)) return false
+    const hostname = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\.?$/i
+    return hostname.test(input)
   },
 
   // 'time' matches ajv + length checks, 'date' matches ajv full
