@@ -3,11 +3,16 @@
 const core = {
   // matches ajv + length checks + does not start with a dot
   // note that quoted emails are deliberately unsupported (as in ajv), who would want \x01 in email
+  // first check is an additional fast path with lengths: 20+(1+21)*2 = 64, (1+61+1)+((1+60+1)+1)*3 = 252 < 253, that should cover most valid emails
+  // max length is 64 (name) + 1 (@) + 253 (host), we want to ensure that prior to feeding to the fast regex
+  // the second regex checks for quoted, starting-leading dot in name, and two dots anywhere
   email: (input) => {
-    if (input[0] === '"') return false
+    if (input.length > 318) return false
+    const fast = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]{1,20}(\.[a-z0-9!#$%&'*+/=?^_`{|}~-]{1,21}){0,2}@[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,60}[a-z0-9])?){0,3}$/
+    if (fast.test(input)) return true
+    if (!input.includes('@') || /(^\.|^"|\.@|\.\.)/.test(input)) return false
     const [name, host, ...rest] = input.split('@')
     if (!name || !host || rest.length !== 0 || name.length > 64 || host.length > 253) return false
-    if (name[0] === '.' || name.endsWith('.') || name.includes('..')) return false
     if (!/^[a-z0-9.-]+$/i.test(host) || !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+$/i.test(name)) return false
     return host.split('.').every((part) => /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/i.test(part))
   },
