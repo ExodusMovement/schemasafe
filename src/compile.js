@@ -2,7 +2,7 @@
 
 const { format, safe, safeand, safenot, safenotor } = require('./safe-format')
 const genfun = require('./generate-function')
-const { resolveReference, joinPath } = require('./pointer')
+const { resolveReference, joinPath, getDynamicAnchors, hasKeywords } = require('./pointer')
 const formats = require('./formats')
 const { toPointer, ...functions } = require('./scope-functions')
 const { scopeMethods } = require('./scope-utils')
@@ -144,11 +144,21 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   }
   scope[funname] = wrap
 
+  const hasRefs = hasKeywords(schema, ['$ref', '$recursiveRef', '$dynamicRef'])
+  const hasDynAnchors = hasRefs && hasKeywords(schema, ['$dynamicAnchor'])
+  const dynAnchorsHead = hasDynAnchors ? format('dynAnchors = []') : safe('dynAnchors')
+
   const fun = genfun()
-  fun.write('function validate(data, recursive) {')
+  fun.write('function validate(data, recursive, %s) {', dynAnchorsHead)
   if (includeErrors) fun.write('validate.errors = null')
   if (allErrors) fun.write('let errorCount = 0')
   if (opts[optDynamic]) fun.write('validate.evaluatedDynamic = null')
+
+  let dynamicAnchorsNext = safe('dynAnchors')
+  if (hasDynAnchors) {
+    fun.write('const dynLocal = [{}]')
+    dynamicAnchorsNext = format('[...dynAnchors, dynLocal[0] || []]')
+  }
 
   const helpers = jsHelpers(fun, scope, propvar, { unmodifiedPrototypes, isJSON }, noopRegExps)
   const { present, forObjectKeys, forArray, patternTest, compare } = helpers
@@ -268,6 +278,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
     handle('$defs', ['object'], null) || handle('definitions', ['object'], null) // defs are allowed, those are validated on usage
 
+    const compileSub = (sub, subR, path) =>
+      sub === schema ? safe('validate') : getref(sub) || compileSchema(sub, subR, opts, scope, path)
     const basePath = () => (basePathStack.length > 0 ? basePathStack[basePathStack.length - 1] : '')
     const setId = ($id) => {
       basePathStack.push(joinPath(basePath(), $id))
@@ -275,18 +287,27 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
     handle('$id', ['string'], setId) || handle('id', ['string'], setId)
     handle('$anchor', ['string'], null) // $anchor is used only for ref resolution, on usage
-
-    handle('$dynamicAnchor', ['string'], () => {
-      // Used for ref resolution, on usage
-      // TODO: add to dynamic scope
-      return null
-    })
+    handle('$dynamicAnchor', ['string'], null) // handled separately and on ref resolution
 
     if (node.$recursiveAnchor || !forbidNoopValues) {
       handle('$recursiveAnchor', ['boolean'], (isRecursive) => {
         if (isRecursive) recursiveLog.push([node, root, basePath()])
         return null
       })
+    }
+
+    // handle schema-wide dynamic anchors
+    const isDynScope = hasDynAnchors && (node === schema || node.id || node.$id)
+    if (isDynScope) {
+      const allDynamic = getDynamicAnchors(node)
+      if (node !== schema) fun.write('dynLocal.unshift({})') // inlined at top level
+      for (const [key, subcheck] of allDynamic) {
+        const resolved = resolveReference(root, schemas, `#${key}`, basePath())
+        const [sub, subRoot, path] = resolved[0] || []
+        enforce(sub === subcheck, `Unexpected $dynamicAnchor resolution: ${key}`)
+        const n = compileSub(sub, subRoot, path)
+        fun.write('dynLocal[0][%j] = %s', `#${key}`, n)
+      }
     }
 
     // evaluated: declare dynamic
@@ -321,8 +342,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       }
     }
 
-    const compileSub = (sub, subR, path) =>
-      sub === schema ? safe('validate') : getref(sub) || compileSchema(sub, subR, opts, scope, path)
     const makeRecursive = () => {
       if (recursiveLog.length === 0) return format('recursive') // no recursive default, i.e. no $recursiveAnchor has been set in this schema
       return format('recursive || %s', compileSub(...recursiveLog[0]))
@@ -332,7 +351,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       // Can do this before the call as the call is just a write
       const delta = (scope[n] && scope[n][evaluatedStatic]) || { unknown: true } // assume unknown if ref is cyclic
       evaluateDelta(delta)
-      const call = format('%s(%s, %s)', n, name, makeRecursive())
+      const call = format('%s(%s, %s, %s)', n, name, makeRecursive(), dynamicAnchorsNext)
       if (!includeErrors && canSkipDynamic()) return format('!%s', call) // simple case
       const res = gensym('res')
       const err = gensym('err') // Save and restore errors in case of recursion (if needed)
@@ -1009,7 +1028,16 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         return applyRef(nrec, { path: ['$recursiveRef'] })
       })
       handle('$dynamicRef', ['string'], ($dynamicRef) => {
-        fail('$dynamicRef support is not yet implemented:', $dynamicRef)
+        enforce(/^#[a-zA-Z0-9_-]+$/.test($dynamicRef), 'Unsupported $dynamicRef format')
+        const resolved = resolveReference(root, schemas, $dynamicRef, basePath())
+        enforce(resolved[0], '$dynamicRef bookending resolution failed', $dynamicRef)
+        const [sub, subRoot, path] = resolved[0]
+        const ok = sub.$dynamicAnchor && `#${sub.$dynamicAnchor}` === $dynamicRef
+        laxMode(ok, '$dynamicRef without $dynamicAnchor in the same scope')
+        const n = compileSub(sub, subRoot, path)
+        scope.dynamicResolve = functions.dynamicResolve
+        const nrec = ok ? format('(dynamicResolve(dynAnchors || [], %j) || %s)', $dynamicRef, n) : n
+        return applyRef(nrec, { path: ['$recursiveRef'] })
       })
 
       // typecheck
@@ -1055,6 +1083,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
     // restore recursiveAnchor history if it's not empty and ends with current node
     if (recursiveLog[0] && recursiveLog[recursiveLog.length - 1][0] === node) recursiveLog.pop()
+    if (isDynScope && node !== schema) fun.write('dynLocal.shift()') // restore dynamic scope, no need on top-level
 
     // Checks related to static schema analysis
     if (!allowUnreachable) enforce(!fun.optimizedOut, 'some checks are never reachable')

@@ -53,6 +53,8 @@ function objpath2path(objpath) {
   return ids.filter((id) => id && typeof id === 'string').reduce(joinPath, '')
 }
 
+const withSpecialChilds = ['properties', 'patternProperties', '$defs', 'definitions']
+
 // Returns a list of resolved entries, in a form: [schema, root, basePath]
 // basePath doesn't contain the target object $id itself
 function resolveReference(root, additionalSchemas, ref, base = '') {
@@ -67,7 +69,6 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
   const local = decodeURI(hash).replace(/\/$/, '')
 
   // Find in self by id path
-  const withSpecialChilds = ['properties', 'patternProperties', '$defs', 'definitions']
   const visit = (sub, oldPath, specialChilds = false, dynamic = false) => {
     if (!sub || typeof sub !== 'object') return
     const id = sub.$id || sub.id
@@ -117,6 +118,42 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
   return results
 }
 
+function getDynamicAnchors(schema) {
+  const results = new Map()
+  const visit = (sub, specialChilds = false) => {
+    if (!sub || typeof sub !== 'object') return
+    if (sub !== schema && (sub.$id || sub.id)) return // base changed, no longer in the same resource
+    const anchor = sub.$dynamicAnchor
+    if (anchor && typeof anchor === 'string') {
+      if (anchor.includes('#')) throw new Error("$dynamicAnchor can't include '#'")
+      if (!/^[a-zA-Z0-9_-]+$/.test(anchor)) throw new Error(`Unsupported $dynamicAnchor: ${anchor}`)
+      if (results.has(anchor)) throw new Error(`duplicate $dynamicAnchor: ${anchor}`)
+      results.set(anchor, sub)
+    }
+    for (const k of Object.keys(sub)) {
+      if (!specialChilds && !Array.isArray(sub) && !knownKeywords.includes(k)) continue
+      if (!specialChilds && ['const', 'enum', 'examples', 'comment'].includes(k)) continue
+      visit(sub[k], !specialChilds && withSpecialChilds.includes(k))
+    }
+  }
+  visit(schema)
+  return results
+}
+
+function hasKeywords(schema, keywords) {
+  const visit = (sub, specialChilds = false) => {
+    if (!sub || typeof sub !== 'object') return false
+    for (const k of Object.keys(sub)) {
+      if (keywords.includes(k)) return true
+      if (!specialChilds && !Array.isArray(sub) && !knownKeywords.includes(k)) continue
+      if (!specialChilds && ['const', 'enum', 'examples', 'comment'].includes(k)) continue
+      if (visit(sub[k], !specialChilds && withSpecialChilds.includes(k))) return true
+    }
+    return false
+  }
+  return visit(schema)
+}
+
 const buildSchemas = (input) => {
   if (input) {
     switch (Object.getPrototypeOf(input)) {
@@ -151,4 +188,4 @@ const buildSchemas = (input) => {
   throw new Error("Unexpected value for 'schemas' option")
 }
 
-module.exports = { get, joinPath, resolveReference, buildSchemas }
+module.exports = { get, joinPath, resolveReference, getDynamicAnchors, hasKeywords, buildSchemas }

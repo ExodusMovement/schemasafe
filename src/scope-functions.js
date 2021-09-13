@@ -83,5 +83,8 @@ const propertyIn = (key, [properties, patterns]) =>
   properties.some((prop) => prop === key) ||
   patterns.some((pattern) => new RegExp(pattern, 'u').test(key))
 
-const extraUtils = { toPointer, pointerPart, errorMerge, propertyIn }
+// id is verified to start with '#' at compile time, hence using plain objects is safe
+const dynamicResolve = (anchors, id) => (anchors.filter((x) => x[id])[0] || {})[id]
+
+const extraUtils = { toPointer, pointerPart, errorMerge, propertyIn, dynamicResolve }
 module.exports = { stringLength, isMultipleOf, deepEqual, unique, deBase64, hasOwn, ...extraUtils }

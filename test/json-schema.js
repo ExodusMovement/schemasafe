@@ -46,6 +46,11 @@ const unsafe = new Set([
   'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor works like $ref',
   'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor in the initial target schema resource',
 
+  // same for $dynamicRef without $dynamicAnchor in the same scope
+  'dynamicRef.json/A $dynamicRef to an $anchor in the same schema resource should behave like a normal $ref to an $anchor',
+  'dynamicRef.json/A $dynamicRef without a matching $dynamicAnchor in the same schema resource should behave like a normal $ref to $anchor',
+  'dynamicRef.json/A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource should behave like a normal $ref to $anchor',
+
   // ajv tests
   'rules/if.json/then/else without if should be ignored',
   'rules/if.json/if without then/else should be ignored',
@@ -101,19 +106,16 @@ const unsupported = new Set([
   'draft2020-12/unevaluatedItems.json/unevaluatedItems depends on adjacent contains',
   'draft2020-12/unevaluatedItems.json/unevaluatedItems depends on multiple nested contains',
   'draft2020-12/unevaluatedItems.json/unevaluatedItems and contains interact to control item dependency relationship',
-  // $dynamicAnchor/$dynamicRef
-  'draft2020-12/dynamicRef.json',
-  'draft2020-12/defs.json/validate definition against metaschema',
-  'draft2020-12/id.json/Invalid use of fragments in location-independent $id',
-  'draft2020-12/id.json/Valid use of empty fragments in location-independent $id',
-  'draft2020-12/id.json/Unnormalized $ids are allowed but discouraged',
-  'draft2020-12/ref.json/remote ref, containing refs itself',
+
+  // We dont have support for complex $dynamicRef yet
+  'dynamicRef.json/A $dynamicRef that initially resolves to a schema with a matching $dynamicAnchor should resolve to the first $dynamicAnchor in the dynamic scope',
+  'dynamicRef.json/A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor should behave like a normal $ref to $anchor',
+  'dynamicRef.json/after leaving a dynamic scope, it should not be used by a $dynamicRef',
 
   // draft-future, same as draft2020-12
   'draft-future/unevaluatedItems.json/unevaluatedItems depends on adjacent contains',
   'draft-future/unevaluatedItems.json/unevaluatedItems depends on multiple nested contains',
   'draft-future/unevaluatedItems.json/unevaluatedItems and contains interact to control item dependency relationship',
-  'draft-future/dynamicRef.json',
   // draft-future only
   'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on adjacent contains',
   'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on multiple nested contains',
