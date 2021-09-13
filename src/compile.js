@@ -37,6 +37,7 @@ const propimm = (parent, keyval, checked = false) => Object.freeze({ parent, key
 const evaluatedStatic = Symbol('evaluatedStatic')
 const optDynamic = Symbol('optDynamic')
 const optDynAnchors = Symbol('optDynAnchors')
+const optRecAnchors = Symbol('optRecAnchors')
 
 const constantValue = (schema) => {
   if (typeof schema === 'boolean') return schema
@@ -151,9 +152,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     if (!opts[optDynAnchors]) return format('')
     return hasDynAnchors ? format(', dynAnchors = []') : format(', dynAnchors')
   }
+  const recAnchorsHead = opts[optRecAnchors] ? format(', recursive') : format('')
 
   const fun = genfun()
-  fun.write('function validate(data, recursive%s) {', dynAnchorsHead())
+  fun.write('function validate(data%s%s) {', recAnchorsHead, dynAnchorsHead())
   if (includeErrors) fun.write('validate.errors = null')
   if (allErrors) fun.write('let errorCount = 0')
   if (opts[optDynamic]) fun.write('validate.evaluatedDynamic = null')
@@ -347,15 +349,16 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     const makeRecursive = () => {
-      if (recursiveLog.length === 0) return format('recursive') // no recursive default, i.e. no $recursiveAnchor has been set in this schema
-      return format('recursive || %s', compileSub(...recursiveLog[0]))
+      if (!opts[optRecAnchors]) return format('') // recursive anchors disabled
+      if (recursiveLog.length === 0) return format(', recursive') // no recursive default, i.e. no $recursiveAnchor has been set in this schema
+      return format(', recursive || %s', compileSub(...recursiveLog[0]))
     }
     const applyRef = (n, errorArgs) => {
       // evaluated: propagate static from ref to current, skips cyclic.
       // Can do this before the call as the call is just a write
       const delta = (scope[n] && scope[n][evaluatedStatic]) || { unknown: true } // assume unknown if ref is cyclic
       evaluateDelta(delta)
-      const call = format('%s(%s, %s%s)', n, name, makeRecursive(), dynamicAnchorsNext)
+      const call = format('%s(%s%s%s)', n, name, makeRecursive(), dynamicAnchorsNext)
       if (!includeErrors && canSkipDynamic()) return format('!%s', call) // simple case
       const res = gensym('res')
       const err = gensym('err') // Save and restore errors in case of recursion (if needed)
@@ -1021,6 +1024,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         return // ref overrides any sibling keywords for older schemas
       }
       handle('$recursiveRef', ['string'], ($recursiveRef) => {
+        if (!opts[optRecAnchors]) throw new Error('Recursive anchors are not enabled')
         enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
         // Resolve to recheck that recursive ref is enabled
         const resolved = resolveReference(root, schemas, '#', basePath())
@@ -1150,9 +1154,11 @@ const compile = (schema, opts) => {
     // it enabled if needed. Enabling it without need can give up to about 40% performance drop.
     if (!opts[optDynamic] && e.message === 'Dynamic unevaluated tracing is not enabled')
       return compile(schema, { ...opts, [optDynamic]: true })
-    // Also enable dynamic refs only if needed
+    // Also enable dynamic and recursive refs only if needed
     if (!opts[optDynAnchors] && e.message === 'Dynamic anchors are not enabled')
       return compile(schema, { ...opts, [optDynAnchors]: true })
+    if (!opts[optRecAnchors] && e.message === 'Recursive anchors are not enabled')
+      return compile(schema, { ...opts, [optRecAnchors]: true })
     throw e
   }
 }
