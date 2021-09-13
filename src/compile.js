@@ -1028,15 +1028,16 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         return applyRef(nrec, { path: ['$recursiveRef'] })
       })
       handle('$dynamicRef', ['string'], ($dynamicRef) => {
-        enforce(/^#[a-zA-Z0-9_-]+$/.test($dynamicRef), 'Unsupported $dynamicRef format')
+        enforce(/^[^#]*#[a-zA-Z0-9_-]+$/.test($dynamicRef), 'Unsupported $dynamicRef format')
+        const dynamicTail = $dynamicRef.replace(/^[^#]+/, '')
         const resolved = resolveReference(root, schemas, $dynamicRef, basePath())
         enforce(resolved[0], '$dynamicRef bookending resolution failed', $dynamicRef)
         const [sub, subRoot, path] = resolved[0]
-        const ok = sub.$dynamicAnchor && `#${sub.$dynamicAnchor}` === $dynamicRef
+        const ok = sub.$dynamicAnchor && `#${sub.$dynamicAnchor}` === dynamicTail
         laxMode(ok, '$dynamicRef without $dynamicAnchor in the same scope')
         const n = compileSub(sub, subRoot, path)
         scope.dynamicResolve = functions.dynamicResolve
-        const nrec = ok ? format('(dynamicResolve(dynAnchors || [], %j) || %s)', $dynamicRef, n) : n
+        const nrec = ok ? format('(dynamicResolve(dynAnchors || [], %j) || %s)', dynamicTail, n) : n
         return applyRef(nrec, { path: ['$recursiveRef'] })
       })
 
