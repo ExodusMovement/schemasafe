@@ -991,8 +991,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
             if (type.includes('object')) evaluateDelta({ properties: [true] })
           }
         }
-        const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
-        return applyRef(n, { path: ['$ref'] })
+        return applyRef(compileSub(sub, subRoot, path), { path: ['$ref'] })
       })
       if (node.$ref && getMeta().exclusiveRefs) {
         enforce(!opts[optDynamic], 'unevaluated* is supported only on draft2019-09 and above')
@@ -1004,7 +1003,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const resolved = resolveReference(root, schemas, '#', basePath())
         const [sub, subRoot, path] = resolved[0]
         laxMode(sub.$recursiveAnchor, '$recursiveRef without $recursiveAnchor')
-        const n = getref(sub) || compileSchema(sub, subRoot, opts, scope, path)
+        const n = compileSub(sub, subRoot, path)
         // Apply deep recursion from here only if $recursiveAnchor is true, else just run self
         const nrec = sub.$recursiveAnchor ? format('(recursive || %s)', n) : n
         return applyRef(nrec, { path: ['$recursiveRef'] })
