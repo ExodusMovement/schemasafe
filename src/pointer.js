@@ -68,7 +68,7 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
 
   // Find in self by id path
   const withSpecialChilds = ['properties', 'patternProperties', '$defs', 'definitions']
-  const visit = (sub, oldPath, specialChilds = false) => {
+  const visit = (sub, oldPath, specialChilds = false, dynamic = false) => {
     if (!sub || typeof sub !== 'object') return
     const id = sub.$id || sub.id
     let path = oldPath
@@ -82,7 +82,7 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
         if (res !== undefined) results.push([res, root, joinPath(oldPath, objpath2path(objpath))])
       }
     }
-    const anchor = sub.$anchor || sub.$dynamicAnchor // ensured to not conflict in compile.js
+    const anchor = dynamic ? sub.$dynamicAnchor : sub.$anchor
     if (anchor && typeof anchor === 'string') {
       if (anchor.includes('#')) throw new Error("$anchor can't include '#'")
       if (anchor.startsWith('/')) throw new Error("$anchor can't start with '/'")
@@ -94,6 +94,7 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
       if (!specialChilds && ['const', 'enum', 'examples', 'comment'].includes(k)) continue
       visit(sub[k], path, !specialChilds && withSpecialChilds.includes(k))
     }
+    if (!dynamic && sub.$dynamicAnchor) visit(sub, oldPath, specialChilds, true)
   }
   visit(root, '')
 
