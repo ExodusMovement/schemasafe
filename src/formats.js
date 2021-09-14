@@ -30,13 +30,15 @@ const core = {
   // 11: 1990-01-01, 1: T, 9: 00:00:00., 12: maxiumum fraction length (non-standard), 6: +00:00
   date: (input) => {
     if (input.length !== 10) return false
-    if (/^\d\d\d\d-(0[13-9]|1[012])-([012][1-9]|[123]0)$/.test(input)) return true
-    if (/^\d\d\d\d-02-([012][1-8]|[12]0|[01]9)$/.test(input)) return true
-    if (/^\d\d\d\d-(0[13578]|1[02])-31$/.test(input)) return true
-    const matches = input.match(/^(\d\d\d\d)-02-29$/)
-    if (!matches) return false
-    const year = matches[1] | 0
-    return year % 16 === 0 || (year % 4 === 0 && year % 25 !== 0)
+    if (input[5] === '0' && input[6] === '2') {
+      if (/^\d\d\d\d-02-(?:[012][1-8]|[12]0|[01]9)$/.test(input)) return true
+      const matches = input.match(/^(\d\d\d\d)-02-29$/)
+      if (!matches) return false
+      const year = matches[1] | 0
+      return year % 16 === 0 || (year % 4 === 0 && year % 25 !== 0)
+    }
+    if (input.endsWith('31')) return /^\d\d\d\d-(?:0[13578]|1[02])-31$/.test(input)
+    return /^\d\d\d\d-(0[13-9]|1[012])-(?:[012][1-9]|[123]0)$/.test(input)
   },
   // leap second handling is special, we check it's 23:59:60.*
   time: (input) => {
