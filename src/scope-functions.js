@@ -21,6 +21,7 @@ const isMultipleOf = (value, divisor, factor, factorMultiple) => {
 const deepEqual = (obj, obj2) => {
   if (obj === obj2) return true
   if (!obj || !obj2 || typeof obj !== typeof obj2) return false
+  if (obj !== obj2 && typeof obj !== 'object') return false
 
   const proto = Object.getPrototypeOf(obj)
   if (proto !== Object.getPrototypeOf(obj2)) return false
@@ -39,6 +40,8 @@ const deepEqual = (obj, obj2) => {
 }
 
 const unique = (array) => {
+  if (array.length < 2) return true
+  if (array.length === 2) return !deepEqual(array[0], array[1])
   const objects = []
   const primitives = array.length > 20 ? new Set() : null
   let primitivesCount = 0
