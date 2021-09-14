@@ -53,8 +53,8 @@ const core = {
   // first two lines specific to date-time, then tests for unanchored (at end) date, code identical to 'date' above
   'date-time': (input) => {
     if (input.length > 10 + 1 + 9 + 12 + 6) return false
-    const full = /^\d{4}-(0[1-9]|1[0-2])-[0-3]\d[t\s](2[0-3]|[0-1]\d):[0-5]\d:([0-5]\d|60)(\.\d+)?(z|[+-](2[0-3]|[0-1]\d)(:?[0-5]\d)?)$/i
-    if (!full.test(input)) return false
+    const full = /^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])[t\s](2[0-3]|[0-1]\d):[0-5]\d:([0-5]\d|60)(\.\d+)?(z|[+-](2[0-3]|[0-1]\d)(:?[0-5]\d)?)$/i
+    if (!full.test(input) || /^.{4}-02-3/.test(input)) return false
     if (/:60/.test(input)) {
       const p = input.slice(11).match(/([0-9.]+|[^0-9.])/g)
       let hm = Number(p[0]) * 60 + Number(p[2])
