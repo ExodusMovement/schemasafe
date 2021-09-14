@@ -55,8 +55,8 @@ const core = {
   // first two lines specific to date-time, then tests for unanchored (at end) date, code identical to 'date' above
   'date-time': (input) => {
     if (input.length > 10 + 1 + 9 + 12 + 6) return false
-    const full = /^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])[t\s](2[0-3]|[0-1]\d):[0-5]\d:([0-5]\d|60)(\.\d+)?(z|[+-](2[0-3]|[0-1]\d)(:?[0-5]\d)?)$/i
-    if (!full.test(input) || /^.{4}-02-3/.test(input)) return false
+    const full = /^\d\d\d\d-(?:0[1-9]|1[0-2])-(?:[0-2]\d|3[01])[t\s](?:2[0-3]|[0-1]\d):[0-5]\d:(?:[0-5]\d|60)(?:\.\d+)?(?:z|[+-](?:2[0-3]|[0-1]\d)(?::?[0-5]\d)?)$/i
+    if (!full.test(input) || /^....-02-3/.test(input)) return false
     if (/:60/.test(input)) {
       const p = input.slice(11).match(/([0-9.]+|[^0-9.])/g)
       let hm = Number(p[0]) * 60 + Number(p[2])
@@ -64,9 +64,9 @@ const core = {
       else if (p[5] === '-') hm += Number(p[6] || 0) * 60 + Number(p[8] || 0)
       if (hm % (24 * 60) !== 23 * 60 + 59) return false
     }
-    if (/^\d\d\d\d-(0[13-9]|1[012])-([012][1-9]|[123]0)/.test(input)) return true
-    if (/^\d\d\d\d-02-([012][1-8]|[12]0|[01]9)/.test(input)) return true
-    if (/^\d\d\d\d-(0[13578]|1[02])-31/.test(input)) return true
+    if (/^\d\d\d\d-(?:0[13-9]|1[012])-(?:[012][1-9]|[123]0)/.test(input)) return true
+    if (/^\d\d\d\d-02-(?:[012][1-8]|[12]0|[01]9)/.test(input)) return true
+    if (/^\d\d\d\d-(?:0[13578]|1[02])-31/.test(input)) return true
     const matches = input.match(/^(\d\d\d\d)-02-29/)
     if (!matches) return false
     const year = matches[1] | 0
