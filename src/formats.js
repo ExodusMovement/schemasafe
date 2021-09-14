@@ -84,22 +84,47 @@ const core = {
     /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d\d?)$/.test(input),
   // optimized http://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses
   // max length: 1000:1000:1000:1000:1000:1000:255.255.255.255
-  // before that, we check a couple of fast paths for simple common cases
+  // we parse ip6 format with a simple scan, leaving embedded ipv4 validation to a regex
+  // s0=count(:), s1=count(.), hex=count(a-zA-Z0-9), short=count(::)>0
+  // 48-57: '0'-'9', 97-102, 65-70: 'a'-'f', 'A'-'F', 58: ':', 46: '.'
+  /* eslint-disable one-var */
+  // prettier-ignore
   ipv6: (input) => {
     if (input.length > 45 || input.length < 2) return false
-    if (!input.includes('.')) {
-      if (!/^[0-9a-f:]+$/i.test(input)) return false
-      if (!input.includes('::')) return /^([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}$/i.test(input)
-      if (input === '::') return true
-      if (input.startsWith(':')) return /^:(:[0-9a-f]{1,4}){1,7}$/i.test(input)
-      if (input.endsWith(':')) return /^([0-9a-f]{1,4}:){1,7}:$/i.test(input)
-      if (input.indexOf('::') !== input.lastIndexOf('::')) return false
-      const short = /^(([0-9a-f]{1,4}:){6}:[0-9a-f]{1,4}|([0-9a-f]{1,4}:){5}(:[0-9a-f]{1,4}){1,2}|([0-9a-f]{1,4}:){4}(:[0-9a-f]{1,4}){1,3}|([0-9a-f]{1,4}:){3}(:[0-9a-f]{1,4}){1,4}|([0-9a-f]{1,4}:){2}(:[0-9a-f]{1,4}){1,5}|([0-9a-f]{1,4}:){1}(:[0-9a-f]{1,4}){1,6})$/i
-      return short.test(input)
+    let s0 = 0, s1 = 0, hex = 0, short = false, letters = false, last = 0, start = true
+    for (let i = 0; i < input.length; i++) {
+      const c = input.charCodeAt(i)
+      if (i === 1 && last === 58 && c !== 58) return false
+      if (c >= 48 && c <= 57) {
+        if (++hex > 4) return false
+      } else if (c === 46) {
+        if (s0 > 6 || s1 >= 3 || hex === 0 || letters) return false
+        s1++
+        hex = 0
+      } else if (c === 58) {
+        if (s1 > 0 || s0 >= 7) return false
+        if (last === 58) {
+          if (short) return false
+          short = true
+        } else if (i === 0) start = false
+        s0++
+        hex = 0
+        letters = false
+      } else if ((c >= 97 && c <= 102) || (c >= 65 && c <= 70)) {
+        if (s1 > 0) return false
+        if (++hex > 4) return false
+        letters = true
+      } else return false
+      last = c
     }
-    const ipv6ipv4 = /^(([0-9a-f]{1,4}:){6}|([0-9a-f]{1,4}:){5}:|([0-9a-f]{1,4}:){4}(:[0-9a-f]{1,4})?:|([0-9a-f]{1,4}:){3}(:[0-9a-f]{1,4}){0,2}:|([0-9a-f]{1,4}:){2}(:[0-9a-f]{1,4}){0,3}:|([0-9a-f]{1,4}:){1}(:[0-9a-f]{1,4}){0,4}:|:(:[0-9a-f]{1,4}){0,5}:)(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/i
-    return ipv6ipv4.test(input)
+    if (s0 < 2 || (s1 > 0 && (s1 !== 3 || hex === 0))) return false
+    if (short && input.length === 2) return true
+    if (s1 > 0 && !/(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/.test(input)) return false
+    const spaces = s1 > 0 ? 6 : 7
+    if (!short) return s0 === spaces && start && hex > 0
+    return (start || hex > 0) && s0 < spaces
   },
+  /* eslint-enable one-var */
   // matches ajv with optimization
   uri: /^[a-z][a-z0-9+\-.]*:(?:\/?\/(?:(?:[a-z0-9\-._~!$&'()*+,;=:]|%[0-9a-f]{2})*@)?(?:\[(?:(?:(?:(?:[0-9a-f]{1,4}:){6}|::(?:[0-9a-f]{1,4}:){5}|(?:[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){4}|(?:(?:[0-9a-f]{1,4}:){0,1}[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){3}|(?:(?:[0-9a-f]{1,4}:){0,2}[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){2}|(?:(?:[0-9a-f]{1,4}:){0,3}[0-9a-f]{1,4})?::[0-9a-f]{1,4}:|(?:(?:[0-9a-f]{1,4}:){0,4}[0-9a-f]{1,4})?::)(?:[0-9a-f]{1,4}:[0-9a-f]{1,4}|(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d\d?))|(?:(?:[0-9a-f]{1,4}:){0,5}[0-9a-f]{1,4})?::[0-9a-f]{1,4}|(?:(?:[0-9a-f]{1,4}:){0,6}[0-9a-f]{1,4})?::)|v[0-9a-f]+\.[a-z0-9\-._~!$&'()*+,;=:]+)\]|(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d\d?)|(?:[a-z0-9\-._~!$&'()*+,;=]|%[0-9a-f]{2})*)(?::\d*)?(?:\/(?:[a-z0-9\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*|\/?(?:(?:[a-z0-9\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})+(?:\/(?:[a-z0-9\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*)?)(?:\?(?:[a-z0-9\-._~!$&'()*+,;=:@/?]|%[0-9a-f]{2})*)?(?:#(?:[a-z0-9\-._~!$&'()*+,;=:@/?]|%[0-9a-f]{2})*)?$/i,
   // matches ajv with optimization
