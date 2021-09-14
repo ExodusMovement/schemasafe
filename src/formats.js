@@ -89,10 +89,10 @@ const core = {
     if (input.length > 45 || input.length < 2) return false
     if (!input.includes('.')) {
       if (!/^[0-9a-f:]+$/i.test(input)) return false
-      if (!input.includes('::')) return /^([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}$/.test(input)
+      if (!input.includes('::')) return /^([0-9a-f]{1,4}:){7}[0-9a-f]{1,4}$/i.test(input)
       if (input === '::') return true
-      if (input.startsWith(':')) return /^:(:[0-9a-f]{1,4}){1,7}$/.test(input)
-      if (input.endsWith(':')) return /^([0-9a-f]{1,4}:){1,7}:$/.test(input)
+      if (input.startsWith(':')) return /^:(:[0-9a-f]{1,4}){1,7}$/i.test(input)
+      if (input.endsWith(':')) return /^([0-9a-f]{1,4}:){1,7}:$/i.test(input)
       if (input.indexOf('::') !== input.lastIndexOf('::')) return false
       const short = /^(([0-9a-f]{1,4}:){6}:[0-9a-f]{1,4}|([0-9a-f]{1,4}:){5}(:[0-9a-f]{1,4}){1,2}|([0-9a-f]{1,4}:){4}(:[0-9a-f]{1,4}){1,3}|([0-9a-f]{1,4}:){3}(:[0-9a-f]{1,4}){1,4}|([0-9a-f]{1,4}:){2}(:[0-9a-f]{1,4}){1,5}|([0-9a-f]{1,4}:){1}(:[0-9a-f]{1,4}){1,6})$/i
       return short.test(input)
