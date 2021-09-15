@@ -79,9 +79,9 @@ const core = {
 
   /* ipv4 and ipv6 are from ajv with length restriction */
   // optimized https://www.safaribooksonline.com/library/view/regular-expressions-cookbook/9780596802837/ch07s16.html
-  ipv4: (input) =>
-    input.length <= 15 &&
-    /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d\d?)$/.test(input),
+  ipv4: (ip) =>
+    ip.length <= 15 &&
+    /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d\d?)$/.test(ip),
   // optimized http://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses
   // max length: 1000:1000:1000:1000:1000:1000:255.255.255.255
   // we parse ip6 format with a simple scan, leaving embedded ipv4 validation to a regex
