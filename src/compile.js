@@ -53,6 +53,7 @@ const generateMeta = (root, $schema, enforce, requireSchema) => {
     rootMeta.set(root, {
       exclusiveRefs: schemaIsOlderThan(version, 'draft/2019-09'),
       newItemsSyntax: !schemaIsOlderThan(version, 'draft/2020-12'),
+      containsEvaluatesItems: !schemaIsOlderThan(version, 'draft/2020-12'),
     })
   } else {
     enforce(!requireSchema, '[requireSchema] $schema is required')
@@ -613,6 +614,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       }
 
       handle('contains', ['object', 'boolean'], () => {
+        enforce(!getMeta().newItemsSyntax, 'draft2020-12 and newer "contains" is not yet supported')
         uncertain('contains')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)

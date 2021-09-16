@@ -100,11 +100,17 @@ const unsupported = new Set([
   'optional/unicode.json',
 
   // draft2020-12 only
+  'draft2020-12/contains.json', // works, but disabled for safety because of unevaluatedItems
+  'draft2020-12/minContains.json', // works, but disabled for safety because of unevaluatedItems
+  'draft2020-12/maxContains.json', // works, but disabled for safety because of unevaluatedItems
   'draft2020-12/unevaluatedItems.json/unevaluatedItems depends on adjacent contains',
   'draft2020-12/unevaluatedItems.json/unevaluatedItems depends on multiple nested contains',
   'draft2020-12/unevaluatedItems.json/unevaluatedItems and contains interact to control item dependency relationship',
 
   // draft-future, same as draft2020-12
+  'draft-future/contains.json', // works, but disabled for safety because of unevaluatedItems/unevaluatedProperties
+  'draft-future/minContains.json', // works, but disabled for safety because of unevaluatedItems/unevaluatedProperties
+  'draft-future/maxContains.json', // works, but disabled for safety because of unevaluatedItems/unevaluatedProperties
   'draft-future/unevaluatedItems.json/unevaluatedItems depends on adjacent contains',
   'draft-future/unevaluatedItems.json/unevaluatedItems depends on multiple nested contains',
   'draft-future/unevaluatedItems.json/unevaluatedItems and contains interact to control item dependency relationship',
