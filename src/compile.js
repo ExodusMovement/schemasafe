@@ -777,7 +777,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       if (node.not) uncertain('not')
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
-      if (thenOrElse)
+      // if we allow lone "if" to be present with allowUnusedKeywords, then we must process it to do the evaluation
+      if (thenOrElse || allowUnusedKeywords)
         handle('if', ['object', 'boolean'], (ifS) => {
           uncertain('if/then/else')
           const { sub, delta: deltaIf } = subrule(null, current, ifS, subPath('if'), dyn)
