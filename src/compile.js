@@ -614,7 +614,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       }
 
       handle('contains', ['object', 'boolean'], () => {
-        enforce(!getMeta().newItemsSyntax, 'draft2020-12 and newer "contains" is not yet supported')
+        enforce(!getMeta().containsEvaluatesItems, 'draft2020-12 "contains" is not yet supported')
         uncertain('contains')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
