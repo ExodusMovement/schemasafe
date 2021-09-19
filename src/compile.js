@@ -375,6 +375,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const props = isDynamic(delta).properties ? format('%s.evaluatedDynamic[1]', n) : null
         applyDynamicToDynamic(dyn, items, props)
       })
+
       return null
     }
 
@@ -430,8 +431,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       return suberr
     }
     const mergeerror = (suberr) => {
-      // suberror can be null e.g. on failed empty contains
-      if (suberr !== null) fun.if(suberr, () => fun.write('%s.push(...%s)', errors, suberr))
+      if (errors === null || suberr === null) return // suberror can be null e.g. on failed empty contains, errors can be null in e.g. not or if
+      fun.if(suberr, () => fun.write('%s.push(...%s)', errors, suberr))
     }
 
     // Extracted single additional(Items/Properties) rules, for reuse with unevaluated(Items/Properties)
@@ -631,7 +632,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
         handle('maxContains', ['natural'], (max) => format('%s > %d', passes, max))
         enforceMinMax('minContains', 'maxContains')
-
         return null
       })
 
