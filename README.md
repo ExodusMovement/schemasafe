@@ -2,7 +2,7 @@
 
 A code-generating [JSON Schema](https://json-schema.org/) validator that attempts to be reasonably secure.
 
-Supports [draft-04/06/07/2019-09](doc/Specification-support.md) and the
+Supports [draft-04/06/07/2019-09/2020-12](doc/Specification-support.md) and the
 [`discriminator` OpenAPI keyword](./doc/Discriminator-support.md).
 
 [![Node CI Status](https://github.com/ExodusMovement/schemasafe/workflows/Node%20CI/badge.svg)](https://github.com/ExodusMovement/schemasafe/actions)
