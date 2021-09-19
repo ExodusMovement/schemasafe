@@ -22,6 +22,7 @@ const unsafe = new Set([
   'unevaluatedProperties.json/unevaluatedProperties with nested unevaluatedProperties',
   'unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties outside',
   'unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties inside',
+  'unevaluatedItems.json/unevaluatedItems and contains interact to control item dependency relationship', // lone if
   'not.json/not with boolean schema false',
   'anyOf.json/anyOf with one empty schema',
   'anyOf.json/anyOf with boolean schemas, all true',
@@ -99,27 +100,11 @@ const unsupported = new Set([
   // invalid tests in upstream
   'optional/unicode.json',
 
-  // draft2020-12 only
-  'draft2020-12/contains.json', // works, but disabled for safety because of unevaluatedItems
-  'draft2020-12/minContains.json', // works, but disabled for safety because of unevaluatedItems
-  'draft2020-12/maxContains.json', // works, but disabled for safety because of unevaluatedItems
-  'draft2020-12/unevaluatedItems.json/unevaluatedItems depends on adjacent contains',
-  'draft2020-12/unevaluatedItems.json/unevaluatedItems depends on multiple nested contains',
-  'draft2020-12/unevaluatedItems.json/unevaluatedItems and contains interact to control item dependency relationship',
-
-  // draft-future, same as draft2020-12
-  'draft-future/contains.json', // works, but disabled for safety because of unevaluatedItems/unevaluatedProperties
-  'draft-future/minContains.json', // works, but disabled for safety because of unevaluatedItems/unevaluatedProperties
-  'draft-future/maxContains.json', // works, but disabled for safety because of unevaluatedItems/unevaluatedProperties
-  'draft-future/unevaluatedItems.json/unevaluatedItems depends on adjacent contains',
-  'draft-future/unevaluatedItems.json/unevaluatedItems depends on multiple nested contains',
-  'draft-future/unevaluatedItems.json/unevaluatedItems and contains interact to control item dependency relationship',
-  // draft-future only
-  'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on adjacent contains',
-  'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on multiple nested contains',
-  // object contains
+  // draft-future only, object contains
   'draft-future/contains.json',
   'draft-future/maxContains.json',
+  'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on adjacent contains',
+  'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on multiple nested contains',
 ])
 const unsupportedMask = []
 

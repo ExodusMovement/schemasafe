@@ -15,7 +15,7 @@
  *  * Missing dyn.properties or dyn.patterns, too low dyn.items
  *  * Extra fullstring flag or required entries
  *  * Missing types, if type is present
- *  * Missing unknown
+ *  * Missing unknown or dyn.item
  *
  * The other way around is non-optimal but safe.
  *
@@ -23,6 +23,7 @@
  * true in properties means any property (i.e. all properties were evaluated)
  * fullstring means that the object is not an unvalidated string (i.e. is either validated or not a string)
  * unknown means that there could be evaluated items or properties unknown to both top-level or dyn
+ * dyn.item (bool) means there could be possible specific evaluated items, e.g. from "contains".
  *
  * For normalization:
  *   1. If type is applicable:
@@ -31,7 +32,7 @@
  *     * dyn.patterns includes patterns.
  *   2. If type is not applicable, the following rules apply:
  *     * `fullstring = true` if `string` type is not applicable
- *     * `items = Infinity`, `dyn.items = 0` if `array` type is not applicable
+ *     * `items = Infinity`, `dyn.item = false`, `dyn.items = 0` if `array` type is not applicable
  *     * `properties = [true]`, `dyn.properties = []` if `object` type is not applicable
  *     * `patterns = dyn.patterns = []` if `object` type is not applicable
  *     * `required = []` if `object` type is not applicable
@@ -53,6 +54,7 @@ const normalize = ({ type = null, dyn: d = {}, ...A }) => ({
   required: typeIsNot(type, 'object') ? [] : [...(A.required || [])].sort(),
   fullstring: typeIsNot(type, 'string') || A.fullstring || false,
   dyn: {
+    item: typeIsNot(type, 'array') ? false : d.item || false,
     items: typeIsNot(type, 'array') ? 0 : Math.max(A.items || 0, d.items || 0),
     properties: typeIsNot(type, 'object') ? [] : merge(A.properties || [], d.properties || []),
     patterns: typeIsNot(type, 'object') ? [] : merge(A.patterns || [], d.patterns || []),
@@ -72,6 +74,7 @@ const andDelta = wrapFull((A, B) => ({
   required: merge(A.required, B.required),
   fullstring: A.fullstring || B.fullstring,
   dyn: {
+    item: A.dyn.item || B.dyn.item,
     items: Math.max(A.dyn.items, B.dyn.items),
     properties: merge(A.dyn.properties, B.dyn.properties),
     patterns: merge(A.dyn.patterns, B.dyn.patterns),
@@ -107,6 +110,7 @@ const orDelta = wrapFull((A, B) => ({
     intersect(A.required, B.required),
   fullstring: A.fullstring && B.fullstring,
   dyn: {
+    item: A.dyn.item || B.dyn.item,
     items: Math.max(A.dyn.items, B.dyn.items),
     properties: merge(A.dyn.properties, B.dyn.properties),
     patterns: merge(A.dyn.patterns, B.dyn.patterns),
@@ -117,7 +121,7 @@ const orDelta = wrapFull((A, B) => ({
 const applyDelta = (stat, delta) => Object.assign(stat, andDelta(stat, delta))
 
 const isDynamic = wrapArgs(({ unknown, items, dyn, ...stat }) => ({
-  items: items !== Infinity && (unknown || dyn.items > items),
+  items: items !== Infinity && (unknown || dyn.items > items || dyn.item),
   properties: !stat.properties.includes(true) && (unknown || !inProperties(stat, dyn)),
 }))
 

@@ -321,14 +321,21 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const needUnevaluated = (rule) =>
       opts[optDynamic] && (node[rule] || node[rule] === false || node === schema)
     const local = Object.freeze({
+      item: needUnevaluated('unevaluatedItems') ? gensym('evaluatedItem') : null,
       items: needUnevaluated('unevaluatedItems') ? gensym('evaluatedItems') : null,
       props: needUnevaluated('unevaluatedProperties') ? gensym('evaluatedProps') : null,
     })
-    const dyn = { items: local.items || trace.items, props: local.props || trace.props }
+    const dyn = Object.freeze({
+      item: local.item || trace.item,
+      items: local.items || trace.items,
+      props: local.props || trace.props,
+    })
     const canSkipDynamic = () =>
       (!dyn.items || stat.items === Infinity) && (!dyn.props || stat.properties.includes(true))
     const evaluateDeltaDynamic = (delta) => {
       // Skips applying those that have already been proved statically
+      if (dyn.item && delta.item && stat.items !== Infinity)
+        fun.write('%s.push(%s)', dyn.item, delta.item)
       if (dyn.items && delta.items > stat.items) fun.write('%s.push(%d)', dyn.items, delta.items)
       if (dyn.props && delta.properties.includes(true) && !stat.properties.includes(true)) {
         fun.write('%s[0].push(true)', dyn.props)
@@ -340,7 +347,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (patterns.length > 0) fun.write('%s[1].push(...%j)', dyn.props, patterns)
       }
     }
-    const applyDynamicToDynamic = (target, items, props) => {
+    const applyDynamicToDynamic = (target, item, items, props) => {
+      if (isDynamic(stat).items && target.item && item)
+        fun.write('%s.push(...%s)', target.item, item)
       if (isDynamic(stat).items && target.items && items)
         fun.write('%s.push(...%s)', target.items, items)
       if (isDynamic(stat).properties && target.props && props) {
@@ -371,9 +380,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       errorIf(safenot(res), { ...errorArgs, source: suberr })
       // evaluated: propagate dynamic from ref to current
       fun.if(res, () => {
-        const items = isDynamic(delta).items ? format('%s.evaluatedDynamic[0]', n) : null
-        const props = isDynamic(delta).properties ? format('%s.evaluatedDynamic[1]', n) : null
-        applyDynamicToDynamic(dyn, items, props)
+        const item = isDynamic(delta).items ? format('%s.evaluatedDynamic[0]', n) : null
+        const items = isDynamic(delta).items ? format('%s.evaluatedDynamic[1]', n) : null
+        const props = isDynamic(delta).properties ? format('%s.evaluatedDynamic[2]', n) : null
+        applyDynamicToDynamic(dyn, item, items, props)
       })
 
       return null
@@ -436,14 +446,17 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     // Extracted single additional(Items/Properties) rules, for reuse with unevaluated(Items/Properties)
-    const additionalItems = (rulePath, limit) => {
+    const additionalItems = (rulePath, limit, extra) => {
       const handled = handle(rulePath, ['object', 'boolean'], (ruleValue) => {
-        if (ruleValue === false) {
-          if (!removeAdditional) return format('%s.length > %s', name, limit)
+        if (ruleValue === false && removeAdditional) {
           fun.write('if (%s.length > %s) %s.length = %s', name, limit, name, limit)
           return null
         }
-        forArray(current, limit, (prop) => rule(prop, ruleValue, subPath(rulePath)))
+        if (ruleValue === false && !extra) return format('%s.length > %s', name, limit)
+        forArray(current, limit, (prop, i) => {
+          if (extra) fun.write('if (%s) continue', extra(i))
+          return rule(prop, ruleValue, subPath(rulePath))
+        })
         return null
       })
       if (handled) evaluateDelta({ items: Infinity })
@@ -615,16 +628,21 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       }
 
       handle('contains', ['object', 'boolean'], () => {
-        enforce(!getMeta().containsEvaluates, 'draft2020-12 "contains" is not yet supported')
         uncertain('contains')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
 
         const suberr = suberror()
-        forArray(current, format('0'), (prop) => {
+        forArray(current, format('0'), (prop, i) => {
           const { sub } = subrule(suberr, prop, node.contains, subPath('contains'))
-          fun.if(sub, () => fun.write('%s++', passes))
-          // evaluateDelta({ unknown: true }) // draft2020: contains counts towards evaluatedItems
+          fun.if(sub, () => {
+            fun.write('%s++', passes)
+            if (getMeta().containsEvaluates) {
+              enforce(!removeAdditional, 'Can\'t use removeAdditional with draft2020+ "contains"')
+              evaluateDelta({ dyn: { item: true } })
+              evaluateDeltaDynamic({ item: i, items: [], properties: [], patterns: [] })
+            }
+          })
         })
 
         if (!handle('minContains', ['natural'], (mn) => format('%s < %d', passes, mn), { suberr }))
@@ -778,6 +796,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
       // if we allow lone "if" to be present with allowUnusedKeywords, then we must process it to do the evaluation
+      // TODO: perhaps we can optimize this out if dynamic evaluation isn't needed _even with this if processed_
       if (thenOrElse || allowUnusedKeywords)
         handle('if', ['object', 'boolean'], (ifS) => {
           uncertain('if/then/else')
@@ -946,7 +965,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       } else if (node.unevaluatedItems || node.unevaluatedItems === false) {
         if (isDynamic(stat).items) {
           if (!opts[optDynamic]) throw new Error('Dynamic unevaluated tracing is not enabled')
-          additionalItems('unevaluatedItems', format('Math.max(%d, ...%s)', stat.items, dyn.items))
+          const limit = format('Math.max(%d, ...%s)', stat.items, dyn.items)
+          const extra = (i) => format('%s.includes(%s)', dyn.item, i)
+          additionalItems('unevaluatedItems', limit, getMeta().containsEvaluates ? extra : null)
         } else {
           additionalItems('unevaluatedItems', format('%d', stat.items))
         }
@@ -997,11 +1018,12 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
       // evaluated: propagate dynamic to parent dynamic (aka trace)
       // static to parent is merged via return value
-      applyDynamicToDynamic(trace, local.items, local.props)
+      applyDynamicToDynamic(trace, local.item, local.items, local.props)
     }
 
     // main post-presence check validation function
     const writeMain = () => {
+      if (local.item) fun.write('const %s = []', local.item)
       if (local.items) fun.write('const %s = [0]', local.items)
       if (local.props) fun.write('const %s = [[], []]', local.props)
 
@@ -1133,7 +1155,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   // evaluated: return dynamic for refs
   if (opts[optDynamic] && (isDynamic(stat).items || isDynamic(stat).properties)) {
     if (!local) throw new Error('Failed to trace dynamic properties') // Unreachable
-    fun.write('validate.evaluatedDynamic = [%s, %s]', local.items, local.props)
+    fun.write('validate.evaluatedDynamic = [%s, %s, %s]', local.item, local.items, local.props)
   }
 
   if (allErrors) fun.write('return errorCount === 0')
