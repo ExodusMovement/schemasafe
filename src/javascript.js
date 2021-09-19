@@ -53,13 +53,17 @@ const jsHelpers = (fun, scope, propvar, { unmodifiedPrototypes, isJSON }, noopRe
     if (inKeys) return format('%s !== undefined', name)
     if (parent && keyname) {
       scope.hasOwn = functions.hasOwn
-      return format('%s !== undefined && hasOwn(%s, %s)', name, buildName(parent), keyname)
+      const pname = buildName(parent)
+      if (isJSON) return format('%s !== undefined && hasOwn(%s, %s)', name, pname, keyname)
+      return format('%s in %s && hasOwn(%s, %s)', keyname, pname, pname, keyname)
     } else if (parent && keyval !== undefined) {
       // numbers must be converted to strings for this check, hence `${keyval}` in check below
       if (unmodifiedPrototypes && isJSON && !jsonProtoKeys.has(`${keyval}`))
         return format('%s !== undefined', name)
       scope.hasOwn = functions.hasOwn
-      return format('%s !== undefined && hasOwn(%s, %j)', name, buildName(parent), keyval)
+      const pname = buildName(parent)
+      if (isJSON) return format('%s !== undefined && hasOwn(%s, %j)', name, pname, keyval)
+      return format('%j in %s && hasOwn(%s, %j)', keyval, pname, pname, keyval)
     }
     /* c8 ignore next */
     throw new Error('Unreachable: present() check without parent')

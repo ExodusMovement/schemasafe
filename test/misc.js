@@ -557,5 +557,15 @@ tape('additionalItems blocks undefined', function(t) {
   const validate = validator(schema)
   t.ok(validate([]), 'empty is valid')
   t.notOk(validate([undefined]), 'undefined is not valid')
+  t.notOk(validate([null]), 'null is not valid')
+  t.end()
+})
+
+tape('complex additionalItems blocks undefined', function(t) {
+  const schema = { items: [], additionalItems: { type: 'string' } }
+  const validate = validator(schema)
+  t.ok(validate([]), 'empty is valid')
+  t.notOk(validate([undefined]), 'undefined is not valid')
+  t.notOk(validate([null]), 'null is not valid')
   t.end()
 })
