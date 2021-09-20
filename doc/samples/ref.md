@@ -13,10 +13,10 @@
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
-      if (!ref0(data.foo, recursive)) return false
+      if (!validate(data.foo)) return false
     }
     for (const key0 of Object.keys(data)) {
       if (key0 !== "foo") return false
@@ -50,17 +50,17 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
       if (!Number.isInteger(data.foo)) return false
     }
     if (data.bar !== undefined && hasOwn(data, "bar")) {
-      if (!ref1(data.bar, recursive)) return false
+      if (!ref1(data.bar)) return false
     }
   }
   return true
@@ -86,17 +86,17 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data[0] !== undefined && hasOwn(data, 0)) {
       if (!(Number.isInteger(data[0]))) return false
     }
     if (data[1] !== undefined && hasOwn(data, 1)) {
-      if (!ref1(data[1], recursive)) return false
+      if (!ref1(data[1])) return false
     }
   }
   return true
@@ -133,28 +133,28 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const ref2 = function validate(data, recursive) {
+const ref2 = function validate(data) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const ref3 = function validate(data, recursive) {
+const ref3 = function validate(data) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.tilde !== undefined && hasOwn(data, "tilde")) {
-      if (!ref1(data.tilde, recursive)) return false
+      if (!ref1(data.tilde)) return false
     }
     if (data.slash !== undefined && hasOwn(data, "slash")) {
-      if (!ref2(data.slash, recursive)) return false
+      if (!ref2(data.slash)) return false
     }
     if (data.percent !== undefined && hasOwn(data, "percent")) {
-      if (!ref3(data.percent, recursive)) return false
+      if (!ref3(data.percent)) return false
     }
   }
   return true
@@ -186,20 +186,20 @@ return ref0
 
 ```js
 'use strict'
-const ref3 = function validate(data, recursive) {
+const ref3 = function validate(data) {
   if (!Number.isInteger(data)) return false
   return true
 };
-const ref2 = function validate(data, recursive) {
-  if (!ref3(data, recursive)) return false
+const ref2 = function validate(data) {
+  if (!ref3(data)) return false
   return true
 };
-const ref1 = function validate(data, recursive) {
-  if (!ref2(data, recursive)) return false
+const ref1 = function validate(data) {
+  if (!ref2(data)) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
-  if (!ref1(data, recursive)) return false
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
   return true
 };
 return ref0
@@ -222,14 +222,14 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   if (!Array.isArray(data)) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
-      if (!ref1(data.foo, recursive)) return false
+      if (!ref1(data.foo)) return false
       if (data.foo.length > 2) return false
     }
   }
@@ -257,6 +257,8 @@ return ref0
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const unique = (array) => {
+  if (array.length < 2) return true
+  if (array.length === 2) return !deepEqual(array[0], array[1])
   const objects = []
   const primitives = array.length > 20 ? new Set() : null
   let primitivesCount = 0
@@ -279,6 +281,7 @@ const unique = (array) => {
 const deepEqual = (obj, obj2) => {
   if (obj === obj2) return true
   if (!obj || !obj2 || typeof obj !== typeof obj2) return false
+  if (obj !== obj2 && typeof obj !== 'object') return false
 
   const proto = Object.getPrototypeOf(obj)
   if (proto !== Object.getPrototypeOf(obj2)) return false
@@ -305,9 +308,9 @@ const ref2 = function validate(data, recursive) {
   if (!unique(data)) return false
   return true
 };
-const format0 = new RegExp("^([a-z][a-z0-9+\\-.]*:)?(\\/?\\/(([a-z0-9\\-._~!$&'()*+,;=:]|%[0-9a-f]{2})*@)?(\\[(((([0-9a-f]{1,4}:){6}|::([0-9a-f]{1,4}:){5}|([0-9a-f]{1,4})?::([0-9a-f]{1,4}:){4}|(([0-9a-f]{1,4}:){0,1}[0-9a-f]{1,4})?::([0-9a-f]{1,4}:){3}|(([0-9a-f]{1,4}:){0,2}[0-9a-f]{1,4})?::([0-9a-f]{1,4}:){2}|(([0-9a-f]{1,4}:){0,3}[0-9a-f]{1,4})?::[0-9a-f]{1,4}:|(([0-9a-f]{1,4}:){0,4}[0-9a-f]{1,4})?::)([0-9a-f]{1,4}:[0-9a-f]{1,4}|((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?))|(([0-9a-f]{1,4}:){0,5}[0-9a-f]{1,4})?::[0-9a-f]{1,4}|(([0-9a-f]{1,4}:){0,6}[0-9a-f]{1,4})?::)|v[0-9a-f]+\\.[a-z0-9\\-._~!$&'()*+,;=:]+)\\]|((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)|([a-z0-9\\-._~!$&'()*+,;=]|%[0-9a-f]{2})*)(:\\d*)?(\\/([a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*|\\/?(([a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})+(\\/([a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*)?)?(\\?([a-z0-9\\-._~!$&'()*+,;=:@/?]|%[0-9a-f]{2})*)?(#([a-z0-9\\-._~!$&'()*+,;=:@/?]|%[0-9a-f]{2})*)?$", "i");
+const format0 = new RegExp("^(?:[a-z][a-z0-9+\\-.]*:)?(?:\\/?\\/(?:(?:[a-z0-9\\-._~!$&'()*+,;=:]|%[0-9a-f]{2})*@)?(?:\\[(?:(?:(?:(?:[0-9a-f]{1,4}:){6}|::(?:[0-9a-f]{1,4}:){5}|(?:[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){4}|(?:(?:[0-9a-f]{1,4}:){0,1}[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){3}|(?:(?:[0-9a-f]{1,4}:){0,2}[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){2}|(?:(?:[0-9a-f]{1,4}:){0,3}[0-9a-f]{1,4})?::[0-9a-f]{1,4}:|(?:(?:[0-9a-f]{1,4}:){0,4}[0-9a-f]{1,4})?::)(?:[0-9a-f]{1,4}:[0-9a-f]{1,4}|(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d\\d?))|(?:(?:[0-9a-f]{1,4}:){0,5}[0-9a-f]{1,4})?::[0-9a-f]{1,4}|(?:(?:[0-9a-f]{1,4}:){0,6}[0-9a-f]{1,4})?::)|v[0-9a-f]+\\.[a-z0-9\\-._~!$&'()*+,;=:]+)\\]|(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d\\d?)|(?:[a-z0-9\\-._~!$&'()*+,;=]|%[0-9a-f]{2})*)(?::\\d*)?(?:\\/(?:[a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*|\\/?(?:(?:[a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})+(?:\\/(?:[a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*)?)?(?:\\?(?:[a-z0-9\\-._~!$&'()*+,;=:@/?]|%[0-9a-f]{2})*)?(?:#(?:[a-z0-9\\-._~!$&'()*+,;=:@/?]|%[0-9a-f]{2})*)?$", "i");
 const pattern0 = new RegExp("^[^#]*#?$", "u");
-const format1 = new RegExp("^[a-z][a-z0-9+\\-.]*:(\\/?\\/(([a-z0-9\\-._~!$&'()*+,;=:]|%[0-9a-f]{2})*@)?(\\[(((([0-9a-f]{1,4}:){6}|::([0-9a-f]{1,4}:){5}|([0-9a-f]{1,4})?::([0-9a-f]{1,4}:){4}|(([0-9a-f]{1,4}:){0,1}[0-9a-f]{1,4})?::([0-9a-f]{1,4}:){3}|(([0-9a-f]{1,4}:){0,2}[0-9a-f]{1,4})?::([0-9a-f]{1,4}:){2}|(([0-9a-f]{1,4}:){0,3}[0-9a-f]{1,4})?::[0-9a-f]{1,4}:|(([0-9a-f]{1,4}:){0,4}[0-9a-f]{1,4})?::)([0-9a-f]{1,4}:[0-9a-f]{1,4}|((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?))|(([0-9a-f]{1,4}:){0,5}[0-9a-f]{1,4})?::[0-9a-f]{1,4}|(([0-9a-f]{1,4}:){0,6}[0-9a-f]{1,4})?::)|v[0-9a-f]+\\.[a-z0-9\\-._~!$&'()*+,;=:]+)\\]|((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)|([a-z0-9\\-._~!$&'()*+,;=]|%[0-9a-f]{2})*)(:\\d*)?(\\/([a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*|\\/?(([a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})+(\\/([a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*)?)(\\?([a-z0-9\\-._~!$&'()*+,;=:@/?]|%[0-9a-f]{2})*)?(#([a-z0-9\\-._~!$&'()*+,;=:@/?]|%[0-9a-f]{2})*)?$", "i");
+const format1 = new RegExp("^[a-z][a-z0-9+\\-.]*:(?:\\/?\\/(?:(?:[a-z0-9\\-._~!$&'()*+,;=:]|%[0-9a-f]{2})*@)?(?:\\[(?:(?:(?:(?:[0-9a-f]{1,4}:){6}|::(?:[0-9a-f]{1,4}:){5}|(?:[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){4}|(?:(?:[0-9a-f]{1,4}:){0,1}[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){3}|(?:(?:[0-9a-f]{1,4}:){0,2}[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){2}|(?:(?:[0-9a-f]{1,4}:){0,3}[0-9a-f]{1,4})?::[0-9a-f]{1,4}:|(?:(?:[0-9a-f]{1,4}:){0,4}[0-9a-f]{1,4})?::)(?:[0-9a-f]{1,4}:[0-9a-f]{1,4}|(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d\\d?))|(?:(?:[0-9a-f]{1,4}:){0,5}[0-9a-f]{1,4})?::[0-9a-f]{1,4}|(?:(?:[0-9a-f]{1,4}:){0,6}[0-9a-f]{1,4})?::)|v[0-9a-f]+\\.[a-z0-9\\-._~!$&'()*+,;=:]+)\\]|(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d\\d?)|(?:[a-z0-9\\-._~!$&'()*+,;=]|%[0-9a-f]{2})*)(?::\\d*)?(?:\\/(?:[a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*|\\/?(?:(?:[a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})+(?:\\/(?:[a-z0-9\\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*)?)(?:\\?(?:[a-z0-9\\-._~!$&'()*+,;=:@/?]|%[0-9a-f]{2})*)?(?:#(?:[a-z0-9\\-._~!$&'()*+,;=:@/?]|%[0-9a-f]{2})*)?$", "i");
 const pattern1 = new RegExp("^[A-Za-z][-A-Za-z0-9.:_]*$", "u");
 const ref3 = function validate(data, recursive) {
   if (!(typeof data === "object" && data && !Array.isArray(data) || typeof data === "boolean")) return false
@@ -363,7 +366,7 @@ const ref5 = function validate(data, recursive) {
   if (data.length < 1) return false
   for (let j = 0; j < data.length; j++) {
     if (data[j] !== undefined && hasOwn(data, j)) {
-      if (!validate(data[j], recursive)) return false
+      if (!(recursive || ref4)(data[j], recursive)) return false
     }
   }
   return true
@@ -662,7 +665,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data["$ref"] !== undefined && hasOwn(data, "$ref")) {
       if (!(typeof data["$ref"] === "string")) return false
@@ -694,14 +697,14 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   if (!(typeof data === "string")) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data["$ref"] !== undefined && hasOwn(data, "$ref")) {
-      if (!ref1(data["$ref"], recursive)) return false
+      if (!ref1(data["$ref"])) return false
     }
   }
   return true
@@ -726,11 +729,11 @@ return ref0
 
 ```js
 'use strict'
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   return true
 };
-const ref0 = function validate(data, recursive) {
-  if (!ref1(data, recursive)) return false
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
   return true
 };
 return ref0
@@ -753,12 +756,12 @@ return ref0
 
 ```js
 'use strict'
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   return false
   return true
 };
-const ref0 = function validate(data, recursive) {
-  if (!ref1(data, recursive)) return false
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
   return true
 };
 return ref0
@@ -799,16 +802,16 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (!(data.value !== undefined && hasOwn(data, "value"))) return false
   if (!(typeof data.value === "number")) return false
   if (data.subtree !== undefined && hasOwn(data, "subtree")) {
-    if (!ref0(data.subtree, recursive)) return false
+    if (!ref0(data.subtree)) return false
   }
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (!(data.meta !== undefined && hasOwn(data, "meta"))) return false
   if (!(data.nodes !== undefined && hasOwn(data, "nodes"))) return false
@@ -816,7 +819,7 @@ const ref0 = function validate(data, recursive) {
   if (!Array.isArray(data.nodes)) return false
   for (let i = 0; i < data.nodes.length; i++) {
     if (data.nodes[i] !== undefined && hasOwn(data.nodes, i)) {
-      if (!ref1(data.nodes[i], recursive)) return false
+      if (!ref1(data.nodes[i])) return false
     }
   }
   return true
@@ -845,14 +848,14 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   if (!(typeof data === "number")) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data["foo\"bar"] !== undefined && hasOwn(data, "foo\"bar")) {
-      if (!ref1(data["foo\"bar"], recursive)) return false
+      if (!ref1(data["foo\"bar"])) return false
     }
   }
   return true
@@ -881,15 +884,15 @@ return ref0
 
 ```js
 'use strict'
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) return false
   }
   return true
 };
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
-  if (!ref1(data, recursive)) return false
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
   if (typeof data === "object" && data && !Array.isArray(data)) {
     if (data.prop1 !== undefined && hasOwn(data, "prop1")) {
       if (!(typeof data.prop1 === "string")) return false
@@ -903,4 +906,165 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
+
+
+## naive replacement of $ref with its destination is not correct
+
+### Schema
+
+```json
+{
+  "$defs": { "a_string": { "type": "string" } },
+  "enum": [{ "$ref": "#/$defs/a_string" }]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (!(typeof data === "object" && data && !Array.isArray(data) && Object.keys(data).length === 1 && hasOwn(data, "$ref") && data["$ref"] === "#/$defs/a_string")) return false
+  return true
+};
+return ref0
+```
+
+
+## refs with relative uris and defs
+
+### Schema
+
+```json
+{
+  "$id": "http://example.com/schema-relative-uri-defs1.json",
+  "properties": {
+    "foo": {
+      "$id": "schema-relative-uri-defs2.json",
+      "$defs": { "inner": { "properties": { "bar": { "type": "string" } } } },
+      "$ref": "#/$defs/inner"
+    }
+  },
+  "$ref": "schema-relative-uri-defs2.json"
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref2 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.bar !== undefined && hasOwn(data, "bar")) {
+      if (!(typeof data.bar === "string")) return false
+    }
+  }
+  return true
+};
+const ref1 = function validate(data) {
+  if (!ref2(data)) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.foo !== undefined && hasOwn(data, "foo")) {
+      if (!ref2(data.foo)) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at http://example.com/schema-relative-uri-defs2.json#/properties/bar`
+
+
+## relative refs with absolute uris and defs
+
+### Schema
+
+```json
+{
+  "$id": "http://example.com/schema-refs-absolute-uris-defs1.json",
+  "properties": {
+    "foo": {
+      "$id": "http://example.com/schema-refs-absolute-uris-defs2.json",
+      "$defs": { "inner": { "properties": { "bar": { "type": "string" } } } },
+      "$ref": "#/$defs/inner"
+    }
+  },
+  "$ref": "schema-refs-absolute-uris-defs2.json"
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref2 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.bar !== undefined && hasOwn(data, "bar")) {
+      if (!(typeof data.bar === "string")) return false
+    }
+  }
+  return true
+};
+const ref1 = function validate(data) {
+  if (!ref2(data)) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.foo !== undefined && hasOwn(data, "foo")) {
+      if (!ref2(data.foo)) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at http://example.com/schema-refs-absolute-uris-defs2.json#/properties/bar`
+
+
+## $id must be resolved against nearest parent, not just immediate parent
+
+### Schema
+
+```json
+{
+  "$id": "http://example.com/a.json",
+  "$defs": {
+    "x": {
+      "$id": "http://example.com/b/c.json",
+      "not": { "$defs": { "y": { "$id": "d.json", "type": "number" } } }
+    }
+  },
+  "allOf": [{ "$ref": "http://example.com/b/d.json" }]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
 

@@ -12,7 +12,7 @@
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === 1 || data === 2 || data === 3)) return false
   return true
 };
@@ -32,27 +32,9 @@ return ref0
 
 ```js
 'use strict'
-const deepEqual = (obj, obj2) => {
-  if (obj === obj2) return true
-  if (!obj || !obj2 || typeof obj !== typeof obj2) return false
-
-  const proto = Object.getPrototypeOf(obj)
-  if (proto !== Object.getPrototypeOf(obj2)) return false
-
-  if (proto === Array.prototype) {
-    if (!Array.isArray(obj) || !Array.isArray(obj2)) return false
-    if (obj.length !== obj2.length) return false
-    return obj.every((x, i) => deepEqual(x, obj2[i]))
-  } else if (proto === Object.prototype) {
-    const [keys, keys2] = [Object.keys(obj), Object.keys(obj2)]
-    if (keys.length !== keys2.length) return false
-    const keyset2 = new Set([...keys, ...keys2])
-    return keyset2.size === keys.length && keys.every((key) => deepEqual(obj[key], obj2[key]))
-  }
-  return false
-};
-const ref0 = function validate(data, recursive) {
-  if (!(data === 6 || data === "foo" || data === true || deepEqual(data, []) || deepEqual(data, {"foo":12}))) return false
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (!(data === 6 || data === "foo" || data === true || Array.isArray(data) && data.length === 0 || typeof data === "object" && data && !Array.isArray(data) && Object.keys(data).length === 1 && hasOwn(data, "foo") && data["foo"] === 12)) return false
   return true
 };
 return ref0
@@ -71,7 +53,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === 6 || data === null)) return false
   return true
 };
@@ -96,7 +78,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
   if (data.foo !== undefined && hasOwn(data, "foo")) {
@@ -125,7 +107,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === "foo\nbar" || data === "foo\rbar")) return false
   return true
 };
@@ -145,7 +127,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === false)) return false
   return true
 };
@@ -165,7 +147,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === true)) return false
   return true
 };
@@ -185,7 +167,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === 0)) return false
   return true
 };
@@ -205,7 +187,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === 1)) return false
   return true
 };
@@ -225,7 +207,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === "hello\u0000there")) return false
   return true
 };

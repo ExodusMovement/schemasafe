@@ -12,7 +12,11 @@
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
+  const sub0 = (() => {
+    if (!(data === 0)) return false
+    return true
+  })()
   return true
 };
 return ref0
@@ -35,7 +39,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -58,7 +62,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -81,7 +85,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   const sub0 = (() => {
     if (typeof data === "number") {
       if (!(0 > data)) return false
@@ -115,7 +119,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   const sub0 = (() => {
     if (typeof data === "number") {
       if (!(0 > data)) return false
@@ -153,7 +157,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   const sub0 = (() => {
     if (typeof data === "number") {
       if (!(0 > data)) return false
@@ -198,7 +202,13 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
+  const sub0 = (() => {
+    if (typeof data === "number") {
+      if (!(0 > data)) return false
+    }
+    return true
+  })()
   return true
 };
 return ref0
@@ -221,7 +231,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === "then")) return false
   return true
 };
@@ -245,7 +255,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === "else")) return false
   return true
 };
@@ -255,4 +265,41 @@ return ref0
 ### Warnings
 
  * `some checks are never reachable at #`
+
+
+## if appears at the end when serialized (keyword processing sequence)
+
+### Schema
+
+```json
+{
+  "then": { "const": "yes" },
+  "else": { "const": "other" },
+  "if": { "maxLength": 4 }
+}
+```
+
+### Code
+
+```js
+'use strict'
+const stringLength = (string) =>
+  /[\uD800-\uDFFF]/.test(string) ? [...string].length : string.length;
+const ref0 = function validate(data) {
+  const sub0 = (() => {
+    if (typeof data === "string") {
+      if (data.length > 4 && stringLength(data) > 4) return false
+    }
+    return true
+  })()
+  if (sub0) {
+    if (!(data === "yes")) return false
+  }
+  else {
+    if (!(data === "other")) return false
+  }
+  return true
+};
+return ref0
+```
 

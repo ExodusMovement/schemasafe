@@ -12,7 +12,7 @@
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "number") {
     if (!(3 >= data)) return false
   }
@@ -38,7 +38,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "number") {
     if (!(300 >= data)) return false
   }

@@ -12,7 +12,7 @@
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!Number.isInteger(data)) return false
   return true
 };
@@ -32,7 +32,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "number")) return false
   return true
 };
@@ -52,7 +52,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   return true
 };
@@ -76,7 +76,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   return true
 };
@@ -100,7 +100,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!Array.isArray(data)) return false
   return true
 };
@@ -124,7 +124,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "boolean")) return false
   return true
 };
@@ -144,7 +144,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === null)) return false
   return true
 };
@@ -164,7 +164,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(Number.isInteger(data) || typeof data === "string")) return false
   return true
 };
@@ -188,7 +188,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   return true
 };
@@ -212,7 +212,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(Array.isArray(data) || typeof data === "object" && data && !Array.isArray(data))) return false
   return true
 };
@@ -236,7 +236,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(Array.isArray(data) || typeof data === "object" && data && !Array.isArray(data) || data === null)) return false
   return true
 };

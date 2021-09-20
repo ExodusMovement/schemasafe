@@ -12,7 +12,7 @@
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   const sub0 = (() => {
     if (!Number.isInteger(data)) return false
     return true
@@ -50,7 +50,7 @@ return ref0
 'use strict'
 const stringLength = (string) =>
   /[\uD800-\uDFFF]/.test(string) ? [...string].length : string.length;
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   const sub0 = (() => {
     if (data.length > 2 && stringLength(data) > 2) return false
@@ -85,7 +85,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -108,7 +108,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -131,7 +131,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return false
   return true
 };
@@ -157,7 +157,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   const sub0 = (() => {
     if (typeof data === "object" && data && !Array.isArray(data)) {
       if (!(data.bar !== undefined && hasOwn(data, "bar"))) return false
@@ -197,7 +197,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   const sub0 = (() => {
     if (!(typeof data === "number")) return false
     return true
@@ -224,7 +224,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(data === null)) return false
   return true
 };

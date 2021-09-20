@@ -12,7 +12,7 @@
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -36,7 +36,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
@@ -74,7 +74,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {

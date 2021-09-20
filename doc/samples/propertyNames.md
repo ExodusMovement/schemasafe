@@ -14,7 +14,7 @@
 'use strict'
 const stringLength = (string) =>
   /[\uD800-\uDFFF]/.test(string) ? [...string].length : string.length;
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (key0.length > 3 && stringLength(key0) > 3) return false
@@ -30,6 +30,35 @@ return ref0
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/propertyNames`
 
 
+## propertyNames validation with pattern
+
+### Schema
+
+```json
+{ "propertyNames": { "pattern": "^a+$" } }
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("^a+$", "u");
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    for (const key0 of Object.keys(data)) {
+      if (!pattern0.test(key0)) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+
+
 ## propertyNames with boolean schema true
 
 ### Schema
@@ -42,7 +71,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -65,7 +94,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) return false
   }

@@ -16,7 +16,7 @@
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key1 of Object.keys(data)) {
       if (key1 !== "foo" && key1 !== "bar" && !(key1.startsWith("v"))) return false
@@ -44,7 +44,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key1 of Object.keys(data)) {
       if (!(key1.startsWith("á"))) return false
@@ -75,7 +75,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (key0 !== "foo" && key0 !== "bar") {
@@ -105,7 +105,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (!(typeof data[key0] === "boolean")) return false
@@ -133,7 +133,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -159,7 +159,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (!(typeof data[key0] === "boolean")) return false

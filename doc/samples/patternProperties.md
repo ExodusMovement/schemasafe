@@ -13,7 +13,7 @@
 ```js
 'use strict'
 const pattern0 = new RegExp("f.*o", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {
@@ -48,7 +48,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (!(Number.isInteger(data[key0]))) return false
@@ -87,7 +87,7 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("[0-9]{2,}", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {
@@ -120,7 +120,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (key0.includes("b")) return false

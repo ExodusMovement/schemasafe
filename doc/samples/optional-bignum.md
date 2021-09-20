@@ -12,7 +12,7 @@
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!Number.isInteger(data)) return false
   return true
 };
@@ -32,47 +32,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
-  if (!(typeof data === "number")) return false
-  return true
-};
-return ref0
-```
-
-
-## integer
-
-### Schema
-
-```json
-{ "type": "integer" }
-```
-
-### Code
-
-```js
-'use strict'
-const ref0 = function validate(data, recursive) {
-  if (!Number.isInteger(data)) return false
-  return true
-};
-return ref0
-```
-
-
-## number
-
-### Schema
-
-```json
-{ "type": "number" }
-```
-
-### Code
-
-```js
-'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "number")) return false
   return true
 };
@@ -92,7 +52,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   return true
 };
@@ -116,7 +76,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "number") {
     if (!(18446744073709552000 >= data)) return false
   }
@@ -142,7 +102,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "number") {
     if (!(9.727837981879871e+26 > data)) return false
   }
@@ -168,7 +128,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "number") {
     if (!(-18446744073709552000 <= data)) return false
   }
@@ -194,7 +154,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "number") {
     if (!(-9.727837981879871e+26 < data)) return false
   }

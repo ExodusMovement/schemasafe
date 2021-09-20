@@ -13,7 +13,7 @@
 ```js
 'use strict'
 const pattern0 = new RegExp("^🐲*$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "string") {
     if (!pattern0.test(data)) return false
   }
@@ -40,7 +40,7 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("^🐲*$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
     for (const key0 of Object.keys(data)) {
       if (pattern0.test(key0)) {

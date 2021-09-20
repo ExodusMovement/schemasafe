@@ -13,6 +13,8 @@
 ```js
 'use strict'
 const unique = (array) => {
+  if (array.length < 2) return true
+  if (array.length === 2) return !deepEqual(array[0], array[1])
   const objects = []
   const primitives = array.length > 20 ? new Set() : null
   let primitivesCount = 0
@@ -35,6 +37,7 @@ const unique = (array) => {
 const deepEqual = (obj, obj2) => {
   if (obj === obj2) return true
   if (!obj || !obj2 || typeof obj !== typeof obj2) return false
+  if (obj !== obj2 && typeof obj !== 'object') return false
 
   const proto = Object.getPrototypeOf(obj)
   if (proto !== Object.getPrototypeOf(obj2)) return false
@@ -51,7 +54,7 @@ const deepEqual = (obj, obj2) => {
   }
   return false
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (!unique(data)) return false
   }
@@ -79,6 +82,8 @@ return ref0
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const unique = (array) => {
+  if (array.length < 2) return true
+  if (array.length === 2) return !deepEqual(array[0], array[1])
   const objects = []
   const primitives = array.length > 20 ? new Set() : null
   let primitivesCount = 0
@@ -101,6 +106,7 @@ const unique = (array) => {
 const deepEqual = (obj, obj2) => {
   if (obj === obj2) return true
   if (!obj || !obj2 || typeof obj !== typeof obj2) return false
+  if (obj !== obj2 && typeof obj !== 'object') return false
 
   const proto = Object.getPrototypeOf(obj)
   if (proto !== Object.getPrototypeOf(obj2)) return false
@@ -117,7 +123,7 @@ const deepEqual = (obj, obj2) => {
   }
   return false
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data[0] !== undefined && hasOwn(data, 0)) {
       if (!(typeof data[0] === "boolean")) return false
@@ -155,6 +161,8 @@ return ref0
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const unique = (array) => {
+  if (array.length < 2) return true
+  if (array.length === 2) return !deepEqual(array[0], array[1])
   const objects = []
   const primitives = array.length > 20 ? new Set() : null
   let primitivesCount = 0
@@ -177,6 +185,7 @@ const unique = (array) => {
 const deepEqual = (obj, obj2) => {
   if (obj === obj2) return true
   if (!obj || !obj2 || typeof obj !== typeof obj2) return false
+  if (obj !== obj2 && typeof obj !== 'object') return false
 
   const proto = Object.getPrototypeOf(obj)
   if (proto !== Object.getPrototypeOf(obj2)) return false
@@ -193,7 +202,7 @@ const deepEqual = (obj, obj2) => {
   }
   return false
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data[0] !== undefined && hasOwn(data, 0)) {
       if (!(typeof data[0] === "boolean")) return false
@@ -226,7 +235,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -253,7 +262,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data[0] !== undefined && hasOwn(data, 0)) {
       if (!(typeof data[0] === "boolean")) return false
@@ -289,7 +298,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data[0] !== undefined && hasOwn(data, 0)) {
       if (!(typeof data[0] === "boolean")) return false

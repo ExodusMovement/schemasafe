@@ -13,7 +13,7 @@
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     for (let i = 0; i < data.length; i++) {
       if (data[i] !== undefined && hasOwn(data, i)) {
@@ -44,7 +44,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data[0] !== undefined && hasOwn(data, 0)) {
       if (!(Number.isInteger(data[0]))) return false
@@ -75,7 +75,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -99,7 +99,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     for (let i = 0; i < data.length; i++) {
       if (data[i] !== undefined && hasOwn(data, i)) return false
@@ -128,7 +128,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data[1] !== undefined && hasOwn(data, 1)) return false
   }
@@ -171,32 +171,32 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref2 = function validate(data, recursive) {
+const ref2 = function validate(data) {
   if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (!(data.foo !== undefined && hasOwn(data, "foo"))) return false
   return true
 };
-const ref1 = function validate(data, recursive) {
+const ref1 = function validate(data) {
   if (!Array.isArray(data)) return false
   if (data[0] !== undefined && hasOwn(data, 0)) {
-    if (!ref2(data[0], recursive)) return false
+    if (!ref2(data[0])) return false
   }
   if (data[1] !== undefined && hasOwn(data, 1)) {
-    if (!ref2(data[1], recursive)) return false
+    if (!ref2(data[1])) return false
   }
   if (data.length > 2) return false
   return true
 };
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!Array.isArray(data)) return false
   if (data[0] !== undefined && hasOwn(data, 0)) {
-    if (!ref1(data[0], recursive)) return false
+    if (!ref1(data[0])) return false
   }
   if (data[1] !== undefined && hasOwn(data, 1)) {
-    if (!ref1(data[1], recursive)) return false
+    if (!ref1(data[1])) return false
   }
   if (data[2] !== undefined && hasOwn(data, 2)) {
-    if (!ref1(data[2], recursive)) return false
+    if (!ref1(data[2])) return false
   }
   if (data.length > 3) return false
   return true
@@ -231,7 +231,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!Array.isArray(data)) return false
   for (let i = 0; i < data.length; i++) {
     if (data[i] !== undefined && hasOwn(data, i)) {

@@ -12,7 +12,7 @@
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -36,7 +36,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
@@ -73,7 +73,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
@@ -110,7 +110,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
@@ -148,7 +148,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
@@ -173,7 +173,7 @@ return ref0
  * `Invalid minContains / maxContains combination at #`
 
 
-## minContains = 0
+## minContains = 0 with no maxContains
 
 ### Schema
 
@@ -186,7 +186,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
@@ -199,6 +199,44 @@ const ref0 = function validate(data, recursive) {
       if (sub0) passes0++
     }
     if (passes0 < 0) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+
+
+## minContains = 0 with maxContains
+
+### Schema
+
+```json
+{ "contains": { "const": 1 }, "minContains": 0, "maxContains": 1 }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (Array.isArray(data)) {
+    let passes0 = 0
+    for (let i = 0; i < data.length; i++) {
+      const sub0 = (() => {
+        if (data[i] !== undefined && hasOwn(data, i)) {
+          if (!(data[i] === 1)) return false
+        }
+        return true
+      })()
+      if (sub0) passes0++
+    }
+    if (passes0 < 0) return false
+    if (passes0 > 1) return false
   }
   return true
 };

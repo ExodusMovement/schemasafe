@@ -13,7 +13,7 @@
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     for (let i = 1; i < data.length; i++) {
       if (data[i] !== undefined && hasOwn(data, i)) {
@@ -31,7 +31,7 @@ return ref0
  * `[requireValidation] empty rules node is not allowed at #/0`
 
 
-## items is schema, no additionalItems
+## when items is schema, additionalItems does nothing
 
 ### Schema
 
@@ -43,7 +43,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -54,7 +54,7 @@ return ref0
  * `Unprocessed keywords: ["additionalItems"] at #`
 
 
-## array of items with no additionalItems
+## array of items with no additionalItems permitted
 
 ### Schema
 
@@ -66,7 +66,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data.length > 3) return false
   }
@@ -92,7 +92,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   return true
 };
 return ref0
@@ -116,7 +116,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data[0] !== undefined && hasOwn(data, 0)) {
       if (!(Number.isInteger(data[0]))) return false
@@ -148,7 +148,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data[0] !== undefined && hasOwn(data, 0)) {
       if (!(Number.isInteger(data[0]))) return false
@@ -181,7 +181,7 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (Array.isArray(data)) {
     if (data[0] !== undefined && hasOwn(data, 0)) {
       if (!(Number.isInteger(data[0]))) return false
@@ -208,4 +208,38 @@ return ref0
 ##### Strong mode notices
 
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/allOf/0/1`
+
+
+## items validation adjusts the starting index for additionalItems
+
+### Schema
+
+```json
+{ "items": [{ "type": "string" }], "additionalItems": { "type": "integer" } }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (Array.isArray(data)) {
+    if (data[0] !== undefined && hasOwn(data, 0)) {
+      if (!(typeof data[0] === "string")) return false
+    }
+    for (let i = 1; i < data.length; i++) {
+      if (data[i] !== undefined && hasOwn(data, i)) {
+        if (!(Number.isInteger(data[i]))) return false
+      }
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/0`
 

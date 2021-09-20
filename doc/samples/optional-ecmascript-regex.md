@@ -1,42 +1,5 @@
 # optional/ecmascript-regex
 
-## ECMA 262 regex non-compliance
-
-### Schema
-
-```json
-{ "format": "regex" }
-```
-
-### Code
-
-```js
-'use strict'
-const format0 = (str) => {
-    if (str.length > 1e5) return false
-    const Z_ANCHOR = /[^\\]\\Z/
-    if (Z_ANCHOR.test(str)) return false
-    try {
-      new RegExp(str)
-      return true
-    } catch (e) {
-      return false
-    }
-  };
-const ref0 = function validate(data, recursive) {
-  if (typeof data === "string") {
-    if (!format0(data)) return false
-  }
-  return true
-};
-return ref0
-```
-
-##### Strong mode notices
-
- * `Unrecognized format used: "regex" at #`
-
-
 ## ECMA 262 regex $ does not match trailing newline
 
 ### Schema
@@ -49,7 +12,7 @@ return ref0
 
 ```js
 'use strict'
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   if (!(data === "abc")) return false
   return true
@@ -71,7 +34,7 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\t$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
@@ -93,7 +56,7 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\cC$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
@@ -115,7 +78,7 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\cc$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
@@ -137,7 +100,7 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\d$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
@@ -159,7 +122,7 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\D$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
@@ -181,7 +144,7 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\w$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
@@ -203,7 +166,7 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\W$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
@@ -225,7 +188,7 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\s$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
@@ -247,11 +210,306 @@ return ref0
 ```js
 'use strict'
 const pattern0 = new RegExp("^\\S$", "u");
-const ref0 = function validate(data, recursive) {
+const ref0 = function validate(data) {
   if (!(typeof data === "string")) return false
   if (!pattern0.test(data)) return false
   return true
 };
 return ref0
 ```
+
+
+## unicode semantics should be used for all pattern matching
+
+### Schema
+
+```json
+{ "pattern": "\\p{Letter}cole" }
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("\\p{Letter}cole", "u");
+const ref0 = function validate(data) {
+  if (typeof data === "string") {
+    if (!pattern0.test(data)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `Should start with ^ and end with $: "\\p{Letter}cole" at #`
+
+
+## \w in patterns matches [A-Za-z0-9_], not unicode letters
+
+### Schema
+
+```json
+{ "pattern": "\\wcole" }
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("\\wcole", "u");
+const ref0 = function validate(data) {
+  if (typeof data === "string") {
+    if (!pattern0.test(data)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `Should start with ^ and end with $: "\\wcole" at #`
+
+
+## unicode characters do not match ascii ranges
+
+### Schema
+
+```json
+{ "pattern": "[a-z]cole" }
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("[a-z]cole", "u");
+const ref0 = function validate(data) {
+  if (typeof data === "string") {
+    if (!pattern0.test(data)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `Should start with ^ and end with $: "[a-z]cole" at #`
+
+
+## \d in pattern matches [0-9], not unicode digits
+
+### Schema
+
+```json
+{ "pattern": "^\\d+$" }
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("^\\d+$", "u");
+const ref0 = function validate(data) {
+  if (typeof data === "string") {
+    if (!pattern0.test(data)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+
+
+## unicode digits are more than 0 through 9
+
+### Schema
+
+```json
+{ "pattern": "^\\p{digit}+$" }
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("^\\p{digit}+$", "u");
+const ref0 = function validate(data) {
+  if (typeof data === "string") {
+    if (!pattern0.test(data)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[complexityChecks] maxLength should be specified for pattern: "^\\p{digit}+$" at #`
+
+
+## unicode semantics should be used for all patternProperties matching
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "patternProperties": { "\\p{Letter}cole": true },
+  "additionalProperties": false
+}
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("\\p{Letter}cole", "u");
+const ref0 = function validate(data) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  for (const key1 of Object.keys(data)) {
+    if (!pattern0.test(key1)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `Should start with ^ and end with $: "\\p{Letter}cole" at #`
+
+
+## \w in patternProperties matches [A-Za-z0-9_], not unicode letters
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "patternProperties": { "\\wcole": true },
+  "additionalProperties": false
+}
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("\\wcole", "u");
+const ref0 = function validate(data) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  for (const key1 of Object.keys(data)) {
+    if (!pattern0.test(key1)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `Should start with ^ and end with $: "\\wcole" at #`
+
+
+## unicode characters do not match ascii ranges
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "patternProperties": { "[a-z]cole": true },
+  "additionalProperties": false
+}
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("[a-z]cole", "u");
+const ref0 = function validate(data) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  for (const key1 of Object.keys(data)) {
+    if (!pattern0.test(key1)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `Should start with ^ and end with $: "[a-z]cole" at #`
+
+
+## \d in patternProperties matches [0-9], not unicode digits
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "patternProperties": { "^\\d+$": true },
+  "additionalProperties": false
+}
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("^\\d+$", "u");
+const ref0 = function validate(data) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  for (const key1 of Object.keys(data)) {
+    if (!pattern0.test(key1)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] schema = true is not allowed at #/patternProperties/^\d+$`
+
+
+## unicode digits are more than 0 through 9
+
+### Schema
+
+```json
+{
+  "type": "object",
+  "patternProperties": { "^\\p{digit}+$": true },
+  "additionalProperties": false
+}
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("^\\p{digit}+$", "u");
+const ref0 = function validate(data) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  for (const key1 of Object.keys(data)) {
+    if (!pattern0.test(key1)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[complexityChecks] maxLength should be specified for pattern: "^\\p{digit}+$" at #`
 
