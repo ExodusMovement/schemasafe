@@ -137,7 +137,7 @@ function processTestDir(schemaDir, main, opts = {}, subdir = '') {
 const testsDir = 'JSON-Schema-Test-Suite/tests'
 processTestDir(testsDir, 'draft4')
 processTestDir(testsDir, 'draft6')
-processTestDir(testsDir, 'draft7', { contentValidation: true })
+processTestDir(testsDir, 'draft7')
 processTestDir(testsDir, 'draft3', { extraFormats: true })
 processTestDir(testsDir, 'draft2019-09')
 processTestDir(testsDir, 'draft2020-12')

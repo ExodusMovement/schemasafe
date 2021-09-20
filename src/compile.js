@@ -52,6 +52,7 @@ const generateMeta = (root, $schema, enforce, requireSchema) => {
     enforce(schemaVersions.includes(version), 'Unexpected schema version:', version)
     rootMeta.set(root, {
       exclusiveRefs: schemaIsOlderThan(version, 'draft/2019-09'),
+      contentValidation: schemaIsOlderThan(version, 'draft/2019-09'),
       newItemsSyntax: !schemaIsOlderThan(version, 'draft/2020-12'),
       containsEvaluates: !schemaIsOlderThan(version, 'draft/2020-12'),
     })
@@ -68,7 +69,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     removeAdditional = false, // supports additionalProperties: false and additionalItems: false
     includeErrors = false,
     allErrors = false,
-    contentValidation = false,
+    contentValidation,
     dryRun, // unused, just for rest siblings
     allowUnusedKeywords = opts.mode === 'lax',
     allowUnreachable = opts.mode === 'lax',
@@ -553,11 +554,12 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         })
 
         enforce(node.contentSchema !== false, 'contentSchema cannot be set to false')
+        const cV = contentValidation === undefined ? getMeta().contentValidation : contentValidation
         const haveContent = node.contentEncoding || node.contentMediaType || node.contentSchema
         const contentErr =
           '"content*" keywords are disabled by default per spec, enable with { contentValidation = true } option (see doc/Options.md for more info)'
-        enforce(!haveContent || contentValidation || allowUnusedKeywords, contentErr)
-        if (haveContent && contentValidation) {
+        enforce(!haveContent || cV || allowUnusedKeywords, contentErr)
+        if (haveContent && cV) {
           const dec = gensym('dec')
           if (node.contentMediaType) fun.write('let %s = %s', dec, name)
 
