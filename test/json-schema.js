@@ -97,9 +97,6 @@ const unsupported = new Set([
   'rules/format.json/validation of JSON-pointer URI fragment strings',
   'issues/33_json_schema_latest.json/use latest json schema as v4 (#33)',
 
-  // invalid tests in upstream
-  'optional/unicode.json',
-
   // draft-future only, object contains
   'draft-future/contains.json',
   'draft-future/maxContains.json',
