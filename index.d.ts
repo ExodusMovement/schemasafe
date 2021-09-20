@@ -105,6 +105,7 @@ interface ValidatorOptions {
   removeAdditional?: boolean
   includeErrors?: boolean
   allErrors?: boolean
+  contentValidation?: boolean
   dryRun?: boolean
   allowUnusedKeywords?: boolean
   allowUnreachable?: boolean

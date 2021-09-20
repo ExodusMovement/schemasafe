@@ -68,6 +68,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     removeAdditional = false, // supports additionalProperties: false and additionalItems: false
     includeErrors = false,
     allErrors = false,
+    contentValidation = false,
     dryRun, // unused, just for rest siblings
     allowUnusedKeywords = opts.mode === 'lax',
     allowUnreachable = opts.mode === 'lax',
@@ -552,7 +553,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         })
 
         enforce(node.contentSchema !== false, 'contentSchema cannot be set to false')
-        if (node.contentEncoding || node.contentMediaType || node.contentSchema) {
+        const haveContent = node.contentEncoding || node.contentMediaType || node.contentSchema
+        const contentErr =
+          '"content*" keywords are disabled by default per spec, enable with { contentValidation = true } option (see doc/Options.md for more info)'
+        enforce(!haveContent || contentValidation || allowUnusedKeywords, contentErr)
+        if (haveContent && contentValidation) {
           const dec = gensym('dec')
           if (node.contentMediaType) fun.write('let %s = %s', dec, name)
 

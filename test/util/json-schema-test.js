@@ -16,24 +16,22 @@ const schemaVersions = new Map(
   })
 )
 
-function processTest(main, id, file, shouldIngore, requiresLax, formats) {
+function processTest(main, id, file, shouldIngore, requiresLax, baseOpts) {
   for (const block of file) {
     if (shouldIngore(`${id}/${block.description}`)) continue
     tape(`json-schema-test-suite ${main}/${id}/${block.description}`, (t) => {
+      const mode = requiresLax(id) || requiresLax(`${id}/${block.description}`) ? 'lax' : 'default'
       try {
-        const mode = requiresLax(`${id}/${block.description}`) ? 'lax' : 'default'
         const $schemaDefault = schemaVersions.get(main)
-        const extraFormats = main === 'draft3' // needs old formats
         const blockSchemas = [
           ...(Object.hasOwnProperty.call(block, 'schema') ? [block.schema] : []),
           ...(block.schemas || []),
         ]
-        const baseOpts = { schemas, mode, $schemaDefault, extraFormats, formats }
         for (const schema of blockSchemas) {
           for (const [includeErrors, allErrors] of [[false, false], [true, false], [true, true]]) {
             // ajv sometimes specifies just the schema id as "schema"
             const wrapped = typeof schema === 'string' ? { $ref: schema } : schema
-            const opts = { ...baseOpts, includeErrors, allErrors }
+            const opts = { ...baseOpts, schemas, mode, $schemaDefault, includeErrors, allErrors }
             const validate = validator(wrapped, opts)
             const parse = parser(wrapped, opts)
             for (const test of block.tests) {

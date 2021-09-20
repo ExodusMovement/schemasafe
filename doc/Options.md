@@ -19,6 +19,12 @@
   * `allErrors` — `false` by default.\
     Return all errors, not just the first one.
 
+  * `contentValidation` — `false` by default.\
+    Use `contentEncoding`, `contentMediaType`, `contentSchema` for validation and make failing\
+    those checks affect the boolean result of the validation.\
+    By default they are no-op per spec and hence are treated as an unused keyword and raise an error\
+    at compile time unless `allowUnusedKeywords` option is enabled.
+
   * `dryRun` — `false` by default.\
     Don't produce a validator, just verify the schema.
 

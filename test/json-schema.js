@@ -33,6 +33,7 @@ const unsafe = new Set([
   'unknownKeyword.json/$id inside an unknown keyword is not a real identifier',
   'optional/refOfUnknownKeyword.json/reference of a root arbitrary keyword ',
   'optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
+  'content.json', // validation for content is disabled by default per spec, which we treat as unsafe
 
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
 
@@ -70,11 +71,6 @@ const unsupported = new Set([
   'optional/format/iri.json',
   'optional/format/idn-email.json',
   'optional/format/idn-hostname.json',
-
-  // deliberate differences where format/content do not expect any validation by default in upstream
-  'draft2019-09/content.json', // expected to be noop in draft2019-09 and actually implemented as an assertion here
-  'draft2020-12/content.json', // same as draft2019-09, we have a replacement test
-  'draft-future/content.json', // same
 
   // we have leading time-offset (e.g. Z) optional in time format for compat reasons for now
   'optional/format/time.json/validation of time strings/no time offset',
@@ -115,7 +111,7 @@ const unsupportedFormats = {
 }
 const manualFormats = (file) => (file === 'format.json' ? unsupportedFormats : undefined)
 
-function processTestDir(schemaDir, main, subdir = '') {
+function processTestDir(schemaDir, main, opts = {}, subdir = '') {
   const dir = path.join(__dirname, schemaDir, main, subdir)
   const shouldIngore = (id) =>
     unsupported.has(id) ||
@@ -128,10 +124,11 @@ function processTestDir(schemaDir, main, subdir = '') {
     if (file.endsWith('.md')) continue
     if (file.endsWith('.json')) {
       const content = fs.readFileSync(path.join(dir, file), 'utf-8')
-      processTest(main, sub, JSON.parse(content), shouldIngore, requiresLax, manualFormats(file))
+      const baseOpts = { ...opts, formats: manualFormats(file) }
+      processTest(main, sub, JSON.parse(content), shouldIngore, requiresLax, baseOpts)
     } else {
       // assume it's a dir and let it fail otherwise
-      processTestDir(schemaDir, main, sub)
+      processTestDir(schemaDir, main, opts, sub)
     }
   }
 }
@@ -140,14 +137,14 @@ function processTestDir(schemaDir, main, subdir = '') {
 const testsDir = 'JSON-Schema-Test-Suite/tests'
 processTestDir(testsDir, 'draft4')
 processTestDir(testsDir, 'draft6')
-processTestDir(testsDir, 'draft7')
-processTestDir(testsDir, 'draft3')
+processTestDir(testsDir, 'draft7', { contentValidation: true })
+processTestDir(testsDir, 'draft3', { extraFormats: true })
 processTestDir(testsDir, 'draft2019-09')
 processTestDir(testsDir, 'draft2020-12')
 processTestDir(testsDir, 'draft-future')
 
 /** extra tests not (yet) merged upstream **/
-processTestDir('', 'extra-tests')
+processTestDir('', 'extra-tests', { contentValidation: true })
 
 /** ajv tests **/
 schemas.push(
