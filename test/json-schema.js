@@ -36,6 +36,8 @@ const unsafe = new Set([
   'content.json', // validation for content is disabled by default per spec, which we treat as unsafe
 
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
+  'ref.json/$ref prevents a sibling id from changing the base uri', // in pre-2019-09, any $ref siblings are not handled
+  'ref.json/$ref prevents a sibling $id from changing the base uri', // in pre-2019-09, any $ref siblings are not handled
 
   // draft3 only
   'draft3/additionalItems.json/additionalItems should not look in applicators',

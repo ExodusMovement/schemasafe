@@ -294,15 +294,19 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       basePathStack.push(joinPath(basePath(), $id))
       return null
     }
-    handle('$id', ['string'], setId) || handle('id', ['string'], setId)
-    handle('$anchor', ['string'], null) // $anchor is used only for ref resolution, on usage
-    handle('$dynamicAnchor', ['string'], null) // handled separately and on ref resolution
 
-    if (node.$recursiveAnchor || !forbidNoopValues) {
-      handle('$recursiveAnchor', ['boolean'], (isRecursive) => {
-        if (isRecursive) recursiveLog.push([node, root, basePath()])
-        return null
-      })
+    // None of the below should be handled if an exlusive pre-2019-09 $ref is present
+    if (!getMeta().exclusiveRefs || !node.$ref) {
+      handle('$id', ['string'], setId) || handle('id', ['string'], setId)
+      handle('$anchor', ['string'], null) // $anchor is used only for ref resolution, on usage
+      handle('$dynamicAnchor', ['string'], null) // handled separately and on ref resolution
+
+      if (node.$recursiveAnchor || !forbidNoopValues) {
+        handle('$recursiveAnchor', ['boolean'], (isRecursive) => {
+          if (isRecursive) recursiveLog.push([node, root, basePath()])
+          return null
+        })
+      }
     }
 
     // handle schema-wide dynamic anchors
