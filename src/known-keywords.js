@@ -33,7 +33,7 @@ const schemaVersions = schemaDrafts.map((draft) => `https://json-schema.org/${dr
 const vocab2019 = ['core', 'applicator', 'validation', 'meta-data', 'format', 'content']
 const vocab2020 = [
   ...['core', 'applicator', 'unevaluated', 'validation'],
-  ...['meta-data', 'format-annotation', 'content'],
+  ...['meta-data', 'format-annotation', 'format-assertion', 'content'],
 ]
 const knownVocabularies = [
   ...vocab2019.map((v) => `https://json-schema.org/draft/2019-09/vocab/${v}`),
