@@ -9,8 +9,7 @@
   "extends": [
     "eslint:recommended",
     "standard",
-    "prettier",
-    "prettier/standard"
+    "prettier"
   ],
   "rules": {
     "no-restricted-syntax": [

@@ -15,7 +15,7 @@ tape('valid', (t) => {
     [function() {}, 'function() {}'],
     [foo, 'function foo(bar) {\n  return bar\n}'],
     [/x/, 'new RegExp("x", "")'],
-    [new RegExp('x\\/', 'i'), 'new RegExp("x\\\\/", "i")'],
+    [/x\//i, 'new RegExp("x\\\\/", "i")'],
     [/x/g, 'new RegExp("x", "g")'],
   ]) {
     t.strictEqual(`${jaystring(source)}`, string, string)
