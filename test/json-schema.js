@@ -74,6 +74,9 @@ const unsupported = new Set([
   'optional/format/idn-email.json',
   'optional/format/idn-hostname.json',
 
+  // Unexpected schema id, otherwise this would have passed
+  'optional/format-assertion.json',
+
   // we have leading time-offset (e.g. Z) optional in time format for compat reasons for now
   'optional/format/time.json/validation of time strings/no time offset',
 
