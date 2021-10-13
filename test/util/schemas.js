@@ -77,6 +77,8 @@ module.exports = [
   },
   require('./../JSON-Schema-Test-Suite/remotes/ref-and-defs.json'),
   require('./../JSON-Schema-Test-Suite/remotes/ref-and-definitions.json'),
+  require('./../JSON-Schema-Test-Suite/remotes/draft2019-09/metaschema-no-validation.json'),
+  require('./../JSON-Schema-Test-Suite/remotes/draft2020-12/metaschema-no-validation.json'),
   require('./../JSON-Schema-Test-Suite/remotes/draft2020-12/format-assertion-false.json'),
   require('./../JSON-Schema-Test-Suite/remotes/draft2020-12/format-assertion-true.json'),
   {
