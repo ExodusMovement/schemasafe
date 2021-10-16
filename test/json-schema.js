@@ -76,7 +76,7 @@ const unsupported = new Set([
 
   // We don't support custom meta-schemas (yet?)
   'vocabulary.json', // Disables some checks in a custom vocabulary set
-  'optional/format-assertion.json',  // Unexpected schema id, otherwise this would have passed
+  'optional/format-assertion.json', // Unexpected schema id, otherwise this would have passed
 
   // we have leading time-offset (e.g. Z) optional in time format for compat reasons for now
   'optional/format/time.json/validation of time strings/no time offset',
