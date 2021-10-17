@@ -2,7 +2,7 @@
 
 const fs = require('fs')
 const path = require('path')
-const schemas = require('./util/schemas')
+const testSchemas = require('./util/schemas')
 const { processTest } = require('./util/json-schema-test')
 
 // these tests require lax mode
@@ -117,7 +117,7 @@ const unsupportedFormats = {
 }
 const manualFormats = (file) => (file === 'format.json' ? unsupportedFormats : undefined)
 
-function processTestDir(schemaDir, main, opts = {}, subdir = '') {
+function processTestDir(schemaDir, main, opts = {}, schemas = testSchemas, subdir = '') {
   const dir = path.join(__dirname, schemaDir, main, subdir)
   const shouldIngore = (id) =>
     unsupported.has(id) ||
@@ -131,10 +131,10 @@ function processTestDir(schemaDir, main, opts = {}, subdir = '') {
     if (file.endsWith('.json')) {
       const content = fs.readFileSync(path.join(dir, file), 'utf-8')
       const baseOpts = { ...opts, formats: manualFormats(file) }
-      processTest(main, sub, JSON.parse(content), shouldIngore, requiresLax, baseOpts)
+      processTest(main, sub, JSON.parse(content), schemas, shouldIngore, requiresLax, baseOpts)
     } else {
       // assume it's a dir and let it fail otherwise
-      processTestDir(schemaDir, main, opts, sub)
+      processTestDir(schemaDir, main, opts, schemas, sub)
     }
   }
 }
@@ -153,7 +153,8 @@ processTestDir(testsDir, 'draft-future')
 processTestDir('', 'extra-tests', { contentValidation: true })
 
 /** ajv tests **/
-schemas.push(
+const ajvSchemas = testSchemas.filter((schema) => !(schema.$id || '').endsWith('/tree.json')) // name collision
+ajvSchemas.push(
   ...[
     require('./ajv-spec/remotes/bar.json'),
     require('./ajv-spec/remotes/foo.json'),
@@ -165,7 +166,7 @@ schemas.push(
     require('./ajv-spec/remotes/scope_change.json'),
   ]
 )
-processTestDir('ajv-spec/tests', 'issues')
-processTestDir('ajv-spec/tests', 'rules')
-processTestDir('ajv-spec/tests', 'schemas')
-processTestDir('ajv-spec', 'extras.part')
+processTestDir('ajv-spec/tests', 'issues', {}, ajvSchemas)
+processTestDir('ajv-spec/tests', 'rules', {}, ajvSchemas)
+processTestDir('ajv-spec/tests', 'schemas', {}, ajvSchemas)
+processTestDir('ajv-spec', 'extras.part', {}, ajvSchemas)

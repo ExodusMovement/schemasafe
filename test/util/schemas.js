@@ -75,6 +75,7 @@ module.exports = [
     $id: 'http://localhost:1234/name-defs.json',
     ...require('./../JSON-Schema-Test-Suite/remotes/name-defs.json'),
   },
+  require('./../JSON-Schema-Test-Suite/remotes/tree.json'),
   require('./../JSON-Schema-Test-Suite/remotes/ref-and-defs.json'),
   require('./../JSON-Schema-Test-Suite/remotes/ref-and-definitions.json'),
   require('./../JSON-Schema-Test-Suite/remotes/draft2019-09/metaschema-no-validation.json'),

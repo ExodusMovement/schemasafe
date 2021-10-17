@@ -2,7 +2,6 @@
 
 const tape = require('tape')
 const { validator, parser } = require('../../')
-const schemas = require('./schemas')
 
 const schemaVersions = new Map(
   Object.entries({
@@ -16,7 +15,7 @@ const schemaVersions = new Map(
   })
 )
 
-function processTest(main, id, file, shouldIngore, requiresLax, baseOpts) {
+function processTest(main, id, file, schemas, shouldIngore, requiresLax, baseOpts) {
   for (const block of file) {
     if (shouldIngore(`${id}/${block.description}`)) continue
     tape(`json-schema-test-suite ${main}/${id}/${block.description}`, (t) => {
