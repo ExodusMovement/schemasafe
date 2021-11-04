@@ -5,7 +5,7 @@ const { validator, parser } = require('../../')
 
 const schemaVersions = new Map(
   Object.entries({
-    'draft-future': 'http://json-schema.org/draft/future/schema#',
+    'draft-next': 'http://json-schema.org/draft/next/schema#',
     'draft2020-12': 'http://json-schema.org/draft/2020-12/schema#',
     'draft2019-09': 'http://json-schema.org/draft/2019-09/schema#',
     draft7: 'http://json-schema.org/draft-07/schema#',

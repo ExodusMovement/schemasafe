@@ -99,11 +99,11 @@ const unsupported = new Set([
   'rules/format.json/validation of JSON-pointer URI fragment strings',
   'issues/33_json_schema_latest.json/use latest json schema as v4 (#33)',
 
-  // draft-future only, object contains
-  'draft-future/contains.json',
-  'draft-future/maxContains.json',
-  'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on adjacent contains',
-  'draft-future/unevaluatedProperties.json/unevaluatedProperties depends on multiple nested contains',
+  // draft-next only, object contains
+  'draft-next/contains.json',
+  'draft-next/maxContains.json',
+  'draft-next/unevaluatedProperties.json/unevaluatedProperties depends on adjacent contains',
+  'draft-next/unevaluatedProperties.json/unevaluatedProperties depends on multiple nested contains',
 ])
 const unsupportedMask = []
 
@@ -147,7 +147,7 @@ processTestDir(testsDir, 'draft7')
 processTestDir(testsDir, 'draft3', { extraFormats: true })
 processTestDir(testsDir, 'draft2019-09')
 processTestDir(testsDir, 'draft2020-12')
-processTestDir(testsDir, 'draft-future')
+processTestDir(testsDir, 'draft-next')
 
 /** extra tests not (yet) merged upstream **/
 processTestDir('', 'extra-tests', { contentValidation: true })

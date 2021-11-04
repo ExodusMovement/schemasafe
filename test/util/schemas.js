@@ -21,38 +21,38 @@ module.exports = [
   require('./../schemas/json-schema-draft-06.json'),
   require('./../schemas/json-schema-draft-04.json'),
   require('./../schemas/json-schema-draft-03.json'),
-  // future, use latest available for refs to draft/future for now (until future schema becomes available)
+  // next, use latest available for refs to draft/next for now (until next schema becomes available)
   {
     ...require('./../schemas/json-schema-draft-2020-12/meta/core.json'),
-    $id: 'https://json-schema.org/draft/future/meta/core',
+    $id: 'https://json-schema.org/draft/next/meta/core',
   },
   {
     ...require('./../schemas/json-schema-draft-2020-12/meta/applicator.json'),
-    $id: 'https://json-schema.org/draft/future/meta/applicator',
+    $id: 'https://json-schema.org/draft/next/meta/applicator',
   },
   {
     ...require('./../schemas/json-schema-draft-2020-12/meta/unevaluated.json'),
-    $id: 'https://json-schema.org/draft/future/meta/unevaluated',
+    $id: 'https://json-schema.org/draft/next/meta/unevaluated',
   },
   {
     ...require('./../schemas/json-schema-draft-2020-12/meta/validation.json'),
-    $id: 'https://json-schema.org/draft/future/meta/validation',
+    $id: 'https://json-schema.org/draft/next/meta/validation',
   },
   {
     ...require('./../schemas/json-schema-draft-2020-12/meta/meta-data.json'),
-    $id: 'https://json-schema.org/draft/future/meta/meta-data',
+    $id: 'https://json-schema.org/draft/next/meta/meta-data',
   },
   {
     ...require('./../schemas/json-schema-draft-2020-12/meta/format-annotation.json'),
-    $id: 'https://json-schema.org/draft/future/meta/format-annotation',
+    $id: 'https://json-schema.org/draft/next/meta/format-annotation',
   },
   {
     ...require('./../schemas/json-schema-draft-2020-12/meta/content.json'),
-    $id: 'https://json-schema.org/draft/future/meta/content',
+    $id: 'https://json-schema.org/draft/next/meta/content',
   },
   {
     ...require('./../schemas/json-schema-draft-2020-12/schema.json'),
-    $id: 'https://json-schema.org/draft/future/schema',
+    $id: 'https://json-schema.org/draft/next/schema',
   },
   // remote
   {
@@ -78,6 +78,7 @@ module.exports = [
   require('./../JSON-Schema-Test-Suite/remotes/tree.json'),
   require('./../JSON-Schema-Test-Suite/remotes/ref-and-defs.json'),
   require('./../JSON-Schema-Test-Suite/remotes/ref-and-definitions.json'),
+  require('./../JSON-Schema-Test-Suite/remotes/extendible-dynamic-ref.json'),
   require('./../JSON-Schema-Test-Suite/remotes/draft2019-09/metaschema-no-validation.json'),
   require('./../JSON-Schema-Test-Suite/remotes/draft2020-12/metaschema-no-validation.json'),
   require('./../JSON-Schema-Test-Suite/remotes/draft2020-12/format-assertion-false.json'),
