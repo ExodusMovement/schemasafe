@@ -7,9 +7,11 @@ const stringLength = (string) =>
 
 // A isMultipleOf B: shortest decimal denoted as A % shortest decimal denoted as B === 0
 // Optimized, coherence checks and precomputation are outside of this method
+// If we get an Infinity when we multiply by the factor (which is always a power of 10), we just undo that instead of always returning false
 const isMultipleOf = (value, divisor, factor, factorMultiple) => {
   if (value % divisor === 0) return true
-  const multiple = value * factor
+  let multiple = value * factor
+  if (multiple === Infinity || multiple === -Infinity) multiple = value
   if (multiple % factorMultiple === 0) return true
   const normal = Math.floor(multiple + 0.5)
   return normal / factor === value && normal % factorMultiple === 0
