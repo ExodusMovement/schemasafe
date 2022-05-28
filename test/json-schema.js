@@ -97,6 +97,7 @@ const unsupported = new Set([
   'rules/format.json/whitelisted unknown format is valid',
   'rules/format.json/validation of URL strings',
   'rules/format.json/validation of JSON-pointer URI fragment strings',
+  'rules/format.json/validation of uuid strings', // URI form not valid per new spec for { format: 'uuid' }
   'issues/33_json_schema_latest.json/use latest json schema as v4 (#33)',
 
   // draft-next only, object contains

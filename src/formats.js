@@ -142,9 +142,8 @@ const core = {
   // relative JSON-pointer: http://tools.ietf.org/html/draft-luff-relative-json-pointer-00
   'relative-json-pointer': /^(?:0|[1-9][0-9]*)(?:|#|\/(?:[^~]|~0|~1)*)$/,
 
-  // matches ajv + unwrap nested group
   // uuid: http://tools.ietf.org/html/rfc4122
-  uuid: /^(?:urn:uuid:)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+  uuid: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
 
   // length restriction is an arbitrary safeguard
   // first regex checks if this a week duration (can't be combined with others)
