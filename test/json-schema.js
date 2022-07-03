@@ -82,6 +82,13 @@ const unsupported = new Set([
   // we have leading time-offset (e.g. Z) optional in time format for compat reasons for now
   'optional/format/time.json/validation of time strings/no time offset',
 
+  // we don't support quoted-string emails (deliberately) and ip-address emails
+  'optional/format/email.json/validation of e-mail addresses/a quoted string with a space in the local part is valid',
+  'optional/format/email.json/validation of e-mail addresses/a quoted string with a double dot in the local part is valid',
+  'optional/format/email.json/validation of e-mail addresses/a quoted string with a @ in the local part is valid',
+  'optional/format/email.json/validation of e-mail addresses/an IPv4-address-literal after the @ is valid',
+  'optional/format/email.json/validation of e-mail addresses/an IPv6-address-literal after the @ is valid',
+
   //  draft4/draft3, optional
   'optional/zeroTerminatedFloats.json', // makes no sense in js
   //  draft3 is deprecated and not fully supported
