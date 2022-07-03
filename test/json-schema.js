@@ -73,6 +73,7 @@ const unsupported = new Set([
   'optional/format/iri.json',
   'optional/format/idn-email.json',
   'optional/format/idn-hostname.json',
+  'optional/format/unknown.json',
 
   // We don't support custom meta-schemas (yet?)
   'vocabulary.json', // Disables some checks in a custom vocabulary set
@@ -105,6 +106,9 @@ const unsupported = new Set([
   'draft-next/maxContains.json',
   'draft-next/unevaluatedProperties.json/unevaluatedProperties depends on adjacent contains',
   'draft-next/unevaluatedProperties.json/unevaluatedProperties depends on multiple nested contains',
+
+  // draft-next changes to bookending requirement in dynamicRef
+  'draft-next/dynamicRef.json',
 ])
 const unsupportedMask = []
 
