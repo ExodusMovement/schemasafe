@@ -453,9 +453,19 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     // Extracted single additional(Items/Properties) rules, for reuse with unevaluated(Items/Properties)
+    const willRemoveAdditional = () => {
+      if (!removeAdditional) return false
+      if (removeAdditional === true) return true
+      if (removeAdditional === 'keyword') {
+        if (!node.removeAdditional) return false
+        consume('removeAdditional', 'boolean')
+        return true
+      }
+      throw new Error(`Invalid removeAdditional: ${removeAdditional}`)
+    }
     const additionalItems = (rulePath, limit, extra) => {
       const handled = handle(rulePath, ['object', 'boolean'], (ruleValue) => {
-        if (ruleValue === false && removeAdditional) {
+        if (ruleValue === false && willRemoveAdditional()) {
           fun.write('if (%s.length > %s) %s.length = %s', name, limit, name, limit)
           return null
         }
@@ -472,7 +482,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       const handled = handle(rulePath, ['object', 'boolean'], (ruleValue) => {
         forObjectKeys(current, (sub, key) => {
           fun.if(condition(key), () => {
-            if (ruleValue === false && removeAdditional) fun.write('delete %s[%s]', name, key)
+            if (ruleValue === false && willRemoveAdditional()) fun.write('delete %s[%s]', name, key)
             else rule(sub, ruleValue, subPath(rulePath))
           })
         })

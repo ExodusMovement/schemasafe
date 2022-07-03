@@ -20,6 +20,7 @@ const knownKeywords = [
   // https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.9
   ...['title', 'description', 'deprecated', 'readOnly', 'writeOnly', 'examples', '$comment'], // unused meta
   'discriminator', // optimization hint and error filtering only, does not affect validation result
+  'removeAdditional', // optional keyword for { removeAdditional: 'keyword' } config, to target specific objects
 ]
 
 // Order is important, newer first!
