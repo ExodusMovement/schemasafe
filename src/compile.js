@@ -11,6 +11,7 @@ const { knownKeywords, schemaVersions, knownVocabularies } = require('./known-ke
 const { initTracing, andDelta, orDelta, applyDelta, isDynamic, inProperties } = require('./tracing')
 
 const noopRegExps = new Set(['^[\\s\\S]*$', '^[\\S\\s]*$', '^[^]*$', '', '.*', '^', '$'])
+const primitiveTypes = ['null', 'boolean', 'number', 'integer', 'string']
 
 // for checking schema parts in consume()
 const schemaTypes = new Map(
@@ -669,7 +670,6 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (ischema.enum || functions.hasOwn(ischema, 'const')) return true
         if (ischema.type) {
           const itemTypes = Array.isArray(ischema.type) ? ischema.type : [ischema.type]
-          const primitiveTypes = ['null', 'boolean', 'number', 'integer', 'string']
           if (itemTypes.every((itemType) => primitiveTypes.includes(itemType))) return true
         }
         if (ischema.$ref) {
@@ -903,11 +903,22 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         return null
       })
 
+      // Mark the schema as uncertain if the path taken is not determined solely by the branch type
+      const uncertainBranchTypes = (key, arr) => {
+        // In general, { const: [] } can interfere with other { type: 'array' }
+        // Same for { const: {} } and { type: 'object' }
+        // So this check doesn't treat those as non-conflicting, and instead labels those as uncertain conflicts
+        const btypes = arr.map((x) => x.type || (Array.isArray(x.const) ? 'array' : typeof x.const)) // typeof can be 'undefined', but we don't care
+        const maybeObj = btypes.filter((x) => !primitiveTypes.includes(x) && x !== 'array').length
+        const maybeArr = btypes.filter((x) => !primitiveTypes.includes(x) && x !== 'object').length
+        if (maybeObj > 1 || maybeArr > 1) uncertain(`${key}, use discriminator to make it certain`)
+      }
+
       handle('anyOf', ['array'], (anyOf) => {
         enforce(anyOf.length > 0, 'anyOf cannot be empty')
         if (anyOf.length === 1) return performAllOf(anyOf)
         if (handleDiscriminator) return handleDiscriminator(anyOf, 'anyOf')
-        uncertain('anyOf, use discriminator to make it certain')
+        uncertainBranchTypes('anyOf', anyOf)
         const suberr = suberror()
         if (!canSkipDynamic()) {
           // In this case, all have to be checked to gather evaluated properties
@@ -939,7 +950,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         enforce(oneOf.length > 0, 'oneOf cannot be empty')
         if (oneOf.length === 1) return performAllOf(oneOf)
         if (handleDiscriminator) return handleDiscriminator(oneOf, 'oneOf')
-        uncertain('oneOf, use discriminator to make it certain')
+        uncertainBranchTypes('oneOf', oneOf)
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
         const suberr = suberror()
