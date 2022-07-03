@@ -918,9 +918,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         enforce(anyOf.length > 0, 'anyOf cannot be empty')
         if (anyOf.length === 1) return performAllOf(anyOf)
         if (handleDiscriminator) return handleDiscriminator(anyOf, 'anyOf')
-        uncertainBranchTypes('anyOf', anyOf)
         const suberr = suberror()
         if (!canSkipDynamic()) {
+          uncertainBranchTypes('anyOf', anyOf) // const sorting for removeAdditional is not supported in dynamic mode
           // In this case, all have to be checked to gather evaluated properties
           const entries = Object.entries(anyOf).map(([key, sch]) =>
             subrule(suberr, current, sch, subPath('anyOf', key), dyn)
@@ -931,9 +931,18 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           for (const { delta, sub } of entries) fun.if(sub, () => evaluateDeltaDynamic(delta))
           return null
         }
+        // We sort the variants to perform const comparisons first, then primitives/array/object/unknown
+        // This way, we can be sure that array/object + removeAdditional do not affect const evaluation
+        // Note that this _might_ e.g. remove all elements of an array in a 2nd branch _and_ fail with `const: []` in the 1st, but that's expected behavior
+        // This can be done because we can stop on the first match in anyOf if we don't need dynamic evaluation
+        const constBlocks = anyOf.filter((x) => functions.hasOwn(x, 'const'))
+        const otherBlocks = anyOf.filter((x) => !functions.hasOwn(x, 'const'))
+        uncertainBranchTypes('anyOf', otherBlocks)
+        const blocks = [...constBlocks, ...otherBlocks]
+
         let delta
         let body = () => error({ path: ['anyOf'], suberr })
-        for (const [key, sch] of Object.entries(anyOf).reverse()) {
+        for (const [key, sch] of Object.entries(blocks).reverse()) {
           const oldBody = body
           body = () => {
             const { sub, delta: deltaVar } = subrule(suberr, current, sch, subPath('anyOf', key))
