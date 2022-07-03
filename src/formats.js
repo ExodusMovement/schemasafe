@@ -196,7 +196,7 @@ const weak = {
     const Z_ANCHOR = /[^\\]\\Z/
     if (Z_ANCHOR.test(str)) return false
     try {
-      new RegExp(str)
+      new RegExp(str, 'u')
       return true
     } catch (e) {
       return false
