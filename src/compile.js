@@ -344,12 +344,12 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       if (dyn.item && delta.item && stat.items !== Infinity)
         fun.write('%s.push(%s)', dyn.item, delta.item)
       if (dyn.items && delta.items > stat.items) fun.write('%s.push(%d)', dyn.items, delta.items)
-      if (dyn.props && delta.properties.includes(true) && !stat.properties.includes(true)) {
+      if (dyn.props && (delta.properties || []).includes(true) && !stat.properties.includes(true)) {
         fun.write('%s[0].push(true)', dyn.props)
       } else if (dyn.props) {
         const inStat = (properties, patterns) => inProperties(stat, { properties, patterns })
-        const properties = delta.properties.filter((x) => !inStat([x], []))
-        const patterns = delta.patterns.filter((x) => !inStat([], [x]))
+        const properties = (delta.properties || []).filter((x) => !inStat([x], []))
+        const patterns = (delta.patterns || []).filter((x) => !inStat([], [x]))
         if (properties.length > 0) fun.write('%s[0].push(...%j)', dyn.props, properties)
         if (patterns.length > 0) fun.write('%s[1].push(...%j)', dyn.props, patterns)
       }
