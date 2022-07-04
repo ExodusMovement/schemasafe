@@ -100,4 +100,16 @@ module.exports = [
     $id: 'http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json',
     ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChangeFolderInSubschema/folderInteger.json'),
   },
+  {
+    $id: 'http://localhost:1234/locationIndependentIdentifier.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/locationIndependentIdentifier.json'),
+  },
+  {
+    $id: 'http://localhost:1234/locationIndependentIdentifierPre2019.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/locationIndependentIdentifierPre2019.json'),
+  },
+  {
+    $id: 'http://localhost:1234/locationIndependentIdentifierDraft4.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/locationIndependentIdentifierDraft4.json'),
+  },
 ]
