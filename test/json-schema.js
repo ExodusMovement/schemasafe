@@ -10,6 +10,7 @@ const unsafe = new Set([
   'additionalItems.json/when items is schema, additionalItems does nothing',
   'additionalItems.json/additionalItems as false without items',
   'additionalItems.json/additionalItems should not look in applicators, valid case',
+  'additionalItems.json/additionalItems should properly handle null data',
   'maxContains.json/maxContains without contains is ignored',
   'minContains.json/minContains without contains is ignored',
   'minContains.json/maxContains < minContains',

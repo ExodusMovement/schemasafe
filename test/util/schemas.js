@@ -75,6 +75,14 @@ module.exports = [
     $id: 'http://localhost:1234/name-defs.json',
     ...require('./../JSON-Schema-Test-Suite/remotes/name-defs.json'),
   },
+  {
+    $id: 'http://localhost:1234/nested/string.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/nested/string.json'),
+  },
+  {
+    $id: 'http://localhost:1234/nested/foo-ref-string.json',
+    ...require('./../JSON-Schema-Test-Suite/remotes/nested/foo-ref-string.json'),
+  },
   require('./../JSON-Schema-Test-Suite/remotes/tree.json'),
   require('./../JSON-Schema-Test-Suite/remotes/ref-and-defs.json'),
   require('./../JSON-Schema-Test-Suite/remotes/ref-and-definitions.json'),
