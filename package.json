@@ -32,6 +32,7 @@
     "format": "prettier --write '**/*.js'",
     "coverage": "c8 --reporter=lcov --reporter=text npm run test",
     "coverage:lcov": "c8 --reporter=lcovonly npm run test",
+    "test:only:json-schema-testsuite": "tape test/json-schema.js | tap-spec",
     "test": "npm run test:raw | tap-spec",
     "test:raw": "npm run test:normal && npm run test:module",
     "test:module": "tape -r ./test/tools/test-module.js test/*.js test/regressions/*.js",
