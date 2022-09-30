@@ -9,8 +9,8 @@ const { processTest } = require('./util/json-schema-test')
 const unsafe = new Set([
   'additionalItems.json/when items is schema, additionalItems does nothing',
   'additionalItems.json/additionalItems as false without items',
-  'additionalItems.json/additionalItems should not look in applicators, valid case',
-  'additionalItems.json/additionalItems should properly handle null data',
+  'additionalItems.json/additionalItems does not look in applicators, valid case',
+  'additionalItems.json/additionalItems with null instance elements',
   'maxContains.json/maxContains without contains is ignored',
   'minContains.json/minContains without contains is ignored',
   'minContains.json/maxContains < minContains',
@@ -35,6 +35,7 @@ const unsafe = new Set([
   'unknownKeyword.json/$id inside an unknown keyword is not a real identifier',
   'optional/refOfUnknownKeyword.json/reference of a root arbitrary keyword ',
   'optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
+  'draft2020-12/optional/cross-draft.json/refs to historic drafts are processed as historic drafts',
   'content.json', // validation for content is disabled by default per spec, which we treat as unsafe
 
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
@@ -42,8 +43,8 @@ const unsafe = new Set([
   'ref.json/$ref prevents a sibling $id from changing the base uri', // in pre-2019-09, any $ref siblings are not handled
 
   // draft3 only
-  'draft3/additionalItems.json/additionalItems should not look in applicators',
-  'draft3/additionalProperties.json/additionalProperties should not look in applicators',
+  'draft3/additionalItems.json/additionalItems does not look in applicators',
+  'draft3/additionalProperties.json/additionalProperties does not look in applicators',
 
   // draft2019-09 only
   // tests $recursiveRef without $recursiveAnchor, we treat this as a mistake
@@ -53,10 +54,10 @@ const unsafe = new Set([
   'draft2019-09/recursiveRef.json/$recursiveRef with no $recursiveAnchor in the initial target schema resource',
 
   // same for $dynamicRef without $dynamicAnchor in the same scope
-  'dynamicRef.json/A $dynamicRef to an $anchor in the same schema resource should behave like a normal $ref to an $anchor',
-  'dynamicRef.json/A $dynamicRef without a matching $dynamicAnchor in the same schema resource should behave like a normal $ref to $anchor',
-  'dynamicRef.json/A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource should behave like a normal $ref to $anchor',
-  'dynamicRef.json/A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor should behave like a normal $ref to $anchor',
+  'dynamicRef.json/A $dynamicRef to an $anchor in the same schema resource behaves like a normal $ref to an $anchor',
+  'dynamicRef.json/A $dynamicRef without a matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor',
+  'dynamicRef.json/A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor',
+  'dynamicRef.json/A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor behaves like a normal $ref to $anchor',
 
   // ajv tests
   'rules/if.json/then/else without if should be ignored',
@@ -118,6 +119,15 @@ const unsupported = new Set([
 
   // draft-next changes to bookending requirement in dynamicRef
   'draft-next/dynamicRef.json',
+
+  // draft-next only, new features
+  'draft-next/propertyDependencies.json',
+
+  // URN $id
+  'refRemote.json/remote HTTP ref with different URN $id',
+
+  // optional
+  'draft2019-09/optional/cross-draft.json/refs to historic drafts are processed as historic drafts',
 ])
 const unsupportedMask = []
 

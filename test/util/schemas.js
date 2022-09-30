@@ -12,7 +12,7 @@ function loadSchema(dir, namespace, name, suffix = '') {
   assert(!schema.id)
 
   if (schema.$id) {
-    assert(schema.$id === $id)
+    assert.strictEqual(schema.$id, $id)
     return schema
   }
 
@@ -82,10 +82,45 @@ const remotes = [
   'baseUriChange/folderInteger',
   'baseUriChangeFolder/folderInteger',
   'baseUriChangeFolderInSubschema/folderInteger',
+  'draft-next/baseUriChange/folderInteger',
+  'draft-next/baseUriChangeFolder/folderInteger',
+  'draft-next/baseUriChangeFolderInSubschema/folderInteger',
+  'draft-next/integer',
+  'draft-next/locationIndependentIdentifier',
+  'draft-next/name-defs',
+  'draft-next/nested/foo-ref-string',
+  'draft-next/nested/string',
+  'draft-next/ref-and-defs',
+  'draft-next/subSchemas-defs',
+  'draft2019-09/baseUriChange/folderInteger',
+  'draft2019-09/baseUriChangeFolder/folderInteger',
+  'draft2019-09/baseUriChangeFolderInSubschema/folderInteger',
+  'draft2019-09/dependentRequired',
+  'draft2019-09/ignore-prefixItems',
+  'draft2019-09/integer',
+  'draft2019-09/locationIndependentIdentifier',
   'draft2019-09/metaschema-no-validation',
+  'draft2019-09/name-defs',
+  'draft2019-09/nested/foo-ref-string',
+  'draft2019-09/nested/string',
+  'draft2019-09/ref-and-defs',
+  'draft2019-09/subSchemas-defs',
+  'draft2020-12/baseUriChange/folderInteger',
+  'draft2020-12/baseUriChangeFolder/folderInteger',
+  'draft2020-12/baseUriChangeFolderInSubschema/folderInteger',
+  'draft2020-12/extendible-dynamic-ref',
   'draft2020-12/format-assertion-false',
   'draft2020-12/format-assertion-true',
+  'draft2020-12/integer',
+  'draft2020-12/locationIndependentIdentifier',
   'draft2020-12/metaschema-no-validation',
+  'draft2020-12/name-defs',
+  'draft2020-12/nested/foo-ref-string',
+  'draft2020-12/nested/string',
+  'draft2020-12/prefixItems',
+  'draft2020-12/ref-and-defs',
+  'draft2020-12/subSchemas-defs',
+  'draft2020-12/tree',
   'extendible-dynamic-ref',
   'integer',
   'locationIndependentIdentifier',
@@ -93,6 +128,7 @@ const remotes = [
   'locationIndependentIdentifierPre2019',
   'name',
   'name-defs',
+  'nested-absolute-ref-to-string',
   'nested/foo-ref-string',
   'nested/string',
   'ref-and-definitions',
@@ -106,9 +142,14 @@ const remotes = [
 
 const extra = [
   {
+    // fails assert in loadSchema() above, intentionally
+    ...require('./../JSON-Schema-Test-Suite/remotes/different-id-ref-string.json'),
+    $id: 'http://localhost:1234/different-id-ref-string.json',
+  },
+  {
     // for AJV test issues/62_resolution_scope_change.json
-    $id: 'http://localhost:1234/folder/folderInteger.json',
     ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChange/folderInteger.json'),
+    $id: 'http://localhost:1234/folder/folderInteger.json',
   },
 ]
 
