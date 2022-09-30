@@ -1,7 +1,26 @@
 'use strict'
 
-module.exports = [
-  // standard
+const fs = require('fs')
+const path = require('path')
+const assert = require('assert')
+
+function loadSchema(dir, namespace, name, suffix = '') {
+  const $id = `${namespace}/${name}${suffix}`
+  const file = `${path.join(__dirname, '..', dir, name)}.json`
+  const schema = JSON.parse(fs.readFileSync(file, 'utf-8'))
+
+  assert(!schema.id)
+
+  if (schema.$id) {
+    assert(schema.$id === $id)
+    return schema
+  }
+
+  return { ...schema, $id }
+}
+
+// standard schemas
+const schemas = [
   require('./../schemas/json-schema-draft-2020-12/meta/core.json'),
   require('./../schemas/json-schema-draft-2020-12/meta/applicator.json'),
   require('./../schemas/json-schema-draft-2020-12/meta/unevaluated.json'),
@@ -21,7 +40,10 @@ module.exports = [
   require('./../schemas/json-schema-draft-06.json'),
   require('./../schemas/json-schema-draft-04.json'),
   require('./../schemas/json-schema-draft-03.json'),
-  // next, use latest available for refs to draft/next for now (until next schema becomes available)
+]
+
+// next, use latest available for refs to draft/next for now (until next schema becomes available)
+const next = [
   {
     ...require('./../schemas/json-schema-draft-2020-12/meta/core.json'),
     $id: 'https://json-schema.org/draft/next/meta/core',
@@ -54,70 +76,40 @@ module.exports = [
     ...require('./../schemas/json-schema-draft-2020-12/schema.json'),
     $id: 'https://json-schema.org/draft/next/schema',
   },
-  // remote
-  {
-    $id: 'http://localhost:1234/integer.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/integer.json'),
-  },
-  {
-    $id: 'http://localhost:1234/subSchemas.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/subSchemas.json'),
-  },
-  {
-    $id: 'http://localhost:1234/subSchemas-defs.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/subSchemas-defs.json'),
-  },
-  {
-    $id: 'http://localhost:1234/name.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/name.json'),
-  },
-  {
-    $id: 'http://localhost:1234/name-defs.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/name-defs.json'),
-  },
-  {
-    $id: 'http://localhost:1234/nested/string.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/nested/string.json'),
-  },
-  {
-    $id: 'http://localhost:1234/nested/foo-ref-string.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/nested/foo-ref-string.json'),
-  },
-  require('./../JSON-Schema-Test-Suite/remotes/tree.json'),
-  require('./../JSON-Schema-Test-Suite/remotes/ref-and-defs.json'),
-  require('./../JSON-Schema-Test-Suite/remotes/ref-and-definitions.json'),
-  require('./../JSON-Schema-Test-Suite/remotes/extendible-dynamic-ref.json'),
-  require('./../JSON-Schema-Test-Suite/remotes/draft2019-09/metaschema-no-validation.json'),
-  require('./../JSON-Schema-Test-Suite/remotes/draft2020-12/metaschema-no-validation.json'),
-  require('./../JSON-Schema-Test-Suite/remotes/draft2020-12/format-assertion-false.json'),
-  require('./../JSON-Schema-Test-Suite/remotes/draft2020-12/format-assertion-true.json'),
+]
+
+const remotes = [
+  'baseUriChange/folderInteger',
+  'baseUriChangeFolder/folderInteger',
+  'baseUriChangeFolderInSubschema/folderInteger',
+  'draft2019-09/metaschema-no-validation',
+  'draft2020-12/format-assertion-false',
+  'draft2020-12/format-assertion-true',
+  'draft2020-12/metaschema-no-validation',
+  'extendible-dynamic-ref',
+  'integer',
+  'locationIndependentIdentifier',
+  'locationIndependentIdentifierDraft4',
+  'locationIndependentIdentifierPre2019',
+  'name',
+  'name-defs',
+  'nested/foo-ref-string',
+  'nested/string',
+  'ref-and-definitions',
+  'ref-and-defs',
+  'subSchemas',
+  'subSchemas-defs',
+  'tree',
+].map((name) =>
+  loadSchema('JSON-Schema-Test-Suite/remotes', 'http://localhost:1234', name, '.json')
+)
+
+const extra = [
   {
     // for AJV test issues/62_resolution_scope_change.json
     $id: 'http://localhost:1234/folder/folderInteger.json',
     ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChange/folderInteger.json'),
   },
-  {
-    $id: 'http://localhost:1234/baseUriChange/folderInteger.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChange/folderInteger.json'),
-  },
-  {
-    $id: 'http://localhost:1234/baseUriChangeFolder/folderInteger.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChangeFolder/folderInteger.json'),
-  },
-  {
-    $id: 'http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/baseUriChangeFolderInSubschema/folderInteger.json'),
-  },
-  {
-    $id: 'http://localhost:1234/locationIndependentIdentifier.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/locationIndependentIdentifier.json'),
-  },
-  {
-    $id: 'http://localhost:1234/locationIndependentIdentifierPre2019.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/locationIndependentIdentifierPre2019.json'),
-  },
-  {
-    $id: 'http://localhost:1234/locationIndependentIdentifierDraft4.json',
-    ...require('./../JSON-Schema-Test-Suite/remotes/locationIndependentIdentifierDraft4.json'),
-  },
 ]
+
+module.exports = [...schemas, ...next, ...remotes, ...extra]
