@@ -5,6 +5,12 @@ const path = require('path')
 const testSchemas = require('./util/schemas')
 const { processTest } = require('./util/json-schema-test')
 
+let filter
+
+if (process.argv.length === 3 && path.resolve(process.argv[1]) === __filename) {
+  filter = process.argv[2]
+}
+
 // these tests require lax mode
 const unsafe = new Set([
   'additionalItems.json/when items is schema, additionalItems does nothing',
@@ -146,7 +152,8 @@ function processTestDir(schemaDir, main, opts = {}, schemas = testSchemas, subdi
     if (file.endsWith('.json')) {
       const content = fs.readFileSync(path.join(dir, file), 'utf-8')
       const baseOpts = { ...opts, formats: manualFormats(file) }
-      processTest(main, sub, JSON.parse(content), schemas, shouldIngore, requiresLax, baseOpts)
+      const config = { shouldIngore, requiresLax, filter }
+      processTest(main, sub, JSON.parse(content), baseOpts, schemas, config)
     } else {
       // assume it's a dir and let it fail otherwise
       processTestDir(schemaDir, main, opts, schemas, sub)

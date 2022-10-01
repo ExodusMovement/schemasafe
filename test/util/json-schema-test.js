@@ -15,8 +15,9 @@ const schemaVersions = new Map(
   })
 )
 
-function processTest(main, id, file, schemas, shouldIngore, requiresLax, baseOpts) {
+function processTest(main, id, file, baseOpts, schemas, { shouldIngore, requiresLax, filter }) {
   for (const block of file) {
+    if (filter && !`${main}/${id}/${block.description}`.includes(filter)) continue
     if (shouldIngore(`${id}/${block.description}`)) continue
     tape(`json-schema-test-suite ${main}/${id}/${block.description}`, (t) => {
       const mode = requiresLax(id) || requiresLax(`${id}/${block.description}`) ? 'lax' : 'default'
