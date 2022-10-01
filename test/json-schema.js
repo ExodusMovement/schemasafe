@@ -35,7 +35,7 @@ const unsafe = new Set([
   'unknownKeyword.json/$id inside an unknown keyword is not a real identifier',
   'optional/refOfUnknownKeyword.json/reference of a root arbitrary keyword ',
   'optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
-  'draft2020-12/optional/cross-draft.json/refs to historic drafts are processed as historic drafts',
+  'optional/cross-draft.json/refs to historic drafts are processed as historic drafts',
   'content.json', // validation for content is disabled by default per spec, which we treat as unsafe
 
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
@@ -125,9 +125,6 @@ const unsupported = new Set([
 
   // URN $id
   'refRemote.json/remote HTTP ref with different URN $id',
-
-  // optional
-  'draft2019-09/optional/cross-draft.json/refs to historic drafts are processed as historic drafts',
 ])
 const unsupportedMask = []
 

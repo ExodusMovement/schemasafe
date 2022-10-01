@@ -54,6 +54,7 @@ const generateMeta = (root, $schema, enforce, requireSchema) => {
     rootMeta.set(root, {
       exclusiveRefs: schemaIsOlderThan(version, 'draft/2019-09'),
       contentValidation: schemaIsOlderThan(version, 'draft/2019-09'),
+      dependentUnsupported: schemaIsOlderThan(version, 'draft/2019-09'),
       newItemsSyntax: !schemaIsOlderThan(version, 'draft/2020-12'),
       containsEvaluates: !schemaIsOlderThan(version, 'draft/2020-12'),
     })
@@ -737,6 +738,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       })
 
       for (const dependencies of ['dependencies', 'dependentRequired', 'dependentSchemas']) {
+        if (dependencies !== 'dependencies' && getMeta().dependentUnsupported) continue
         handle(dependencies, ['object'], (value) => {
           for (const key of Object.keys(value)) {
             const deps = typeof value[key] === 'string' ? [value[key]] : value[key]
