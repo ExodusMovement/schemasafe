@@ -122,9 +122,6 @@ const unsupported = new Set([
 
   // draft-next only, new features
   'draft-next/propertyDependencies.json',
-
-  // URN $id
-  'refRemote.json/remote HTTP ref with different URN $id',
 ])
 const unsupportedMask = []
 

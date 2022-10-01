@@ -142,6 +142,11 @@ const remotes = [
 
 const extra = [
   {
+    // has to be loaded this way as we don't load over network
+    ...require('./../JSON-Schema-Test-Suite/remotes/urn-ref-string.json'),
+    $id: 'http://localhost:1234/urn-ref-string.json',
+  },
+  {
     // fails assert in loadSchema() above, likely a bug in tests
     ...require('./../JSON-Schema-Test-Suite/remotes/draft7/ignore-dependentRequired.json'),
     $id: 'http://localhost:1234/draft7/ignore-dependentRequired.json',
