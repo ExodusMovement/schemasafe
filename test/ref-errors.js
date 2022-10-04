@@ -10,6 +10,9 @@ const schema = {
     hello: {
       type: 'string',
     },
+    bar: {
+      type: 'number',
+    },
   },
   additionalProperties: false,
 }
