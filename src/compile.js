@@ -284,6 +284,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     } else if (!getMeta()) saveMeta(root.$schema)
 
     handle('examples', ['array'], null) // unused, meta-only
+    handle('example', ['jsonval'], null) // unused, meta-only, OpenAPI
     for (const ignore of ['title', 'description', '$comment']) handle(ignore, ['string'], null) // unused, meta-only strings
     for (const ignore of ['deprecated', 'readOnly', 'writeOnly']) handle(ignore, ['boolean'], null) // unused, meta-only flags
 
