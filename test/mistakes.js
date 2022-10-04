@@ -139,3 +139,87 @@ tape('Invalid default', (t) => {
   )
   t.end()
 })
+
+tape('Invalid required', (t) => {
+  t.throws(() =>
+    validator({
+      type: 'object',
+      required: ['foo', 'bar', 'bax'],
+      properties: {
+        foo: {
+          type: 'number',
+        },
+      },
+      additionalProperties: false,
+    })
+  )
+  t.doesNotThrow(() =>
+    validator({
+      type: 'object',
+      required: ['foo', 'bar', 'bax'],
+      properties: {
+        foo: {
+          type: 'number',
+        },
+      },
+      additionalProperties: true,
+    })
+  )
+  t.doesNotThrow(() =>
+    validator({
+      type: 'object',
+      required: ['foo', 'bar', 'bax'],
+      properties: {
+        foo: {
+          type: 'number',
+        },
+      },
+      patternProperties: {
+        '^.*x$': {
+          type: 'number',
+        },
+      },
+      allOf: [
+        {
+          required: [],
+          properties: {
+            bar: {
+              type: 'number',
+            },
+          },
+        },
+      ],
+      unevaluatedProperties: false,
+    })
+  )
+  t.throws(
+    () =>
+      validator({
+        type: 'object',
+        required: ['foo', 'bar', 'bax'],
+        properties: {
+          foo: {
+            type: 'number',
+          },
+        },
+        patternProperties: {
+          '^.*y$': {
+            type: 'number',
+          },
+        },
+        allOf: [
+          {
+            required: [],
+            properties: {
+              bar: {
+                type: 'number',
+              },
+            },
+          },
+        ],
+        unevaluatedProperties: false,
+      }),
+    /Unknown required property: "bax"/
+  )
+  t.end()
+})

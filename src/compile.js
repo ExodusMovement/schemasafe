@@ -497,6 +497,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         ...properties.map((p) => format('%s !== %j', key, p)),
         ...patternProperties.map((p) => safenot(patternTest(p, key)))
       )
+    const lintRequired = (properties, patterns) => {
+      const regexps = patterns.map((p) => new RegExp(p, 'u'))
+      const known = (key) => properties.includes(key) || regexps.some((r) => r.test(key))
+      for (const key of stat.required) enforce(known(key), `Unknown required property:`, key)
+    }
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
 
@@ -797,6 +802,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (node.additionalProperties || node.additionalProperties === false) {
           const properties = Object.keys(node.properties || {})
           const patternProperties = Object.keys(node.patternProperties || {})
+          if (node.additionalProperties === false) lintRequired(properties, patternProperties)
           const condition = (key) => additionalCondition(key, properties, patternProperties)
           additionalProperties('additionalProperties', condition)
         }
@@ -1031,6 +1037,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
             const condition = (key) => safeand(notStatic(key), notDynamic(key))
             additionalProperties('unevaluatedProperties', condition)
           } else {
+            if (node.unevaluatedProperties === false) lintRequired(stat.properties, stat.patterns)
             additionalProperties('unevaluatedProperties', notStatic)
           }
         }
