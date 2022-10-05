@@ -502,6 +502,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       const known = (key) => properties.includes(key) || regexps.some((r) => r.test(key))
       for (const key of stat.required) enforce(known(key), `Unknown required property:`, key)
     }
+    const finalLint = []
 
     /* Checks inside blocks are independent, they are happening on the same code depth */
 
@@ -802,7 +803,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (node.additionalProperties || node.additionalProperties === false) {
           const properties = Object.keys(node.properties || {})
           const patternProperties = Object.keys(node.patternProperties || {})
-          if (node.additionalProperties === false) lintRequired(properties, patternProperties)
+          if (node.additionalProperties === false) {
+            // Postpone the check to the end when all nested .required are collected
+            finalLint.push(() => lintRequired(properties, patternProperties))
+          }
           const condition = (key) => additionalCondition(key, properties, patternProperties)
           additionalProperties('additionalProperties', condition)
         }
@@ -1066,6 +1070,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       // evaluated: apply static + dynamic
       typeWrap(checkArraysFinal, ['array'], types.get('array')(name))
       typeWrap(checkObjectsFinal, ['object'], types.get('object')(name))
+
+      for (const lint of finalLint) lint()
 
       // evaluated: propagate dynamic to parent dynamic (aka trace)
       // static to parent is merged via return value
