@@ -221,5 +221,24 @@ tape('Invalid required', (t) => {
       }),
     /Unknown required property: "bax"/
   )
+  t.throws(
+    () =>
+      validator({
+        type: 'object',
+        required: [],
+        properties: {
+          foo: {
+            type: 'number',
+          },
+        },
+        allOf: [
+          {
+            required: ['foo', 'bar'],
+          },
+        ],
+        unevaluatedProperties: false,
+      }),
+    /Unknown required property: "bar"/
+  )
   t.end()
 })
