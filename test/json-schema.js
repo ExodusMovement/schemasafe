@@ -119,9 +119,6 @@ const unsupported = new Set([
 
   // draft-next changes to bookending requirement in dynamicRef
   'draft-next/dynamicRef.json',
-
-  // draft-next only, new features
-  'draft-next/propertyDependencies.json',
 ])
 const unsupportedMask = []
 

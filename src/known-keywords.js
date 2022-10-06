@@ -13,7 +13,8 @@ const knownKeywords = [
   ...['maxLength', 'minLength', 'format', 'pattern'], // strings
   ...['contentEncoding', 'contentMediaType', 'contentSchema'], // strings content
   ...['properties', 'maxProperties', 'minProperties', 'additionalProperties', 'patternProperties'], // objects
-  ...['propertyNames', 'dependencies', 'dependentRequired', 'dependentSchemas'], // objects
+  ...['propertyNames'], // objects
+  ...['dependencies', 'dependentRequired', 'dependentSchemas', 'propertyDependencies'], // objects (dependencies)
   ...['unevaluatedProperties', 'unevaluatedItems'], // see-through
   // Unused meta keywords not affecting validation (annotations and comments)
   // https://json-schema.org/understanding-json-schema/reference/generic.html

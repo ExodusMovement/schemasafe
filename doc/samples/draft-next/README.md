@@ -58,7 +58,7 @@ Based on JSON Schema Test Suite for `draft-next`.
 | [patternProperties](./patternProperties.md)                                     | 5     | -                 | -        | -             |
 | [prefixItems](./prefixItems.md)                                                 | 4     | -                 | -        | -             |
 | [properties](./properties.md)                                                   | 6     | -                 | -        | -             |
-| [propertyDependencies](./propertyDependencies.md)                               | 3     | -                 | 3        | 1             |
+| [propertyDependencies](./propertyDependencies.md)                               | 3     | -                 | -        | -             |
 | [propertyNames](./propertyNames.md)                                             | 3     | -                 | -        | -             |
 | [ref](./ref.md)                                                                 | 29    | -                 | -        | -             |
 | [refRemote](./refRemote.md)                                                     | 13    | -                 | -        | -             |

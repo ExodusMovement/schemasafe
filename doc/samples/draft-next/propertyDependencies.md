@@ -12,15 +12,21 @@
 
 ```js
 'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.foo !== undefined && hasOwn(data, "foo")) {
+      if (data.foo === "bar") return false
+    }
+  }
   return true
 };
 return ref0
 ```
 
-### Warnings
+##### Strong mode notices
 
- * `Keyword not supported: "propertyDependencies" at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## propertyDependencies doesn't act on non-string property values
@@ -35,15 +41,21 @@ return ref0
 
 ```js
 'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.foo !== undefined && hasOwn(data, "foo")) {
+      if (data.foo === "bar") return false
+    }
+  }
   return true
 };
 return ref0
 ```
 
-### Warnings
+##### Strong mode notices
 
- * `Keyword not supported: "propertyDependencies" at #`
+ * `[requireValidation] type should be specified at #`
 
 
 ## multiple options selects the right one
@@ -67,17 +79,30 @@ return ref0
 
 ```js
 'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.foo !== undefined && hasOwn(data, "foo")) {
+      if (data.foo === "bar") {
+        if (typeof data === "object" && data && !Array.isArray(data)) {
+          if (Object.keys(data).length > 2) return false
+          if (Object.keys(data).length < 2) return false
+        }
+      }
+      if (data.foo === "baz") {
+        if (typeof data === "object" && data && !Array.isArray(data)) {
+          if (Object.keys(data).length > 1) return false
+        }
+      }
+      if (data.foo === "quux") return false
+    }
+  }
   return true
 };
 return ref0
 ```
 
-### Warnings
+##### Strong mode notices
 
- * `Keyword not supported: "propertyDependencies" at #`
-
-### Misclassified!
-
-**This schema caused 4 misclassifications!**
+ * `[requireValidation] schema = true is not allowed at #/propertyDependencies/foo/qux`
 

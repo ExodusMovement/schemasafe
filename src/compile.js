@@ -764,7 +764,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
                 errorIf(safeand(present(item), condition), errorArgs)
               }
             } else if (isSchemaish(deps) && dependencies !== 'dependentRequired') {
-              uncertain(dependencies)
+              uncertain(dependencies) // TODO: we don't always need this, remove when no uncertainity?
               fun.if(item.checked ? true : present(item), () => {
                 const delta = rule(current, deps, subPath(dependencies, key), dyn)
                 evaluateDelta(orDelta({}, delta))
@@ -775,6 +775,27 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           return null
         })
       }
+
+      handle('propertyDependencies', ['object'], (propertyDependencies) => {
+        for (const [key, variants] of Object.entries(propertyDependencies)) {
+          enforce(isPlainObject(variants), 'propertyDependencies must be an object')
+          uncertain('propertyDependencies') // TODO: we don't always need this, remove when no uncertainity?
+          const item = currPropImm(key, checked(key))
+          // NOTE: would it be useful to also check if it's a string?
+          fun.if(item.checked ? true : present(item), () => {
+            for (const [val, deps] of Object.entries(variants)) {
+              enforce(isSchemaish(deps), 'propertyDependencies must contain schemas')
+              fun.if(compare(buildName(item), val), () => {
+                // TODO: we already know that we have an object here, optimize?
+                const delta = rule(current, deps, subPath('propertyDependencies', key, val), dyn)
+                evaluateDelta(orDelta({}, delta))
+                evaluateDeltaDynamic(delta)
+              })
+            }
+          })
+        }
+        return null
+      })
 
       handle('properties', ['object'], (properties) => {
         for (const p of Object.keys(properties)) {
@@ -1181,8 +1202,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       const logicalOp = ['not', 'if', 'then', 'else'].includes(schemaPath[schemaPath.length - 1])
       const branchOp = ['oneOf', 'anyOf', 'allOf'].includes(schemaPath[schemaPath.length - 2])
       const depOp = ['dependencies', 'dependentSchemas'].includes(schemaPath[schemaPath.length - 2])
+      const propDepOp = ['propertyDependencies'].includes(schemaPath[schemaPath.length - 3])
       // Coherence check, unreachable, double-check that we came from expected path
-      enforce(logicalOp || branchOp || depOp, 'Unexpected')
+      enforce(logicalOp || branchOp || depOp || propDepOp, 'Unexpected logical path')
     } else if (!schemaPath.includes('not')) {
       // 'not' does not mark anything as evaluated (unlike even if/then/else), so it's safe to exclude from these
       // checks, as we are sure that everything will be checked without it. It can be viewed as a pure add-on.
