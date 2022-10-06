@@ -223,3 +223,40 @@ return ref0
 
  * `[requireValidation] schema = true is not allowed at #/contains/else`
 
+
+## contains with null instance elements
+
+### Schema
+
+```json
+{ "contains": { "type": "null" } }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (Array.isArray(data)) {
+    let passes0 = 0
+    for (let i = 0; i < data.length; i++) {
+      const sub0 = (() => {
+        if (data[i] !== undefined && hasOwn(data, i)) {
+          if (!(data[i] === null)) return false
+        }
+        return true
+      })()
+      if (sub0) passes0++
+    }
+    if (passes0 < 1) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+

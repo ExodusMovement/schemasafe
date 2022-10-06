@@ -70,7 +70,7 @@ const format0 = (str) => {
     const Z_ANCHOR = /[^\\]\\Z/
     if (Z_ANCHOR.test(str)) return false
     try {
-      new RegExp(str)
+      new RegExp(str, 'u')
       return true
     } catch (e) {
       return false
@@ -532,7 +532,7 @@ return ref0
 
 ```js
 'use strict'
-const format0 = new RegExp("^(?:urn:uuid:)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", "i");
+const format0 = new RegExp("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", "i");
 const ref0 = function validate(data) {
   if (typeof data === "string") {
     if (!format0.test(data)) return false

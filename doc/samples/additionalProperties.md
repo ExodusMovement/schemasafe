@@ -60,7 +60,7 @@ return ref0
  * `Should start with ^ and end with $: "^á" at #`
 
 
-## additionalProperties allows a schema which should validate
+## additionalProperties with schema
 
 ### Schema
 
@@ -144,7 +144,7 @@ return ref0
  * `[requireValidation] empty rules node is not allowed at #/properties/foo`
 
 
-## additionalProperties should not look in applicators
+## additionalProperties does not look in applicators
 
 ### Schema
 
@@ -173,4 +173,32 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] empty rules node is not allowed at #/allOf/0/properties/foo`
+
+
+## additionalProperties with null valued instance properties
+
+### Schema
+
+```json
+{ "additionalProperties": { "type": "null" } }
+```
+
+### Code
+
+```js
+'use strict'
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    for (const key0 of Object.keys(data)) {
+      if (!(data[key0] === null)) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
 

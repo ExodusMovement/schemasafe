@@ -7,6 +7,7 @@ const { validator } = require('../../../')
 const schemas = require('../../../test/util/schemas')
 
 const version = 'draft2019-09'
+const versionUrl = 'https://json-schema.org/draft/2019-09/schema'
 const dir = path.join(__dirname, '../../../test/JSON-Schema-Test-Suite/tests', version)
 
 function processSchema(block) {
@@ -16,7 +17,7 @@ function processSchema(block) {
   const { description, comment } = block
   for (const mode of ['strong', 'default', 'lax']) {
     try {
-      const $schema = 'http://json-schema.org/draft/2019-09/schema#'
+      const $schema = versionUrl
       const opts = { schemas, mode, isJSON: true }
       const schema = typeof block.schema === 'object' ? { $schema, ...block.schema } : block.schema
       const validate = validator(schema, opts)
@@ -55,7 +56,9 @@ for (const file of [...readdir(''), ...readdir('optional')]) {
     for (const block of JSON.parse(content)) {
       const entry = processSchema(block)
       contents.push(`## ${entry.description}`, '')
-      const schemaJson = prettify(JSON.stringify(block.schema), { parser: 'json' }).trim()
+      const { $schema, ...schema } = block.schema
+      const schemaToPrint = $schema === versionUrl ? schema : block.schema
+      const schemaJson = prettify(JSON.stringify(schemaToPrint), { parser: 'json' }).trim()
       contents.push(`### Schema`, '', `\`\`\`json`, schemaJson, `\`\`\``, '')
       contents.push('### Code', '')
       if (entry.source) {

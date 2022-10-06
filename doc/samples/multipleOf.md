@@ -66,7 +66,8 @@ return ref0
 'use strict'
 const isMultipleOf = (value, divisor, factor, factorMultiple) => {
   if (value % divisor === 0) return true
-  const multiple = value * factor
+  let multiple = value * factor
+  if (multiple === Infinity || multiple === -Infinity) multiple = value
   if (multiple % factorMultiple === 0) return true
   const normal = Math.floor(multiple + 0.5)
   return normal / factor === value && normal % factorMultiple === 0
@@ -85,7 +86,7 @@ return ref0
  * `[requireValidation] type should be specified at #`
 
 
-## invalid instance should not raise error when float division = inf
+## float division = inf
 
 ### Schema
 
@@ -99,7 +100,8 @@ return ref0
 'use strict'
 const isMultipleOf = (value, divisor, factor, factorMultiple) => {
   if (value % divisor === 0) return true
-  const multiple = value * factor
+  let multiple = value * factor
+  if (multiple === Infinity || multiple === -Infinity) multiple = value
   if (multiple % factorMultiple === 0) return true
   const normal = Math.floor(multiple + 0.5)
   return normal / factor === value && normal % factorMultiple === 0

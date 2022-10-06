@@ -258,3 +258,63 @@ const ref0 = function validate(data) {
 return ref0
 ```
 
+
+## single-form items with null instance elements
+
+### Schema
+
+```json
+{ "items": { "type": "null" } }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (Array.isArray(data)) {
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] !== undefined && hasOwn(data, i)) {
+        if (!(data[i] === null)) return false
+      }
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+
+
+## array-form items with null instance elements
+
+### Schema
+
+```json
+{ "items": [{ "type": "null" }] }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (Array.isArray(data)) {
+    if (data[0] !== undefined && hasOwn(data, 0)) {
+      if (!(data[0] === null)) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+

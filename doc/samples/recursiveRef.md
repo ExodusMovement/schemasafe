@@ -41,7 +41,7 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:4242/recursiveRef2/schema.json",
+  "$id": "http://localhost:4242/draft2019-09/recursiveRef2/schema.json",
   "$defs": {
     "myobject": {
       "$id": "myobject.json",
@@ -96,7 +96,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at http://localhost:4242/recursiveRef2/schema.json#/anyOf/1/additionalProperties`
+ * `[requireValidation] type should be specified at http://localhost:4242/draft2019-09/recursiveRef2/schema.json#/anyOf/1/additionalProperties`
 
 
 ## $recursiveRef with nesting
@@ -105,7 +105,7 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:4242/recursiveRef3/schema.json",
+  "$id": "http://localhost:4242/draft2019-09/recursiveRef3/schema.json",
   "$recursiveAnchor": true,
   "$defs": {
     "myobject": {
@@ -161,7 +161,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at http://localhost:4242/recursiveRef3/schema.json#/anyOf/1/additionalProperties`
+ * `[requireValidation] type should be specified at http://localhost:4242/draft2019-09/recursiveRef3/schema.json#/anyOf/1/additionalProperties`
 
 
 ## $recursiveRef with $recursiveAnchor: false works like $ref
@@ -170,7 +170,7 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:4242/recursiveRef4/schema.json",
+  "$id": "http://localhost:4242/draft2019-09/recursiveRef4/schema.json",
   "$recursiveAnchor": false,
   "$defs": {
     "myobject": {
@@ -226,7 +226,7 @@ return ref0
 
 ### Warnings
 
- * `$recursiveRef without $recursiveAnchor at http://localhost:4242/recursiveRef4/schema.json#/anyOf/1/additionalProperties`
+ * `$recursiveRef without $recursiveAnchor at http://localhost:4242/draft2019-09/recursiveRef4/schema.json#/anyOf/1/additionalProperties`
 
 
 ## $recursiveRef with no $recursiveAnchor works like $ref
@@ -235,7 +235,7 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:4242/recursiveRef5/schema.json",
+  "$id": "http://localhost:4242/draft2019-09/recursiveRef5/schema.json",
   "$defs": {
     "myobject": {
       "$id": "myobject.json",
@@ -290,7 +290,7 @@ return ref0
 
 ### Warnings
 
- * `$recursiveRef without $recursiveAnchor at http://localhost:4242/recursiveRef5/schema.json#/anyOf/1/additionalProperties`
+ * `$recursiveRef without $recursiveAnchor at http://localhost:4242/draft2019-09/recursiveRef5/schema.json#/anyOf/1/additionalProperties`
 
 
 ## $recursiveRef with no $recursiveAnchor in the initial target schema resource
@@ -299,14 +299,14 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:4242/recursiveRef6/base.json",
+  "$id": "http://localhost:4242/draft2019-09/recursiveRef6/base.json",
   "$recursiveAnchor": true,
   "anyOf": [
     { "type": "boolean" },
     {
       "type": "object",
       "additionalProperties": {
-        "$id": "http://localhost:4242/recursiveRef6/inner.json",
+        "$id": "http://localhost:4242/draft2019-09/recursiveRef6/inner.json",
         "$comment": "there is no $recursiveAnchor: true here, so we do NOT recurse to the base",
         "anyOf": [
           { "type": "integer" },
@@ -383,13 +383,13 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:4242/recursiveRef7/base.json",
+  "$id": "http://localhost:4242/draft2019-09/recursiveRef7/base.json",
   "anyOf": [
     { "type": "boolean" },
     {
       "type": "object",
       "additionalProperties": {
-        "$id": "http://localhost:4242/recursiveRef7/inner.json",
+        "$id": "http://localhost:4242/draft2019-09/recursiveRef7/inner.json",
         "$recursiveAnchor": true,
         "anyOf": [
           { "type": "integer" },
@@ -457,7 +457,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at http://localhost:4242/recursiveRef7/base.json#/anyOf/1/additionalProperties`
+ * `[requireValidation] type should be specified at http://localhost:4242/draft2019-09/recursiveRef7/base.json#/anyOf/1/additionalProperties`
 
 
 ## multiple dynamic paths to the $recursiveRef keyword
@@ -480,14 +480,14 @@ return ref0
     "title": "any type of node",
     "$id": "recursiveRef8_anyLeafNode.json",
     "$recursiveAnchor": true,
-    "$ref": "recursiveRef8_main.json#/$defs/inner"
+    "$ref": "recursiveRef8_inner.json"
   },
   "else": {
     "title": "integer node",
     "$id": "recursiveRef8_integerNode.json",
     "$recursiveAnchor": true,
     "type": ["object", "integer"],
-    "$ref": "recursiveRef8_main.json#/$defs/inner"
+    "$ref": "recursiveRef8_inner.json"
   }
 }
 ```

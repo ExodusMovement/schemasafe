@@ -64,7 +64,7 @@ return ref0
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
 
 
-## integer comparison
+## maximum integer comparison
 
 ### Schema
 
@@ -116,7 +116,7 @@ return ref0
  * `[requireValidation] type should be specified at #`
 
 
-## integer comparison
+## minimum integer comparison
 
 ### Schema
 

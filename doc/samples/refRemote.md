@@ -5,7 +5,7 @@
 ### Schema
 
 ```json
-{ "$ref": "http://localhost:1234/integer.json" }
+{ "$ref": "http://localhost:1234/draft2019-09/integer.json" }
 ```
 
 ### Code
@@ -22,10 +22,6 @@ const ref0 = function validate(data) {
 };
 return ref0
 ```
-
-##### Strong mode notices
-
- * `[requireSchema] $schema is required at http://localhost:1234/integer.json#`
 
 
 ## fragment within remote ref
@@ -33,7 +29,9 @@ return ref0
 ### Schema
 
 ```json
-{ "$ref": "http://localhost:1234/subSchemas-defs.json#/$defs/integer" }
+{
+  "$ref": "http://localhost:1234/draft2019-09/subSchemas-defs.json#/$defs/integer"
+}
 ```
 
 ### Code
@@ -51,17 +49,15 @@ const ref0 = function validate(data) {
 return ref0
 ```
 
-##### Strong mode notices
-
- * `[requireSchema] $schema is required at http://localhost:1234/subSchemas-defs.json#`
-
 
 ## ref within remote ref
 
 ### Schema
 
 ```json
-{ "$ref": "http://localhost:1234/subSchemas-defs.json#/$defs/refToInteger" }
+{
+  "$ref": "http://localhost:1234/draft2019-09/subSchemas-defs.json#/$defs/refToInteger"
+}
 ```
 
 ### Code
@@ -90,7 +86,7 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:1234/",
+  "$id": "http://localhost:1234/draft2019-09/",
   "items": {
     "$id": "baseUriChange/",
     "items": { "$ref": "folderInteger.json" }
@@ -128,7 +124,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireSchema] $schema is required at http://localhost:1234/baseUriChange/folderInteger.json#`
+ * `[requireValidation] type should be specified at #/items`
 
 
 ## base URI change - change folder
@@ -137,7 +133,7 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:1234/scope_change_defs1.json",
+  "$id": "http://localhost:1234/draft2019-09/scope_change_defs1.json",
   "type": "object",
   "properties": { "list": { "$ref": "baseUriChangeFolder/" } },
   "$defs": {
@@ -180,7 +176,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireSchema] $schema is required at http://localhost:1234/baseUriChangeFolder/folderInteger.json#`
+ * `[requireValidation] additionalProperties or unevaluatedProperties should be specified at #`
 
 
 ## base URI change - change folder in subschema
@@ -189,7 +185,7 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:1234/scope_change_defs2.json",
+  "$id": "http://localhost:1234/draft2019-09/scope_change_defs2.json",
   "type": "object",
   "properties": {
     "list": { "$ref": "baseUriChangeFolderInSubschema/#/$defs/bar" }
@@ -235,7 +231,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireSchema] $schema is required at http://localhost:1234/baseUriChangeFolderInSubschema/folderInteger.json#`
+ * `[requireValidation] additionalProperties or unevaluatedProperties should be specified at #`
 
 
 ## root ref in remote ref
@@ -244,7 +240,7 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:1234/object",
+  "$id": "http://localhost:1234/draft2019-09/object",
   "type": "object",
   "properties": { "name": { "$ref": "name-defs.json#/$defs/orNull" } }
 }
@@ -285,7 +281,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireSchema] $schema is required at http://localhost:1234/name-defs.json#`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
 
 
 ## remote ref with ref to defs
@@ -294,7 +290,7 @@ return ref0
 
 ```json
 {
-  "$id": "http://localhost:1234/schema-remote-ref-ref-defs1.json",
+  "$id": "http://localhost:1234/draft2019-09/schema-remote-ref-ref-defs1.json",
   "$ref": "ref-and-defs.json"
 }
 ```
@@ -325,5 +321,174 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireSchema] $schema is required at http://localhost:1234/ref-and-defs.json#`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at http://localhost:1234/draft2019-09/ref-and-defs.json#/properties/bar`
+
+
+## Location-independent identifier in remote ref
+
+### Schema
+
+```json
+{
+  "$ref": "http://localhost:1234/draft2019-09/locationIndependentIdentifier.json#/$defs/refToInteger"
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref2 = function validate(data) {
+  if (!Number.isInteger(data)) return false
+  return true
+};
+const ref1 = function validate(data) {
+  if (!ref2(data)) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+
+## retrieved nested refs resolve relative to their URI not $id
+
+### Schema
+
+```json
+{
+  "$id": "http://localhost:1234/draft2019-09/some-id",
+  "properties": { "name": { "$ref": "nested/foo-ref-string.json" } }
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref2 = function validate(data) {
+  if (!(typeof data === "string")) return false
+  return true
+};
+const ref1 = function validate(data) {
+  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+  if (data.foo !== undefined && hasOwn(data, "foo")) {
+    if (!ref2(data.foo)) return false
+  }
+  return true
+};
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.name !== undefined && hasOwn(data, "name")) {
+      if (!ref1(data.name)) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at http://localhost:1234/draft2019-09/nested/string.json#`
+
+
+## remote HTTP ref with different $id
+
+### Schema
+
+```json
+{ "$ref": "http://localhost:1234/different-id-ref-string.json" }
+```
+
+### Code
+
+```js
+'use strict'
+const ref2 = function validate(data) {
+  if (!(typeof data === "string")) return false
+  return true
+};
+const ref1 = function validate(data) {
+  if (!ref2(data)) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireSchema] $schema is required at http://localhost:1234/different-id-ref-string.json#`
+
+
+## remote HTTP ref with different URN $id
+
+### Schema
+
+```json
+{ "$ref": "http://localhost:1234/urn-ref-string.json" }
+```
+
+### Code
+
+```js
+'use strict'
+const ref2 = function validate(data) {
+  if (!(typeof data === "string")) return false
+  return true
+};
+const ref1 = function validate(data) {
+  if (!ref2(data)) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireSchema] $schema is required at http://localhost:1234/urn-ref-string.json#`
+
+
+## remote HTTP ref with nested absolute ref
+
+### Schema
+
+```json
+{ "$ref": "http://localhost:1234/nested-absolute-ref-to-string.json" }
+```
+
+### Code
+
+```js
+'use strict'
+const ref2 = function validate(data) {
+  if (!(typeof data === "string")) return false
+  return true
+};
+const ref1 = function validate(data) {
+  if (!ref2(data)) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireSchema] $schema is required at http://localhost:1234/nested-absolute-ref-to-string.json#`
 

@@ -219,7 +219,7 @@ return ref0
 ```
 
 
-## unicode semantics should be used for all pattern matching
+## patterns always use unicode semantics with pattern
 
 ### Schema
 
@@ -273,7 +273,7 @@ return ref0
  * `Should start with ^ and end with $: "\\wcole" at #`
 
 
-## unicode characters do not match ascii ranges
+## pattern with ASCII ranges
 
 ### Schema
 
@@ -327,7 +327,7 @@ return ref0
  * `[requireValidation] type should be specified at #`
 
 
-## unicode digits are more than 0 through 9
+## pattern with non-ASCII digits
 
 ### Schema
 
@@ -354,7 +354,7 @@ return ref0
  * `[complexityChecks] maxLength should be specified for pattern: "^\\p{digit}+$" at #`
 
 
-## unicode semantics should be used for all patternProperties matching
+## patterns always use unicode semantics with patternProperties
 
 ### Schema
 
@@ -418,7 +418,7 @@ return ref0
  * `Should start with ^ and end with $: "\\wcole" at #`
 
 
-## unicode characters do not match ascii ranges
+## patternProperties with ASCII ranges
 
 ### Schema
 
@@ -482,7 +482,7 @@ return ref0
  * `[requireValidation] schema = true is not allowed at #/patternProperties/^\d+$`
 
 
-## unicode digits are more than 0 through 9
+## patternProperties with non-ASCII digits
 
 ### Schema
 

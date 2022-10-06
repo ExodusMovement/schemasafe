@@ -132,7 +132,7 @@ return ref0
  * `[requireValidation] type should be specified at #`
 
 
-## additionalItems should not look in applicators, valid case
+## additionalItems does not look in applicators, valid case
 
 ### Schema
 
@@ -164,7 +164,7 @@ return ref0
  * `Unprocessed keywords: ["additionalItems"] at #`
 
 
-## additionalItems should not look in applicators, invalid case
+## additionalItems does not look in applicators, invalid case
 
 ### Schema
 
@@ -242,4 +242,27 @@ return ref0
 ##### Strong mode notices
 
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/0`
+
+
+## additionalItems with null instance elements
+
+### Schema
+
+```json
+{ "additionalItems": { "type": "null" } }
+```
+
+### Code
+
+```js
+'use strict'
+const ref0 = function validate(data) {
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unprocessed keywords: ["additionalItems"] at #`
 

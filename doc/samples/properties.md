@@ -164,3 +164,77 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+
+## properties with null valued instance properties
+
+### Schema
+
+```json
+{ "properties": { "foo": { "type": "null" } } }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.foo !== undefined && hasOwn(data, "foo")) {
+      if (!(data.foo === null)) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+
+
+## properties whose names are Javascript object property names
+
+### Schema
+
+```json
+{
+  "properties": {
+    "__proto__": { "type": "number" },
+    "toString": { "properties": { "length": { "type": "string" } } },
+    "constructor": { "type": "number" }
+  }
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data["__proto__"] !== undefined && hasOwn(data, "__proto__")) {
+      if (!(typeof data["__proto__"] === "number")) return false
+    }
+    if (data.toString !== undefined && hasOwn(data, "toString")) {
+      if (typeof data.toString === "object" && data.toString && !Array.isArray(data.toString)) {
+        if (data.toString.length !== undefined && hasOwn(data.toString, "length")) {
+          if (!(typeof data.toString.length === "string")) return false
+        }
+      }
+    }
+    if (data.constructor !== undefined && hasOwn(data, "constructor")) {
+      if (!(typeof data.constructor === "number")) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/properties/toString/properties/length`
+

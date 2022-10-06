@@ -1455,3 +1455,57 @@ return ref0
 
  * `[requireValidation] schema = true is not allowed at #/oneOf/0/properties/c`
 
+
+## non-object instances are valid
+
+### Schema
+
+```json
+{ "unevaluatedProperties": false }
+```
+
+### Code
+
+```js
+'use strict'
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    for (const key0 of Object.keys(data)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+
+
+## unevaluatedProperties with null valued instance properties
+
+### Schema
+
+```json
+{ "unevaluatedProperties": { "type": "null" } }
+```
+
+### Code
+
+```js
+'use strict'
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    for (const key0 of Object.keys(data)) {
+      if (!(data[key0] === null)) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+

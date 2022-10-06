@@ -18,59 +18,64 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 
 ## Results
 
-| Name                                                              | Total | Failed to compile | Warnings | Misclassified |
-|-------------------------------------------------------------------|-------|-------------------|----------|---------------|
-| [additionalItems](./additionalItems.md)                           | 8     | -                 | 3        | -             |
-| [additionalProperties](./additionalProperties.md)                 | 6     | -                 | -        | -             |
-| [allOf](./allOf.md)                                               | 12    | -                 | -        | -             |
-| [anchor](./anchor.md)                                             | 5     | -                 | -        | -             |
-| [anyOf](./anyOf.md)                                               | 8     | -                 | 3        | -             |
-| [boolean_schema](./boolean_schema.md)                             | 2     | -                 | -        | -             |
-| [const](./const.md)                                               | 15    | -                 | -        | -             |
-| [contains](./contains.md)                                         | 6     | -                 | -        | -             |
-| [default](./default.md)                                           | 3     | -                 | -        | -             |
-| [defs](./defs.md)                                                 | 1     | -                 | -        | -             |
-| [dependentRequired](./dependentRequired.md)                       | 4     | -                 | -        | -             |
-| [dependentSchemas](./dependentSchemas.md)                         | 3     | -                 | -        | -             |
-| [enum](./enum.md)                                                 | 10    | -                 | -        | -             |
-| [exclusiveMaximum](./exclusiveMaximum.md)                         | 1     | -                 | -        | -             |
-| [exclusiveMinimum](./exclusiveMinimum.md)                         | 1     | -                 | -        | -             |
-| [format](./format.md)                                             | 19    | 4                 | -        | -             |
-| [id](./id.md)                                                     | 4     | -                 | -        | -             |
-| [if-then-else](./if-then-else.md)                                 | 10    | -                 | 6        | -             |
-| [infinite-loop-detection](./infinite-loop-detection.md)           | 1     | -                 | -        | -             |
-| [items](./items.md)                                               | 7     | -                 | -        | -             |
-| [maxContains](./maxContains.md)                                   | 3     | -                 | 1        | -             |
-| [maxItems](./maxItems.md)                                         | 1     | -                 | -        | -             |
-| [maxLength](./maxLength.md)                                       | 1     | -                 | -        | -             |
-| [maxProperties](./maxProperties.md)                               | 2     | -                 | -        | -             |
-| [maximum](./maximum.md)                                           | 2     | -                 | -        | -             |
-| [minContains](./minContains.md)                                   | 7     | -                 | 2        | -             |
-| [minItems](./minItems.md)                                         | 1     | -                 | -        | -             |
-| [minLength](./minLength.md)                                       | 1     | -                 | -        | -             |
-| [minProperties](./minProperties.md)                               | 1     | -                 | -        | -             |
-| [minimum](./minimum.md)                                           | 2     | -                 | -        | -             |
-| [multipleOf](./multipleOf.md)                                     | 4     | -                 | -        | -             |
-| [not](./not.md)                                                   | 6     | -                 | 1        | -             |
-| [oneOf](./oneOf.md)                                               | 11    | -                 | 3        | -             |
-| [pattern](./pattern.md)                                           | 2     | -                 | -        | -             |
-| [patternProperties](./patternProperties.md)                       | 4     | -                 | -        | -             |
-| [properties](./properties.md)                                     | 4     | -                 | -        | -             |
-| [propertyNames](./propertyNames.md)                               | 4     | -                 | -        | -             |
-| [recursiveRef](./recursiveRef.md)                                 | 9     | -                 | 4        | -             |
-| [ref](./ref.md)                                                   | 18    | -                 | -        | -             |
-| [refRemote](./refRemote.md)                                       | 8     | -                 | -        | -             |
-| [required](./required.md)                                         | 4     | -                 | -        | -             |
-| [type](./type.md)                                                 | 11    | -                 | -        | -             |
-| [unevaluatedItems](./unevaluatedItems.md)                         | 17    | -                 | -        | -             |
-| [unevaluatedProperties](./unevaluatedProperties.md)               | 32    | -                 | 3        | -             |
-| [uniqueItems](./uniqueItems.md)                                   | 6     | -                 | -        | -             |
-| [unknownKeyword](./unknownKeyword.md)                             | 1     | -                 | 1        | -             |
-| [optional/bignum](./optional-bignum.md)                           | 7     | -                 | -        | -             |
-| [optional/ecmascript-regex](./optional-ecmascript-regex.md)       | 20    | -                 | -        | -             |
-| [optional/float-overflow](./optional-float-overflow.md)           | 1     | -                 | -        | -             |
-| [optional/non-bmp-regex](./optional-non-bmp-regex.md)             | 2     | -                 | -        | -             |
-| [optional/refOfUnknownKeyword](./optional-refOfUnknownKeyword.md) | 2     | -                 | 2        | -             |
+| Name                                                                            | Total | Failed to compile | Warnings | Misclassified |
+|---------------------------------------------------------------------------------|-------|-------------------|----------|---------------|
+| [additionalItems](./additionalItems.md)                                         | 9     | -                 | 4        | -             |
+| [additionalProperties](./additionalProperties.md)                               | 7     | -                 | -        | -             |
+| [allOf](./allOf.md)                                                             | 12    | -                 | -        | -             |
+| [anchor](./anchor.md)                                                           | 7     | -                 | -        | -             |
+| [anyOf](./anyOf.md)                                                             | 8     | -                 | 3        | -             |
+| [boolean_schema](./boolean_schema.md)                                           | 2     | -                 | -        | -             |
+| [const](./const.md)                                                             | 15    | -                 | -        | -             |
+| [contains](./contains.md)                                                       | 7     | -                 | -        | -             |
+| [content](./content.md)                                                         | 4     | -                 | 4        | -             |
+| [default](./default.md)                                                         | 3     | -                 | -        | -             |
+| [defs](./defs.md)                                                               | 1     | -                 | -        | -             |
+| [dependentRequired](./dependentRequired.md)                                     | 4     | -                 | -        | -             |
+| [dependentSchemas](./dependentSchemas.md)                                       | 3     | -                 | -        | -             |
+| [enum](./enum.md)                                                               | 10    | -                 | -        | -             |
+| [exclusiveMaximum](./exclusiveMaximum.md)                                       | 1     | -                 | -        | -             |
+| [exclusiveMinimum](./exclusiveMinimum.md)                                       | 1     | -                 | -        | -             |
+| [format](./format.md)                                                           | 19    | 4                 | -        | -             |
+| [id](./id.md)                                                                   | 5     | -                 | -        | -             |
+| [if-then-else](./if-then-else.md)                                               | 10    | -                 | 6        | -             |
+| [infinite-loop-detection](./infinite-loop-detection.md)                         | 1     | -                 | -        | -             |
+| [items](./items.md)                                                             | 9     | -                 | -        | -             |
+| [maxContains](./maxContains.md)                                                 | 4     | -                 | 1        | -             |
+| [maxItems](./maxItems.md)                                                       | 2     | -                 | -        | -             |
+| [maxLength](./maxLength.md)                                                     | 2     | -                 | -        | -             |
+| [maxProperties](./maxProperties.md)                                             | 3     | -                 | -        | -             |
+| [maximum](./maximum.md)                                                         | 2     | -                 | -        | -             |
+| [minContains](./minContains.md)                                                 | 8     | -                 | 2        | -             |
+| [minItems](./minItems.md)                                                       | 2     | -                 | -        | -             |
+| [minLength](./minLength.md)                                                     | 2     | -                 | -        | -             |
+| [minProperties](./minProperties.md)                                             | 2     | -                 | -        | -             |
+| [minimum](./minimum.md)                                                         | 2     | -                 | -        | -             |
+| [multipleOf](./multipleOf.md)                                                   | 4     | -                 | -        | -             |
+| [not](./not.md)                                                                 | 6     | -                 | 1        | -             |
+| [oneOf](./oneOf.md)                                                             | 11    | -                 | 3        | -             |
+| [pattern](./pattern.md)                                                         | 2     | -                 | -        | -             |
+| [patternProperties](./patternProperties.md)                                     | 5     | -                 | -        | -             |
+| [properties](./properties.md)                                                   | 6     | -                 | -        | -             |
+| [propertyNames](./propertyNames.md)                                             | 4     | -                 | -        | -             |
+| [recursiveRef](./recursiveRef.md)                                               | 9     | -                 | 4        | -             |
+| [ref](./ref.md)                                                                 | 29    | -                 | -        | -             |
+| [refRemote](./refRemote.md)                                                     | 13    | -                 | -        | -             |
+| [required](./required.md)                                                       | 5     | -                 | -        | -             |
+| [type](./type.md)                                                               | 11    | -                 | -        | -             |
+| [unevaluatedItems](./unevaluatedItems.md)                                       | 20    | -                 | 1        | -             |
+| [unevaluatedProperties](./unevaluatedProperties.md)                             | 34    | -                 | 3        | -             |
+| [uniqueItems](./uniqueItems.md)                                                 | 6     | -                 | -        | -             |
+| [unknownKeyword](./unknownKeyword.md)                                           | 1     | -                 | 1        | -             |
+| [vocabulary](./vocabulary.md)                                                   | 1     | 1                 | -        | -             |
+| [optional/bignum](./optional-bignum.md)                                         | 7     | -                 | -        | -             |
+| [optional/cross-draft](./optional-cross-draft.md)                               | 2     | -                 | 1        | -             |
+| [optional/dependencies-compatibility](./optional-dependencies-compatibility.md) | 7     | -                 | -        | -             |
+| [optional/ecmascript-regex](./optional-ecmascript-regex.md)                     | 20    | -                 | -        | -             |
+| [optional/float-overflow](./optional-float-overflow.md)                         | 1     | -                 | -        | -             |
+| [optional/no-schema](./optional-no-schema.md)                                   | 1     | -                 | -        | -             |
+| [optional/non-bmp-regex](./optional-non-bmp-regex.md)                           | 2     | -                 | -        | -             |
+| [optional/refOfUnknownKeyword](./optional-refOfUnknownKeyword.md)               | 2     | -                 | 2        | -             |
 
 ### Notes
 

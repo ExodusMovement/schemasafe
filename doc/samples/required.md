@@ -113,3 +113,32 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+
+## required properties whose names are Javascript object property names
+
+### Schema
+
+```json
+{ "required": ["__proto__", "toString", "constructor"] }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (!(data["__proto__"] !== undefined && hasOwn(data, "__proto__"))) return false
+    if (!(data.toString !== undefined && hasOwn(data, "toString"))) return false
+    if (!(data.constructor !== undefined && hasOwn(data, "constructor"))) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+

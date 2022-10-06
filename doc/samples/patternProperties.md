@@ -135,3 +135,34 @@ return ref0
 
  * `Should start with ^ and end with $: "f.*" at #`
 
+
+## patternProperties with null valued instance properties
+
+### Schema
+
+```json
+{ "patternProperties": { "^.*bar$": { "type": "null" } } }
+```
+
+### Code
+
+```js
+'use strict'
+const pattern0 = new RegExp("^.*bar$", "u");
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    for (const key0 of Object.keys(data)) {
+      if (pattern0.test(key0)) {
+        if (!(data[key0] === null)) return false
+      }
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+
