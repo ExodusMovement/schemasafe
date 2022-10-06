@@ -1,14 +1,17 @@
 'use strict'
 
-const { readdirSync, readFileSync, writeFileSync } = require('fs')
+const { mkdirSync, readdirSync, readFileSync, writeFileSync } = require('fs')
 const path = require('path')
 const { format: prettify } = require('prettier')
 const { validator } = require('../../../')
 const schemas = require('../../../test/util/schemas')
 
-const version = 'draft2019-09'
-const versionUrl = 'https://json-schema.org/draft/2019-09/schema'
-const dir = path.join(__dirname, '../../../test/JSON-Schema-Test-Suite/tests', version)
+const version = process.argv[2] || '2019-09'
+const versionName = `draft${version}`
+const versionUrl = `https://json-schema.org/draft/${version}/schema`
+const dir = path.join(__dirname, '../../../test/JSON-Schema-Test-Suite/tests', versionName)
+
+mkdirSync(versionName, { recursive: true })
 
 function processSchema(block) {
   const errors = new Set()
@@ -91,7 +94,7 @@ for (const file of [...readdir(''), ...readdir('optional')]) {
       contents.push('')
     }
     const md = `${id.replace(/\//g, '-')}.md`
-    writeFileSync(md, contents.join('\n'))
+    writeFileSync(path.join(versionName, md), contents.join('\n'))
     stat.name = `[${id}](./${md})`
     // console.log(JSON.stringify(stat))
     results.push(stat)
@@ -116,7 +119,7 @@ const wrapRow = (row, s = ' ') =>
     .join(`${s}|${s}`)}${s}|`
 
 const indexContents = ['# Samples', '']
-indexContents.push(`Based on JSON Schema Test Suite for \`${version}\`.`, '')
+indexContents.push(`Based on JSON Schema Test Suite for \`${versionName}\`.`, '')
 
 indexContents.push(`
 ### Disambiguation
@@ -146,4 +149,4 @@ expected usage pattern of this module. Without it, there would be additional che
 \`!== undefined\`, which can be fast-tracked if we know that the input came from \`JSON.parse()\`.
 `)
 
-writeFileSync(`README.md`, indexContents.join('\n'))
+writeFileSync(`${versionName}/README.md`, indexContents.join('\n'))

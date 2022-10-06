@@ -197,7 +197,7 @@ See [Error handling](./doc/Error-handling.md) for more information.
 
 ## Generate Modules
 
-See the [doc/samples](./doc/samples/README.md) directory to see how `@exodus/schemasafe` compiles
+See the [doc/samples](./doc/samples/) directory to see how `@exodus/schemasafe` compiles
 the `draft/2019-09` test suite.
 
 To compile a validator function to an IIFE, call `validate.toModule()`:
