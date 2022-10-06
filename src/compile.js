@@ -670,7 +670,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
             if (getMeta().containsEvaluates) {
               enforce(!removeAdditional, 'Can\'t use removeAdditional with draft2020+ "contains"')
               evaluateDelta({ dyn: { item: true } })
-              evaluateDeltaDynamic({ item: i, items: [], properties: [], patterns: [] })
+              evaluateDeltaDynamic({ item: i, items: 0, properties: [], patterns: [] })
             }
           })
         })
