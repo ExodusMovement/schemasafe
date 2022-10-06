@@ -1,15 +1,20 @@
 'use strict'
 
 const { mkdirSync, readdirSync, readFileSync, writeFileSync } = require('fs')
+const assert = require('assert').strict
 const path = require('path')
 const { format: prettify } = require('prettier')
 const { validator } = require('../../../')
 const schemas = require('../../../test/util/schemas')
+const { schemaVersions } = require('../../../src/known-keywords')
 
 const version = process.argv[2] || '2019-09'
-const versionName = `draft${version}`
-const versionUrl = `https://json-schema.org/draft/${version}/schema`
+const versionName = `draft${['next'].includes(version) ? `-${version}` : version}`
+const versionDraft = `draft${/^\d$/.test(version) ? '-0' : '/'}${version}`
+const versionUrl = `https://json-schema.org/${versionDraft}/schema`
 const dir = path.join(__dirname, '../../../test/JSON-Schema-Test-Suite/tests', versionName)
+
+assert(schemaVersions.includes(versionUrl), 'Unknown schema version')
 
 mkdirSync(versionName, { recursive: true })
 
