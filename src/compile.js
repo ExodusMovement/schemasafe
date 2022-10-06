@@ -26,6 +26,7 @@ const schemaTypes = new Map(
   })
 )
 const isPlainObject = schemaTypes.get('object')
+const isSchemaish = (arg) => isPlainObject(arg) || typeof arg === 'boolean'
 
 const schemaIsOlderThan = ($schema, ver) =>
   schemaVersions.indexOf($schema) > schemaVersions.indexOf(`https://json-schema.org/${ver}/schema`)
@@ -762,10 +763,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
               } else {
                 errorIf(safeand(present(item), condition), errorArgs)
               }
-            } else if (
-              ((typeof deps === 'object' && !Array.isArray(deps)) || typeof deps === 'boolean') &&
-              dependencies !== 'dependentRequired'
-            ) {
+            } else if (isSchemaish(deps) && dependencies !== 'dependentRequired') {
               uncertain(dependencies)
               fun.if(item.checked ? true : present(item), () => {
                 const delta = rule(current, deps, subPath(dependencies, key), dyn)
