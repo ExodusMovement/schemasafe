@@ -11,7 +11,7 @@ const validator = (schema, { jsonCheck = false, isJSON = false, schemas, ...opts
   const { scope, ref } = compile(schema, options)
   if (opts.dryRun) return
   const fun = genfun()
-  if (!jsonCheck || opts.dryRun) {
+  if (!jsonCheck) {
     fun.write('%s', ref)
   } else {
     // jsonCheck wrapper implementation below
