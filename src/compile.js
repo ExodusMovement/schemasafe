@@ -658,31 +658,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         // As a result, omitting .items is not allowed by default, only in allowUnusedKeywords mode
       }
 
-      handle('contains', ['object', 'boolean'], () => {
-        uncertain('contains')
-        const passes = gensym('passes')
-        fun.write('let %s = 0', passes)
-
-        const suberr = suberror()
-        forArray(current, format('0'), (prop, i) => {
-          const { sub } = subrule(suberr, prop, node.contains, subPath('contains'))
-          fun.if(sub, () => {
-            fun.write('%s++', passes)
-            if (getMeta().containsEvaluates) {
-              enforce(!removeAdditional, 'Can\'t use removeAdditional with draft2020+ "contains"')
-              evaluateDelta({ dyn: { item: true } })
-              evaluateDeltaDynamic({ item: i, items: 0, properties: [], patterns: [] })
-            }
-          })
-        })
-
-        if (!handle('minContains', ['natural'], (mn) => format('%s < %d', passes, mn), { suberr }))
-          errorIf(format('%s < 1', passes), { path: ['contains'], suberr })
-
-        handle('maxContains', ['natural'], (max) => format('%s > %d', passes, max))
-        enforceMinMax('minContains', 'maxContains')
-        return null
-      })
+      checkContains()
 
       const itemsSimple = (ischema) => {
         if (!isPlainObject(ischema)) return false
@@ -841,6 +817,34 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         return safenotor(...[...primitive, ...objects].map((value) => compare(name, value)))
       })
       return handledConst || handledEnum
+    }
+
+    const checkContains = () => {
+      handle('contains', ['object', 'boolean'], () => {
+        uncertain('contains')
+        const passes = gensym('passes')
+        fun.write('let %s = 0', passes)
+
+        const suberr = suberror()
+        forArray(current, format('0'), (prop, i) => {
+          const { sub } = subrule(suberr, prop, node.contains, subPath('contains'))
+          fun.if(sub, () => {
+            fun.write('%s++', passes)
+            if (getMeta().containsEvaluates) {
+              enforce(!removeAdditional, 'Can\'t use removeAdditional with draft2020+ "contains"')
+              evaluateDelta({ dyn: { item: true } })
+              evaluateDeltaDynamic({ item: i, items: 0, properties: [], patterns: [] })
+            }
+          })
+        })
+
+        if (!handle('minContains', ['natural'], (mn) => format('%s < %d', passes, mn), { suberr }))
+          errorIf(format('%s < 1', passes), { path: ['contains'], suberr })
+
+        handle('maxContains', ['natural'], (max) => format('%s > %d', passes, max))
+        enforceMinMax('minContains', 'maxContains')
+        return null
+      })
     }
 
     const checkGeneric = () => {
