@@ -19,25 +19,38 @@ const jsonCheckWithErrors = (validate) =>
 const jsonCheckWithoutErrors = (validate) => (data) =>
   deepEqual(data, JSON.parse(JSON.stringify(data))) && validate(data)
 
-const validator = (schema, rawOpts = {}) => {
-  const { parse = false, jsonCheck = false, isJSON = false, schemas = [], ...opts } = rawOpts
+const validator = (
+  schema,
+  { parse = false, multi = false, jsonCheck = false, isJSON = false, schemas = [], ...opts } = {}
+) => {
   if (jsonCheck && isJSON) throw new Error('Can not specify both isJSON and jsonCheck options')
   if (parse && (jsonCheck || isJSON))
     throw new Error('jsonCheck and isJSON options are not applicable in parser mode')
   const mode = parse ? 'strong' : 'default' // strong mode is default in parser, can be overriden
   const willJSON = isJSON || jsonCheck || parse
-  const options = { mode, ...opts, schemas: buildSchemas(schemas, [schema]), isJSON: willJSON }
-  const { scope, refs } = compile([schema], options) // only a single ref
+  const arg = multi ? schema : [schema]
+  const options = { mode, ...opts, schemas: buildSchemas(schemas, arg), isJSON: willJSON }
+  const { scope, refs } = compile(arg, options) // only a single ref
   if (opts.dryRun) return
   const fun = genfun()
   if (parse) {
     scope.parseWrap = opts.includeErrors ? parseWithErrors : parseWithoutErrors
-    fun.write('parseWrap(%s)', refs[0])
   } else if (jsonCheck) {
     scope.deepEqual = deepEqual
     scope.jsonCheckWrap = opts.includeErrors ? jsonCheckWithErrors : jsonCheckWithoutErrors
-    fun.write('jsonCheckWrap(%s)', refs[0])
-  } else fun.write('%s', refs[0])
+  }
+  if (multi) {
+    fun.write('[')
+    for (const ref of refs.slice(0, -1)) fun.write('%s,', ref)
+    if (refs.length > 0) fun.write('%s', refs[refs.length - 1])
+    fun.write(']')
+    if (parse) fun.write('.map(parseWrap)')
+    else if (jsonCheck) fun.write('.map(jsonCheckWrap)')
+  } else {
+    if (parse) fun.write('parseWrap(%s)', refs[0])
+    else if (jsonCheck) fun.write('jsonCheckWrap(%s)', refs[0])
+    else fun.write('%s', refs[0])
+  }
   const validate = fun.makeFunction(scope)
   validate.toModule = ({ semi = true } = {}) => fun.makeModule(scope) + (semi ? ';' : '')
   validate.toJSON = () => schema
