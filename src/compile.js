@@ -1181,6 +1181,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (!resolved[0] && !getMeta().bookending) {
           // TODO: this is draft/next only atm, recheck if dynamicResolve() can fail in runtime and what should happen
           // We have this allowed in lax mode only for now
+          // Ref: https://github.com/json-schema-org/json-schema-spec/issues/1064#issuecomment-947223332
+          // Ref: https://github.com/json-schema-org/json-schema-spec/pull/1139
+          // Ref: https://github.com/json-schema-org/json-schema-spec/issues/1140 (unresolved)
           laxMode(false, '$dynamicRef bookending resolution failed (even though not required)')
           scope.dynamicResolve = functions.dynamicResolve
           const nrec = format('dynamicResolve(dynAnchors || [], %j)', dynamicTail)
