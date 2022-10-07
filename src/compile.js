@@ -1184,7 +1184,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const n = compileSub(sub, subRoot, path)
         scope.dynamicResolve = functions.dynamicResolve
         const nrec = ok ? format('(dynamicResolve(dynAnchors || [], %j) || %s)', dynamicTail, n) : n
-        return applyRef(nrec, { path: ['$recursiveRef'] })
+        return applyRef(nrec, { path: ['$dynamicRef'] })
       })
 
       // typecheck
