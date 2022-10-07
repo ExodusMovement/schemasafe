@@ -102,11 +102,35 @@ return ref0
 
 ### Code
 
-**FAILED TO COMPILE**
+```js
+'use strict'
+const ref1 = function validate(data, dynAnchors) {
+  if (!(typeof data === "string")) return false
+  return true
+};
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const dynamicResolve = (anchors, id) => (anchors.filter((x) => x[id])[0] || {})[id];
+const ref2 = function validate(data, dynAnchors) {
+  if (!Array.isArray(data)) return false
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] !== undefined && hasOwn(data, i)) {
+      if (!dynamicResolve(dynAnchors || [], "#items")(data[i], dynAnchors)) return false
+    }
+  }
+  return true
+};
+const ref0 = function validate(data, dynAnchors = []) {
+  const dynLocal = [{}]
+  dynLocal[0]["#items"] = ref1
+  if (!ref2(data, [...dynAnchors, dynLocal[0] || []])) return false
+  return true
+};
+return ref0
+```
 
-### Errors
+### Warnings
 
- * `$dynamicRef bookending resolution failed "#items" at https://test.json-schema.org/typical-dynamic-resolution/root#/items`
+ * `$dynamicRef bookending resolution failed (even though not required) at https://test.json-schema.org/typical-dynamic-resolution/root#/items`
 
 
 ## A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution
@@ -131,11 +155,39 @@ return ref0
 
 ### Code
 
-**FAILED TO COMPILE**
+```js
+'use strict'
+const ref1 = function validate(data, dynAnchors) {
+  if (!(typeof data === "string")) return false
+  return true
+};
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const dynamicResolve = (anchors, id) => (anchors.filter((x) => x[id])[0] || {})[id];
+const ref3 = function validate(data, dynAnchors) {
+  if (!Array.isArray(data)) return false
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] !== undefined && hasOwn(data, i)) {
+      if (!dynamicResolve(dynAnchors || [], "#items")(data[i], dynAnchors)) return false
+    }
+  }
+  return true
+};
+const ref2 = function validate(data, dynAnchors) {
+  if (!ref3(data, dynAnchors)) return false
+  return true
+};
+const ref0 = function validate(data, dynAnchors = []) {
+  const dynLocal = [{}]
+  dynLocal[0]["#items"] = ref1
+  if (!ref2(data, [...dynAnchors, dynLocal[0] || []])) return false
+  return true
+};
+return ref0
+```
 
-### Errors
+### Warnings
 
- * `$dynamicRef bookending resolution failed "#items" at https://test.json-schema.org/dynamic-resolution-with-intermediate-scopes/root#/items`
+ * `$dynamicRef bookending resolution failed (even though not required) at https://test.json-schema.org/dynamic-resolution-with-intermediate-scopes/root#/items`
 
 
 ## An $anchor with the same name as a $dynamicAnchor is not used for dynamic scope resolution

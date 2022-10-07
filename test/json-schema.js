@@ -65,6 +65,10 @@ const unsafe = new Set([
   'dynamicRef.json/A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor',
   'dynamicRef.json/A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor behaves like a normal $ref to $anchor',
 
+  // no bookending
+  'draft-next/dynamicRef.json/A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated',
+  "draft-next/dynamicRef.json/A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution",
+
   // ajv tests
   'rules/if.json/then/else without if should be ignored',
   'rules/if.json/if without then/else should be ignored',
@@ -116,9 +120,6 @@ const unsupported = new Set([
   'rules/format.json/validation of JSON-pointer URI fragment strings',
   'rules/format.json/validation of uuid strings', // URI form not valid per new spec for { format: 'uuid' }
   'issues/33_json_schema_latest.json/use latest json schema as v4 (#33)',
-
-  // draft-next changes to bookending requirement in dynamicRef
-  'draft-next/dynamicRef.json',
 ])
 const unsupportedMask = []
 

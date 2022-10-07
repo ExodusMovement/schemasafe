@@ -59,6 +59,7 @@ const generateMeta = (root, $schema, enforce, requireSchema) => {
       newItemsSyntax: !schemaIsOlderThan(version, 'draft/2020-12'),
       containsEvaluates: !schemaIsOlderThan(version, 'draft/2020-12'),
       objectContains: !schemaIsOlderThan(version, 'draft/next'),
+      bookending: schemaIsOlderThan(version, 'draft/next'),
     })
   } else {
     enforce(!requireSchema, '[requireSchema] $schema is required')
@@ -1177,6 +1178,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         enforce(/^[^#]*#[a-zA-Z0-9_-]+$/.test($dynamicRef), 'Unsupported $dynamicRef format')
         const dynamicTail = $dynamicRef.replace(/^[^#]+/, '')
         const resolved = resolveReference(root, schemas, $dynamicRef, basePath())
+        if (!resolved[0] && !getMeta().bookending) {
+          // TODO: this is draft/next only atm, recheck if dynamicResolve() can fail in runtime and what should happen
+          // We have this allowed in lax mode only for now
+          laxMode(false, '$dynamicRef bookending resolution failed (even though not required)')
+          scope.dynamicResolve = functions.dynamicResolve
+          const nrec = format('dynamicResolve(dynAnchors || [], %j)', dynamicTail)
+          return applyRef(nrec, { path: ['$dynamicRef'] })
+        }
         enforce(resolved[0], '$dynamicRef bookending resolution failed', $dynamicRef)
         const [sub, subRoot, path] = resolved[0]
         const ok = sub.$dynamicAnchor && `#${sub.$dynamicAnchor}` === dynamicTail
