@@ -26,7 +26,7 @@ Based on JSON Schema Test Suite for `draft-next`.
 | [anyOf](./anyOf.md)                                                             | 8     | -                 | 3        | -             |
 | [boolean_schema](./boolean_schema.md)                                           | 2     | -                 | -        | -             |
 | [const](./const.md)                                                             | 15    | -                 | -        | -             |
-| [contains](./contains.md)                                                       | 7     | -                 | -        | 6             |
+| [contains](./contains.md)                                                       | 7     | -                 | -        | -             |
 | [content](./content.md)                                                         | 4     | -                 | 4        | -             |
 | [default](./default.md)                                                         | 3     | -                 | -        | -             |
 | [defs](./defs.md)                                                               | 1     | -                 | -        | -             |
@@ -41,7 +41,7 @@ Based on JSON Schema Test Suite for `draft-next`.
 | [if-then-else](./if-then-else.md)                                               | 10    | -                 | 6        | -             |
 | [infinite-loop-detection](./infinite-loop-detection.md)                         | 1     | -                 | -        | -             |
 | [items](./items.md)                                                             | 9     | -                 | -        | -             |
-| [maxContains](./maxContains.md)                                                 | 4     | -                 | 1        | 2             |
+| [maxContains](./maxContains.md)                                                 | 4     | -                 | 1        | -             |
 | [maxItems](./maxItems.md)                                                       | 2     | -                 | -        | -             |
 | [maxLength](./maxLength.md)                                                     | 2     | -                 | -        | -             |
 | [maxProperties](./maxProperties.md)                                             | 3     | -                 | -        | -             |
@@ -65,7 +65,7 @@ Based on JSON Schema Test Suite for `draft-next`.
 | [required](./required.md)                                                       | 5     | -                 | -        | -             |
 | [type](./type.md)                                                               | 11    | -                 | -        | -             |
 | [unevaluatedItems](./unevaluatedItems.md)                                       | 23    | -                 | 2        | -             |
-| [unevaluatedProperties](./unevaluatedProperties.md)                             | 36    | -                 | 3        | 2             |
+| [unevaluatedProperties](./unevaluatedProperties.md)                             | 36    | -                 | 3        | -             |
 | [uniqueItems](./uniqueItems.md)                                                 | 6     | -                 | -        | -             |
 | [unknownKeyword](./unknownKeyword.md)                                           | 1     | -                 | 1        | -             |
 | [vocabulary](./vocabulary.md)                                                   | 1     | 1                 | -        | -             |

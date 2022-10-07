@@ -29,6 +29,19 @@ const ref0 = function validate(data) {
     }
     if (passes0 < 1) return false
   }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        if (typeof data[key0] === "number") {
+          if (!(5 <= data[key0])) return false
+        }
+        return true
+      })()
+      if (sub1) passes1++
+    }
+    if (passes1 < 1) return false
+  }
   return true
 };
 return ref0
@@ -37,10 +50,6 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #/contains`
-
-### Misclassified!
-
-**This schema caused 2 misclassifications!**
 
 
 ## contains keyword with const keyword
@@ -70,6 +79,17 @@ const ref0 = function validate(data) {
     }
     if (passes0 < 1) return false
   }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        if (!(data[key0] === 5)) return false
+        return true
+      })()
+      if (sub1) passes1++
+    }
+    if (passes1 < 1) return false
+  }
   return true
 };
 return ref0
@@ -78,10 +98,6 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
-
-### Misclassified!
-
-**This schema caused 1 misclassifications!**
 
 
 ## contains keyword with boolean schema true
@@ -107,6 +123,16 @@ const ref0 = function validate(data) {
     }
     if (passes0 < 1) return false
   }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        return true
+      })()
+      if (sub1) passes1++
+    }
+    if (passes1 < 1) return false
+  }
   return true
 };
 return ref0
@@ -115,10 +141,6 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] schema = true is not allowed at #/contains`
-
-### Misclassified!
-
-**This schema caused 1 misclassifications!**
 
 
 ## contains keyword with boolean schema false
@@ -146,6 +168,17 @@ const ref0 = function validate(data) {
     }
     if (passes0 < 1) return false
   }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        return false
+        return true
+      })()
+      if (sub1) passes1++
+    }
+    if (passes1 < 1) return false
+  }
   return true
 };
 return ref0
@@ -154,10 +187,6 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
-
-### Misclassified!
-
-**This schema caused 1 misclassifications!**
 
 
 ## items + contains
@@ -206,6 +235,17 @@ const ref0 = function validate(data) {
         if (data[key0] % 2 !== 0) return false
       }
     }
+    let passes1 = 0
+    for (const key1 of Object.keys(data)) {
+      const sub1 = (() => {
+        if (typeof data[key1] === "number") {
+          if (data[key1] % 3 !== 0) return false
+        }
+        return true
+      })()
+      if (sub1) passes1++
+    }
+    if (passes1 < 1) return false
   }
   return true
 };
@@ -215,10 +255,6 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #/items`
-
-### Misclassified!
-
-**This schema caused 1 misclassifications!**
 
 
 ## contains with false if subschema
@@ -245,6 +281,16 @@ const ref0 = function validate(data) {
     }
     if (passes0 < 1) return false
   }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        return true
+      })()
+      if (sub1) passes1++
+    }
+    if (passes1 < 1) return false
+  }
   return true
 };
 return ref0
@@ -253,10 +299,6 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] schema = true is not allowed at #/contains/else`
-
-### Misclassified!
-
-**This schema caused 1 misclassifications!**
 
 
 ## contains with null instance elements
@@ -285,6 +327,17 @@ const ref0 = function validate(data) {
       if (sub0) passes0++
     }
     if (passes0 < 1) return false
+  }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        if (!(data[key0] === null)) return false
+        return true
+      })()
+      if (sub1) passes1++
+    }
+    if (passes1 < 1) return false
   }
   return true
 };

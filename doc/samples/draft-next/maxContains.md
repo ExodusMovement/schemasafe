@@ -51,6 +51,18 @@ const ref0 = function validate(data) {
     if (passes0 < 1) return false
     if (passes0 > 1) return false
   }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        if (!(data[key0] === 1)) return false
+        return true
+      })()
+      if (sub1) passes1++
+    }
+    if (passes1 < 1) return false
+    if (passes1 > 1) return false
+  }
   return true
 };
 return ref0
@@ -59,10 +71,6 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
-
-### Misclassified!
-
-**This schema caused 3 misclassifications!**
 
 
 ## maxContains with contains, value with a decimal
@@ -92,6 +100,18 @@ const ref0 = function validate(data) {
     }
     if (passes0 < 1) return false
     if (passes0 > 1) return false
+  }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        if (!(data[key0] === 1)) return false
+        return true
+      })()
+      if (sub1) passes1++
+    }
+    if (passes1 < 1) return false
+    if (passes1 > 1) return false
   }
   return true
 };
@@ -131,6 +151,18 @@ const ref0 = function validate(data) {
     if (passes0 < 1) return false
     if (passes0 > 3) return false
   }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        if (!(data[key0] === 1)) return false
+        return true
+      })()
+      if (sub1) passes1++
+    }
+    if (passes1 < 1) return false
+    if (passes1 > 3) return false
+  }
   return true
 };
 return ref0
@@ -139,8 +171,4 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
-
-### Misclassified!
-
-**This schema caused 2 misclassifications!**
 

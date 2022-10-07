@@ -58,6 +58,7 @@ const generateMeta = (root, $schema, enforce, requireSchema) => {
       dependentUnsupported: schemaIsOlderThan(version, 'draft/2019-09'),
       newItemsSyntax: !schemaIsOlderThan(version, 'draft/2020-12'),
       containsEvaluates: !schemaIsOlderThan(version, 'draft/2020-12'),
+      objectContains: !schemaIsOlderThan(version, 'draft/next'),
     })
   } else {
     enforce(!requireSchema, '[requireSchema] $schema is required')
@@ -251,8 +252,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     const unused = new Set(Object.keys(node))
+    const multiConsumable = new Set()
     const consume = (prop, ...ruleTypes) => {
-      enforce(unused.has(prop), 'Unexpected double consumption:', prop)
+      enforce(multiConsumable.has(prop) || unused.has(prop), 'Unexpected double consumption:', prop)
       enforce(functions.hasOwn(node, prop), 'Is not an own property:', prop)
       enforce(ruleTypes.every((t) => schemaTypes.has(t)), 'Invalid type used in consume')
       enforce(ruleTypes.some((t) => schemaTypes.get(t)(node[prop])), 'Unexpected type for', prop)
@@ -283,6 +285,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         return null
       })
     } else if (!getMeta()) saveMeta(root.$schema)
+
+    if (getMeta().objectContains) {
+      // When object contains is enabled, contains-related keywords can be consumed two times: in object branch and in array branch
+      for (const prop of ['contains', 'minContains', 'maxContains']) multiConsumable.add(prop)
+    }
 
     handle('examples', ['array'], null) // unused, meta-only
     handle('example', ['jsonval'], null) // unused, meta-only, OpenAPI
@@ -355,6 +362,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const patterns = (delta.patterns || []).filter((x) => !inStat([], [x]))
         if (properties.length > 0) fun.write('%s[0].push(...%j)', dyn.props, properties)
         if (patterns.length > 0) fun.write('%s[1].push(...%j)', dyn.props, patterns)
+        for (const sym of delta.propertiesVars || []) fun.write('%s[0].push(%s)', dyn.props, sym)
       }
     }
     const applyDynamicToDynamic = (target, item, items, props) => {
@@ -658,7 +666,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         // As a result, omitting .items is not allowed by default, only in allowUnusedKeywords mode
       }
 
-      checkContains()
+      checkContains((run) => {
+        forArray(current, format('0'), (prop, i) => {
+          run(prop, () => {
+            evaluateDelta({ dyn: { item: true } })
+            evaluateDeltaDynamic({ item: i })
+          })
+        })
+      })
 
       const itemsSimple = (ischema) => {
         if (!isPlainObject(ischema)) return false
@@ -806,6 +821,17 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           additionalProperties('additionalProperties', condition)
         }
       })
+
+      if (getMeta().objectContains) {
+        checkContains((run) => {
+          forObjectKeys(current, (prop, i) => {
+            run(prop, () => {
+              evaluateDelta({ dyn: { properties: [true] } })
+              evaluateDeltaDynamic({ propertiesVars: [i] })
+            })
+          })
+        })
+      }
     }
 
     const checkConst = () => {
@@ -819,21 +845,20 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       return handledConst || handledEnum
     }
 
-    const checkContains = () => {
+    const checkContains = (iterate) => {
       handle('contains', ['object', 'boolean'], () => {
         uncertain('contains')
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
 
         const suberr = suberror()
-        forArray(current, format('0'), (prop, i) => {
+        iterate((prop, evaluate) => {
           const { sub } = subrule(suberr, prop, node.contains, subPath('contains'))
           fun.if(sub, () => {
             fun.write('%s++', passes)
             if (getMeta().containsEvaluates) {
               enforce(!removeAdditional, 'Can\'t use removeAdditional with draft2020+ "contains"')
-              evaluateDelta({ dyn: { item: true } })
-              evaluateDeltaDynamic({ item: i, items: 0, properties: [], patterns: [] })
+              evaluate()
             }
           })
         })
@@ -1088,6 +1113,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       typeWrap(checkStrings, ['string'], types.get('string')(name))
       typeWrap(checkArrays, ['array'], types.get('array')(name))
       typeWrap(checkObjects, ['object'], types.get('object')(name))
+
       checkGeneric()
 
       // evaluated: apply static + dynamic

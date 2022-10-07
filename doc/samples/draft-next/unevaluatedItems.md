@@ -764,12 +764,27 @@ const ref0 = function validate(data) {
     }
     if (passes0 < 1) return false
   }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        if (!(typeof data[key0] === "string")) return false
+        return true
+      })()
+      if (sub1) {
+        passes1++
+        evaluatedProps0[0].push(key0)
+      }
+    }
+    if (passes1 < 1) return false
+  }
   if (Array.isArray(data)) {
     for (let j = Math.max(1, ...evaluatedItems0); j < data.length; j++) {
       if (evaluatedItem0.includes(j)) continue
       if (data[j] !== undefined && hasOwn(data, j)) return false
     }
   }
+  validate.evaluatedDynamic = [evaluatedItem0, evaluatedItems0, evaluatedProps0]
   return true
 };
 return ref0
@@ -822,10 +837,26 @@ const ref0 = function validate(data) {
     }
     if (passes0 < 1) return false
   }
-  if (Array.isArray(data)) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
     let passes1 = 0
-    for (let j = 0; j < data.length; j++) {
+    for (const key0 of Object.keys(data)) {
       const sub1 = (() => {
+        if (typeof data[key0] === "number") {
+          if (data[key0] % 2 !== 0) return false
+        }
+        return true
+      })()
+      if (sub1) {
+        passes1++
+        evaluatedProps0[0].push(key0)
+      }
+    }
+    if (passes1 < 1) return false
+  }
+  if (Array.isArray(data)) {
+    let passes2 = 0
+    for (let j = 0; j < data.length; j++) {
+      const sub2 = (() => {
         if (data[j] !== undefined && hasOwn(data, j)) {
           if (typeof data[j] === "number") {
             if (data[j] % 3 !== 0) return false
@@ -833,12 +864,28 @@ const ref0 = function validate(data) {
         }
         return true
       })()
-      if (sub1) {
-        passes1++
+      if (sub2) {
+        passes2++
         evaluatedItem0.push(j)
       }
     }
-    if (passes1 < 1) return false
+    if (passes2 < 1) return false
+  }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    let passes3 = 0
+    for (const key1 of Object.keys(data)) {
+      const sub3 = (() => {
+        if (typeof data[key1] === "number") {
+          if (data[key1] % 3 !== 0) return false
+        }
+        return true
+      })()
+      if (sub3) {
+        passes3++
+        evaluatedProps0[0].push(key1)
+      }
+    }
+    if (passes3 < 1) return false
   }
   if (Array.isArray(data)) {
     for (let k = Math.max(0, ...evaluatedItems0); k < data.length; k++) {
@@ -850,6 +897,7 @@ const ref0 = function validate(data) {
       }
     }
   }
+  validate.evaluatedDynamic = [evaluatedItem0, evaluatedItems0, evaluatedProps0]
   return true
 };
 return ref0
@@ -902,45 +950,87 @@ const ref0 = function validate(data) {
       }
       if (passes0 < 1) return false
     }
+    if (typeof data === "object" && data && !Array.isArray(data)) {
+      let passes1 = 0
+      for (const key0 of Object.keys(data)) {
+        const sub2 = (() => {
+          if (!(data[key0] === "a")) return false
+          return true
+        })()
+        if (sub2) {
+          passes1++
+          evaluatedProps0[0].push(key0)
+        }
+      }
+      if (passes1 < 1) return false
+    }
     return true
   })()
   if (sub0) {
-    const sub2 = (() => {
+    const sub3 = (() => {
       if (Array.isArray(data)) {
-        let passes1 = 0
+        let passes2 = 0
         for (let j = 0; j < data.length; j++) {
-          const sub3 = (() => {
+          const sub4 = (() => {
             if (data[j] !== undefined && hasOwn(data, j)) {
               if (!(data[j] === "b")) return false
             }
             return true
           })()
-          if (sub3) {
-            passes1++
+          if (sub4) {
+            passes2++
             evaluatedItem0.push(j)
           }
         }
-        if (passes1 < 1) return false
+        if (passes2 < 1) return false
+      }
+      if (typeof data === "object" && data && !Array.isArray(data)) {
+        let passes3 = 0
+        for (const key1 of Object.keys(data)) {
+          const sub5 = (() => {
+            if (!(data[key1] === "b")) return false
+            return true
+          })()
+          if (sub5) {
+            passes3++
+            evaluatedProps0[0].push(key1)
+          }
+        }
+        if (passes3 < 1) return false
       }
       return true
     })()
-    if (sub2) {
-      const sub4 = (() => {
+    if (sub3) {
+      const sub6 = (() => {
         if (Array.isArray(data)) {
-          let passes2 = 0
+          let passes4 = 0
           for (let k = 0; k < data.length; k++) {
-            const sub5 = (() => {
+            const sub7 = (() => {
               if (data[k] !== undefined && hasOwn(data, k)) {
                 if (!(data[k] === "c")) return false
               }
               return true
             })()
-            if (sub5) {
-              passes2++
+            if (sub7) {
+              passes4++
               evaluatedItem0.push(k)
             }
           }
-          if (passes2 < 1) return false
+          if (passes4 < 1) return false
+        }
+        if (typeof data === "object" && data && !Array.isArray(data)) {
+          let passes5 = 0
+          for (const key2 of Object.keys(data)) {
+            const sub8 = (() => {
+              if (!(data[key2] === "c")) return false
+              return true
+            })()
+            if (sub8) {
+              passes5++
+              evaluatedProps0[0].push(key2)
+            }
+          }
+          if (passes5 < 1) return false
         }
         return true
       })()
@@ -952,6 +1042,7 @@ const ref0 = function validate(data) {
       if (data[l] !== undefined && hasOwn(data, l)) return false
     }
   }
+  validate.evaluatedDynamic = [evaluatedItem0, evaluatedItems0, evaluatedProps0]
   return true
 };
 return ref0

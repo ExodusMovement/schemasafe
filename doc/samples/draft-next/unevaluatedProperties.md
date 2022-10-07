@@ -1473,7 +1473,15 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const propertyIn = (key, [properties, patterns]) =>
+  properties.includes(true) ||
+  properties.some((prop) => prop === key) ||
+  patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
 const ref0 = function validate(data) {
+  validate.evaluatedDynamic = null
+  const evaluatedItem0 = []
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [[], []]
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
@@ -1483,7 +1491,10 @@ const ref0 = function validate(data) {
         }
         return true
       })()
-      if (sub0) passes0++
+      if (sub0) {
+        passes0++
+        evaluatedItem0.push(i)
+      }
     }
     if (passes0 < 1) return false
   }
@@ -1491,12 +1502,25 @@ const ref0 = function validate(data) {
     if (data.foo !== undefined && hasOwn(data, "foo")) {
       if (!(typeof data.foo === "number")) return false
     }
+    let passes1 = 0
+    for (const key0 of Object.keys(data)) {
+      const sub1 = (() => {
+        if (!(typeof data[key0] === "string")) return false
+        return true
+      })()
+      if (sub1) {
+        passes1++
+        evaluatedProps0[0].push(key0)
+      }
+    }
+    if (passes1 < 1) return false
   }
   if (typeof data === "object" && data && !Array.isArray(data)) {
-    for (const key0 of Object.keys(data)) {
-      if (key0 !== "foo") return false
+    for (const key1 of Object.keys(data)) {
+      if (key1 !== "foo" && !propertyIn(key1, evaluatedProps0)) return false
     }
   }
+  validate.evaluatedDynamic = [evaluatedItem0, evaluatedItems0, evaluatedProps0]
   return true
 };
 return ref0
@@ -1505,10 +1529,6 @@ return ref0
 ##### Strong mode notices
 
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/contains`
-
-### Misclassified!
-
-**This schema caused 1 misclassifications!**
 
 
 ## unevaluatedProperties depends on multiple nested contains
@@ -1530,7 +1550,15 @@ return ref0
 ```js
 'use strict'
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const propertyIn = (key, [properties, patterns]) =>
+  properties.includes(true) ||
+  properties.some((prop) => prop === key) ||
+  patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
 const ref0 = function validate(data) {
+  validate.evaluatedDynamic = null
+  const evaluatedItem0 = []
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [[], []]
   if (Array.isArray(data)) {
     let passes0 = 0
     for (let i = 0; i < data.length; i++) {
@@ -1542,14 +1570,33 @@ const ref0 = function validate(data) {
         }
         return true
       })()
-      if (sub0) passes0++
+      if (sub0) {
+        passes0++
+        evaluatedItem0.push(i)
+      }
     }
     if (passes0 < 1) return false
   }
-  if (Array.isArray(data)) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
     let passes1 = 0
-    for (let j = 0; j < data.length; j++) {
+    for (const key0 of Object.keys(data)) {
       const sub1 = (() => {
+        if (typeof data[key0] === "number") {
+          if (data[key0] % 2 !== 0) return false
+        }
+        return true
+      })()
+      if (sub1) {
+        passes1++
+        evaluatedProps0[0].push(key0)
+      }
+    }
+    if (passes1 < 1) return false
+  }
+  if (Array.isArray(data)) {
+    let passes2 = 0
+    for (let j = 0; j < data.length; j++) {
+      const sub2 = (() => {
         if (data[j] !== undefined && hasOwn(data, j)) {
           if (typeof data[j] === "number") {
             if (data[j] % 3 !== 0) return false
@@ -1557,17 +1604,39 @@ const ref0 = function validate(data) {
         }
         return true
       })()
-      if (sub1) passes1++
+      if (sub2) {
+        passes2++
+        evaluatedItem0.push(j)
+      }
     }
-    if (passes1 < 1) return false
+    if (passes2 < 1) return false
   }
   if (typeof data === "object" && data && !Array.isArray(data)) {
-    for (const key0 of Object.keys(data)) {
-      if (typeof data[key0] === "number") {
-        if (data[key0] % 5 !== 0) return false
+    let passes3 = 0
+    for (const key1 of Object.keys(data)) {
+      const sub3 = (() => {
+        if (typeof data[key1] === "number") {
+          if (data[key1] % 3 !== 0) return false
+        }
+        return true
+      })()
+      if (sub3) {
+        passes3++
+        evaluatedProps0[0].push(key1)
+      }
+    }
+    if (passes3 < 1) return false
+  }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    for (const key2 of Object.keys(data)) {
+      if (true && !propertyIn(key2, evaluatedProps0)) {
+        if (typeof data[key2] === "number") {
+          if (data[key2] % 5 !== 0) return false
+        }
       }
     }
   }
+  validate.evaluatedDynamic = [evaluatedItem0, evaluatedItems0, evaluatedProps0]
   return true
 };
 return ref0
@@ -1576,10 +1645,6 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #/allOf/0/contains`
-
-### Misclassified!
-
-**This schema caused 1 misclassifications!**
 
 
 ## non-object instances are valid

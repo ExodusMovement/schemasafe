@@ -117,12 +117,6 @@ const unsupported = new Set([
   'rules/format.json/validation of uuid strings', // URI form not valid per new spec for { format: 'uuid' }
   'issues/33_json_schema_latest.json/use latest json schema as v4 (#33)',
 
-  // draft-next only, object contains
-  'draft-next/contains.json',
-  'draft-next/maxContains.json',
-  'draft-next/unevaluatedProperties.json/unevaluatedProperties depends on adjacent contains',
-  'draft-next/unevaluatedProperties.json/unevaluatedProperties depends on multiple nested contains',
-
   // draft-next changes to bookending requirement in dynamicRef
   'draft-next/dynamicRef.json',
 ])
