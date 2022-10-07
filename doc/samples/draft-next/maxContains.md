@@ -70,7 +70,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## maxContains with contains, value with a decimal
@@ -120,7 +120,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## minContains < maxContains
@@ -170,5 +170,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 

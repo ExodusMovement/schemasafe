@@ -49,7 +49,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #/contains`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## contains keyword with const keyword
@@ -97,7 +97,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## contains keyword with boolean schema true
@@ -140,7 +140,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] schema = true is not allowed at #/contains`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## contains keyword with boolean schema false
@@ -186,7 +186,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## items + contains
@@ -298,7 +298,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] schema = true is not allowed at #/contains/else`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## contains with null instance elements
@@ -346,5 +346,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 

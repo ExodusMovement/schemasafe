@@ -1528,7 +1528,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/contains`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## unevaluatedProperties depends on multiple nested contains
@@ -1644,7 +1644,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #/allOf/0/contains`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #/allOf/0`
 
 
 ## non-object instances are valid

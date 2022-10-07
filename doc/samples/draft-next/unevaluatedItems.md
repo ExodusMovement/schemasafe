@@ -905,7 +905,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #/allOf/0/contains`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #/allOf/0`
 
 
 ## unevaluatedItems and contains interact to control item dependency relationship

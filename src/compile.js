@@ -846,8 +846,14 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     const checkContains = (iterate) => {
+      // This can be called two times, 'object' and 'array' separately
       handle('contains', ['object', 'boolean'], () => {
         uncertain('contains')
+
+        if (getMeta().objectContains && typeApplicable('array') && typeApplicable('object')) {
+          enforceValidation("possible type confusion in 'contains',", "forbid 'object' or 'array'")
+        }
+
         const passes = gensym('passes')
         fun.write('let %s = 0', passes)
 

@@ -68,7 +68,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## minContains=2 with contains
@@ -116,7 +116,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## minContains=2 with contains with a decimal value
@@ -164,7 +164,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## maxContains = minContains
@@ -214,7 +214,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## maxContains < minContains
@@ -312,7 +312,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
 
 ## minContains = 0 with maxContains
@@ -362,5 +362,5 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at #`
+ * `[requireValidation] possible type confusion in 'contains', forbid 'object' or 'array' at #`
 
