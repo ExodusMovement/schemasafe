@@ -8,11 +8,11 @@ const functions = require('./scope-functions')
 const validator = (schema, { jsonCheck = false, isJSON = false, schemas, ...opts } = {}) => {
   if (jsonCheck && isJSON) throw new Error('Can not specify both isJSON and jsonCheck options')
   const options = { ...opts, schemas: buildSchemas(schemas || []), isJSON: isJSON || jsonCheck }
-  const { scope, ref } = compile(schema, options)
+  const { scope, refs } = compile([schema], options) // only a single ref
   if (opts.dryRun) return
   const fun = genfun()
   if (!jsonCheck) {
-    fun.write('%s', ref)
+    fun.write('%s', refs[0])
   } else {
     // jsonCheck wrapper implementation below
     scope.deepEqual = functions.deepEqual
@@ -22,11 +22,11 @@ const validator = (schema, { jsonCheck = false, isJSON = false, schemas, ...opts
       fun.write('validateIsJSON.errors = [{instanceLocation:"#",error:"not JSON compatible"}]')
       fun.write('return false')
       fun.write('}')
-      fun.write('const res = %s(data)', ref)
+      fun.write('const res = %s(data)', refs[0])
       fun.write('validateIsJSON.errors = actualValidate.errors')
       fun.write('return res')
     } else {
-      fun.write('return deepEqual(data, JSON.parse(JSON.stringify(data))) && %s(data)', ref)
+      fun.write('return deepEqual(data, JSON.parse(JSON.stringify(data))) && %s(data)', refs[0])
     }
     fun.write('}')
   }

@@ -1295,20 +1295,22 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   return funname
 }
 
-const compile = (schema, opts) => {
+const compile = (schemas, opts) => {
+  if (!Array.isArray(schemas)) throw new Error('Expected an array of schemas')
   try {
     const scope = Object.create(null)
-    return { scope, ref: compileSchema(schema, schema, opts, scope) }
+    const { getref } = scopeMethods(scope)
+    return { scope, refs: schemas.map((s) => getref(s) || compileSchema(s, s, opts, scope)) }
   } catch (e) {
     // For performance, we try to build the schema without dynamic tracing first, then re-run with
     // it enabled if needed. Enabling it without need can give up to about 40% performance drop.
     if (!opts[optDynamic] && e.message === 'Dynamic unevaluated tracing is not enabled')
-      return compile(schema, { ...opts, [optDynamic]: true })
+      return compile(schemas, { ...opts, [optDynamic]: true })
     // Also enable dynamic and recursive refs only if needed
     if (!opts[optDynAnchors] && e.message === 'Dynamic anchors are not enabled')
-      return compile(schema, { ...opts, [optDynAnchors]: true })
+      return compile(schemas, { ...opts, [optDynAnchors]: true })
     if (!opts[optRecAnchors] && e.message === 'Recursive anchors are not enabled')
-      return compile(schema, { ...opts, [optRecAnchors]: true })
+      return compile(schemas, { ...opts, [optRecAnchors]: true })
     throw e
   }
 }
