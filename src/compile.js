@@ -302,6 +302,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const compileSub = (sub, subR, path) =>
       sub === schema ? safe('validate') : getref(sub) || compileSchema(sub, subR, opts, scope, path)
     const basePath = () => (basePathStack.length > 0 ? basePathStack[basePathStack.length - 1] : '')
+    const basePathStackLength = basePathStack.length // to restore at exit
     const setId = ($id) => {
       basePathStack.push(joinPath(basePath(), $id))
       return null
@@ -1239,6 +1240,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       handle('default', ['jsonval'], null) // unused
       fun.if(definitelyPresent ? true : present(current), writeMain)
     }
+
+    basePathStack.length = basePathStackLength // restore basePath
 
     // restore recursiveAnchor history if it's not empty and ends with current node
     if (recursiveLog[0] && recursiveLog[recursiveLog.length - 1][0] === node) recursiveLog.pop()
