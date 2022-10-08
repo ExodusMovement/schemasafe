@@ -2,6 +2,11 @@
 
 const { knownKeywords } = require('./known-keywords')
 
+function safeSet(map, key, value, comment = 'keys') {
+  if (!map.has(key)) return map.set(key, value)
+  if (map.get(key) !== value) throw new Error(`Conflicting duplicate ${comment}: ${key}`)
+}
+
 function untilde(string) {
   if (!string.includes('~')) return string
   return string.replace(/~[01]/g, (match) => {
@@ -79,7 +84,7 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
   const ptr = joinPath(base, ref)
   const schemas = new Map(additionalSchemas)
   const self = (base || '').split('#')[0]
-  if (self) schemas.set(self, root)
+  if (self) safeSet(schemas, self, root)
 
   const results = []
 
@@ -146,8 +151,7 @@ function getDynamicAnchors(schema) {
     if (anchor && typeof anchor === 'string') {
       if (anchor.includes('#')) throw new Error("$dynamicAnchor can't include '#'")
       if (!/^[a-zA-Z0-9_-]+$/.test(anchor)) throw new Error(`Unsupported $dynamicAnchor: ${anchor}`)
-      if (results.has(anchor)) throw new Error(`duplicate $dynamicAnchor: ${anchor}`)
-      results.set(anchor, sub)
+      safeSet(results, anchor, sub, '$dynamicAnchor')
     }
   })
   return results
@@ -173,8 +177,7 @@ const buildSchemas = (input) => {
           traverse(schema, (sub) => {
             const id = cleanId(sub.$id || sub.id)
             if (id && id.includes('://')) {
-              if (schemas.has(id)) throw new Error("Duplicate schema $id in 'schemas'")
-              schemas.set(id, sub)
+              safeSet(schemas, id, sub, "schema $id in 'schemas'")
             } else if (sub === schema) {
               throw new Error("Schema with missing or invalid $id in 'schemas'")
             }
