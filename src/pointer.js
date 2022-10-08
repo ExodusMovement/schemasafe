@@ -54,6 +54,24 @@ function objpath2path(objpath) {
 }
 
 const withSpecialChilds = ['properties', 'patternProperties', '$defs', 'definitions']
+const skipChilds = ['const', 'enum', 'examples', 'example', 'comment']
+const sSkip = Symbol('skip')
+
+function traverse(schema, work) {
+  const visit = (sub, specialChilds = false) => {
+    if (!sub || typeof sub !== 'object') return
+    const res = work(sub)
+    if (res !== undefined) return res
+    if (res === sSkip) return
+    for (const k of Object.keys(sub)) {
+      if (!specialChilds && !Array.isArray(sub) && !knownKeywords.includes(k)) continue
+      if (!specialChilds && skipChilds.includes(k)) continue
+      const kres = visit(sub[k], !specialChilds && withSpecialChilds.includes(k))
+      if (kres !== undefined) return kres
+    }
+  }
+  return visit(schema)
+}
 
 // Returns a list of resolved entries, in a form: [schema, root, basePath]
 // basePath doesn't contain the target object $id itself
@@ -71,6 +89,7 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
   // Find in self by id path
   const visit = (sub, oldPath, specialChilds = false, dynamic = false) => {
     if (!sub || typeof sub !== 'object') return
+
     const id = sub.$id || sub.id
     let path = oldPath
     if (id && typeof id === 'string') {
@@ -90,9 +109,10 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
       path = joinPath(path, `#${anchor}`)
       if (path === ptr) results.push([sub, root, oldPath])
     }
+
     for (const k of Object.keys(sub)) {
       if (!specialChilds && !Array.isArray(sub) && !knownKeywords.includes(k)) continue
-      if (!specialChilds && ['const', 'enum', 'examples', 'comment'].includes(k)) continue
+      if (!specialChilds && skipChilds.includes(k)) continue
       visit(sub[k], path, !specialChilds && withSpecialChilds.includes(k))
     }
     if (!dynamic && sub.$dynamicAnchor) visit(sub, oldPath, specialChilds, true)
@@ -120,9 +140,8 @@ function resolveReference(root, additionalSchemas, ref, base = '') {
 
 function getDynamicAnchors(schema) {
   const results = new Map()
-  const visit = (sub, specialChilds = false) => {
-    if (!sub || typeof sub !== 'object') return
-    if (sub !== schema && (sub.$id || sub.id)) return // base changed, no longer in the same resource
+  traverse(schema, (sub) => {
+    if (sub !== schema && (sub.$id || sub.id)) return sSkip // base changed, no longer in the same resource
     const anchor = sub.$dynamicAnchor
     if (anchor && typeof anchor === 'string') {
       if (anchor.includes('#')) throw new Error("$dynamicAnchor can't include '#'")
@@ -130,29 +149,12 @@ function getDynamicAnchors(schema) {
       if (results.has(anchor)) throw new Error(`duplicate $dynamicAnchor: ${anchor}`)
       results.set(anchor, sub)
     }
-    for (const k of Object.keys(sub)) {
-      if (!specialChilds && !Array.isArray(sub) && !knownKeywords.includes(k)) continue
-      if (!specialChilds && ['const', 'enum', 'examples', 'comment'].includes(k)) continue
-      visit(sub[k], !specialChilds && withSpecialChilds.includes(k))
-    }
-  }
-  visit(schema)
+  })
   return results
 }
 
-function hasKeywords(schema, keywords) {
-  const visit = (sub, specialChilds = false) => {
-    if (!sub || typeof sub !== 'object') return false
-    for (const k of Object.keys(sub)) {
-      if (keywords.includes(k)) return true
-      if (!specialChilds && !Array.isArray(sub) && !knownKeywords.includes(k)) continue
-      if (!specialChilds && ['const', 'enum', 'examples', 'comment'].includes(k)) continue
-      if (visit(sub[k], !specialChilds && withSpecialChilds.includes(k))) return true
-    }
-    return false
-  }
-  return visit(schema)
-}
+const hasKeywords = (schema, keywords) =>
+  traverse(schema, (s) => Object.keys(s).some((k) => keywords.includes(k)) || undefined) || false
 
 const buildSchemas = (input) => {
   if (input) {
@@ -168,8 +170,7 @@ const buildSchemas = (input) => {
           // # is allowed only as the last symbol here
           id && typeof id === 'string' && !/#./.test(id) ? id.replace(/#$/, '') : null
         for (const schema of input) {
-          const visit = (sub) => {
-            if (!sub || typeof sub !== 'object') return
+          traverse(schema, (sub) => {
             const id = cleanId(sub.$id || sub.id)
             if (id && id.includes('://')) {
               if (schemas.has(id)) throw new Error("Duplicate schema $id in 'schemas'")
@@ -177,9 +178,7 @@ const buildSchemas = (input) => {
             } else if (sub === schema) {
               throw new Error("Schema with missing or invalid $id in 'schemas'")
             }
-            for (const k of Object.keys(sub)) visit(sub[k])
-          }
-          visit(schema)
+          })
         }
         return schemas
       }
