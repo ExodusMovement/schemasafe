@@ -159,13 +159,11 @@ const hasKeywords = (schema, keywords) =>
 const addSchemasArrayToMap = (schemas, input, optional = false) => {
   if (!Array.isArray(input)) throw new Error('Expected an array of schemas')
   // schema ids are extracted from the schemas themselves
-  const cleanId = (id) =>
-    // # is allowed only as the last symbol here
-    id && typeof id === 'string' && !/#./.test(id) ? id.replace(/#$/, '') : null
   for (const schema of input) {
     traverse(schema, (sub) => {
-      const id = cleanId(sub.$id || sub.id)
-      if (id && id.includes('://')) {
+      const idRaw = sub.$id || sub.id
+      const id = idRaw && typeof idRaw === 'string' ? idRaw.replace(/#$/, '') : null // # is allowed only as the last symbol here
+      if (id && id.includes('://') && !id.includes('#')) {
         safeSet(schemas, id, sub, "schema $id in 'schemas'")
       } else if (sub === schema && !optional) {
         throw new Error("Schema with missing or invalid $id in 'schemas'")
