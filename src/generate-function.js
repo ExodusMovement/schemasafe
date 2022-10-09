@@ -84,7 +84,7 @@ module.exports = () => {
       const scopeDefs = processScope(scope).map(
         ([key, val]) => `const ${safe(key)} = ${jaystring(val)};`
       )
-      return `(function() {\n'use strict'\n${scopeDefs.join('\n')}\n${build()}})();`
+      return `(function() {\n'use strict'\n${scopeDefs.join('\n')}\n${build()}})()`
     },
 
     makeFunction(scope = {}) {

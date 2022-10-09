@@ -31,7 +31,7 @@ const validator = (schema, { jsonCheck = false, isJSON = false, schemas = [], ..
     fun.write('}')
   }
   const validate = fun.makeFunction(scope)
-  validate.toModule = () => fun.makeModule(scope)
+  validate.toModule = ({ semi = true } = {}) => fun.makeModule(scope) + (semi ? ';' : '')
   validate.toJSON = () => schema
   return validate
 }
@@ -67,13 +67,13 @@ const parser = function(schema, opts = {}) {
           return { valid: false }
         }
       }
-  parse.toModule = () =>
+  parse.toModule = ({ semi = true } = {}) =>
     [
       '(function(src) {',
       `const validate = ${validate.toModule()}`,
       `const parse = ${parse}\n`,
       'return parse(src)',
-      '});',
+      `})${semi ? ';' : ''}`,
     ].join('\n')
   parse.toJSON = () => schema
   return parse
