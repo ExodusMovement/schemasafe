@@ -3,21 +3,21 @@
 const genfun = require('./generate-function')
 const { buildSchemas } = require('./pointer')
 const { compile } = require('./compile')
-const functions = require('./scope-functions')
+const { hasOwn, deepEqual } = require('./scope-functions')
 
-function writeJsonCheck(fun, validate, includeErrors) {
-  if (includeErrors) {
-    fun.write('if (!deepEqual(data, JSON.parse(JSON.stringify(data)))) {')
-    fun.write('validateIsJSON.errors = [{instanceLocation:"#",error:"not JSON compatible"}]')
-    fun.write('return false')
-    fun.write('}')
-    fun.write('const res = %s(data)', validate)
-    fun.write('validateIsJSON.errors = %s.errors', validate)
-    fun.write('return res')
-  } else {
-    fun.write('return deepEqual(data, JSON.parse(JSON.stringify(data))) && %s(data)', validate)
+const jsonCheckWithErrors = (validate) =>
+  function validateIsJSON(data) {
+    if (!deepEqual(data, JSON.parse(JSON.stringify(data)))) {
+      validateIsJSON.errors = [{ instanceLocation: '#', error: 'not JSON compatible' }]
+      return false
+    }
+    const res = validate(data)
+    validateIsJSON.errors = validate.errors
+    return res
   }
-}
+
+const jsonCheckWithoutErrors = (validate) => (data) =>
+  deepEqual(data, JSON.parse(JSON.stringify(data))) && validate(data)
 
 const validator = (schema, { jsonCheck = false, isJSON = false, schemas = [], ...opts } = {}) => {
   if (jsonCheck && isJSON) throw new Error('Can not specify both isJSON and jsonCheck options')
@@ -25,14 +25,11 @@ const validator = (schema, { jsonCheck = false, isJSON = false, schemas = [], ..
   const { scope, refs } = compile([schema], options) // only a single ref
   if (opts.dryRun) return
   const fun = genfun()
-  if (!jsonCheck) {
-    fun.write('%s', refs[0])
-  } else {
-    scope.deepEqual = functions.deepEqual
-    fun.write('function validateIsJSON(data) {')
-    writeJsonCheck(fun, refs[0], opts.includeErrors)
-    fun.write('}')
-  }
+  if (jsonCheck) {
+    scope.deepEqual = deepEqual
+    scope.jsonCheckWrap = opts.includeErrors ? jsonCheckWithErrors : jsonCheckWithoutErrors
+    fun.write('jsonCheckWrap(%s)', refs[0])
+  } else fun.write('%s', refs[0])
   const validate = fun.makeFunction(scope)
   validate.toModule = ({ semi = true } = {}) => fun.makeModule(scope) + (semi ? ';' : '')
   validate.toJSON = () => schema
@@ -68,7 +65,7 @@ const parseWithoutErrors = (validate) => (src) => {
 
 const parser = function(schema, opts = {}) {
   // strong mode is default in parser
-  if (functions.hasOwn(opts, 'jsonCheck') || functions.hasOwn(opts, 'isJSON'))
+  if (hasOwn(opts, 'jsonCheck') || hasOwn(opts, 'isJSON'))
     throw new Error('jsonCheck and isJSON options are not applicable in parser mode')
   const validate = validator(schema, { mode: 'strong', ...opts, jsonCheck: false, isJSON: true })
   const parseWith = opts.includeErrors ? parseWithErrors : parseWithoutErrors
