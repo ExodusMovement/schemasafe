@@ -12,7 +12,7 @@ function writeJsonCheck(fun, validate, includeErrors) {
     fun.write('return false')
     fun.write('}')
     fun.write('const res = %s(data)', validate)
-    fun.write('validateIsJSON.errors = actualValidate.errors')
+    fun.write('validateIsJSON.errors = %s.errors', validate)
     fun.write('return res')
   } else {
     fun.write('return deepEqual(data, JSON.parse(JSON.stringify(data))) && %s(data)', validate)

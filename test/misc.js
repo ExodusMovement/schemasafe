@@ -539,6 +539,12 @@ tape('jsonCheck option', function(t) {
       const [error] = validate.errors
       t.is(error.error, 'not JSON compatible', 'correct error message')
     }
+
+    t.notOk(validate([]), 'invalid object still fails with jsonCheck')
+
+    if (includeErrors) {
+      t.deepEqual(validate.errors, [{ keywordLocation: '#/type', instanceLocation: '#' }])
+    }
   }
 
   t.end()
