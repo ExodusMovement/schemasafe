@@ -3,7 +3,7 @@
 const genfun = require('./generate-function')
 const { buildSchemas } = require('./pointer')
 const { compile } = require('./compile')
-const { hasOwn, deepEqual } = require('./scope-functions')
+const { deepEqual } = require('./scope-functions')
 
 const jsonCheckWithErrors = (validate) =>
   function validateIsJSON(data) {
@@ -19,13 +19,21 @@ const jsonCheckWithErrors = (validate) =>
 const jsonCheckWithoutErrors = (validate) => (data) =>
   deepEqual(data, JSON.parse(JSON.stringify(data))) && validate(data)
 
-const validator = (schema, { jsonCheck = false, isJSON = false, schemas = [], ...opts } = {}) => {
+const validator = (schema, rawOpts = {}) => {
+  const { parse = false, jsonCheck = false, isJSON = false, schemas = [], ...opts } = rawOpts
   if (jsonCheck && isJSON) throw new Error('Can not specify both isJSON and jsonCheck options')
-  const options = { ...opts, schemas: buildSchemas(schemas, [schema]), isJSON: isJSON || jsonCheck }
+  if (parse && (jsonCheck || isJSON))
+    throw new Error('jsonCheck and isJSON options are not applicable in parser mode')
+  const mode = parse ? 'strong' : 'default' // strong mode is default in parser, can be overriden
+  const willJSON = isJSON || jsonCheck || parse
+  const options = { mode, ...opts, schemas: buildSchemas(schemas, [schema]), isJSON: willJSON }
   const { scope, refs } = compile([schema], options) // only a single ref
   if (opts.dryRun) return
   const fun = genfun()
-  if (jsonCheck) {
+  if (parse) {
+    scope.parseWrap = opts.includeErrors ? parseWithErrors : parseWithoutErrors
+    fun.write('parseWrap(%s)', refs[0])
+  } else if (jsonCheck) {
     scope.deepEqual = deepEqual
     scope.jsonCheckWrap = opts.includeErrors ? jsonCheckWithErrors : jsonCheckWithoutErrors
     fun.write('jsonCheckWrap(%s)', refs[0])
@@ -63,17 +71,9 @@ const parseWithoutErrors = (validate) => (src) => {
   }
 }
 
-const parser = function(schema, opts = {}) {
-  // strong mode is default in parser
-  if (hasOwn(opts, 'jsonCheck') || hasOwn(opts, 'isJSON'))
-    throw new Error('jsonCheck and isJSON options are not applicable in parser mode')
-  const validate = validator(schema, { mode: 'strong', ...opts, jsonCheck: false, isJSON: true })
-  const parseWith = opts.includeErrors ? parseWithErrors : parseWithoutErrors
-  const parse = parseWith(validate)
-  parse.toModule = ({ semi = true } = {}) =>
-    `(${parseWith})(${validate.toModule({ semi: false })})${semi ? ';' : ''}`
-  parse.toJSON = () => schema
-  return parse
+const parser = function(schema, { parse = true, ...opts } = {}) {
+  if (!parse) throw new Error('can not disable parse in parser')
+  return validator(schema, { parse, ...opts })
 }
 
 module.exports = { validator, parser }
