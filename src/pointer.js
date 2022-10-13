@@ -180,9 +180,8 @@ const buildSchemas = (input, extra) => {
         return new Map(Object.entries(input))
       case Map.prototype:
         return new Map(input)
-      case Array.prototype: {
+      case Array.prototype:
         return addSchemasArrayToMap(new Map(), input)
-      }
     }
   }
   throw new Error("Unexpected value for 'schemas' option")
