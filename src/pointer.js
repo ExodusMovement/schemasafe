@@ -66,8 +66,7 @@ function traverse(schema, work) {
   const visit = (sub, specialChilds = false) => {
     if (!sub || typeof sub !== 'object') return
     const res = work(sub)
-    if (res !== undefined) return res
-    if (res === sSkip) return
+    if (res !== undefined) return res === sSkip ? undefined : res
     for (const k of Object.keys(sub)) {
       if (!specialChilds && !Array.isArray(sub) && !knownKeywords.includes(k)) continue
       if (!specialChilds && skipChilds.includes(k)) continue
