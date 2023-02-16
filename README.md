@@ -61,7 +61,7 @@ Or use the [parser API](./doc/Parser-not-validator.md) (running in
 [strong mode](./doc/Strong-mode.md) by default):
 
 ```js
-const { parser } = require('.')
+const { parser } = require('@exodus/schemasafe')
 
 const parse = parser({
   $schema: 'https://json-schema.org/draft/2019-09/schema',
