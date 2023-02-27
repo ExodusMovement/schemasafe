@@ -94,6 +94,7 @@ const unsupported = new Set([
 
   // we have leading time-offset (e.g. Z) optional in time format for compat reasons for now
   'optional/format/time.json/validation of time strings/no time offset',
+  'optional/format/time.json/validation of time strings/no time offset with second fraction',
 
   // we don't support quoted-string emails (deliberately) and ip-address emails
   'optional/format/email.json/validation of e-mail addresses/a quoted string with a space in the local part is valid',
@@ -113,6 +114,10 @@ const unsupported = new Set([
   'draft3/enum.json/enums in properties', // we don't support boolean required
   'draft3/ref.json/remote ref, containing refs itself',
   'draft3/optional/ecmascript-regex.json/ECMA 262 regex dialect recognition', // broken assumption in test
+
+  // draft-next changes
+  'draft-next/dynamicRef.json/$dynamicAnchor inside propertyDependencies',
+  'draft-next/unevaluatedProperties.json/unevaluatedProperties can see inside propertyDependencies',
 
   // ajv specific non-standard tests
   'rules/format.json/whitelisted unknown format is valid',
