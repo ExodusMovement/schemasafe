@@ -117,18 +117,18 @@ function resolveReference(root, schemas, ref, base = '') {
     }
     if (!dynamic && sub.$dynamicAnchor) visit(sub, oldPath, specialChilds, true)
   }
-  visit(root, '')
+  visit(root, main)
 
   // Find in self by pointer
-  if (main === '' && (local[0] === '/' || local === '')) {
+  if (main === base.replace(/#$/, '') && (local[0] === '/' || local === '')) {
     const objpath = []
     const res = get(root, local, objpath)
     if (res !== undefined) results.push([res, root, objpath2path(objpath)])
   }
 
   // Find in additional schemas
-  if (schemas.has(main)) {
-    const additional = resolveReference(schemas.get(main), schemas, `#${hash}`)
+  if (schemas.has(main) && schemas.get(main) !== root) {
+    const additional = resolveReference(schemas.get(main), schemas, `#${hash}`, main)
     results.push(...additional.map(([res, rRoot, rPath]) => [res, rRoot, joinPath(main, rPath)]))
   }
 
