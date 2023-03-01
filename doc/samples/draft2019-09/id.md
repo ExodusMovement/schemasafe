@@ -152,13 +152,11 @@ const ref4 = function validate(data, recursive) {
         if (!(recursive || validate)(data.items, recursive || validate)) return false
         return true
       })()
-      if (!sub2) {
-        const sub3 = (() => {
-          if (!ref5(data.items, recursive || validate)) return false
-          return true
-        })()
-        if (!sub3) return false
-      }
+      const sub3 = (() => {
+        if (!ref5(data.items, recursive || validate)) return false
+        return true
+      })()
+      if (!(sub2 || sub3)) return false
     }
     if (data.contains !== undefined && hasOwn(data, "contains")) {
       if (!(recursive || validate)(data.contains, recursive || validate)) return false
@@ -297,20 +295,18 @@ const ref6 = function validate(data, recursive) {
         if (!ref9(data.type, recursive || validate)) return false
         return true
       })()
-      if (!sub4) {
-        const sub5 = (() => {
-          if (!Array.isArray(data.type)) return false
-          if (data.type.length < 1) return false
-          for (let l = 0; l < data.type.length; l++) {
-            if (data.type[l] !== undefined && hasOwn(data.type, l)) {
-              if (!ref9(data.type[l], recursive || validate)) return false
-            }
+      const sub5 = (() => {
+        if (!Array.isArray(data.type)) return false
+        if (data.type.length < 1) return false
+        for (let l = 0; l < data.type.length; l++) {
+          if (data.type[l] !== undefined && hasOwn(data.type, l)) {
+            if (!ref9(data.type[l], recursive || validate)) return false
           }
-          if (!unique(data.type)) return false
-          return true
-        })()
-        if (!sub5) return false
-      }
+        }
+        if (!unique(data.type)) return false
+        return true
+      })()
+      if (!(sub4 || sub5)) return false
     }
   }
   return true
@@ -379,13 +375,11 @@ const ref1 = function validate(data, recursive) {
           if (!(recursive || validate)(data.dependencies[key1], recursive || validate)) return false
           return true
         })()
-        if (!sub0) {
-          const sub1 = (() => {
-            if (!ref2(data.dependencies[key1], recursive || validate)) return false
-            return true
-          })()
-          if (!sub1) return false
-        }
+        const sub1 = (() => {
+          if (!ref2(data.dependencies[key1], recursive || validate)) return false
+          return true
+        })()
+        if (!(sub0 || sub1)) return false
       }
     }
   }
@@ -561,13 +555,11 @@ const ref4 = function validate(data, recursive) {
         if (!(recursive || validate)(data.items, recursive || validate)) return false
         return true
       })()
-      if (!sub2) {
-        const sub3 = (() => {
-          if (!ref5(data.items, recursive || validate)) return false
-          return true
-        })()
-        if (!sub3) return false
-      }
+      const sub3 = (() => {
+        if (!ref5(data.items, recursive || validate)) return false
+        return true
+      })()
+      if (!(sub2 || sub3)) return false
     }
     if (data.contains !== undefined && hasOwn(data, "contains")) {
       if (!(recursive || validate)(data.contains, recursive || validate)) return false
@@ -706,20 +698,18 @@ const ref6 = function validate(data, recursive) {
         if (!ref9(data.type, recursive || validate)) return false
         return true
       })()
-      if (!sub4) {
-        const sub5 = (() => {
-          if (!Array.isArray(data.type)) return false
-          if (data.type.length < 1) return false
-          for (let l = 0; l < data.type.length; l++) {
-            if (data.type[l] !== undefined && hasOwn(data.type, l)) {
-              if (!ref9(data.type[l], recursive || validate)) return false
-            }
+      const sub5 = (() => {
+        if (!Array.isArray(data.type)) return false
+        if (data.type.length < 1) return false
+        for (let l = 0; l < data.type.length; l++) {
+          if (data.type[l] !== undefined && hasOwn(data.type, l)) {
+            if (!ref9(data.type[l], recursive || validate)) return false
           }
-          if (!unique(data.type)) return false
-          return true
-        })()
-        if (!sub5) return false
-      }
+        }
+        if (!unique(data.type)) return false
+        return true
+      })()
+      if (!(sub4 || sub5)) return false
     }
   }
   return true
@@ -788,13 +778,11 @@ const ref1 = function validate(data, recursive) {
           if (!(recursive || validate)(data.dependencies[key1], recursive || validate)) return false
           return true
         })()
-        if (!sub0) {
-          const sub1 = (() => {
-            if (!ref2(data.dependencies[key1], recursive || validate)) return false
-            return true
-          })()
-          if (!sub1) return false
-        }
+        const sub1 = (() => {
+          if (!ref2(data.dependencies[key1], recursive || validate)) return false
+          return true
+        })()
+        if (!(sub0 || sub1)) return false
       }
     }
   }
@@ -970,13 +958,11 @@ const ref4 = function validate(data, recursive) {
         if (!(recursive || validate)(data.items, recursive || validate)) return false
         return true
       })()
-      if (!sub2) {
-        const sub3 = (() => {
-          if (!ref5(data.items, recursive || validate)) return false
-          return true
-        })()
-        if (!sub3) return false
-      }
+      const sub3 = (() => {
+        if (!ref5(data.items, recursive || validate)) return false
+        return true
+      })()
+      if (!(sub2 || sub3)) return false
     }
     if (data.contains !== undefined && hasOwn(data, "contains")) {
       if (!(recursive || validate)(data.contains, recursive || validate)) return false
@@ -1115,20 +1101,18 @@ const ref6 = function validate(data, recursive) {
         if (!ref9(data.type, recursive || validate)) return false
         return true
       })()
-      if (!sub4) {
-        const sub5 = (() => {
-          if (!Array.isArray(data.type)) return false
-          if (data.type.length < 1) return false
-          for (let l = 0; l < data.type.length; l++) {
-            if (data.type[l] !== undefined && hasOwn(data.type, l)) {
-              if (!ref9(data.type[l], recursive || validate)) return false
-            }
+      const sub5 = (() => {
+        if (!Array.isArray(data.type)) return false
+        if (data.type.length < 1) return false
+        for (let l = 0; l < data.type.length; l++) {
+          if (data.type[l] !== undefined && hasOwn(data.type, l)) {
+            if (!ref9(data.type[l], recursive || validate)) return false
           }
-          if (!unique(data.type)) return false
-          return true
-        })()
-        if (!sub5) return false
-      }
+        }
+        if (!unique(data.type)) return false
+        return true
+      })()
+      if (!(sub4 || sub5)) return false
     }
   }
   return true
@@ -1197,13 +1181,11 @@ const ref1 = function validate(data, recursive) {
           if (!(recursive || validate)(data.dependencies[key1], recursive || validate)) return false
           return true
         })()
-        if (!sub0) {
-          const sub1 = (() => {
-            if (!ref2(data.dependencies[key1], recursive || validate)) return false
-            return true
-          })()
-          if (!sub1) return false
-        }
+        const sub1 = (() => {
+          if (!ref2(data.dependencies[key1], recursive || validate)) return false
+          return true
+        })()
+        if (!(sub0 || sub1)) return false
       }
     }
   }
@@ -1278,13 +1260,11 @@ const ref0 = function validate(data) {
     if (!ref1(data)) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (!ref2(data)) return false
-      return true
-    })()
-    if (!sub1) return false
-  }
+  const sub1 = (() => {
+    if (!ref2(data)) return false
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 return ref0
@@ -1292,7 +1272,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at https://localhost:1234/draft2019-09/id/my_identifier.json#`
 
 
 ## non-schema object containing an $id property

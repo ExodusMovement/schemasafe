@@ -65,16 +65,14 @@ const ref1 = function validate(data, recursive) {
     if (!(typeof data === "string")) return false
     return true
   })()
-  if (!sub2) {
-    const sub3 = (() => {
-      if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-      for (const key0 of Object.keys(data)) {
-        if (!(recursive || validate)(data[key0], recursive || validate)) return false
-      }
-      return true
-    })()
-    if (!sub3) return false
-  }
+  const sub3 = (() => {
+    if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+    for (const key0 of Object.keys(data)) {
+      if (!(recursive || validate)(data[key0], recursive || validate)) return false
+    }
+    return true
+  })()
+  if (!(sub2 || sub3)) return false
   return true
 };
 const ref0 = function validate(data, recursive) {
@@ -82,13 +80,11 @@ const ref0 = function validate(data, recursive) {
     if (!Number.isInteger(data)) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (!ref1(data, recursive)) return false
-      return true
-    })()
-    if (!sub1) return false
-  }
+  const sub1 = (() => {
+    if (!ref1(data, recursive)) return false
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 return ref0
@@ -130,16 +126,14 @@ const ref1 = function validate(data, recursive) {
     if (!(typeof data === "string")) return false
     return true
   })()
-  if (!sub2) {
-    const sub3 = (() => {
-      if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-      for (const key0 of Object.keys(data)) {
-        if (!(recursive || validate)(data[key0], recursive || validate)) return false
-      }
-      return true
-    })()
-    if (!sub3) return false
-  }
+  const sub3 = (() => {
+    if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+    for (const key0 of Object.keys(data)) {
+      if (!(recursive || validate)(data[key0], recursive || validate)) return false
+    }
+    return true
+  })()
+  if (!(sub2 || sub3)) return false
   return true
 };
 const ref0 = function validate(data, recursive) {
@@ -147,13 +141,11 @@ const ref0 = function validate(data, recursive) {
     if (!Number.isInteger(data)) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (!ref1(data, recursive || validate)) return false
-      return true
-    })()
-    if (!sub1) return false
-  }
+  const sub1 = (() => {
+    if (!ref1(data, recursive || validate)) return false
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 return ref0
@@ -195,16 +187,14 @@ const ref1 = function validate(data, recursive) {
     if (!(typeof data === "string")) return false
     return true
   })()
-  if (!sub2) {
-    const sub3 = (() => {
-      if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-      for (const key0 of Object.keys(data)) {
-        if (!validate(data[key0], recursive)) return false
-      }
-      return true
-    })()
-    if (!sub3) return false
-  }
+  const sub3 = (() => {
+    if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+    for (const key0 of Object.keys(data)) {
+      if (!validate(data[key0], recursive)) return false
+    }
+    return true
+  })()
+  if (!(sub2 || sub3)) return false
   return true
 };
 const ref0 = function validate(data, recursive) {
@@ -212,13 +202,11 @@ const ref0 = function validate(data, recursive) {
     if (!Number.isInteger(data)) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (!ref1(data, recursive)) return false
-      return true
-    })()
-    if (!sub1) return false
-  }
+  const sub1 = (() => {
+    if (!ref1(data, recursive)) return false
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 return ref0
@@ -259,16 +247,14 @@ const ref1 = function validate(data, recursive) {
     if (!(typeof data === "string")) return false
     return true
   })()
-  if (!sub2) {
-    const sub3 = (() => {
-      if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-      for (const key0 of Object.keys(data)) {
-        if (!validate(data[key0], recursive)) return false
-      }
-      return true
-    })()
-    if (!sub3) return false
-  }
+  const sub3 = (() => {
+    if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+    for (const key0 of Object.keys(data)) {
+      if (!validate(data[key0], recursive)) return false
+    }
+    return true
+  })()
+  if (!(sub2 || sub3)) return false
   return true
 };
 const ref0 = function validate(data, recursive) {
@@ -276,13 +262,11 @@ const ref0 = function validate(data, recursive) {
     if (!Number.isInteger(data)) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (!ref1(data, recursive)) return false
-      return true
-    })()
-    if (!sub1) return false
-  }
+  const sub1 = (() => {
+    if (!ref1(data, recursive)) return false
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 return ref0
@@ -327,16 +311,14 @@ const ref1 = function validate(data, recursive) {
     if (!Number.isInteger(data)) return false
     return true
   })()
-  if (!sub4) {
-    const sub5 = (() => {
-      if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-      for (const key2 of Object.keys(data)) {
-        if (!validate(data[key2], recursive)) return false
-      }
-      return true
-    })()
-    if (!sub5) return false
-  }
+  const sub5 = (() => {
+    if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+    for (const key2 of Object.keys(data)) {
+      if (!validate(data[key2], recursive)) return false
+    }
+    return true
+  })()
+  if (!(sub4 || sub5)) return false
   return true
 };
 const ref0 = function validate(data, recursive) {
@@ -344,29 +326,25 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data === "boolean")) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-      for (const key0 of Object.keys(data)) {
-        const sub2 = (() => {
-          if (!(Number.isInteger(data[key0]))) return false
-          return true
-        })()
-        if (!sub2) {
-          const sub3 = (() => {
-            if (!(typeof data[key0] === "object" && data[key0] && !Array.isArray(data[key0]))) return false
-            for (const key1 of Object.keys(data[key0])) {
-              if (!ref1(data[key0][key1], recursive || validate)) return false
-            }
-            return true
-          })()
-          if (!sub3) return false
+  const sub1 = (() => {
+    if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+    for (const key0 of Object.keys(data)) {
+      const sub2 = (() => {
+        if (!(Number.isInteger(data[key0]))) return false
+        return true
+      })()
+      const sub3 = (() => {
+        if (!(typeof data[key0] === "object" && data[key0] && !Array.isArray(data[key0]))) return false
+        for (const key1 of Object.keys(data[key0])) {
+          if (!ref1(data[key0][key1], recursive || validate)) return false
         }
-      }
-      return true
-    })()
-    if (!sub1) return false
-  }
+        return true
+      })()
+      if (!(sub2 || sub3)) return false
+    }
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 return ref0
@@ -410,16 +388,14 @@ const ref1 = function validate(data, recursive) {
     if (!Number.isInteger(data)) return false
     return true
   })()
-  if (!sub4) {
-    const sub5 = (() => {
-      if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-      for (const key2 of Object.keys(data)) {
-        if (!(recursive || validate)(data[key2], recursive || validate)) return false
-      }
-      return true
-    })()
-    if (!sub5) return false
-  }
+  const sub5 = (() => {
+    if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+    for (const key2 of Object.keys(data)) {
+      if (!(recursive || validate)(data[key2], recursive || validate)) return false
+    }
+    return true
+  })()
+  if (!(sub4 || sub5)) return false
   return true
 };
 const ref0 = function validate(data, recursive) {
@@ -427,29 +403,25 @@ const ref0 = function validate(data, recursive) {
     if (!(typeof data === "boolean")) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (!(typeof data === "object" && data && !Array.isArray(data))) return false
-      for (const key0 of Object.keys(data)) {
-        const sub2 = (() => {
-          if (!(Number.isInteger(data[key0]))) return false
-          return true
-        })()
-        if (!sub2) {
-          const sub3 = (() => {
-            if (!(typeof data[key0] === "object" && data[key0] && !Array.isArray(data[key0]))) return false
-            for (const key1 of Object.keys(data[key0])) {
-              if (!(recursive || ref1)(data[key0][key1], recursive || ref1)) return false
-            }
-            return true
-          })()
-          if (!sub3) return false
+  const sub1 = (() => {
+    if (!(typeof data === "object" && data && !Array.isArray(data))) return false
+    for (const key0 of Object.keys(data)) {
+      const sub2 = (() => {
+        if (!(Number.isInteger(data[key0]))) return false
+        return true
+      })()
+      const sub3 = (() => {
+        if (!(typeof data[key0] === "object" && data[key0] && !Array.isArray(data[key0]))) return false
+        for (const key1 of Object.keys(data[key0])) {
+          if (!(recursive || ref1)(data[key0][key1], recursive || ref1)) return false
         }
-      }
-      return true
-    })()
-    if (!sub1) return false
-  }
+        return true
+      })()
+      if (!(sub2 || sub3)) return false
+    }
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 return ref0

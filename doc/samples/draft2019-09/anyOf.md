@@ -17,15 +17,13 @@ const ref0 = function validate(data) {
     if (!Number.isInteger(data)) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (typeof data === "number") {
-        if (!(2 <= data)) return false
-      }
-      return true
-    })()
-    if (!sub1) return false
-  }
+  const sub1 = (() => {
+    if (typeof data === "number") {
+      if (!(2 <= data)) return false
+    }
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 return ref0
@@ -56,13 +54,11 @@ const ref0 = function validate(data) {
     if (data.length > 2 && stringLength(data) > 2) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (data.length < 4 || stringLength(data) < 4) return false
-      return true
-    })()
-    if (!sub1) return false
-  }
+  const sub1 = (() => {
+    if (data.length < 4 || stringLength(data) < 4) return false
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 return ref0
@@ -132,11 +128,15 @@ return ref0
 ```js
 'use strict'
 const ref0 = function validate(data) {
-  return false
+  if (!(false || false)) return false
   return true
 };
 return ref0
 ```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
 
 
 ## anyOf complex types
@@ -165,16 +165,14 @@ const ref0 = function validate(data) {
     }
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (typeof data === "object" && data && !Array.isArray(data)) {
-        if (!(data.foo !== undefined && hasOwn(data, "foo"))) return false
-        if (!(typeof data.foo === "string")) return false
-      }
-      return true
-    })()
-    if (!sub1) return false
-  }
+  const sub1 = (() => {
+    if (typeof data === "object" && data && !Array.isArray(data)) {
+      if (!(data.foo !== undefined && hasOwn(data, "foo"))) return false
+      if (!(typeof data.foo === "string")) return false
+    }
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 return ref0

@@ -841,6 +841,37 @@ return ref0
  * `[requireValidation] schema = true is not allowed at #/allOf/0/properties/foo`
 
 
+## unevaluatedProperties can't see inside cousins (reverse order)
+
+### Schema
+
+```json
+{
+  "allOf": [
+    { "unevaluatedProperties": false },
+    { "properties": { "foo": true } }
+  ]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    for (const key0 of Object.keys(data)) return false
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] schema = true is not allowed at #/allOf/1/properties/foo`
+
+
 ## nested unevaluatedProperties, outer false, inner true, properties outside
 
 ### Schema

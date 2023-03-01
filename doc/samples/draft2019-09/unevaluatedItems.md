@@ -143,7 +143,7 @@ return ref0
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/0`
 
 
-## unevaluatedItems with additionalItems
+## unevaluatedItems with items and additionalItems
 
 ### Schema
 
@@ -174,6 +174,74 @@ return ref0
 ##### Strong mode notices
 
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/0`
+
+
+## unevaluatedItems with ignored additionalItems
+
+### Schema
+
+```json
+{
+  "additionalItems": { "type": "number" },
+  "unevaluatedItems": { "type": "string" }
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (Array.isArray(data)) {
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] !== undefined && hasOwn(data, i)) {
+        if (!(typeof data[i] === "string")) return false
+      }
+    }
+  }
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unprocessed keywords: ["additionalItems"] at #`
+
+
+## unevaluatedItems with ignored applicator additionalItems
+
+### Schema
+
+```json
+{
+  "allOf": [{ "additionalItems": { "type": "number" } }],
+  "unevaluatedItems": { "type": "string" }
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (Array.isArray(data)) {
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] !== undefined && hasOwn(data, i)) {
+        if (!(typeof data[i] === "string")) return false
+      }
+    }
+  }
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unprocessed keywords: ["additionalItems"] at #/allOf/0`
 
 
 ## unevaluatedItems with nested tuple

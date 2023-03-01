@@ -36,6 +36,37 @@ return ref0
 ### Schema
 
 ```json
+{ "items": { "type": "integer" }, "additionalItems": { "type": "string" } }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (Array.isArray(data)) {
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] !== undefined && hasOwn(data, i)) {
+        if (!(Number.isInteger(data[i]))) return false
+      }
+    }
+  }
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unprocessed keywords: ["additionalItems"] at #`
+
+
+## when items is schema, boolean additionalItems does nothing
+
+### Schema
+
+```json
 { "items": {}, "additionalItems": false }
 ```
 

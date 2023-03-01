@@ -20,7 +20,7 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 
 | Name                                                                            | Total | Failed to compile | Warnings | Misclassified |
 |---------------------------------------------------------------------------------|-------|-------------------|----------|---------------|
-| [additionalItems](./additionalItems.md)                                         | 9     | -                 | 4        | -             |
+| [additionalItems](./additionalItems.md)                                         | 10    | -                 | 5        | -             |
 | [additionalProperties](./additionalProperties.md)                               | 7     | -                 | -        | -             |
 | [allOf](./allOf.md)                                                             | 12    | -                 | -        | -             |
 | [anchor](./anchor.md)                                                           | 7     | -                 | -        | -             |
@@ -52,19 +52,19 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [minProperties](./minProperties.md)                                             | 2     | -                 | -        | -             |
 | [minimum](./minimum.md)                                                         | 2     | -                 | -        | -             |
 | [multipleOf](./multipleOf.md)                                                   | 4     | -                 | -        | -             |
-| [not](./not.md)                                                                 | 6     | -                 | 1        | -             |
+| [not](./not.md)                                                                 | 7     | -                 | 2        | -             |
 | [oneOf](./oneOf.md)                                                             | 11    | -                 | 3        | -             |
 | [pattern](./pattern.md)                                                         | 2     | -                 | -        | -             |
 | [patternProperties](./patternProperties.md)                                     | 5     | -                 | -        | -             |
 | [properties](./properties.md)                                                   | 6     | -                 | -        | -             |
 | [propertyNames](./propertyNames.md)                                             | 4     | -                 | -        | -             |
 | [recursiveRef](./recursiveRef.md)                                               | 9     | -                 | 4        | -             |
-| [ref](./ref.md)                                                                 | 29    | -                 | -        | -             |
-| [refRemote](./refRemote.md)                                                     | 13    | -                 | -        | -             |
+| [ref](./ref.md)                                                                 | 32    | -                 | 3        | -             |
+| [refRemote](./refRemote.md)                                                     | 14    | -                 | -        | -             |
 | [required](./required.md)                                                       | 5     | -                 | -        | -             |
 | [type](./type.md)                                                               | 11    | -                 | -        | -             |
-| [unevaluatedItems](./unevaluatedItems.md)                                       | 20    | -                 | 1        | -             |
-| [unevaluatedProperties](./unevaluatedProperties.md)                             | 34    | -                 | 3        | -             |
+| [unevaluatedItems](./unevaluatedItems.md)                                       | 22    | -                 | 3        | -             |
+| [unevaluatedProperties](./unevaluatedProperties.md)                             | 35    | -                 | 3        | -             |
 | [uniqueItems](./uniqueItems.md)                                                 | 6     | -                 | -        | -             |
 | [unknownKeyword](./unknownKeyword.md)                                           | 1     | -                 | 1        | -             |
 | [vocabulary](./vocabulary.md)                                                   | 1     | 1                 | -        | -             |

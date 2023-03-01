@@ -69,19 +69,15 @@ const ref0 = function validate(data) {
     if (!ref1(data)) return false
     return true
   })()
-  if (!sub0) {
-    const sub2 = (() => {
-      if (!ref2(data)) return false
-      return true
-    })()
-    if (!sub2) {
-      const sub4 = (() => {
-        if (!ref3(data)) return false
-        return true
-      })()
-      if (!sub4) return false
-    }
-  }
+  const sub2 = (() => {
+    if (!ref2(data)) return false
+    return true
+  })()
+  const sub4 = (() => {
+    if (!ref3(data)) return false
+    return true
+  })()
+  if (!(sub0 || sub2 || sub4)) return false
   return true
 };
 return ref0
