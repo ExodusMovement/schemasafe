@@ -1005,8 +1005,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
             subrule(suberr, current, sch, subPath('anyOf', key), dyn)
           )
           evaluateDelta(entries.reduce((acc, cur) => orDelta(acc, cur.delta), {}))
-          const condition = safenotor(...entries.map(({ sub }) => sub))
-          errorIf(condition, { path: ['anyOf'], suberr })
+          errorIf(safenotor(...entries.map(({ sub }) => sub)), { path: ['anyOf'], suberr })
           for (const { delta, sub } of entries) fun.if(sub, () => evaluateDeltaDynamic(delta))
           return null
         }
@@ -1018,18 +1017,30 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         const otherBlocks = anyOf.filter((x) => !functions.hasOwn(x, 'const'))
         uncertainBranchTypes('anyOf', otherBlocks)
         const blocks = [...constBlocks, ...otherBlocks]
-
         let delta
-        let body = () => error({ path: ['anyOf'], suberr })
-        for (const [key, sch] of Object.entries(blocks).reverse()) {
-          const oldBody = body
-          body = () => {
-            const { sub, delta: deltaVar } = subrule(suberr, current, sch, subPath('anyOf', key))
-            fun.if(safenot(sub), oldBody)
-            delta = delta ? orDelta(delta, deltaVar) : deltaVar
+
+        if (!getMeta().exclusiveRefs) {
+          // Under unevaluated* support, we can't optimize out branches using simple rules, see below
+          const entries = Object.entries(anyOf).map(([key, sch]) =>
+            subrule(suberr, current, sch, subPath('anyOf', key), dyn)
+          )
+          delta = entries.reduce((acc, cur) => orDelta(acc, cur.delta), {})
+          errorIf(safenotor(...entries.map(({ sub }) => sub)), { path: ['anyOf'], suberr })
+        } else {
+          // Optimization logic below isn't stable under unevaluated* presence, as branches can be the sole reason of
+          // causing dynamic evaluation, and optimizing them out can miss the `if (!canSkipDynamic()) {` check above
+          let body = () => error({ path: ['anyOf'], suberr })
+          for (const [key, sch] of Object.entries(blocks).reverse()) {
+            const oldBody = body
+            body = () => {
+              const { sub, delta: deltaVar } = subrule(suberr, current, sch, subPath('anyOf', key))
+              fun.if(safenot(sub), oldBody) // this can exclude branches, see note above
+              delta = delta ? orDelta(delta, deltaVar) : deltaVar
+            }
           }
+          body()
         }
-        body()
+
         evaluateDelta(delta)
         return null
       })
@@ -1158,9 +1169,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         }
         return applyRef(compileSub(sub, subRoot, path), { path: ['$ref'] })
       })
-      if (node.$ref && getMeta().exclusiveRefs) {
+      if (getMeta().exclusiveRefs) {
         enforce(!opts[optDynamic], 'unevaluated* is supported only on draft2019-09 and above')
-        return // ref overrides any sibling keywords for older schemas
+        if (node.$ref) return // ref overrides any sibling keywords for older schemas
       }
       handle('$recursiveRef', ['string'], ($recursiveRef) => {
         if (!opts[optRecAnchors]) throw new Error('Recursive anchors are not enabled')
