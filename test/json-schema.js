@@ -43,6 +43,14 @@ const unsafe = new Set([
   'optional/refOfUnknownKeyword.json/reference of an arbitrary keyword of a sub-schema',
   'optional/cross-draft.json/refs to historic drafts are processed as historic drafts',
   'content.json', // validation for content is disabled by default per spec, which we treat as unsafe
+  'additionalItems.json/when items is schema, boolean additionalItems does nothing',
+  'unevaluatedItems.json/unevaluatedItems with ignored additionalItems',
+  'unevaluatedItems.json/unevaluatedItems with ignored applicator additionalItems',
+  'unevaluatedItems.json/unevaluatedItems with items',
+  'ref.json/ref to if',
+  'ref.json/ref to then',
+  'ref.json/ref to else',
+  "not.json/collect annotations inside a 'not', even if collection is disabled",
 
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
   'ref.json/$ref prevents a sibling id from changing the base uri', // in pre-2019-09, any $ref siblings are not handled
@@ -113,6 +121,7 @@ const unsupported = new Set([
   'draft3/infinite-loop-detection.json', // has 'extends'
   'draft3/enum.json/enums in properties', // we don't support boolean required
   'draft3/ref.json/remote ref, containing refs itself',
+  'draft3/ref.json/$ref prevents a sibling id from changing the base uri',
   'draft3/optional/ecmascript-regex.json/ECMA 262 regex dialect recognition', // broken assumption in test
 
   // draft-next changes
