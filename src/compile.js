@@ -1004,7 +1004,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           const entries = Object.entries(anyOf).map(([key, sch]) =>
             subrule(suberr, current, sch, subPath('anyOf', key), dyn)
           )
-          evaluateDelta(entries.reduce((acc, cur) => orDelta(acc, cur.delta), {}))
+          evaluateDelta(entries.map((x) => x.delta).reduce((acc, cur) => orDelta(acc, cur)))
           errorIf(safenotor(...entries.map(({ sub }) => sub)), { path: ['anyOf'], suberr })
           for (const { delta, sub } of entries) fun.if(sub, () => evaluateDeltaDynamic(delta))
           return null
@@ -1024,7 +1024,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           const entries = Object.entries(anyOf).map(([key, sch]) =>
             subrule(suberr, current, sch, subPath('anyOf', key), dyn)
           )
-          delta = entries.reduce((acc, cur) => orDelta(acc, cur.delta), {})
+          delta = entries.map((x) => x.delta).reduce((acc, cur) => orDelta(acc, cur))
           errorIf(safenotor(...entries.map(({ sub }) => sub)), { path: ['anyOf'], suberr })
         } else {
           // Optimization logic below isn't stable under unevaluated* presence, as branches can be the sole reason of
