@@ -72,6 +72,7 @@ const unsafe = new Set([
   'dynamicRef.json/A $dynamicRef without a matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor',
   'dynamicRef.json/A $dynamicRef with a non-matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor',
   'dynamicRef.json/A $dynamicRef that initially resolves to a schema without a matching $dynamicAnchor behaves like a normal $ref to $anchor',
+  'dynamicRef.json/A $dynamicRef without anchor in fragment behaves identical to $ref',
 
   // no bookending
   'draft-next/dynamicRef.json/A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated',
