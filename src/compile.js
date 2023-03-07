@@ -1187,7 +1187,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       })
       handle('$dynamicRef', ['string'], ($dynamicRef) => {
         if (!opts[optDynAnchors]) throw new Error('Dynamic anchors are not enabled')
-        enforce(/^[^#]*#[a-zA-Z0-9_-]+$/.test($dynamicRef), 'Unsupported $dynamicRef format')
+        laxMode(/^[^#]*#[a-zA-Z0-9_-]+$/.test($dynamicRef), 'Unsupported $dynamicRef format')
         const dynamicTail = $dynamicRef.replace(/^[^#]+/, '')
         const resolved = resolveReference(root, schemas, $dynamicRef, basePath())
         if (!resolved[0] && !getMeta().bookending) {
