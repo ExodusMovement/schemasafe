@@ -130,10 +130,10 @@ const unsupported = new Set([
   'draft-next/unevaluatedProperties.json/unevaluatedProperties can see inside propertyDependencies',
 
   // ajv specific non-standard tests
-  'rules/format.json/whitelisted unknown format is valid',
-  'rules/format.json/validation of URL strings',
-  'rules/format.json/validation of JSON-pointer URI fragment strings',
-  'rules/format.json/validation of uuid strings', // URI form not valid per new spec for { format: 'uuid' }
+  'rules/format.json/allowed unknown format is valid',
+  'removed/format.json/validation of URL strings',
+  'removed/format.json/validation of JSON-pointer URI fragment strings',
+  'removed/format.json/validation of uuid strings', // URI form not valid per new spec for { format: 'uuid' }
   'issues/33_json_schema_latest.json/use latest json schema as v4 (#33)',
 ])
 const unsupportedMask = []
@@ -202,3 +202,4 @@ processTestDir('ajv-spec/tests', 'issues', {}, ajvSchemas)
 processTestDir('ajv-spec/tests', 'rules', {}, ajvSchemas)
 processTestDir('ajv-spec/tests', 'schemas', {}, ajvSchemas)
 processTestDir('ajv-spec', 'extras.part', {}, ajvSchemas)
+processTestDir('ajv-spec', 'removed', {}, ajvSchemas)
