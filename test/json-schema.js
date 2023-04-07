@@ -136,7 +136,10 @@ const unsupported = new Set([
   'removed/format.json/validation of uuid strings', // URI form not valid per new spec for { format: 'uuid' }
   'issues/33_json_schema_latest.json/use latest json schema as v4 (#33)',
 ])
-const unsupportedMask = []
+const unsupportedMask = [
+  // "only an annotation by default" tests
+  /^format\.json\/[0-9a-z-]+ format\/invalid [0-9a-z-]+ string is only an annotation by default$/,
+]
 
 // There is no option to make all formats fallback to noop, but users can easily opt-in to that
 // per-format, or get a visible error in compile time
