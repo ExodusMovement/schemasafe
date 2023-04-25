@@ -84,7 +84,7 @@ function resolveReference(root, schemas, ref, base = '') {
   const results = []
 
   const [main, hash = ''] = ptr.split('#')
-  const local = decodeURI(hash).replace(/\/$/, '')
+  const local = decodeURI(hash)
 
   // Find in self by id path
   const visit = (sub, oldPath, specialChilds = false, dynamic = false) => {
