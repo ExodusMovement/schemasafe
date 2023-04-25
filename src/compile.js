@@ -27,6 +27,7 @@ const schemaTypes = new Map(
 )
 const isPlainObject = schemaTypes.get('object')
 const isSchemaish = (arg) => isPlainObject(arg) || typeof arg === 'boolean'
+const deltaEmpty = (delta) => functions.deepEqual(delta, { type: [] })
 
 const schemaIsOlderThan = ($schema, ver) =>
   schemaVersions.indexOf($schema) > schemaVersions.indexOf(`https://json-schema.org/${ver}/schema`)
@@ -907,6 +908,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
             }
             return null
           })
+          if (!handleThen && !deltaEmpty(deltaIf)) handleThen = () => evaluateDeltaDynamic(deltaIf)
           fun.if(sub, handleThen, handleElse)
           evaluateDelta(orDelta(deltaElse || {}, andDelta(deltaIf, deltaThen || {})))
           return null
