@@ -29,8 +29,10 @@ const unsafe = new Set([
   'unevaluatedProperties.json/unevaluatedProperties with nested unevaluatedProperties',
   'unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties outside',
   'unevaluatedProperties.json/nested unevaluatedProperties, outer true, inner false, properties inside',
+  'unevaluatedProperties.json/unevaluatedProperties can see annotations from if without then and else', // lone if
   'unevaluatedItems.json/unevaluatedItems and contains interact to control item dependency relationship', // lone if
   'unevaluatedItems.json/unevaluatedItems with nested items', // schema true
+  'unevaluatedItems.json/unevaluatedItems can see annotations from if without then and else', // lone if
   'not.json/not with boolean schema false',
   'anyOf.json/anyOf with one empty schema',
   'anyOf.json/anyOf with boolean schemas, all true',
