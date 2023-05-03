@@ -33,7 +33,6 @@ Based on JSON Schema Test Suite for `draft7`.
 | [enum](./enum.md)                                           | 10    | -                 | -        | -             |
 | [exclusiveMaximum](./exclusiveMaximum.md)                   | 1     | -                 | -        | -             |
 | [exclusiveMinimum](./exclusiveMinimum.md)                   | 1     | -                 | -        | -             |
-| [format](./format.md)                                       | 17    | 4                 | -        | -             |
 | [id](./id.md)                                               | 3     | -                 | -        | -             |
 | [if-then-else](./if-then-else.md)                           | 10    | -                 | 6        | -             |
 | [infinite-loop-detection](./infinite-loop-detection.md)     | 1     | -                 | -        | -             |

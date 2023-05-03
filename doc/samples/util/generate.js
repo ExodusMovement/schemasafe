@@ -49,6 +49,10 @@ function processSchema(block) {
   return { description, comment, errors, warnings, notices }
 }
 
+const skip = new Set([
+  'format', // top-level format tests are noops that expect no validation but just annotation by default
+])
+
 const results = []
 const readdir = (sub) =>
   readdirSync(path.join(dir, sub))
@@ -58,6 +62,7 @@ for (const file of [...readdir(''), ...readdir('optional')]) {
   if (file.endsWith('.json')) {
     const id = file.replace(/\.json$/, '')
     if (!/^[a-z0-9_/-]+$/i.test(id)) throw new Error('Unexpected')
+    if (skip.has(id)) continue
     const content = readFileSync(path.join(dir, file))
     const stat = { id, schemas: 0, errors: 0, warnings: 0, notices: 0, mistakes: 0 }
     const contents = [`# ${id}`, '']

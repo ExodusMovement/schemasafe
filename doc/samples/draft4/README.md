@@ -28,7 +28,6 @@ Based on JSON Schema Test Suite for `draft4`.
 | [definitions](./definitions.md)                                     | 1     | -                 | -        | -             |
 | [dependencies](./dependencies.md)                                   | 5     | -                 | -        | -             |
 | [enum](./enum.md)                                                   | 10    | -                 | -        | -             |
-| [format](./format.md)                                               | 6     | -                 | -        | -             |
 | [id](./id.md)                                                       | 1     | -                 | -        | -             |
 | [infinite-loop-detection](./infinite-loop-detection.md)             | 1     | -                 | -        | -             |
 | [items](./items.md)                                                 | 6     | -                 | -        | -             |
