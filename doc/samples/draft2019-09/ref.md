@@ -1070,16 +1070,16 @@ return ref0
 ```json
 {
   "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
-  "$id": "/draft2019-09/ref-and-id1/base.json",
+  "$id": "https://example.com/draft2019-09/ref-and-id1/base.json",
   "$ref": "int.json",
   "$defs": {
     "bigint": {
-      "$comment": "canonical uri: /draft2019-09/ref-and-id1/int.json",
+      "$comment": "canonical uri: https://example.com/draft2019-09/ref-and-id1/int.json",
       "$id": "int.json",
       "maximum": 10
     },
     "smallint": {
-      "$comment": "canonical uri: /draft2019-09/ref-and-id1-int.json",
+      "$comment": "canonical uri: https://example.com/draft2019-09/ref-and-id1-int.json",
       "$id": "/draft2019-09/ref-and-id1-int.json",
       "maximum": 2
     }
@@ -1106,7 +1106,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at /draft2019-09/ref-and-id1/base.json#`
+ * `[requireValidation] type should be specified at https://example.com/draft2019-09/ref-and-id1/base.json#`
 
 
 ## order of evaluation: $id and $anchor and $ref
@@ -1116,16 +1116,16 @@ return ref0
 ```json
 {
   "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
-  "$id": "/draft2019-09/ref-and-id2/base.json",
+  "$id": "https://example.com/draft2019-09/ref-and-id2/base.json",
   "$ref": "#bigint",
   "$defs": {
     "bigint": {
-      "$comment": "canonical uri: /draft2019-09/ref-and-id2/base.json#/$defs/bigint; another valid uri for this location: /ref-and-id2/base.json#bigint",
+      "$comment": "canonical uri: https://example.com/draft2019-09/ref-and-id2/base.json#/$defs/bigint; another valid uri for this location: https://example.com/ref-and-id2/base.json#bigint",
       "$anchor": "bigint",
       "maximum": 10
     },
     "smallint": {
-      "$comment": "canonical uri: /draft2019-09/ref-and-id2#/$defs/smallint; another valid uri for this location: /ref-and-id2/#bigint",
+      "$comment": "canonical uri: https://example.com/draft2019-09/ref-and-id2#/$defs/smallint; another valid uri for this location: https://example.com/ref-and-id2/#bigint",
       "$id": "/draft2019-09/ref-and-id2/",
       "$anchor": "bigint",
       "maximum": 2
@@ -1153,7 +1153,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at /draft2019-09/ref-and-id2/base.json#`
+ * `[requireValidation] type should be specified at https://example.com/draft2019-09/ref-and-id2/base.json#`
 
 
 ## simple URN base URI with $ref via the URN
@@ -1968,4 +1968,125 @@ return ref0
 ### Warnings
 
  * `Unprocessed keywords: ["else"] at #`
+
+
+## ref with absolute-path-reference
+
+### Schema
+
+```json
+{
+  "$id": "http://example.com/ref/absref.json",
+  "$defs": {
+    "a": {
+      "$id": "http://example.com/ref/absref/foobar.json",
+      "type": "number"
+    },
+    "b": { "$id": "http://example.com/absref/foobar.json", "type": "string" }
+  },
+  "$ref": "/absref/foobar.json"
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "string")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at http://example.com/ref/absref.json#`
+
+
+## $id with file URI still resolves pointers - *nix
+
+### Schema
+
+```json
+{
+  "$id": "file:///folder/file.json",
+  "$defs": { "foo": { "type": "number" } },
+  "$ref": "#/$defs/foo"
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+
+## $id with file URI still resolves pointers - windows
+
+### Schema
+
+```json
+{
+  "$id": "file:///c:/folder/file.json",
+  "$defs": { "foo": { "type": "number" } },
+  "$ref": "#/$defs/foo"
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+
+## empty tokens in $ref json-pointer
+
+### Schema
+
+```json
+{
+  "$defs": { "": { "$defs": { "": { "type": "number" } } } },
+  "allOf": [{ "$ref": "#/$defs//$defs/" }]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
 

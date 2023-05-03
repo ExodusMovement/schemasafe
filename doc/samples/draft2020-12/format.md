@@ -35,6 +35,10 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
+
 
 ## idn-email format
 
@@ -89,6 +93,10 @@ return ref0
 
  * `Unrecognized format used: "regex" at #`
 
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
+
 
 ## ipv4 format
 
@@ -117,6 +125,10 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
+
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
 
 
 ## ipv6 format
@@ -179,6 +191,10 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
+
 
 ## idn-hostname format
 
@@ -227,6 +243,10 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
+
 
 ## date format
 
@@ -264,6 +284,10 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
+
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
 
 
 ## date-time format
@@ -313,6 +337,10 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
+
 
 ## time format
 
@@ -350,6 +378,10 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
+
 
 ## json-pointer format
 
@@ -377,6 +409,10 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
+
 
 ## relative-json-pointer format
 
@@ -403,6 +439,10 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
+
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
 
 
 ## iri format
@@ -465,6 +505,10 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
+
 
 ## uri-reference format
 
@@ -491,6 +535,10 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
+
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
 
 
 ## uri-template format
@@ -519,6 +567,10 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
+
 
 ## uuid format
 
@@ -545,6 +597,10 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
+
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
 
 
 ## duration format
@@ -577,4 +633,8 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
+
+### Misclassified!
+
+**This schema caused 1 misclassifications!**
 

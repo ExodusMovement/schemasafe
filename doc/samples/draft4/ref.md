@@ -858,3 +858,86 @@ const ref0 = function validate(data) {
 return ref0
 ```
 
+
+## id with file URI still resolves pointers - *nix
+
+### Schema
+
+```json
+{
+  "id": "file:///folder/file.json",
+  "definitions": { "foo": { "type": "number" } },
+  "allOf": [{ "$ref": "#/definitions/foo" }]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+
+## id with file URI still resolves pointers - windows
+
+### Schema
+
+```json
+{
+  "id": "file:///c:/folder/file.json",
+  "definitions": { "foo": { "type": "number" } },
+  "allOf": [{ "$ref": "#/definitions/foo" }]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+
+## empty tokens in $ref json-pointer
+
+### Schema
+
+```json
+{
+  "definitions": { "": { "definitions": { "": { "type": "number" } } } },
+  "allOf": [{ "$ref": "#/definitions//definitions/" }]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+

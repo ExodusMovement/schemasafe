@@ -445,10 +445,9 @@ const ref0 = function validate(data) {
     return true
   })()
   if (!(sub0 || sub1)) return false
-  if (sub0) evaluatedItems0.push(2)
   if (sub1) evaluatedItems0.push(3)
   if (Array.isArray(data)) {
-    if (data.length > Math.max(1, ...evaluatedItems0)) return false
+    if (data.length > Math.max(2, ...evaluatedItems0)) return false
   }
   return true
 };
@@ -839,4 +838,44 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
+
+
+## unevaluatedItems can see annotations from if without then and else
+
+### Schema
+
+```json
+{ "if": { "items": [{ "const": "a" }] }, "unevaluatedItems": false }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  validate.evaluatedDynamic = null
+  const evaluatedItem0 = []
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [[], []]
+  const sub0 = (() => {
+    if (Array.isArray(data)) {
+      if (data[0] !== undefined && hasOwn(data, 0)) {
+        if (!(data[0] === "a")) return false
+      }
+    }
+    return true
+  })()
+  if (sub0) evaluatedItems0.push(1)
+  if (Array.isArray(data)) {
+    if (data.length > Math.max(0, ...evaluatedItems0)) return false
+  }
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unprocessed keywords: ["if"] at #`
 

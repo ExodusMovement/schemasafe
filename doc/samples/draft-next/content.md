@@ -78,6 +78,7 @@ return ref0
   "contentMediaType": "application/json",
   "contentEncoding": "base64",
   "contentSchema": {
+    "type": "object",
     "required": ["foo"],
     "properties": { "foo": { "type": "string" } }
   }

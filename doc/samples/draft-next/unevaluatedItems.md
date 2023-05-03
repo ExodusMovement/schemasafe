@@ -143,7 +143,7 @@ return ref0
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/0`
 
 
-## unevaluatedItems with items
+## unevaluatedItems with items and prefixItems
 
 ### Schema
 
@@ -174,6 +174,37 @@ return ref0
 ##### Strong mode notices
 
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/0`
+
+
+## unevaluatedItems with items
+
+### Schema
+
+```json
+{ "items": { "type": "number" }, "unevaluatedItems": { "type": "string" } }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (Array.isArray(data)) {
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] !== undefined && hasOwn(data, i)) {
+        if (!(typeof data[i] === "number")) return false
+      }
+    }
+  }
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unprocessed keywords: ["unevaluatedItems"] at #`
 
 
 ## unevaluatedItems with nested tuple
@@ -381,10 +412,9 @@ const ref0 = function validate(data) {
     return true
   })()
   if (!(sub0 || sub1)) return false
-  if (sub0) evaluatedItems0.push(2)
   if (sub1) evaluatedItems0.push(3)
   if (Array.isArray(data)) {
-    for (let i = Math.max(1, ...evaluatedItems0); i < data.length; i++) {
+    for (let i = Math.max(2, ...evaluatedItems0); i < data.length; i++) {
       if (evaluatedItem0.includes(i)) continue
       if (data[i] !== undefined && hasOwn(data, i)) return false
     }
@@ -1108,4 +1138,47 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
+
+
+## unevaluatedItems can see annotations from if without then and else
+
+### Schema
+
+```json
+{ "if": { "prefixItems": [{ "const": "a" }] }, "unevaluatedItems": false }
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  validate.evaluatedDynamic = null
+  const evaluatedItem0 = []
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [[], []]
+  const sub0 = (() => {
+    if (Array.isArray(data)) {
+      if (data[0] !== undefined && hasOwn(data, 0)) {
+        if (!(data[0] === "a")) return false
+      }
+    }
+    return true
+  })()
+  if (sub0) evaluatedItems0.push(1)
+  if (Array.isArray(data)) {
+    for (let i = Math.max(0, ...evaluatedItems0); i < data.length; i++) {
+      if (evaluatedItem0.includes(i)) continue
+      if (data[i] !== undefined && hasOwn(data, i)) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unprocessed keywords: ["if"] at #`
 

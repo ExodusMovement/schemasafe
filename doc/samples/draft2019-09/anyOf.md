@@ -134,10 +134,6 @@ const ref0 = function validate(data) {
 return ref0
 ```
 
-##### Strong mode notices
-
- * `[requireValidation] type should be specified at #`
-
 
 ## anyOf complex types
 

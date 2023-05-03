@@ -1254,3 +1254,124 @@ return ref0
 
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#`
 
+
+## ref with absolute-path-reference
+
+### Schema
+
+```json
+{
+  "$id": "http://example.com/ref/absref.json",
+  "definitions": {
+    "a": {
+      "$id": "http://example.com/ref/absref/foobar.json",
+      "type": "number"
+    },
+    "b": { "$id": "http://example.com/absref/foobar.json", "type": "string" }
+  },
+  "allOf": [{ "$ref": "/absref/foobar.json" }]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "string")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at http://example.com/ref/absref.json#`
+
+
+## $id with file URI still resolves pointers - *nix
+
+### Schema
+
+```json
+{
+  "$id": "file:///folder/file.json",
+  "definitions": { "foo": { "type": "number" } },
+  "allOf": [{ "$ref": "#/definitions/foo" }]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+
+## $id with file URI still resolves pointers - windows
+
+### Schema
+
+```json
+{
+  "$id": "file:///c:/folder/file.json",
+  "definitions": { "foo": { "type": "number" } },
+  "allOf": [{ "$ref": "#/definitions/foo" }]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+
+## empty tokens in $ref json-pointer
+
+### Schema
+
+```json
+{
+  "definitions": { "": { "definitions": { "": { "type": "number" } } } },
+  "allOf": [{ "$ref": "#/definitions//definitions/" }]
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+

@@ -32,7 +32,7 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [default](./default.md)                                                         | 3     | -                 | -        | -             |
 | [defs](./defs.md)                                                               | 1     | -                 | -        | -             |
 | [dependentRequired](./dependentRequired.md)                                     | 4     | -                 | -        | -             |
-| [dependentSchemas](./dependentSchemas.md)                                       | 3     | -                 | -        | -             |
+| [dependentSchemas](./dependentSchemas.md)                                       | 4     | -                 | -        | -             |
 | [enum](./enum.md)                                                               | 10    | -                 | -        | -             |
 | [exclusiveMaximum](./exclusiveMaximum.md)                                       | 1     | -                 | -        | -             |
 | [exclusiveMinimum](./exclusiveMinimum.md)                                       | 1     | -                 | -        | -             |
@@ -51,7 +51,7 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [minLength](./minLength.md)                                                     | 2     | -                 | -        | -             |
 | [minProperties](./minProperties.md)                                             | 2     | -                 | -        | -             |
 | [minimum](./minimum.md)                                                         | 2     | -                 | -        | -             |
-| [multipleOf](./multipleOf.md)                                                   | 4     | -                 | -        | -             |
+| [multipleOf](./multipleOf.md)                                                   | 5     | -                 | -        | -             |
 | [not](./not.md)                                                                 | 7     | -                 | 2        | -             |
 | [oneOf](./oneOf.md)                                                             | 11    | -                 | 3        | -             |
 | [pattern](./pattern.md)                                                         | 2     | -                 | -        | -             |
@@ -59,15 +59,15 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [properties](./properties.md)                                                   | 6     | -                 | -        | -             |
 | [propertyNames](./propertyNames.md)                                             | 4     | -                 | -        | -             |
 | [recursiveRef](./recursiveRef.md)                                               | 9     | -                 | 4        | -             |
-| [ref](./ref.md)                                                                 | 32    | -                 | 3        | -             |
+| [ref](./ref.md)                                                                 | 36    | -                 | 3        | -             |
 | [refRemote](./refRemote.md)                                                     | 14    | -                 | -        | -             |
 | [required](./required.md)                                                       | 5     | -                 | -        | -             |
 | [type](./type.md)                                                               | 11    | -                 | -        | -             |
-| [unevaluatedItems](./unevaluatedItems.md)                                       | 22    | -                 | 3        | -             |
-| [unevaluatedProperties](./unevaluatedProperties.md)                             | 35    | -                 | 3        | -             |
+| [unevaluatedItems](./unevaluatedItems.md)                                       | 23    | -                 | 4        | -             |
+| [unevaluatedProperties](./unevaluatedProperties.md)                             | 37    | -                 | 4        | -             |
 | [uniqueItems](./uniqueItems.md)                                                 | 6     | -                 | -        | -             |
 | [unknownKeyword](./unknownKeyword.md)                                           | 1     | -                 | 1        | -             |
-| [vocabulary](./vocabulary.md)                                                   | 1     | 1                 | -        | -             |
+| [vocabulary](./vocabulary.md)                                                   | 2     | 2                 | -        | -             |
 | [optional/bignum](./optional-bignum.md)                                         | 7     | -                 | -        | -             |
 | [optional/cross-draft](./optional-cross-draft.md)                               | 2     | -                 | 1        | -             |
 | [optional/dependencies-compatibility](./optional-dependencies-compatibility.md) | 7     | -                 | -        | -             |

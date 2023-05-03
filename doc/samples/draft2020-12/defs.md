@@ -253,20 +253,18 @@ const ref10 = function validate(data, dynAnchors = []) {
         if (!ref11(data.type, [...dynAnchors, dynLocal[0] || []])) return false
         return true
       })()
-      if (!sub2) {
-        const sub3 = (() => {
-          if (!Array.isArray(data.type)) return false
-          if (data.type.length < 1) return false
-          for (let k = 0; k < data.type.length; k++) {
-            if (data.type[k] !== undefined && hasOwn(data.type, k)) {
-              if (!ref11(data.type[k], [...dynAnchors, dynLocal[0] || []])) return false
-            }
+      const sub3 = (() => {
+        if (!Array.isArray(data.type)) return false
+        if (data.type.length < 1) return false
+        for (let k = 0; k < data.type.length; k++) {
+          if (data.type[k] !== undefined && hasOwn(data.type, k)) {
+            if (!ref11(data.type[k], [...dynAnchors, dynLocal[0] || []])) return false
           }
-          if (!unique(data.type)) return false
-          return true
-        })()
-        if (!sub3) return false
-      }
+        }
+        if (!unique(data.type)) return false
+        return true
+      })()
+      if (!(sub2 || sub3)) return false
     }
     if (data.enum !== undefined && hasOwn(data, "enum")) {
       if (!Array.isArray(data.enum)) return false
@@ -398,13 +396,11 @@ const ref1 = function validate(data, dynAnchors = []) {
           if (!(dynamicResolve(dynAnchors || [], "#meta") || validate)(data.dependencies[key1], [...dynAnchors, dynLocal[0] || []])) return false
           return true
         })()
-        if (!sub0) {
-          const sub1 = (() => {
-            if (!ref2(data.dependencies[key1], [...dynAnchors, dynLocal[0] || []])) return false
-            return true
-          })()
-          if (!sub1) return false
-        }
+        const sub1 = (() => {
+          if (!ref2(data.dependencies[key1], [...dynAnchors, dynLocal[0] || []])) return false
+          return true
+        })()
+        if (!(sub0 || sub1)) return false
       }
     }
     if (data["$recursiveAnchor"] !== undefined && hasOwn(data, "$recursiveAnchor")) {

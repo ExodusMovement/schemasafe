@@ -751,3 +751,45 @@ return ref0
 
  * `[requireValidation] schema = true is not allowed at http://localhost:1234/draft-next/strict-extendible-allof-ref-first.json#/properties/a`
 
+
+## $dynamicAnchor inside propertyDependencies
+
+### Schema
+
+```json
+{
+  "$id": "http://localhost:1234/draft-next/dynamicanchor-in-propertydependencies.json",
+  "$defs": {
+    "inner": {
+      "$id": "inner",
+      "$dynamicAnchor": "foo",
+      "type": "object",
+      "properties": { "expectedTypes": { "type": "string" } },
+      "additionalProperties": { "$dynamicRef": "#foo" }
+    }
+  },
+  "propertyDependencies": {
+    "expectedTypes": {
+      "strings": {
+        "$id": "east",
+        "$ref": "inner",
+        "$defs": { "foo": { "$dynamicAnchor": "foo", "type": "string" } }
+      },
+      "integers": {
+        "$id": "west",
+        "$ref": "inner",
+        "$defs": { "foo": { "$dynamicAnchor": "foo", "type": "integer" } }
+      }
+    }
+  }
+}
+```
+
+### Code
+
+**FAILED TO COMPILE**
+
+### Errors
+
+ * `Unexpected $dynamicAnchor resolution: foo at #/propertyDependencies/expectedTypes/strings`
+

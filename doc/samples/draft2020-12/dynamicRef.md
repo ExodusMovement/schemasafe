@@ -184,6 +184,71 @@ return ref0
  * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at https://test.json-schema.org/typical-dynamic-resolution/root#`
 
 
+## A $dynamicRef without anchor in fragment behaves identical to $ref
+
+### Schema
+
+```json
+{
+  "$id": "https://test.json-schema.org/dynamicRef-without-anchor/root",
+  "$ref": "list",
+  "$defs": {
+    "foo": { "$dynamicAnchor": "items", "type": "string" },
+    "list": {
+      "$id": "list",
+      "type": "array",
+      "items": { "$dynamicRef": "#/$defs/items" },
+      "$defs": {
+        "items": {
+          "$comment": "This is only needed to satisfy the bookending requirement",
+          "$dynamicAnchor": "items",
+          "type": "number"
+        }
+      }
+    }
+  }
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data, dynAnchors) {
+  if (!(typeof data === "string")) return false
+  return true
+};
+const ref3 = function validate(data, dynAnchors) {
+  if (!(typeof data === "number")) return false
+  return true
+};
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const dynamicResolve = (anchors, id) => (anchors.filter((x) => x[id])[0] || {})[id];
+const ref2 = function validate(data, dynAnchors = []) {
+  const dynLocal = [{}]
+  dynLocal[0]["#items"] = ref3
+  if (!Array.isArray(data)) return false
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] !== undefined && hasOwn(data, i)) {
+      if (!ref3(data[i], [...dynAnchors, dynLocal[0] || []])) return false
+    }
+  }
+  return true
+};
+const ref0 = function validate(data, dynAnchors = []) {
+  const dynLocal = [{}]
+  dynLocal[0]["#items"] = ref1
+  if (!ref2(data, [...dynAnchors, dynLocal[0] || []])) return false
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unsupported $dynamicRef format at https://test.json-schema.org/dynamicRef-without-anchor/root#/items`
+
+
 ## A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution
 
 ### Schema

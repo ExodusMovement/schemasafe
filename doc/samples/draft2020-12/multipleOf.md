@@ -114,3 +114,32 @@ const ref0 = function validate(data) {
 return ref0
 ```
 
+
+## small multiple of large integer
+
+### Schema
+
+```json
+{ "type": "integer", "multipleOf": 1e-8 }
+```
+
+### Code
+
+```js
+'use strict'
+const isMultipleOf = (value, divisor, factor, factorMultiple) => {
+  if (value % divisor === 0) return true
+  let multiple = value * factor
+  if (multiple === Infinity || multiple === -Infinity) multiple = value
+  if (multiple % factorMultiple === 0) return true
+  const normal = Math.floor(multiple + 0.5)
+  return normal / factor === value && normal % factorMultiple === 0
+};
+const ref0 = function validate(data) {
+  if (!Number.isInteger(data)) return false
+  if (!isMultipleOf(data, 1e-8, 1e8, 1)) return false
+  return true
+};
+return ref0
+```
+

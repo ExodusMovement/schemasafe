@@ -20,3 +20,23 @@
 
  * `Unexpected schema version: "https://localhost:1234/draft2020-12/metaschema-no-validation.json" at #`
 
+
+## ignore unrecognized optional vocabulary
+
+### Schema
+
+```json
+{
+  "$schema": "http://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json",
+  "type": "number"
+}
+```
+
+### Code
+
+**FAILED TO COMPILE**
+
+### Errors
+
+ * `Unexpected schema version: "https://localhost:1234/draft2020-12/metaschema-optional-vocabulary.json" at #`
+

@@ -143,3 +143,41 @@ return ref0
 
  * `[requireValidation] type should be specified at #`
 
+
+## dependent subschema incompatible with root
+
+### Schema
+
+```json
+{
+  "properties": { "foo": {} },
+  "dependencies": {
+    "foo": { "properties": { "bar": {} }, "additionalProperties": false }
+  }
+}
+```
+
+### Code
+
+```js
+'use strict'
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.foo !== undefined && hasOwn(data, "foo")) {
+      if (typeof data === "object" && data && !Array.isArray(data)) {
+        for (const key0 of Object.keys(data)) {
+          if (key0 !== "bar") return false
+        }
+      }
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] empty rules node is not allowed at #/dependencies/foo/properties/bar`
+

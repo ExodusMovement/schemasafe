@@ -605,7 +605,10 @@ const ref0 = function validate(data) {
     if (!(data.foo === "then")) return false
     return true
   })()
-  if (!sub0) {
+  if (sub0) {
+    evaluatedProps0[0].push(...["foo"])
+  }
+  else {
     if (!(data.baz !== undefined && hasOwn(data, "baz"))) return false
     if (!(typeof data.baz === "string")) return false
     evaluatedProps0[0].push(...["baz"])
@@ -1539,4 +1542,92 @@ return ref0
 ##### Strong mode notices
 
  * `[requireValidation] type should be specified at #`
+
+
+## unevaluatedProperties not affected by propertyNames
+
+### Schema
+
+```json
+{
+  "propertyNames": { "maxLength": 1 },
+  "unevaluatedProperties": { "type": "number" }
+}
+```
+
+### Code
+
+```js
+'use strict'
+const stringLength = (string) =>
+  /[\uD800-\uDFFF]/.test(string) ? [...string].length : string.length;
+const ref0 = function validate(data) {
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    for (const key0 of Object.keys(data)) {
+      if (key0.length > 1 && stringLength(key0) > 1) return false
+    }
+  }
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    for (const key1 of Object.keys(data)) {
+      if (!(typeof data[key1] === "number")) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/propertyNames`
+
+
+## unevaluatedProperties can see annotations from if without then and else
+
+### Schema
+
+```json
+{
+  "if": { "patternProperties": { "foo": { "type": "string" } } },
+  "unevaluatedProperties": false
+}
+```
+
+### Code
+
+```js
+'use strict'
+const propertyIn = (key, [properties, patterns]) =>
+  properties.includes(true) ||
+  properties.some((prop) => prop === key) ||
+  patterns.some((pattern) => new RegExp(pattern, 'u').test(key));
+const ref0 = function validate(data) {
+  validate.evaluatedDynamic = null
+  const evaluatedItem0 = []
+  const evaluatedItems0 = [0]
+  const evaluatedProps0 = [[], []]
+  const sub0 = (() => {
+    if (typeof data === "object" && data && !Array.isArray(data)) {
+      for (const key0 of Object.keys(data)) {
+        if (key0.includes("foo")) {
+          if (!(typeof data[key0] === "string")) return false
+        }
+      }
+    }
+    return true
+  })()
+  if (sub0) evaluatedProps0[1].push(...["foo"])
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    for (const key1 of Object.keys(data)) {
+      if (true && !propertyIn(key1, evaluatedProps0)) return false
+    }
+  }
+  return true
+};
+return ref0
+```
+
+### Warnings
+
+ * `Unprocessed keywords: ["if"] at #`
 

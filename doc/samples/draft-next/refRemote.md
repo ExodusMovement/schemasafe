@@ -50,6 +50,32 @@ return ref0
 ```
 
 
+## anchor within remote ref
+
+### Schema
+
+```json
+{
+  "$ref": "http://localhost:1234/draft-next/locationIndependentIdentifier.json#foo"
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!Number.isInteger(data)) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+
 ## ref within remote ref
 
 ### Schema
@@ -260,13 +286,11 @@ const ref1 = function validate(data) {
     if (!(data === null)) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (!ref2(data)) return false
-      return true
-    })()
-    if (!sub1) return false
-  }
+  const sub1 = (() => {
+    if (!ref2(data)) return false
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 const ref0 = function validate(data) {
@@ -281,7 +305,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at http://localhost:1234/draft-next/name-defs.json#`
 
 
 ## remote ref with ref to defs

@@ -26,7 +26,7 @@ Based on JSON Schema Test Suite for `draft4`.
 | [anyOf](./anyOf.md)                                                 | 5     | -                 | 1        | -             |
 | [default](./default.md)                                             | 3     | -                 | -        | -             |
 | [definitions](./definitions.md)                                     | 1     | -                 | -        | -             |
-| [dependencies](./dependencies.md)                                   | 4     | -                 | -        | -             |
+| [dependencies](./dependencies.md)                                   | 5     | -                 | -        | -             |
 | [enum](./enum.md)                                                   | 10    | -                 | -        | -             |
 | [format](./format.md)                                               | 6     | -                 | -        | -             |
 | [id](./id.md)                                                       | 1     | -                 | -        | -             |
@@ -40,13 +40,13 @@ Based on JSON Schema Test Suite for `draft4`.
 | [minLength](./minLength.md)                                         | 1     | -                 | -        | -             |
 | [minProperties](./minProperties.md)                                 | 1     | -                 | -        | -             |
 | [minimum](./minimum.md)                                             | 4     | -                 | -        | -             |
-| [multipleOf](./multipleOf.md)                                       | 4     | -                 | -        | -             |
+| [multipleOf](./multipleOf.md)                                       | 5     | -                 | -        | -             |
 | [not](./not.md)                                                     | 4     | -                 | -        | -             |
 | [oneOf](./oneOf.md)                                                 | 7     | -                 | -        | -             |
 | [pattern](./pattern.md)                                             | 2     | -                 | -        | -             |
 | [patternProperties](./patternProperties.md)                         | 4     | -                 | -        | -             |
 | [properties](./properties.md)                                       | 5     | -                 | -        | -             |
-| [ref](./ref.md)                                                     | 16    | -                 | 2        | -             |
+| [ref](./ref.md)                                                     | 19    | -                 | 2        | -             |
 | [refRemote](./refRemote.md)                                         | 8     | -                 | -        | -             |
 | [required](./required.md)                                           | 4     | -                 | -        | -             |
 | [type](./type.md)                                                   | 11    | -                 | -        | -             |

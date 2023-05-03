@@ -259,13 +259,11 @@ const ref1 = function validate(data) {
     if (!(data === null)) return false
     return true
   })()
-  if (!sub0) {
-    const sub1 = (() => {
-      if (!ref2(data)) return false
-      return true
-    })()
-    if (!sub1) return false
-  }
+  const sub1 = (() => {
+    if (!ref2(data)) return false
+    return true
+  })()
+  if (!(sub0 || sub1)) return false
   return true
 };
 const ref0 = function validate(data) {

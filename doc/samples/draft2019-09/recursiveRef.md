@@ -438,7 +438,7 @@ return ref0
 
 ```json
 {
-  "$id": "recursiveRef8_main.json",
+  "$id": "https://example.com/recursiveRef8_main.json",
   "$defs": {
     "inner": {
       "$id": "recursiveRef8_inner.json",
@@ -518,7 +518,7 @@ return ref0
 
 ```json
 {
-  "$id": "main.json",
+  "$id": "https://example.com/main.json",
   "$defs": {
     "inner": {
       "$id": "inner.json",

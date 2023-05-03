@@ -20,7 +20,7 @@ Based on JSON Schema Test Suite for `draft6`.
 
 | Name                                                        | Total | Failed to compile | Warnings | Misclassified |
 |-------------------------------------------------------------|-------|-------------------|----------|---------------|
-| [additionalItems](./additionalItems.md)                     | 9     | -                 | 4        | -             |
+| [additionalItems](./additionalItems.md)                     | 10    | -                 | 5        | -             |
 | [additionalProperties](./additionalProperties.md)           | 7     | -                 | -        | -             |
 | [allOf](./allOf.md)                                         | 12    | -                 | -        | -             |
 | [anyOf](./anyOf.md)                                         | 8     | -                 | 3        | -             |
@@ -29,7 +29,7 @@ Based on JSON Schema Test Suite for `draft6`.
 | [contains](./contains.md)                                   | 6     | -                 | -        | -             |
 | [default](./default.md)                                     | 3     | -                 | -        | -             |
 | [definitions](./definitions.md)                             | 1     | -                 | -        | -             |
-| [dependencies](./dependencies.md)                           | 6     | -                 | -        | -             |
+| [dependencies](./dependencies.md)                           | 7     | -                 | -        | -             |
 | [enum](./enum.md)                                           | 10    | -                 | -        | -             |
 | [exclusiveMaximum](./exclusiveMaximum.md)                   | 1     | -                 | -        | -             |
 | [exclusiveMinimum](./exclusiveMinimum.md)                   | 1     | -                 | -        | -             |
@@ -45,14 +45,14 @@ Based on JSON Schema Test Suite for `draft6`.
 | [minLength](./minLength.md)                                 | 2     | -                 | -        | -             |
 | [minProperties](./minProperties.md)                         | 2     | -                 | -        | -             |
 | [minimum](./minimum.md)                                     | 2     | -                 | -        | -             |
-| [multipleOf](./multipleOf.md)                               | 4     | -                 | -        | -             |
+| [multipleOf](./multipleOf.md)                               | 5     | -                 | -        | -             |
 | [not](./not.md)                                             | 6     | -                 | 1        | -             |
 | [oneOf](./oneOf.md)                                         | 11    | -                 | 3        | -             |
 | [pattern](./pattern.md)                                     | 2     | -                 | -        | -             |
 | [patternProperties](./patternProperties.md)                 | 5     | -                 | -        | -             |
 | [properties](./properties.md)                               | 6     | -                 | -        | -             |
 | [propertyNames](./propertyNames.md)                         | 4     | -                 | -        | -             |
-| [ref](./ref.md)                                             | 26    | -                 | 2        | -             |
+| [ref](./ref.md)                                             | 30    | -                 | 2        | -             |
 | [refRemote](./refRemote.md)                                 | 10    | -                 | -        | -             |
 | [required](./required.md)                                   | 5     | -                 | -        | -             |
 | [type](./type.md)                                           | 11    | -                 | -        | -             |
