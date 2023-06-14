@@ -2,6 +2,10 @@
 
 const { knownKeywords } = require('./known-keywords')
 
+/*
+ * JSON pointer collection/resolution logic
+ */
+
 function safeSet(map, key, value, comment = 'keys') {
   if (!map.has(key)) return map.set(key, value)
   if (map.get(key) !== value) throw new Error(`Conflicting duplicate ${comment}: ${key}`)

@@ -3,6 +3,12 @@
 const { format, safe, safenot } = require('./safe-format')
 const { jaystring } = require('./javascript')
 
+/*
+ * Construct a function from lines/blocks/if conditions.
+ *
+ * Returns a Function instance (makeFunction) or code in text format (makeModule).
+ */
+
 const INDENT_START = /[{[]/
 const INDENT_END = /[}\]]/
 
