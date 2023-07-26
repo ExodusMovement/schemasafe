@@ -79,6 +79,7 @@ const unsafe = new Set([
   // no bookending
   'draft-next/dynamicRef.json/A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated',
   "draft-next/dynamicRef.json/A $dynamicRef with intermediate scopes that don't include a matching $dynamicAnchor does not affect dynamic scope resolution",
+  'draft-next/dynamicRef.json/multiple dynamic paths to the $dynamicRef keyword',
 
   // ajv tests
   'rules/if.json/then/else without if should be ignored',
