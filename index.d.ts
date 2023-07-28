@@ -107,6 +107,7 @@ interface ValidatorOptions {
   allErrors?: boolean
   contentValidation?: boolean
   dryRun?: boolean
+  lint?: boolean
   allowUnusedKeywords?: boolean
   allowUnreachable?: boolean
   requireSchema?: boolean
@@ -137,18 +138,28 @@ interface Parse {
   toJSON(): Schema
 }
 
+interface LintError {
+  message: string
+  keywordLocation: string
+  schema: Schema
+}
+
 declare const validator: (schema: Schema, options?: ValidatorOptions) => Validate
 
 declare const parser: (schema: Schema, options?: ValidatorOptions) => Parse
 
+declare const lint: (schema: Schema, options?: ValidatorOptions) => LintError[]
+
 export {
   validator,
   parser,
+  lint,
   Validate,
   ValidationError,
   ValidatorOptions,
   ParseResult,
   Parse,
+  LintError,
   Json,
   Schema,
 }

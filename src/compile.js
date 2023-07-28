@@ -77,6 +77,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     allErrors = false,
     contentValidation,
     dryRun, // unused, just for rest siblings
+    lint: lintOnly = false,
     allowUnusedKeywords = opts.mode === 'lax',
     allowUnreachable = opts.mode === 'lax',
     requireSchema = opts.mode === 'strong',
@@ -215,9 +216,21 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
     const errorIf = (condition, errorArgs) => fun.if(condition, () => error(errorArgs))
 
+    if (lintOnly && !scope.lintErrors) scope.lintErrors = [] // we can do this as we don't build functions in lint-only mode
     const fail = (msg, value) => {
       const comment = value !== undefined ? ` ${JSON.stringify(value)}` : ''
-      throw new Error(`${msg}${comment} at ${joinPath(basePathRoot, toPointer(schemaPath))}`)
+      const keywordLocation = joinPath(basePathRoot, toPointer(schemaPath))
+      const message = `${msg}${comment} at ${keywordLocation}`
+      if (lintOnly) return scope.lintErrors.push({ message, keywordLocation, schema }) // don't fail if we are just collecting all errors
+      throw new Error(message)
+    }
+    const patternTestSafe = (pat, key) => {
+      try {
+        return patternTest(pat, key)
+      } catch (e) {
+        fail(e.message)
+        return format('false') // for lint-only mode
+      }
     }
     const enforce = (ok, ...args) => ok || fail(...args)
     const laxMode = (ok, ...args) => enforce(mode === 'lax' || ok, ...args)
@@ -271,8 +284,13 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       // opt-out on null is explicit in both places here, don't set default
       consume(prop, ...ruleTypes)
       if (handler !== null) {
-        const condition = handler(node[prop])
-        if (condition !== null) errorIf(condition, { path: [prop], ...errorArgs })
+        try {
+          const condition = handler(node[prop])
+          if (condition !== null) errorIf(condition, { path: [prop], ...errorArgs })
+        } catch (e) {
+          if (lintOnly && !e.message.startsWith('[opt] ')) fail(e.message) // for lint-only mode, but not processing special re-run errors
+          throw e
+        }
       }
       return true
     }
@@ -507,7 +525,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const additionalCondition = (key, properties, patternProperties) =>
       safeand(
         ...properties.map((p) => format('%s !== %j', key, p)),
-        ...patternProperties.map((p) => safenot(patternTest(p, key)))
+        ...patternProperties.map((p) => safenot(patternTestSafe(p, key)))
       )
     const lintRequired = (properties, patterns) => {
       const regexps = patterns.map((p) => new RegExp(p, 'u'))
@@ -586,7 +604,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         handle('pattern', ['string'], (pattern) => {
           enforceRegex(pattern)
           evaluateDelta({ fullstring: true })
-          return noopRegExps.has(pattern) ? null : safenot(patternTest(pattern, name))
+          return noopRegExps.has(pattern) ? null : safenot(patternTestSafe(pattern, name))
         })
 
         enforce(node.contentSchema !== false, 'contentSchema cannot be set to false')
@@ -806,7 +824,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           forObjectKeys(current, (sub, key) => {
             for (const p of Object.keys(patternProperties)) {
               enforceRegex(p, node.propertyNames || {})
-              fun.if(patternTest(p, key), () => {
+              fun.if(patternTestSafe(p, key), () => {
                 rule(sub, patternProperties[p], subPath('patternProperties', p))
               })
             }
@@ -1088,7 +1106,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (node.unevaluatedItems === false) consume('unevaluatedItems', 'boolean')
       } else if (node.unevaluatedItems || node.unevaluatedItems === false) {
         if (isDynamic(stat).items) {
-          if (!opts[optDynamic]) throw new Error('Dynamic unevaluated tracing is not enabled')
+          if (!opts[optDynamic]) throw new Error('[opt] Dynamic unevaluated tracing not enabled')
           const limit = format('Math.max(%d, ...%s)', stat.items, dyn.items)
           const extra = (i) => format('%s.includes(%s)', dyn.item, i)
           additionalItems('unevaluatedItems', limit, getMeta().containsEvaluates ? extra : null)
@@ -1105,7 +1123,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         } else if (node.unevaluatedProperties || node.unevaluatedProperties === false) {
           const notStatic = (key) => additionalCondition(key, stat.properties, stat.patterns)
           if (isDynamic(stat).properties) {
-            if (!opts[optDynamic]) throw new Error('Dynamic unevaluated tracing is not enabled')
+            if (!opts[optDynamic]) throw new Error('[opt] Dynamic unevaluated tracing not enabled')
             scope.propertyIn = functions.propertyIn
             const notDynamic = (key) => format('!propertyIn(%s, %s)', key, dyn.props)
             const condition = (key) => safeand(notStatic(key), notDynamic(key))
@@ -1159,7 +1177,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       handle('$ref', ['string'], ($ref) => {
         const resolved = resolveReference(root, schemas, $ref, basePath())
         const [sub, subRoot, path] = resolved[0] || []
-        if (!sub && sub !== false) fail('failed to resolve $ref:', $ref)
+        if (!sub && sub !== false) {
+          fail('failed to resolve $ref:', $ref)
+          if (lintOnly) return null // failures are just collected in linter mode and don't throw, this makes a ref noop
+        }
         if (sub.type) {
           // This could be done better, but for now we check only the direct type in the $ref
           const type = Array.isArray(sub.type) ? sub.type : [sub.type]
@@ -1177,7 +1198,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         if (node.$ref) return // ref overrides any sibling keywords for older schemas
       }
       handle('$recursiveRef', ['string'], ($recursiveRef) => {
-        if (!opts[optRecAnchors]) throw new Error('Recursive anchors are not enabled')
+        if (!opts[optRecAnchors]) throw new Error('[opt] Recursive anchors are not enabled')
         enforce($recursiveRef === '#', 'Behavior of $recursiveRef is defined only for "#"')
         // Resolve to recheck that recursive ref is enabled
         const resolved = resolveReference(root, schemas, '#', basePath())
@@ -1189,7 +1210,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
         return applyRef(nrec, { path: ['$recursiveRef'] })
       })
       handle('$dynamicRef', ['string'], ($dynamicRef) => {
-        if (!opts[optDynAnchors]) throw new Error('Dynamic anchors are not enabled')
+        if (!opts[optDynAnchors]) throw new Error('[opt] Dynamic anchors are not enabled')
         laxMode(/^[^#]*#[a-zA-Z0-9_-]+$/.test($dynamicRef), 'Unsupported $dynamicRef format')
         const dynamicTail = $dynamicRef.replace(/^[^#]+/, '')
         const resolved = resolveReference(root, schemas, $dynamicRef, basePath())
@@ -1305,10 +1326,12 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
   fun.write('}')
 
-  validate = fun.makeFunction(scope)
-  validate[evaluatedStatic] = stat
-  delete scope[funname] // more logical key order
-  scope[funname] = validate
+  if (!lintOnly) {
+    validate = fun.makeFunction(scope)
+    validate[evaluatedStatic] = stat
+    delete scope[funname] // more logical key order
+    scope[funname] = validate
+  }
   return funname
 }
 
@@ -1321,12 +1344,12 @@ const compile = (schemas, opts) => {
   } catch (e) {
     // For performance, we try to build the schema without dynamic tracing first, then re-run with
     // it enabled if needed. Enabling it without need can give up to about 40% performance drop.
-    if (!opts[optDynamic] && e.message === 'Dynamic unevaluated tracing is not enabled')
+    if (!opts[optDynamic] && e.message === '[opt] Dynamic unevaluated tracing not enabled')
       return compile(schemas, { ...opts, [optDynamic]: true })
     // Also enable dynamic and recursive refs only if needed
-    if (!opts[optDynAnchors] && e.message === 'Dynamic anchors are not enabled')
+    if (!opts[optDynAnchors] && e.message === '[opt] Dynamic anchors are not enabled')
       return compile(schemas, { ...opts, [optDynAnchors]: true })
-    if (!opts[optRecAnchors] && e.message === 'Recursive anchors are not enabled')
+    if (!opts[optRecAnchors] && e.message === '[opt] Recursive anchors are not enabled')
       return compile(schemas, { ...opts, [optRecAnchors]: true })
     throw e
   }
