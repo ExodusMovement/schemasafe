@@ -288,8 +288,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           const condition = handler(node[prop])
           if (condition !== null) errorIf(condition, { path: [prop], ...errorArgs })
         } catch (e) {
-          if (lintOnly && !e.message.startsWith('[opt] ')) fail(e.message) // for lint-only mode, but not processing special re-run errors
-          throw e
+          if (lintOnly && !e.message.startsWith('[opt] ')) {
+            fail(e.message) // for lint-only mode, but not processing special re-run errors
+          } else {
+            throw e
+          }
         }
       }
       return true
