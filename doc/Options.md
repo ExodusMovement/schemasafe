@@ -27,7 +27,11 @@
     keyword and raise an error at compile time unless `allowUnusedKeywords` option is enabled.
 
   * `dryRun` — `false` by default.\
-    Don't produce a validator, just verify the schema.
+    Don't produce a validator, just verify the schema and throw on first error.
+
+  * `lint` — `false` by default.\
+    Don't produce a validator, just verify the schema and collect all errors.
+    Same as [Linter mode](./Linter.md).
 
   * `$schemaDefault` — `null` by default.\
     Can not be used if `requireSchema` is on.

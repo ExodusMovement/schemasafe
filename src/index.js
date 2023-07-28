@@ -32,6 +32,7 @@ const validator = (
   const options = { mode, ...opts, schemas: buildSchemas(schemas, arg), isJSON: willJSON }
   const { scope, refs } = compile(arg, options) // only a single ref
   if (opts.dryRun) return
+  if (opts.lint) return scope.lintErrors
   const fun = genfun()
   if (parse) {
     scope.parseWrap = opts.includeErrors ? parseWithErrors : parseWithoutErrors
@@ -89,4 +90,9 @@ const parser = function(schema, { parse = true, ...opts } = {}) {
   return validator(schema, { parse, ...opts })
 }
 
-module.exports = { validator, parser }
+const lint = function(schema, { lint: lintOption = true, ...opts } = {}) {
+  if (!lintOption) throw new Error('can not disable lint option in lint()')
+  return validator(schema, { lint: lintOption, ...opts })
+}
+
+module.exports = { validator, parser, lint }
