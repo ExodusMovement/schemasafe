@@ -48,6 +48,7 @@ const constantValue = (schema) => {
   return undefined
 }
 
+const refsNeedFullValidation = new Set() // cleared before each full compilation
 const rootMeta = new WeakMap()
 const generateMeta = (root, $schema, enforce, requireSchema) => {
   if ($schema) {
@@ -1184,17 +1185,25 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           fail('failed to resolve $ref:', $ref)
           if (lintOnly) return null // failures are just collected in linter mode and don't throw, this makes a ref noop
         }
-        if (sub.type) {
-          // This could be done better, but for now we check only the direct type in the $ref
+        const n = compileSub(sub, subRoot, path)
+        const rn = sub === schema ? funname : n // resolve to actual name
+        if (!scope[rn]) throw new Error('Unexpected: coherence check failed')
+        if (!scope[rn][evaluatedStatic] && sub.type) {
           const type = Array.isArray(sub.type) ? sub.type : [sub.type]
           evaluateDelta({ type })
           if (requireValidation) {
-            // If validation is required, then $ref is guranteed to validate all items and properties
+            // We are inside a cyclic ref, label it as a one that needs full validation to support assumption in next clause
+            refsNeedFullValidation.add(rn)
+            // If validation is required, then a cyclic $ref is guranteed to validate all items and properties
             if (type.includes('array')) evaluateDelta({ items: Infinity })
             if (type.includes('object')) evaluateDelta({ properties: [true] })
           }
+          if (requireStringValidation && type.includes('string')) {
+            refsNeedFullValidation.add(rn)
+            evaluateDelta({ fullstring: true })
+          }
         }
-        return applyRef(compileSub(sub, subRoot, path), { path: ['$ref'] })
+        return applyRef(n, { path: ['$ref'] })
       })
       if (getMeta().exclusiveRefs) {
         enforce(!opts[optDynamic], 'unevaluated* is supported only on draft2019-09 and above')
@@ -1297,18 +1306,23 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     } else if (!schemaPath.includes('not')) {
       // 'not' does not mark anything as evaluated (unlike even if/then/else), so it's safe to exclude from these
       // checks, as we are sure that everything will be checked without it. It can be viewed as a pure add-on.
-      if (!stat.type) enforceValidation('type')
-      if (typeApplicable('array') && stat.items !== Infinity)
-        enforceValidation(node.items ? 'additionalItems or unevaluatedItems' : 'items rule')
-      if (typeApplicable('object') && !stat.properties.includes(true))
-        enforceValidation('additionalProperties or unevaluatedProperties')
+      const isRefTop = schema !== root && node === schema // We are at the top-level of an opaque ref inside the schema object
+      if (!isRefTop || refsNeedFullValidation.has(funname)) {
+        refsNeedFullValidation.delete(funname)
+        if (!stat.type) enforceValidation('type')
+        // This can't be true for top-level schemas, only references with #/...
+        if (typeApplicable('array') && stat.items !== Infinity)
+          enforceValidation(node.items ? 'additionalItems or unevaluatedItems' : 'items rule')
+        if (typeApplicable('object') && !stat.properties.includes(true))
+          enforceValidation('additionalProperties or unevaluatedProperties')
+        if (!stat.fullstring && requireStringValidation) {
+          const stringWarning = 'pattern, format or contentSchema should be specified for strings'
+          fail(`[requireStringValidation] ${stringWarning}, use pattern: ^[\\s\\S]*$ to opt-out`)
+        }
+      }
       if (typeof node.propertyNames !== 'object')
         for (const sub of ['additionalProperties', 'unevaluatedProperties'])
           if (node[sub]) enforceValidation(`wild-card ${sub}`, 'requires propertyNames')
-      if (!stat.fullstring && requireStringValidation) {
-        const stringWarning = 'pattern, format or contentSchema should be specified for strings'
-        fail(`[requireStringValidation] ${stringWarning}, use pattern: ^[\\s\\S]*$ to opt-out`)
-      }
     }
     if (node.properties && !node.required) enforceValidation('if properties is used, required')
     enforce(unused.size === 0 || allowUnusedKeywords, 'Unprocessed keywords:', [...unused])
@@ -1317,6 +1331,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   }
 
   const { stat, local } = visit(format('validate.errors'), [], { name: safe('data') }, schema, [])
+  if (refsNeedFullValidation.has(funname)) throw new Error('Unexpected: unvalidated cyclic ref')
 
   // evaluated: return dynamic for refs
   if (opts[optDynamic] && (isDynamic(stat).items || isDynamic(stat).properties)) {
@@ -1343,7 +1358,10 @@ const compile = (schemas, opts) => {
   try {
     const scope = Object.create(null)
     const { getref } = scopeMethods(scope)
-    return { scope, refs: schemas.map((s) => getref(s) || compileSchema(s, s, opts, scope)) }
+    refsNeedFullValidation.clear()
+    const refs = schemas.map((s) => getref(s) || compileSchema(s, s, opts, scope))
+    if (refsNeedFullValidation.size !== 0) throw new Error('Unexpected: not all refs are validated')
+    return { scope, refs }
   } catch (e) {
     // For performance, we try to build the schema without dynamic tracing first, then re-run with
     // it enabled if needed. Enabling it without need can give up to about 40% performance drop.
