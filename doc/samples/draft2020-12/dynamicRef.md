@@ -39,7 +39,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at https://test.json-schema.org/dynamicRef-dynamicAnchor-same-schema/root#`
+ * `[requireValidation] type should be specified at #/items`
 
 
 ## A $dynamicRef to an $anchor in the same schema resource behaves like a normal $ref to an $anchor
@@ -118,7 +118,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at https://test.json-schema.org/ref-dynamicAnchor-same-schema/root#`
+ * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at #/items`
 
 
 ## A $dynamicRef resolves to the first $dynamicAnchor still in scope that is encountered when the schema is evaluated
@@ -181,7 +181,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at https://test.json-schema.org/typical-dynamic-resolution/root#`
+ * `[requireValidation] type should be specified at https://test.json-schema.org/typical-dynamic-resolution/root#/items`
 
 
 ## A $dynamicRef without anchor in fragment behaves identical to $ref
@@ -314,7 +314,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at https://test.json-schema.org/dynamic-resolution-with-intermediate-scopes/root#`
+ * `[requireValidation] type should be specified at https://test.json-schema.org/dynamic-resolution-with-intermediate-scopes/root#/items`
 
 
 ## An $anchor with the same name as a $dynamicAnchor is not used for dynamic scope resolution
@@ -372,7 +372,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at https://test.json-schema.org/dynamic-resolution-ignores-anchors/list#`
+ * `[requireValidation] type should be specified at https://test.json-schema.org/dynamic-resolution-ignores-anchors/root#/items`
 
 
 ## A $dynamicRef without a matching $dynamicAnchor in the same schema resource behaves like a normal $ref to $anchor
@@ -741,7 +741,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] type should be specified at https://test.json-schema.org/dynamic-ref-with-multiple-paths/genericList#`
+ * `[requireValidation] type should be specified at https://test.json-schema.org/dynamic-ref-with-multiple-paths/main#/properties/list/items`
 
 
 ## after leaving a dynamic scope, it is not used by a $dynamicRef
@@ -830,7 +830,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireStringValidation] pattern, format or contentSchema should be specified for strings, use pattern: ^[\s\S]*$ to opt-out at https://test.json-schema.org/dynamic-ref-leaving-dynamic-scope/main#`
+ * `[requireValidation] type should be specified at #`
 
 
 ## strict-tree schema, guards against misspelled properties
