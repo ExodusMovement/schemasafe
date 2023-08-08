@@ -317,27 +317,31 @@ return ref0
 ```json
 {
   "$id": "https://test.json-schema.org/dynamic-ref-with-multiple-paths/main",
-  "$defs": {
-    "inner": {
-      "$id": "inner",
-      "$dynamicAnchor": "foo",
-      "title": "inner",
-      "additionalProperties": { "$dynamicRef": "#foo" }
+  "propertyDependencies": {
+    "kindOfList": {
+      "numbers": { "$ref": "numberList" },
+      "strings": { "$ref": "stringList" }
     }
   },
-  "if": { "propertyNames": { "pattern": "^[a-m]" } },
-  "then": {
-    "title": "any type of node",
-    "$id": "anyLeafNode",
-    "$dynamicAnchor": "foo",
-    "$ref": "inner"
-  },
-  "else": {
-    "title": "integer node",
-    "$id": "integerNode",
-    "$dynamicAnchor": "foo",
-    "type": ["object", "integer"],
-    "$ref": "inner"
+  "$defs": {
+    "genericList": {
+      "$id": "genericList",
+      "properties": { "list": { "items": { "$dynamicRef": "#itemType" } } }
+    },
+    "numberList": {
+      "$id": "numberList",
+      "$defs": {
+        "itemType": { "$dynamicAnchor": "itemType", "type": "number" }
+      },
+      "$ref": "genericList"
+    },
+    "stringList": {
+      "$id": "stringList",
+      "$defs": {
+        "itemType": { "$dynamicAnchor": "itemType", "type": "string" }
+      },
+      "$ref": "genericList"
+    }
   }
 }
 ```
@@ -346,62 +350,62 @@ return ref0
 
 ```js
 'use strict'
-const pattern0 = new RegExp("^[a-m]", "u");
+const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+const ref2 = function validate(data, dynAnchors) {
+  if (!(typeof data === "number")) return false
+  return true
+};
 const dynamicResolve = (anchors, id) => (anchors.filter((x) => x[id])[0] || {})[id];
-const ref2 = function validate(data, dynAnchors = []) {
-  const dynLocal = [{}]
-  dynLocal[0]["#foo"] = validate
+const ref3 = function validate(data, dynAnchors) {
   if (typeof data === "object" && data && !Array.isArray(data)) {
-    for (const key1 of Object.keys(data)) {
-      if (!(dynamicResolve(dynAnchors || [], "#foo") || validate)(data[key1], [...dynAnchors, dynLocal[0] || []])) return false
+    if (data.list !== undefined && hasOwn(data, "list")) {
+      if (Array.isArray(data.list)) {
+        for (let i = 0; i < data.list.length; i++) {
+          if (data.list[i] !== undefined && hasOwn(data.list, i)) {
+            if (!dynamicResolve(dynAnchors || [], "#itemType")(data.list[i], dynAnchors)) return false
+          }
+        }
+      }
     }
   }
   return true
 };
 const ref1 = function validate(data, dynAnchors = []) {
   const dynLocal = [{}]
-  dynLocal[0]["#foo"] = validate
-  if (!ref2(data, [...dynAnchors, dynLocal[0] || []])) return false
+  dynLocal[0]["#itemType"] = ref2
+  if (!ref3(data, [...dynAnchors, dynLocal[0] || []])) return false
   return true
 };
-const ref3 = function validate(data, dynAnchors = []) {
+const ref5 = function validate(data, dynAnchors) {
+  if (!(typeof data === "string")) return false
+  return true
+};
+const ref4 = function validate(data, dynAnchors = []) {
   const dynLocal = [{}]
-  dynLocal[0]["#foo"] = validate
-  if (!ref2(data, [...dynAnchors, dynLocal[0] || []])) return false
-  if (!(typeof data === "object" && data && !Array.isArray(data) || Number.isInteger(data))) return false
+  dynLocal[0]["#itemType"] = ref5
+  if (!ref3(data, [...dynAnchors, dynLocal[0] || []])) return false
   return true
 };
 const ref0 = function validate(data, dynAnchors = []) {
   const dynLocal = [{}]
-  const sub0 = (() => {
-    if (typeof data === "object" && data && !Array.isArray(data)) {
-      for (const key0 of Object.keys(data)) {
-        if (!pattern0.test(key0)) return false
+  if (typeof data === "object" && data && !Array.isArray(data)) {
+    if (data.kindOfList !== undefined && hasOwn(data, "kindOfList")) {
+      if (data.kindOfList === "numbers") {
+        if (!ref1(data, [...dynAnchors, dynLocal[0] || []])) return false
+      }
+      if (data.kindOfList === "strings") {
+        if (!ref4(data, [...dynAnchors, dynLocal[0] || []])) return false
       }
     }
-    return true
-  })()
-  if (sub0) {
-    dynLocal.unshift({})
-    dynLocal[0]["#foo"] = ref1
-    if (!ref2(data, [...dynAnchors, dynLocal[0] || []])) return false
-    dynLocal.shift()
-  }
-  else {
-    dynLocal.unshift({})
-    dynLocal[0]["#foo"] = ref3
-    if (!ref2(data, [...dynAnchors, dynLocal[0] || []])) return false
-    if (!(typeof data === "object" && data && !Array.isArray(data) || Number.isInteger(data))) return false
-    dynLocal.shift()
   }
   return true
 };
 return ref0
 ```
 
-##### Strong mode notices
+### Warnings
 
- * `Should start with ^ and end with $: "^[a-m]" at #/if/propertyNames`
+ * `$dynamicRef bookending resolution failed (even though not required) at https://test.json-schema.org/dynamic-ref-with-multiple-paths/main#/properties/list/items`
 
 
 ## after leaving a dynamic scope, it is not used by a $dynamicRef

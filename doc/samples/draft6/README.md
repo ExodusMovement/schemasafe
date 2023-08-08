@@ -51,7 +51,7 @@ Based on JSON Schema Test Suite for `draft6`.
 | [patternProperties](./patternProperties.md)                 | 5     | -                 | -        | -             |
 | [properties](./properties.md)                               | 6     | -                 | -        | -             |
 | [propertyNames](./propertyNames.md)                         | 4     | -                 | -        | -             |
-| [ref](./ref.md)                                             | 30    | -                 | 2        | -             |
+| [ref](./ref.md)                                             | 31    | -                 | 2        | -             |
 | [refRemote](./refRemote.md)                                 | 10    | -                 | -        | -             |
 | [required](./required.md)                                   | 5     | -                 | -        | -             |
 | [type](./type.md)                                           | 11    | -                 | -        | -             |

@@ -32,7 +32,7 @@ Based on JSON Schema Test Suite for `draft-next`.
 | [defs](./defs.md)                                                               | 1     | -                 | -        | -             |
 | [dependentRequired](./dependentRequired.md)                                     | 4     | -                 | -        | -             |
 | [dependentSchemas](./dependentSchemas.md)                                       | 4     | -                 | -        | -             |
-| [dynamicRef](./dynamicRef.md)                                                   | 13    | 1                 | 2        | -             |
+| [dynamicRef](./dynamicRef.md)                                                   | 13    | 1                 | 3        | -             |
 | [enum](./enum.md)                                                               | 10    | -                 | -        | -             |
 | [exclusiveMaximum](./exclusiveMaximum.md)                                       | 1     | -                 | -        | -             |
 | [exclusiveMinimum](./exclusiveMinimum.md)                                       | 1     | -                 | -        | -             |

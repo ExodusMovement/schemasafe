@@ -819,6 +819,34 @@ return ref0
 ```
 
 
+## Reference an anchor with a non-relative URI
+
+### Schema
+
+```json
+{
+  "$id": "https://example.com/schema-with-anchor",
+  "allOf": [{ "$ref": "https://example.com/schema-with-anchor#foo" }],
+  "definitions": { "A": { "$id": "#foo", "type": "integer" } }
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref1 = function validate(data) {
+  if (!Number.isInteger(data)) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+
+
 ## Location-independent identifier with base URI change in subschema
 
 ### Schema
