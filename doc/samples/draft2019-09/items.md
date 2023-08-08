@@ -206,7 +206,7 @@ return ref0
 
 ##### Strong mode notices
 
- * `[requireValidation] additionalProperties or unevaluatedProperties should be specified at #`
+ * `[requireValidation] additionalProperties or unevaluatedProperties should be specified at #/0`
 
 
 ## nested items
