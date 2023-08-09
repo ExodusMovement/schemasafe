@@ -48,8 +48,8 @@ const constantValue = (schema) => {
   return undefined
 }
 
-const refsNeedFullValidation = new Set() // cleared before each full compilation
-const rootMeta = new WeakMap()
+const refsNeedFullValidation = new Set() // cleared before and after each full compilation
+const rootMeta = new Map() // cleared before and after each full compilation
 const generateMeta = (root, $schema, enforce, requireSchema) => {
   if ($schema) {
     const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
@@ -1358,9 +1358,12 @@ const compile = (schemas, opts) => {
   try {
     const scope = Object.create(null)
     const { getref } = scopeMethods(scope)
-    refsNeedFullValidation.clear()
+    refsNeedFullValidation.clear() // for isolation/safeguard
+    rootMeta.clear() // for isolation/safeguard
     const refs = schemas.map((s) => getref(s) || compileSchema(s, s, opts, scope))
     if (refsNeedFullValidation.size !== 0) throw new Error('Unexpected: not all refs are validated')
+    refsNeedFullValidation.clear() // for gc
+    rootMeta.clear() // for gc
     return { scope, refs }
   } catch (e) {
     // For performance, we try to build the schema without dynamic tracing first, then re-run with
