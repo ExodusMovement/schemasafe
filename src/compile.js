@@ -1362,8 +1362,6 @@ const compile = (schemas, opts) => {
     rootMeta.clear() // for isolation/safeguard
     const refs = schemas.map((s) => getref(s) || compileSchema(s, s, opts, scope))
     if (refsNeedFullValidation.size !== 0) throw new Error('Unexpected: not all refs are validated')
-    refsNeedFullValidation.clear() // for gc
-    rootMeta.clear() // for gc
     return { scope, refs }
   } catch (e) {
     // For performance, we try to build the schema without dynamic tracing first, then re-run with
@@ -1376,6 +1374,9 @@ const compile = (schemas, opts) => {
     if (!opts[optRecAnchors] && e.message === '[opt] Recursive anchors are not enabled')
       return compile(schemas, { ...opts, [optRecAnchors]: true })
     throw e
+  } finally {
+    refsNeedFullValidation.clear() // for gc
+    rootMeta.clear() // for gc
   }
 }
 
