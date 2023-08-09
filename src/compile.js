@@ -49,7 +49,7 @@ const constantValue = (schema) => {
 }
 
 const refsNeedFullValidation = new Set() // cleared before each full compilation
-const rootMeta = new WeakMap() // cleared before each full compilation
+const rootMeta = new WeakMap()
 const generateMeta = (root, $schema, enforce, requireSchema) => {
   if ($schema) {
     const version = $schema.replace(/^http:\/\//, 'https://').replace(/#$/, '')
@@ -1359,7 +1359,6 @@ const compile = (schemas, opts) => {
     const scope = Object.create(null)
     const { getref } = scopeMethods(scope)
     refsNeedFullValidation.clear()
-    rootMeta.clear()
     const refs = schemas.map((s) => getref(s) || compileSchema(s, s, opts, scope))
     if (refsNeedFullValidation.size !== 0) throw new Error('Unexpected: not all refs are validated')
     return { scope, refs }
