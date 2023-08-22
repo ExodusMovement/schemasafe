@@ -28,7 +28,7 @@ Supports [draft-04/06/07/2019-09/2020-12](doc/Specification-support.md) and the
   [`discriminator` OpenAPI keyword](./doc/Discriminator-support.md).
 * Can assign defaults and/or remove additional properties when schema allows to do that safely.
   Throws at build time if those options are used with schemas that don't allow to do that safely.
-* Can use used as a [schema linter](./doc/Linter.md).
+* Can be used as a [schema linter](./doc/Linter.md).
 
 ## Installation
 
