@@ -1,6 +1,6 @@
 {
   "name": "@exodus/schemasafe",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "JSON Safe Parser & Schema Validator",
   "license": "MIT",
   "main": "src/index.js",
