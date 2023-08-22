@@ -1346,10 +1346,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
   if (!lintOnly) {
     validate = fun.makeFunction(scope)
-    validate[evaluatedStatic] = stat
     delete scope[funname] // more logical key order
     scope[funname] = validate
   }
+  scope[funname][evaluatedStatic] = stat // still needed even in non-compiled lint for recursive refs check
   return funname
 }
 
