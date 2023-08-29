@@ -5,6 +5,11 @@
   * `mode` — `'default'` by default in `validator()`, `'strong'` by default in `parser()`.\
     See also [strong mode documentation](./Strong-mode.md).
 
+    `'lax'` mode disables some default [schema coherence checks](#options-for-relaxing-coherence-checks).
+
+    `'spec'` mode is the same as `'lax'` but also disables format assertion in `draft2019-09` and
+    newer `$schema` versions.
+
   * `useDefaults` — `false` by default. Apply `default:` values from the schema to missing
     properties.
 
