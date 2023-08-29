@@ -119,6 +119,7 @@ interface ValidatorOptions {
   isJSON?: boolean
   jsonCheck?: boolean
   $schemaDefault?: string | null
+  formatAssertion?: boolean
   formats?: { [key: string]: RegExp | ((input: string) => boolean) }
   weakFormats?: boolean
   extraFormats?: boolean

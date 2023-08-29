@@ -36,10 +36,26 @@
   * `$schemaDefault` — `null` by default.\
     Can not be used if `requireSchema` is on.
 
+  * `formatAssertion` — `true` by default (`false` by default when `mode = 'spec'` **and** `$schema`
+    is `draft2019-09` or later).
+
+    Switching it to `false` will disable `format` assertions, essentially making them not affect
+    the result of validation at all, i.e. validation would pass regardless of all `format` strings
+    in the schema.
+
+    **That (`false`) behaviour is specified as default in the upstream since `draft2019-09`,
+    but not followed here,** unless `mode` is set to `'spec'`, due to being potentially
+    dangereous/unsafe and missing expected validation.
+
+    For more info, see
+    [upstream documentation](https://json-schema.org/draft/2020-12/json-schema-validation.html#section-7.2)
+    and
+    [upstream changelog](https://json-schema.org/draft/2019-09/release-notes.html#incompatible-changes).
+
   * `formats` — `{}` by default.\
     Additional formats to use.
 
-  * `weakFormats` — `true` in `'default'` and `'lax'` modes, `false` in
+  * `weakFormats` — `true` in `'default'` and `'lax'`/`'spec'` modes, `false` in
     [`'strong'` mode](./Strong-mode.md) by default.\
     Add support for formats deemed potentially weak (currently, only `RegExp`).
 
@@ -51,8 +67,8 @@
 
 ## Options for enforcing additional checks
 
-  All these options are `false` by default in `'default'` and `'lax` modes and `true` by default in
-  [`'strong'` mode](./Strong-mode.md).
+  All these options are `false` by default in `'default'` and `'lax`/`'spec'` modes and `true` by
+  default in [`'strong'` mode](./Strong-mode.md).
 
   * `requireSchema` — refuse to use schemas with missing `$schema`.
 
@@ -74,10 +90,10 @@
 
 ## Options for relaxing coherence checks
 
-  * `allowUnusedKeywords` — `opts.mode === 'lax'` by default.\
+  * `allowUnusedKeywords` — `opts.mode === 'lax' || opts.mode === 'spec'` by default.\
     Allows unused keywords to be present in the schema.
 
-  * `allowUnreachable` — `opts.mode === 'lax'` by default.\
+  * `allowUnreachable` — `opts.mode === 'lax' || opts.mode === 'spec'` by default.\
     Allows unreachable checks to be present in the schema.
 
 ## Options to pass assumptions about input

@@ -32,6 +32,12 @@ const deltaEmpty = (delta) => functions.deepEqual(delta, { type: [] })
 const schemaIsOlderThan = ($schema, ver) =>
   schemaVersions.indexOf($schema) > schemaVersions.indexOf(`https://json-schema.org/${ver}/schema`)
 
+const schemaIsUnkownOrOlder = ($schema, ver) => {
+  const normalized = `${$schema}`.replace(/^http:\/\//, 'https://').replace(/#$/, '')
+  if (!schemaVersions.includes(normalized)) return true
+  return schemaIsOlderThan(normalized, ver)
+}
+
 // Helper methods for semi-structured paths
 const propvar = (parent, keyname, inKeys = false, number = false) =>
   Object.freeze({ parent, keyname, inKeys, number }) // property by variable
@@ -79,8 +85,8 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     contentValidation,
     dryRun, // unused, just for rest siblings
     lint: lintOnly = false,
-    allowUnusedKeywords = opts.mode === 'lax',
-    allowUnreachable = opts.mode === 'lax',
+    allowUnusedKeywords = opts.mode === 'lax' || opts.mode === 'spec',
+    allowUnreachable = opts.mode === 'lax' || opts.mode === 'spec',
     requireSchema = opts.mode === 'strong',
     requireValidation = opts.mode === 'strong',
     requireStringValidation = opts.mode === 'strong',
@@ -89,6 +95,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     unmodifiedPrototypes = false, // assumes no mangled Object/Array prototypes
     isJSON = false, // assume input to be JSON, which e.g. makes undefined impossible
     $schemaDefault = null,
+    formatAssertion = opts.mode !== 'spec' || schemaIsUnkownOrOlder(root.$schema, 'draft/2019-09'),
     formats: optFormats = {},
     weakFormats = opts.mode !== 'strong',
     extraFormats = false,
@@ -104,11 +111,12 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   if (Object.keys(unknown).length !== 0)
     throw new Error(`Unknown options: ${Object.keys(unknown).join(', ')}`)
 
-  if (!['strong', 'lax', 'default'].includes(mode)) throw new Error(`Invalid mode: ${mode}`)
+  if (!['strong', 'lax', 'default', 'spec'].includes(mode)) throw new Error(`Invalid mode: ${mode}`)
   if (!includeErrors && allErrors) throw new Error('allErrors requires includeErrors to be enabled')
   if (requireSchema && $schemaDefault) throw new Error('requireSchema forbids $schemaDefault')
   if (mode === 'strong') {
-    const strong = { requireValidation, requireStringValidation, complexityChecks, requireSchema }
+    const validation = { requireValidation, requireStringValidation }
+    const strong = { ...validation, formatAssertion, complexityChecks, requireSchema }
     const weak = { weakFormats, allowUnusedKeywords }
     for (const [k, v] of Object.entries(strong)) if (!v) throw new Error(`Strong mode demands ${k}`)
     for (const [k, v] of Object.entries(weak)) if (v) throw new Error(`Strong mode forbids ${k}`)
@@ -234,7 +242,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
       }
     }
     const enforce = (ok, ...args) => ok || fail(...args)
-    const laxMode = (ok, ...args) => enforce(mode === 'lax' || ok, ...args)
+    const laxMode = (ok, ...args) => enforce(mode === 'lax' || mode === 'spec' || ok, ...args)
     const enforceMinMax = (a, b) => laxMode(!(node[b] < node[a]), `Invalid ${a} / ${b} combination`)
     const enforceValidation = (msg, suffix = 'should be specified') =>
       enforce(!requireValidation, `[requireValidation] ${msg} ${suffix}`)
@@ -592,6 +600,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           const formatImpl = formatsObj[fmtname]
           const valid = formatImpl instanceof RegExp || typeof formatImpl === 'function'
           enforce(valid, 'Invalid format used:', fmtname)
+          if (!formatAssertion) return null
           if (formatImpl instanceof RegExp) {
             // built-in formats are fine, check only ones from options
             if (functions.hasOwn(optFormats, fmtname)) enforceRegex(formatImpl.source)
