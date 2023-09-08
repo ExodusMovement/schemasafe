@@ -52,7 +52,7 @@ Based on JSON Schema Test Suite for `draft6`.
 | [properties](./properties.md)                               | 6     | -                 | -        | -             |
 | [propertyNames](./propertyNames.md)                         | 4     | -                 | -        | -             |
 | [ref](./ref.md)                                             | 31    | -                 | 2        | -             |
-| [refRemote](./refRemote.md)                                 | 10    | -                 | -        | -             |
+| [refRemote](./refRemote.md)                                 | 11    | -                 | -        | -             |
 | [required](./required.md)                                   | 5     | -                 | -        | -             |
 | [type](./type.md)                                           | 11    | -                 | -        | -             |
 | [uniqueItems](./uniqueItems.md)                             | 6     | -                 | -        | -             |

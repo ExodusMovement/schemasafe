@@ -83,6 +83,10 @@ const ref0 = function validate(data) {
 return ref0
 ```
 
+##### Strong mode notices
+
+ * `[requireSchema] $schema is required at http://localhost:1234/subSchemas.json#`
+
 
 ## base URI change
 

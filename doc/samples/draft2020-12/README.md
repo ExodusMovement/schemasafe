@@ -32,7 +32,7 @@ Based on JSON Schema Test Suite for `draft2020-12`.
 | [defs](./defs.md)                                                               | 1     | -                 | -        | -             |
 | [dependentRequired](./dependentRequired.md)                                     | 4     | -                 | -        | -             |
 | [dependentSchemas](./dependentSchemas.md)                                       | 4     | -                 | -        | -             |
-| [dynamicRef](./dynamicRef.md)                                                   | 17    | -                 | 5        | -             |
+| [dynamicRef](./dynamicRef.md)                                                   | 18    | -                 | 5        | -             |
 | [enum](./enum.md)                                                               | 10    | -                 | -        | -             |
 | [exclusiveMaximum](./exclusiveMaximum.md)                                       | 1     | -                 | -        | -             |
 | [exclusiveMinimum](./exclusiveMinimum.md)                                       | 1     | -                 | -        | -             |
@@ -59,7 +59,7 @@ Based on JSON Schema Test Suite for `draft2020-12`.
 | [properties](./properties.md)                                                   | 6     | -                 | -        | -             |
 | [propertyNames](./propertyNames.md)                                             | 3     | -                 | -        | -             |
 | [ref](./ref.md)                                                                 | 36    | -                 | 3        | -             |
-| [refRemote](./refRemote.md)                                                     | 14    | -                 | -        | -             |
+| [refRemote](./refRemote.md)                                                     | 15    | -                 | -        | -             |
 | [required](./required.md)                                                       | 5     | -                 | -        | -             |
 | [type](./type.md)                                                               | 11    | -                 | -        | -             |
 | [unevaluatedItems](./unevaluatedItems.md)                                       | 25    | -                 | 4        | -             |

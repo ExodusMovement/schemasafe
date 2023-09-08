@@ -516,3 +516,31 @@ return ref0
 
  * `[requireSchema] $schema is required at http://localhost:1234/nested-absolute-ref-to-string.json#`
 
+
+## $ref to $ref finds detached $anchor
+
+### Schema
+
+```json
+{ "$ref": "http://localhost:1234/draft-next/detached-ref.json#/$defs/foo" }
+```
+
+### Code
+
+```js
+'use strict'
+const ref2 = function validate(data) {
+  if (!Number.isInteger(data)) return false
+  return true
+};
+const ref1 = function validate(data) {
+  if (!ref2(data)) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
+

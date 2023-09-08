@@ -59,7 +59,7 @@ Based on JSON Schema Test Suite for `draft2019-09`.
 | [propertyNames](./propertyNames.md)                                             | 4     | -                 | -        | -             |
 | [recursiveRef](./recursiveRef.md)                                               | 9     | -                 | 4        | -             |
 | [ref](./ref.md)                                                                 | 36    | -                 | 3        | -             |
-| [refRemote](./refRemote.md)                                                     | 14    | -                 | -        | -             |
+| [refRemote](./refRemote.md)                                                     | 15    | -                 | -        | -             |
 | [required](./required.md)                                                       | 5     | -                 | -        | -             |
 | [type](./type.md)                                                               | 11    | -                 | -        | -             |
 | [unevaluatedItems](./unevaluatedItems.md)                                       | 23    | -                 | 4        | -             |

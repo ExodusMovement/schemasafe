@@ -83,6 +83,10 @@ const ref0 = function validate(data) {
 return ref0
 ```
 
+##### Strong mode notices
+
+ * `[requireSchema] $schema is required at http://localhost:1234/subSchemas.json#`
+
 
 ## base URI change
 
@@ -399,4 +403,32 @@ return ref0
 ##### Strong mode notices
 
  * `[requireSchema] $schema is required at http://localhost:1234/nested/foo-ref-string.json#`
+
+
+## $ref to $ref finds location-independent $id
+
+### Schema
+
+```json
+{ "$ref": "http://localhost:1234/draft6/detached-ref.json#/definitions/foo" }
+```
+
+### Code
+
+```js
+'use strict'
+const ref2 = function validate(data) {
+  if (!Number.isInteger(data)) return false
+  return true
+};
+const ref1 = function validate(data) {
+  if (!ref2(data)) return false
+  return true
+};
+const ref0 = function validate(data) {
+  if (!ref1(data)) return false
+  return true
+};
+return ref0
+```
 

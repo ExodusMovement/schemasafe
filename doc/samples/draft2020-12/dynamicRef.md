@@ -1091,3 +1091,38 @@ return ref0
 
  * `[requireValidation] schema = true is not allowed at http://localhost:1234/draft2020-12/strict-extendible-allof-ref-first.json#/properties/a`
 
+
+## $ref to $dynamicRef finds detached $dynamicAnchor
+
+### Schema
+
+```json
+{
+  "$ref": "http://localhost:1234/draft2020-12/detached-dynamicref.json#/$defs/foo"
+}
+```
+
+### Code
+
+```js
+'use strict'
+const ref2 = function validate(data, dynAnchors) {
+  if (!Number.isInteger(data)) return false
+  return true
+};
+const dynamicResolve = (anchors, id) => (anchors.filter((x) => x[id])[0] || {})[id];
+const ref1 = function validate(data, dynAnchors) {
+  if (!(dynamicResolve(dynAnchors || [], "#detached") || ref2)(data, dynAnchors)) return false
+  return true
+};
+const ref0 = function validate(data, dynAnchors) {
+  if (!ref1(data, dynAnchors)) return false
+  return true
+};
+return ref0
+```
+
+##### Strong mode notices
+
+ * `[requireValidation] type should be specified at #`
+
