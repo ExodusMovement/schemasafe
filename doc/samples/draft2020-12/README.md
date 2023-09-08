@@ -26,7 +26,7 @@ Based on JSON Schema Test Suite for `draft2020-12`.
 | [anyOf](./anyOf.md)                                                             | 8     | -                 | 3        | -             |
 | [boolean_schema](./boolean_schema.md)                                           | 2     | -                 | -        | -             |
 | [const](./const.md)                                                             | 15    | -                 | -        | -             |
-| [contains](./contains.md)                                                       | 7     | -                 | -        | -             |
+| [contains](./contains.md)                                                       | 7     | -                 | 1        | -             |
 | [content](./content.md)                                                         | 4     | -                 | 4        | -             |
 | [default](./default.md)                                                         | 3     | -                 | -        | -             |
 | [defs](./defs.md)                                                               | 1     | -                 | -        | -             |

@@ -26,7 +26,7 @@ Based on JSON Schema Test Suite for `draft7`.
 | [anyOf](./anyOf.md)                                         | 8     | -                 | 3        | -             |
 | [boolean_schema](./boolean_schema.md)                       | 2     | -                 | -        | -             |
 | [const](./const.md)                                         | 15    | -                 | -        | -             |
-| [contains](./contains.md)                                   | 7     | -                 | -        | -             |
+| [contains](./contains.md)                                   | 7     | -                 | 1        | -             |
 | [default](./default.md)                                     | 3     | -                 | -        | -             |
 | [definitions](./definitions.md)                             | 1     | -                 | -        | -             |
 | [dependencies](./dependencies.md)                           | 7     | -                 | -        | -             |
