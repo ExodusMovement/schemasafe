@@ -12,7 +12,7 @@ const indexModule = require.cache[id] // extract index.js module to override it
 // Sanity check
 if (origExports !== indexModule.exports) throw new Error('Unexpected!')
 
-const { validator: validatorOrig, parser: parserOrig } = origExports
+const { validator: validatorOrig, parser: parserOrig, lint } = origExports
 
 const wrap = (method) =>
   function(...args) {
@@ -28,4 +28,4 @@ const wrap = (method) =>
 const validator = wrap(validatorOrig)
 const parser = wrap(parserOrig)
 
-indexModule.exports = { validator, parser }
+indexModule.exports = { validator, parser, lint }
