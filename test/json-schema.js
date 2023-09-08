@@ -53,6 +53,7 @@ const unsafe = new Set([
   'ref.json/ref to then',
   'ref.json/ref to else',
   "not.json/collect annotations inside a 'not', even if collection is disabled",
+  'contains.json/contains keyword with boolean schema false', // optimized out
 
   'ref.json/ref overrides any sibling keywords', // this was fixed in draft/2019-09 spec
   'ref.json/$ref prevents a sibling id from changing the base uri', // in pre-2019-09, any $ref siblings are not handled

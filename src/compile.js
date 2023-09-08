@@ -469,8 +469,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const nexthistory = () => [...history, { stat, prop: current }]
     // Can not be used before undefined check! The one performed by present()
     const rule = (...args) => visit(errors, nexthistory(), ...args).stat
-    const subrule = (suberr, ...args) => {
-      if (args[0] === current) {
+    const subrule = (...args) => subruleImpl(false, ...args)
+    const subruleSub = (...args) => subruleImpl(true, ...args).sub
+    const subruleImpl = (noDelta, suberr, ...args) => {
+      if (args[0] === current || noDelta) {
         const constval = constantValue(args[1])
         if (constval === true) return { sub: format('true'), delta: {} }
         if (constval === false) return { sub: format('false'), delta: { type: [] } }
@@ -894,7 +896,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
         const suberr = suberror()
         iterate((prop, evaluate) => {
-          const { sub } = subrule(suberr, prop, node.contains, subPath('contains'))
+          const sub = subruleSub(suberr, prop, node.contains, subPath('contains'))
           fun.if(sub, () => {
             fun.write('%s++', passes)
             if (getMeta().containsEvaluates) {
@@ -914,7 +916,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     const checkGeneric = () => {
-      handle('not', ['object', 'boolean'], (not) => subrule(null, current, not, subPath('not')).sub)
+      handle('not', ['object', 'boolean'], (not) => subruleSub(null, current, not, subPath('not')))
       if (node.not) uncertain('not')
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
