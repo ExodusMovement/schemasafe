@@ -469,12 +469,15 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     const nexthistory = () => [...history, { stat, prop: current }]
     // Can not be used before undefined check! The one performed by present()
     const rule = (...args) => visit(errors, nexthistory(), ...args).stat
-    const subrule = (...args) => subruleImpl(false, ...args)
-    const subruleSub = (...args) => subruleImpl(true, ...args).sub
-    const subruleImpl = (noDelta, suberr, ...args) => {
+    const subrule = (...args) => subruleImpl(false, false, ...args)
+    const subruleSub = (noEval, ...args) => subruleImpl(true, noEval, ...args).sub
+    const subruleImpl = (noDelta, noEval, suberr, ...args) => {
       if (args[0] === current || noDelta) {
         const constval = constantValue(args[1])
-        if (constval === true) return { sub: format('true'), delta: {} }
+        // We can optimize out only false _or_ when we don't need evaluation
+        if (args[0] === current || noEval) {
+          if (constval === true) return { sub: format('true'), delta: {} }
+        }
         if (constval === false) return { sub: format('false'), delta: { type: [] } }
       }
       const sub = gensym('sub')
@@ -896,10 +899,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
         const suberr = suberror()
         iterate((prop, evaluate) => {
-          const sub = subruleSub(suberr, prop, node.contains, subPath('contains'))
+          const ev = getMeta().containsEvaluates
+          const sub = subruleSub(!ev, suberr, prop, node.contains, subPath('contains'))
           fun.if(sub, () => {
             fun.write('%s++', passes)
-            if (getMeta().containsEvaluates) {
+            if (ev) {
               enforce(!removeAdditional, 'Can\'t use removeAdditional with draft2020+ "contains"')
               evaluate()
             }
@@ -916,7 +920,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     const checkGeneric = () => {
-      handle('not', ['object', 'boolean'], (not) => subruleSub(null, current, not, subPath('not')))
+      handle('not', ['object', 'boolean'], (not) => subruleSub(true, null, current, not, subPath('not')))
       if (node.not) uncertain('not')
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
