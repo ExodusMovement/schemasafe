@@ -920,7 +920,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     const checkGeneric = () => {
-      handle('not', ['object', 'boolean'], (not) => subruleSub(true, null, current, not, subPath('not')))
+      handle('not', ['object', 'boolean'], (not) =>
+        subruleSub(true, null, current, not, subPath('not'))
+      )
       if (node.not) uncertain('not')
 
       const thenOrElse = node.then || node.then === false || node.else || node.else === false
