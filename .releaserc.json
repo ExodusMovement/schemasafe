@@ -1,8 +1,5 @@
 {
-  "branches": [
-    "master",
-    "sparten11740/ci/automatic-releases"
-  ],
+  "branches": ["master"],
   "plugins": [
     [
       "@semantic-release/commit-analyzer",
