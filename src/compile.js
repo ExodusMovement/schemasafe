@@ -201,6 +201,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   const recursiveLog = []
   const getMeta = () => rootMeta.get(root)
   const basePathStack = basePathRoot ? [basePathRoot] : []
+  const recursiveDelta = isPlainObject(schema) && (schema.$dynamicAnchor || schema.$recursiveAnchor)
   const visit = (errors, history, current, node, schemaPath, trace = {}, { constProp } = {}) => {
     // e.g. top-level data and property names, OR already checked by present() in history, OR in keys and not undefined
     const isSub = history.length > 0 && history[history.length - 1].prop === current
@@ -264,7 +265,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
     // evaluated tracing
     const stat = initTracing()
-    const evaluateDelta = (delta) => applyDelta(stat, delta)
+    const evaluateDelta = (delta) => {
+      applyDelta(stat, delta)
+      if (recursiveDelta && node === schema) evaluateDeltaDynamic(delta, true)
+    }
 
     if (typeof node === 'boolean') {
       if (node === true) {
@@ -379,30 +383,36 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
     // evaluated: declare dynamic
     const needUnevaluated = (rule) =>
-      opts[optDynamic] && (node[rule] || node[rule] === false || node === schema)
+      (opts[optDynamic] && (node[rule] || node[rule] === false || node === schema)) ||
+      (recursiveDelta && node === schema) // FIXME
     const local = Object.freeze({
       item: needUnevaluated('unevaluatedItems') ? gensym('evaluatedItem') : null,
       items: needUnevaluated('unevaluatedItems') ? gensym('evaluatedItems') : null,
       props: needUnevaluated('unevaluatedProperties') ? gensym('evaluatedProps') : null,
     })
+    // RECHECK!
     const dyn = Object.freeze({
       item: local.item || trace.item,
       items: local.items || trace.items,
       props: local.props || trace.props,
     })
+    // RECHECK!
     const canSkipDynamic = () =>
       (!dyn.items || stat.items === Infinity) && (!dyn.props || stat.properties.includes(true))
-    const evaluateDeltaDynamic = (delta) => {
-      // Skips applying those that have already been proved statically
-      if (dyn.item && delta.item && stat.items !== Infinity)
+    const evaluateDeltaDynamic = (delta, noskip = false) => {
+      // Skips applying those that have already been proven statically (if not enforced for dynamic recursion)
+      if (dyn.item && delta.item && (noskip || stat.items !== Infinity)) {
         fun.write('%s.push(%s)', dyn.item, delta.item)
-      if (dyn.items && delta.items > stat.items) fun.write('%s.push(%d)', dyn.items, delta.items)
-      if (dyn.props && (delta.properties || []).includes(true) && !stat.properties.includes(true)) {
-        fun.write('%s[0].push(true)', dyn.props)
+      }
+      if (dyn.items && delta.items && (noskip || delta.items > stat.items)) {
+        fun.write('%s.push(%d)', dyn.items, delta.items)
+      }
+      if (dyn.props && (delta.properties || []).includes(true)) {
+        if (noskip || !stat.properties.includes(true)) fun.write('%s[0].push(true)', dyn.props)
       } else if (dyn.props) {
         const inStat = (properties, patterns) => inProperties(stat, { properties, patterns })
-        const properties = (delta.properties || []).filter((x) => !inStat([x], []))
-        const patterns = (delta.patterns || []).filter((x) => !inStat([], [x]))
+        const properties = (delta.properties || []).filter((x) => noskip || !inStat([x], []))
+        const patterns = (delta.patterns || []).filter((x) => noskip || !inStat([], [x]))
         if (properties.length > 0) fun.write('%s[0].push(...%j)', dyn.props, properties)
         if (patterns.length > 0) fun.write('%s[1].push(...%j)', dyn.props, patterns)
         for (const sym of delta.propertiesVars || []) fun.write('%s[0].push(%s)', dyn.props, sym)
@@ -1360,8 +1370,11 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   if (refsNeedFullValidation.has(funname)) throw new Error('Unexpected: unvalidated cyclic ref')
 
   // evaluated: return dynamic for refs
-  if (opts[optDynamic] && (isDynamic(stat).items || isDynamic(stat).properties)) {
-    if (!local) throw new Error('Failed to trace dynamic properties') // Unreachable
+  if (
+    (opts[optDynamic] && (isDynamic(stat).items || isDynamic(stat).properties)) ||
+    recursiveDelta
+  ) {
+    if (!local || !local.props) throw new Error('Failed to trace dynamic properties') // Unreachable
     fun.write('validate.evaluatedDynamic = [%s, %s, %s]', local.item, local.items, local.props)
   }
 
