@@ -1,0 +1,10 @@
+# This file (security sensitive)
+/.github/CODEOWNERS @olistic @chalker
+
+# Github workflows (security sensitive due to autorelease workflow)
+/.github/workflows/ @olistic @chalker
+
+# What actually goes into the package
+/package.json @chalker
+/src/ @chalker
+/index.d.ts @chalker
