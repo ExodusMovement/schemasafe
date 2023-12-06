@@ -75,6 +75,16 @@ const generateMeta = (root, $schema, enforce, requireSchema) => {
   }
 }
 
+/*
+  Variables referencing schemas:
+   1. `root` -- top-level schema, entry point
+   2. `schema` -- portion of the schema currently being compiled to a separate function,
+      i.e. top-level or referenced ($ref/etc)
+   3. `node` (defined in visit()) -- schema object being visited by visit()
+   4. `schemas` aka `opts.schemas` -- a Map() of sibling schemas that could be referenced by
+      their $id (and optionally subreferenced via json pointer path)
+*/
+
 const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   const {
     mode = 'default',
