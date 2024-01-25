@@ -1284,7 +1284,10 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           evaluateDelta({ type: [current.type] })
           return null
         }
-        if (parentCheckedType(...typearr)) return null
+        if (parentCheckedType(...typearr)) {
+          evaluateDelta({ type: typearr })
+          return null
+        }
         const filteredTypes = typearr.filter((t) => typeApplicable(t))
         if (filteredTypes.length === 0) fail('No valid types possible')
         evaluateDelta({ type: typearr }) // can be safely done here, filteredTypes already prepared
