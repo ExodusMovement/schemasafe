@@ -29,9 +29,7 @@ return ref0
 ### Schema
 
 ```json
-{
-  "$ref": "http://localhost:1234/draft-next/subSchemas-defs.json#/$defs/integer"
-}
+{ "$ref": "http://localhost:1234/draft-next/subSchemas.json#/$defs/integer" }
 ```
 
 ### Code
@@ -82,7 +80,7 @@ return ref0
 
 ```json
 {
-  "$ref": "http://localhost:1234/draft-next/subSchemas-defs.json#/$defs/refToInteger"
+  "$ref": "http://localhost:1234/draft-next/subSchemas.json#/$defs/refToInteger"
 }
 ```
 
