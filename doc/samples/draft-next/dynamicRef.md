@@ -296,7 +296,6 @@ const ref0 = function validate(data, dynAnchors = []) {
   const dynLocal = [{}]
   dynLocal[0]["#meta"] = validate
   if (!ref1(data, [...dynAnchors, dynLocal[0] || []])) return false
-  if (!(typeof data === "object" && data && !Array.isArray(data))) return false
   if (data.foo !== undefined && hasOwn(data, "foo")) {
     if (!(data.foo === "pass")) return false
   }

@@ -204,9 +204,9 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
   const visit = (errors, history, current, node, schemaPath, trace = {}, { constProp } = {}) => {
     // e.g. top-level data and property names, OR already checked by present() in history, OR in keys and not undefined
     const isSub = history.length > 0 && history[history.length - 1].prop === current
-    const queryCurrent = () => history.filter((h) => h.prop === current)
+    const statHistory = history.filter((h) => h.prop === current).map((h) => h.stat) // nested stat objects only for the current node
     const definitelyPresent =
-      !current.parent || current.checked || (current.inKeys && isJSON) || queryCurrent().length > 0
+      !current.parent || current.checked || (current.inKeys && isJSON) || statHistory.length > 0
 
     const name = buildName(current)
     const currPropImm = (...args) => propimm(current, ...args)
@@ -452,14 +452,15 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
 
     /* Preparation and methods, post-$ref validation will begin at the end of the function */
 
+    // Trust already applied { type, required } restrictions from parent rules for the current node
+    // Can't apply items/properties as those affect child unevaluated*, and { fullstring } is just not needed in same-node subrules
+    for (const { type, required } of statHistory) evaluateDelta({ type, required })
+
     // This is used for typechecks, null means * here
     const allIn = (arr, valid) => arr && arr.every((s) => valid.includes(s)) // all arr entries are in valid
     const someIn = (arr, possible) => possible.some((x) => arr === null || arr.includes(x)) // all possible are in arrs
-
-    const parentCheckedType = (...valid) => queryCurrent().some((h) => allIn(h.stat.type, valid))
-    const definitelyType = (...valid) => allIn(stat.type, valid) || parentCheckedType(...valid)
-    const typeApplicable = (...possible) =>
-      someIn(stat.type, possible) && queryCurrent().every((h) => someIn(h.stat.type, possible))
+    const definitelyType = (...valid) => allIn(stat.type, valid)
+    const typeApplicable = (...possible) => someIn(stat.type, possible)
 
     const enforceRegex = (source, target = node) => {
       enforce(typeof source === 'string', 'Invalid pattern:', source)
@@ -756,9 +757,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
     }
 
     // if allErrors is false, we can skip present check for required properties validated before
-    const checked = (p) =>
-      !allErrors &&
-      (stat.required.includes(p) || queryCurrent().some((h) => h.stat.required.includes(p)))
+    const checked = (p) => !allErrors && stat.required.includes(p)
 
     const checkObjects = () => {
       const propertiesCount = format('Object.keys(%s).length', name)
@@ -1284,10 +1283,7 @@ const compileSchema = (schema, root, opts, scope, basePathRoot = '') => {
           evaluateDelta({ type: [current.type] })
           return null
         }
-        if (parentCheckedType(...typearr)) {
-          evaluateDelta({ type: typearr })
-          return null
-        }
+        if (definitelyType(...typearr)) return null
         const filteredTypes = typearr.filter((t) => typeApplicable(t))
         if (filteredTypes.length === 0) fail('No valid types possible')
         evaluateDelta({ type: typearr }) // can be safely done here, filteredTypes already prepared
