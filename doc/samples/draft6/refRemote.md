@@ -33,7 +33,7 @@ return ref0
 ### Schema
 
 ```json
-{ "$ref": "http://localhost:1234/subSchemas.json#/integer" }
+{ "$ref": "http://localhost:1234/subSchemas.json#/definitions/integer" }
 ```
 
 ### Code
@@ -61,7 +61,7 @@ return ref0
 ### Schema
 
 ```json
-{ "$ref": "http://localhost:1234/subSchemas.json#/refToInteger" }
+{ "$ref": "http://localhost:1234/subSchemas.json#/definitions/refToInteger" }
 ```
 
 ### Code
