@@ -3,7 +3,7 @@
 const tape = require('tape')
 const { validator } = require('../../')
 
-tape('regression #177', (t) => {
+tape('regression #177 + #179', (t) => {
   const variants = [{ type: 'object' }, {}]
 
   for (const l0 of variants) {
@@ -14,8 +14,6 @@ tape('regression #177', (t) => {
             if (!l0.type && !l1a.type) continue
             if (!l0.type && !l1b.type && !l2a.type) continue
             if (!l0.type && !l1b.type && !l2b.type) continue
-
-            if (l0.type && (!l2a.type || !l2b.type)) continue // Bug, fixed by #179
 
             t.doesNotThrow(() => {
               const validate = validator({
