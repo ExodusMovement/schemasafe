@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "strict": true,
+  },
+  "include": ["tests"],
+  "exclude": ["node_modules"]
+}

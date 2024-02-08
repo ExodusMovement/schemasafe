@@ -15,8 +15,8 @@ type Schema =
       $id?: string
       $anchor?: string
       $ref?: string
-      definitions?: { [id: string]: Schema }
-      $defs?: { [id: string]: Schema }
+      definitions?: Partial<{ [id: string]: Schema }>
+      $defs?: Partial<{ [id: string]: Schema }>
       $recursiveRef?: string
       $recursiveAnchor?: boolean
       // generic
@@ -61,15 +61,15 @@ type Schema =
       contentMediaType?: string
       contentSchema?: Schema
       // objects
-      properties?: { [id: string]: Schema }
+      properties?: Partial<{ [id: string]: Schema }>
       maxProperties?: number
       minProperties?: number
       additionalProperties?: Schema
-      patternProperties?: { [pattern: string]: Schema }
+      patternProperties?: Partial<{ [pattern: string]: Schema }>
       propertyNames?: Schema
-      dependencies?: { [id: string]: Array<string> | Schema }
-      dependentRequired?: { [id: string]: Array<string> }
-      dependentSchemas?: { [id: string]: Schema }
+      dependencies?: Partial<{ [id: string]: Array<string> | Schema }>
+      dependentRequired?: Partial<{ [id: string]: Array<string> }>
+      dependentSchemas?: Partial<{ [id: string]: Schema }>
       // see-through
       unevaluatedProperties?: Schema
       unevaluatedItems?: Schema

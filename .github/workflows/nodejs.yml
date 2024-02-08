@@ -23,3 +23,16 @@ jobs:
       - run: yarn lint
       - run: git submodule update --init --recursive
       - run: yarn run test
+  types:
+    name: 'Test types'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: test/types
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: yarn
+      - run: yarn test
