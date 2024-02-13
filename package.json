@@ -31,7 +31,7 @@
     "lint": "prettier --list-different '**/*.js' && eslint .",
     "format": "prettier --write '**/*.js'",
     "coverage": "c8 --reporter=lcov --reporter=text npm run test",
-    "coverage:lcov": "c8 --reporter=lcovonly npm run test",
+    "coverage:lcov": "c8 --reporter=lcovonly yarn test",
     "test:only:json-schema-testsuite": "tape test/json-schema.js | tap-spec",
     "test": "yarn test:raw | tap-spec",
     "test:raw": "yarn test:normal && yarn test:module",
