@@ -37,7 +37,7 @@
     "test:raw": "npm run test:normal && npm run test:module",
     "test:module": "tape -r ./test/tools/test-module.js test/*.js test/regressions/*.js",
     "test:normal": "tape test/*.js test/regressions/*.js",
-    "test:types": "cd test/types && yarn test"
+    "test:types": "yarn --cwd test/types test"
   },
   "dependencies": {},
   "devDependencies": {
